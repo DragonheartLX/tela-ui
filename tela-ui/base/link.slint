@@ -1,0 +1,90 @@
+// Tela UI — Link
+//
+// Hyperlink text: theme-colored, underlines on hover (or always with
+// `underline`). theme: 0 default, 2 success, 3 warning, 4 danger.
+
+import { TelaTheme } from "../theme.slint";
+import { Icon } from "icon/icon.slint";
+import { TIconData } from "icon/data.slint";
+
+export component Link inherits Rectangle {
+    in property <int> theme: 0;
+    in property <string> text;
+    in property <TIconData> icon;
+    in property <bool> disabled;
+    in property <bool> underline: false;
+    // 0 small, 1 medium, 2 large
+    in property <int> size: 1;
+
+    callback clicked();
+
+    private property <length> fs:
+        size == 0 ? TelaTheme.font-size-s : size == 2 ? TelaTheme.font-size-l : TelaTheme.font-size-m;
+
+    // Rest state; overridden by the `states` below.
+    private property <brush> content-color:
+        theme == 0 ? TelaTheme.text-color-link : TelaTheme.theme-color(theme);
+
+    animate content-color { duration: TelaTheme.duration-fast; }
+
+    // Later states win over earlier ones.
+    states [
+        hovered when touch.has-hover && !root.disabled: {
+            content-color: theme == 0 ? TelaTheme.brand-color-hover : TelaTheme.theme-color-hover(theme);
+        }
+        pressed when touch.pressed && !root.disabled: {
+            content-color: theme == 0 ? TelaTheme.brand-color-active : TelaTheme.theme-color-active(theme);
+        }
+        disabled when root.disabled: {
+            content-color: TelaTheme.text-color-disabled;
+        }
+    ]
+
+    height: content.preferred-height;
+    width: max(content.preferred-width, underline-line.width);
+
+    touch := TouchArea {
+        enabled: !root.disabled;
+        mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;
+        clicked => {
+            root.clicked();
+        }
+    }
+
+    content := HorizontalLayout {
+        x: 0;
+        y: 0;
+        width: self.preferred-width;
+        height: self.preferred-height;
+        spacing: TelaTheme.spacing-2;
+
+        if root.icon.paths.length > 0: Icon {
+            y: (parent.height - self.height) / 2;
+            icon: root.icon;
+            size: root.fs + 2px;
+            icon-color: root.content-color;
+        }
+
+        Text {
+            text: root.text;
+            font-size: root.fs;
+            color: root.content-color;
+            vertical-alignment: center;
+        }
+    }
+
+    underline-line := Rectangle {
+        y: parent.height - 1px;
+        x: 0;
+        width: content.preferred-width;
+        height: 1px;
+        background: root.content-color;
+        visible: !root.disabled;
+        opacity: root.underline || (touch.has-hover && !touch.pressed) ? 1 : 0;
+        animate opacity { duration: TelaTheme.duration-fast; }
+    }
+
+    accessible-role: AccessibleRole.text;
+    accessible-label: text;
+    accessible-action-default => { root.clicked(); }
+}

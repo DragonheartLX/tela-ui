@@ -1,0 +1,142 @@
+// Demo section: 导航 (Tabs / Pagination / NavBar / Breadcrumb & Steps).
+// The app's own top navigation bar is the live NavBar demo; this section
+// covers the rest.
+
+import { TelaTheme } from "@tela-ui/theme.slint";
+import { TIconSet, Caption, Divider, Button, Paragraph } from "@tela-ui/base.slint";
+import { Tabs, Pagination, NavBar, NavItem, Breadcrumb, CrumbItem, Steps, Card } from "@tela-ui/common.slint";
+import { CodeBlock } from "code-block.slint";
+
+export component NavigationSection inherits VerticalLayout {
+    spacing: 28px;
+
+    in property <[string]> tab-titles: ["首页", "组件", "文档", "关于"];
+    in-out property <int> tab-index: 0;
+    in-out property <int> page: 3;
+    in property <[NavItem]> demo-nav-items: [
+        { label: "首页", value: "home" },
+        { label: "组件", value: "components" },
+        { label: "文档", value: "docs" },
+        { label: "关于", value: "about" },
+    ];
+    in-out property <string> demo-nav-value: "components";
+    in property <[CrumbItem]> crumb-items: [
+        { label: "首页", value: "home" },
+        { label: "组件库", value: "components" },
+        { label: "导航栏", value: "nav" },
+    ];
+    in-out property <string> crumb-value: "nav";
+    in property <[string]> step-items: ["注册账号", "填写信息", "验证邮箱", "完成"];
+
+    // ======================= Tabs =========================
+    VerticalLayout {
+        spacing: 8px;
+
+        Card {
+            title: "选项卡 Tabs";
+
+            VerticalLayout {
+                spacing: 16px;
+
+                Tabs {
+                    items: root.tab-titles;
+                    current-index <=> root.tab-index;
+                }
+
+                Rectangle {
+                    height: 72px;
+                    border-radius: TelaTheme.radius-medium;
+                    background: TelaTheme.bg-color-secondarycontainer;
+
+                    VerticalLayout {
+                        padding: TelaTheme.margin-l;
+                        spacing: 4px;
+
+                        if root.tab-index == 0: Paragraph { text: "首页内容：这里根据 current-index 切换显示不同的面板。"; }
+                        if root.tab-index == 1: Paragraph { text: "组件内容：Tabs 组件的下方通过 if 表达式渲染当前页。"; }
+                        if root.tab-index == 2: Paragraph { text: "文档内容：下划线位置随选中项平滑移动。"; }
+                        if root.tab-index == 3: Paragraph { text: "关于内容：Tela UI — TDesign-inspired Slint components."; }
+                    }
+                }
+            }
+        }
+
+        CodeBlock { code: "import { Tabs } from \"@tela-ui/common.slint\";\n\nTabs { items: [\"首页\", \"组件\", \"文档\", \"关于\"]; current-index <=> i; }\nif root.i == 0: Paragraph { text: \"首页内容\"; }"; }
+    }
+
+    // ==================== Pagination ======================
+    VerticalLayout {
+        spacing: 8px;
+
+        Card {
+            title: "分页 Pagination";
+
+            HorizontalLayout {
+                spacing: 24px;
+
+                Pagination {
+                    y: (parent.height - self.height) / 2;
+                    total-pages: 20;
+                    current <=> root.page;
+                }
+
+                Caption { text: "当前第 \{root.page} 页"; vertical-alignment: center; }
+            }
+        }
+
+        CodeBlock { code: "import { Pagination } from \"@tela-ui/common.slint\";\n\nPagination { total-pages: 20; current <=> page; }"; }
+    }
+
+    // ======================= NavBar =======================
+    VerticalLayout {
+        spacing: 8px;
+
+        Card {
+            title: "导航栏 NavBar";
+
+            VerticalLayout {
+                spacing: 16px;
+
+                NavBar {
+                    title: "Tela UI";
+                    logo: TIconSet.LayoutDashboard;
+                    items: root.demo-nav-items;
+                    current-value <=> root.demo-nav-value;
+
+                    Button { size: 0; theme: 1; text: "操作"; }
+                }
+
+                Caption { text: "右侧操作区由 NavBar 的子元素提供，点击菜单项切换高亮；本演示页顶部的分组导航也是这个组件。"; }
+            }
+        }
+
+        CodeBlock { code: "import { NavBar } from \"@tela-ui/common.slint\";\n\nNavBar {\n    title: \"Tela UI\";\n    logo: TIconSet.LayoutDashboard;\n    items: [{ label: \"首页\", value: \"home\" }, …];\n    current-value <=> nav;\n    Button { text: \"操作\"; } // 右侧操作区\n}"; }
+    }
+
+    // ================ Breadcrumb & Steps ==================
+    VerticalLayout {
+        spacing: 8px;
+
+        Card {
+            title: "面包屑与步骤条 Breadcrumb & Steps";
+
+            VerticalLayout {
+                spacing: 16px;
+
+                Breadcrumb {
+                    items: root.crumb-items;
+                    current-value <=> root.crumb-value;
+                }
+
+                Divider { }
+
+                Steps {
+                    items: root.step-items;
+                    current: 1;
+                }
+            }
+        }
+
+        CodeBlock { code: "import { Breadcrumb, Steps } from \"@tela-ui/common.slint\";\n\nBreadcrumb { items: crumbs; current-value <=> crumb; }\nSteps { items: [\"注册账号\", \"填写信息\", \"验证邮箱\", \"完成\"]; current: 1; }"; }
+    }
+}

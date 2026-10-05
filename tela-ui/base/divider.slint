@@ -1,0 +1,69 @@
+// Tela UI — Divider
+//
+// Horizontal separator with optional label (align: 0 left, 1 center,
+// 2 right) or a vertical rule (orientation: Orientation.vertical).
+
+import { TelaTheme } from "../theme.slint";
+
+export component Divider inherits Rectangle {
+    in property <Orientation> orientation: Orientation.horizontal;
+    in property <string> text;
+    in property <int> align: 1;
+    in property <color> line-color: TelaTheme.border-level-1-color;
+    in property <color> text-color: TelaTheme.text-color-secondary;
+    in property <length> content-gap: TelaTheme.margin-l;
+    // Distance from the container edges (horizontal mode only).
+    in property <length> inset: 0px;
+
+    height: text != "" || orientation == Orientation.vertical
+        ? TelaTheme.line-height-m : 1px;
+    // Vertical rule: clamp the filled width to 1px (avoids state-set sizes).
+    max-width: orientation == Orientation.vertical ? 1px : 999999px;
+
+    if orientation == Orientation.horizontal && text == "": Rectangle {
+        x: root.inset;
+        y: (parent.height - self.height) / 2;
+        width: parent.width - root.inset * 2;
+        height: 1px;
+        background: root.line-color;
+    }
+
+    if orientation == Orientation.horizontal && text != "": HorizontalLayout {
+        x: 0;
+        y: 0;
+        width: parent.width;
+        height: parent.height;
+        spacing: root.content-gap;
+        padding-left: root.inset;
+        padding-right: root.inset;
+
+        if root.align != 0: Rectangle {
+            background: root.line-color;
+            height: 1px;
+            y: (parent.height - self.height) / 2;
+            horizontal-stretch: 1;
+        }
+
+        Text {
+            text: root.text;
+            font-size: TelaTheme.font-size-m;
+            color: root.text-color;
+            vertical-alignment: center;
+        }
+
+        if root.align != 2: Rectangle {
+            background: root.line-color;
+            height: 1px;
+            y: (parent.height - self.height) / 2;
+            horizontal-stretch: 1;
+        }
+    }
+
+    if orientation == Orientation.vertical: Rectangle {
+        x: (parent.width - self.width) / 2;
+        y: 0;
+        width: 1px;
+        height: parent.height;
+        background: root.line-color;
+    }
+}

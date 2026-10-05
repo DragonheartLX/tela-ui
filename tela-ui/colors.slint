@@ -1,0 +1,172 @@
+// Tela UI — color presets
+//
+// TDesign color ramps for the light and dark schemes. `TLightColors` /
+// `TDarkColors` are consumed by the `TelaTheme` global's default presets;
+// they are also exported so custom themes can derive from the original
+// palettes.
+
+import { TPrimaryColor } from "structs/theme.slint";
+
+export global TLightColors {
+    out property <TPrimaryColor> brand: {
+        color-1: #f2f3ff,
+        color-2: #d9e1ff,
+        color-3: #b5c7ff,
+        color-4: #8eabff,
+        color-5: #618dff,
+        color-6: #366ef4,
+        color-7: #0052d9,
+        color-8: #003cab,
+        color-9: #002a7c,
+        color-10: #001a57,
+        color: #0052d9,
+        hover: #366ef4,
+        focus: #d9e1ff,
+        active: #003cab,
+        disabled: #b5c7ff,
+        light: #f2f3ff,
+        light-hover: #d9e1ff,
+    };
+
+    out property <TPrimaryColor> success: {
+        color-1: #e3f9e9,
+        color-2: #c6f3d7,
+        color-3: #92dab2,
+        color-4: #56c08d,
+        color-5: #2ba471,
+        color-6: #008858,
+        color-7: #006c45,
+        color-8: #005334,
+        color-9: #003b23,
+        color-10: #002515,
+        color: #2ba471,
+        hover: #56c08d,
+        focus: #c6f3d7,
+        active: #008858,
+        disabled: #92dab2,
+        light: #e3f9e9,
+        light-hover: #c6f3d7,
+    };
+
+    out property <TPrimaryColor> warning: {
+        color-1: #fff1e9,
+        color-2: #ffd9c2,
+        color-3: #ffb98c,
+        color-4: #fa9550,
+        color-5: #e37318,
+        color-6: #be5a00,
+        color-7: #954500,
+        color-8: #713300,
+        color-9: #532300,
+        color-10: #3b1700,
+        color: #e37318,
+        hover: #fa9550,
+        focus: #ffd9c2,
+        active: #be5a00,
+        disabled: #ffb98c,
+        light: #fff1e9,
+        light-hover: #ffd9c2,
+    };
+
+    out property <TPrimaryColor> error: {
+        color-1: #fff0ed,
+        color-2: #ffd8d2,
+        color-3: #ffb9b0,
+        color-4: #ff9285,
+        color-5: #f6685d,
+        color-6: #d54941,
+        color-7: #ad352f,
+        color-8: #881f1c,
+        color-9: #68070a,
+        color-10: #490002,
+        color: #d54941,
+        hover: #f6685d,
+        focus: #ffd8d2,
+        active: #ad352f,
+        disabled: #ffb9b0,
+        light: #fff0ed,
+        light-hover: #ffd8d2,
+    };
+}
+
+export global TDarkColors {
+    out property <TPrimaryColor> brand: {
+        color-1: #1b2f51,
+        color-2: #173463,
+        color-3: #143975,
+        color-4: #103d88,
+        color-5: #0d429a,
+        color-6: #054bbe,
+        color-7: #2667d4,
+        color-8: #4582e6,
+        color-9: #699ef5,
+        color-10: #96bbf8,
+        color: #4582e6,
+        hover: #2667d4,
+        focus: #173463,
+        active: #699ef5,
+        disabled: #143975,
+        light: #1b2f51,
+        light-hover: #173463,
+    };
+
+    out property <TPrimaryColor> success: {
+        color-1: #193a2a,
+        color-2: #1a4230,
+        color-3: #17533d,
+        color-4: #0d7a55,
+        color-5: #059465,
+        color-6: #43af8a,
+        color-7: #46bf96,
+        color-8: #80d2b6,
+        color-9: #b4e1d3,
+        color-10: #deede8,
+        color: #059465,
+        hover: #0d7a55,
+        focus: #1a4230,
+        active: #43af8a,
+        disabled: #17533d,
+        light: #193a2a,
+        light-hover: #1a4230,
+    };
+
+    out property <TPrimaryColor> warning: {
+        color-1: #4f2a1d,
+        color-2: #582f21,
+        color-3: #733c23,
+        color-4: #a75d2b,
+        color-5: #cf6e2d,
+        color-6: #dc7633,
+        color-7: #e8935c,
+        color-8: #ecbf91,
+        color-9: #eed7bf,
+        color-10: #f3e9dc,
+        color: #cf6e2d,
+        hover: #a75d2b,
+        focus: #582f21,
+        active: #dc7633,
+        disabled: #733c23,
+        light: #4f2a1d,
+        light-hover: #582f21,
+    };
+
+    out property <TPrimaryColor> error: {
+        color-1: #472324,
+        color-2: #5e2a2d,
+        color-3: #703439,
+        color-4: #83383e,
+        color-5: #a03f46,
+        color-6: #c64751,
+        color-7: #de6670,
+        color-8: #ec888e,
+        color-9: #edb1b6,
+        color-10: #eeced0,
+        color: #c64751,
+        hover: #a03f46,
+        focus: #5e2a2d,
+        active: #de6670,
+        disabled: #703439,
+        light: #472324,
+        light-hover: #5e2a2d,
+    };
+}

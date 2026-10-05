@@ -1,0 +1,129 @@
+// Demo section: 基础组件 (Button / Icon & Link / Typography).
+
+import { TelaTheme } from "@tela-ui/theme.slint";
+import { Button, Link, Icon, TIconSet, Heading, Paragraph, Caption } from "@tela-ui/base.slint";
+import { Card } from "@tela-ui/common.slint";
+import { CodeBlock } from "code-block.slint";
+
+export component BasicsSection inherits VerticalLayout {
+    spacing: 28px;
+
+    // ======================= Button =======================
+    VerticalLayout {
+        spacing: 8px;
+
+        Card {
+            title: "按钮 Button";
+
+            VerticalLayout {
+                spacing: 16px;
+
+                HorizontalLayout {
+                    spacing: 12px;
+                    Button { text: "默认按钮"; }
+                    Button { theme: 1; text: "主要按钮"; }
+                    Button { theme: 2; text: "成功按钮"; }
+                    Button { theme: 3; text: "警告按钮"; }
+                    Button { theme: 4; text: "危险按钮"; }
+                }
+
+                HorizontalLayout {
+                    spacing: 12px;
+                    Button { variant: 1; text: "描边按钮"; }
+                    Button { variant: 1; theme: 1; text: "描边按钮"; }
+                    Button { variant: 1; theme: 4; text: "描边按钮"; }
+                    Button { variant: 2; text: "文字按钮"; }
+                    Button { variant: 2; theme: 1; text: "文字按钮"; }
+                    Button { variant: 2; theme: 4; text: "文字按钮"; }
+                }
+
+                HorizontalLayout {
+                    spacing: 12px;
+                    Button { size: 0; theme: 1; text: "小按钮"; }
+                    Button { size: 1; theme: 1; text: "中按钮"; }
+                    Button { size: 2; theme: 1; text: "大按钮"; }
+                    Button { shape: 1; theme: 1; icon: TIconSet.Search; }
+                    Button { shape: 2; theme: 1; icon: TIconSet.Pencil; text: "圆形"; }
+                    Button { theme: 1; icon: TIconSet.Download; text: "下载"; }
+                    Button { theme: 1; text: "加载中"; loading: true; }
+                    Button { theme: 1; text: "禁用状态"; disabled: true; }
+                    Button { variant: 1; text: "禁用状态"; disabled: true; }
+                }
+            }
+        }
+
+        CodeBlock { code: "import { Button } from \"@tela-ui/base.slint\";\n\nButton { text: \"主要按钮\"; theme: 1; }\nButton { text: \"描边按钮\"; variant: 1; }\nButton { text: \"下载\"; theme: 1; icon: TIconSet.Download; }\nButton { text: \"加载中\"; theme: 1; loading: true; }"; }
+    }
+
+    // =================== Icon & Link ======================
+    VerticalLayout {
+        spacing: 8px;
+
+        Card {
+            title: "图标与链接 Icon & Link";
+
+            VerticalLayout {
+                spacing: 16px;
+
+                FlexboxLayout {
+                    spacing: 20px;
+
+                    for ic in [
+                        TIconSet.Search, TIconSet.Plus, TIconSet.Minus,
+                        TIconSet.X, TIconSet.Check, TIconSet.Menu,
+                        TIconSet.Info, TIconSet.CircleCheck, TIconSet.CircleX,
+                        TIconSet.CircleAlert, TIconSet.TriangleAlert,
+                        TIconSet.Eye, TIconSet.Calendar, TIconSet.User,
+                        TIconSet.Bell, TIconSet.Star, TIconSet.Heart,
+                        TIconSet.Trash2, TIconSet.Pencil, TIconSet.Settings,
+                        TIconSet.Download, TIconSet.Upload, TIconSet.RefreshCw,
+                        TIconSet.Image, TIconSet.House, TIconSet.Lock,
+                        TIconSet.Mail, TIconSet.Ellipsis, TIconSet.Moon,
+                        TIconSet.Sun,
+                    ]: Icon {
+                        icon: ic;
+                        size: 20px;
+                        icon-color: TelaTheme.text-color-primary;
+                    }
+                }
+
+                HorizontalLayout {
+                    spacing: 24px;
+                    Link { text: "默认链接"; }
+                    Link { theme: 2; text: "成功链接"; underline: true; }
+                    Link { theme: 3; text: "警告链接"; }
+                    Link { theme: 4; text: "危险链接"; }
+                    Link { text: "禁用链接"; disabled: true; }
+                }
+            }
+        }
+
+        CodeBlock { code: "import { Icon, Link, TIconSet } from \"@tela-ui/base.slint\";\n\nIcon { icon: TIconSet.Search; size: 20px; }\nLink { text: \"默认链接\"; }\nLink { text: \"成功链接\"; theme: 2; underline: true; }"; }
+    }
+
+    // ==================== Typography ======================
+    VerticalLayout {
+        spacing: 8px;
+
+        Card {
+            title: "排版 Typography";
+
+            VerticalLayout {
+                spacing: 8px;
+
+                Heading { level: 1; text: "一级标题 Heading 1"; }
+                Heading { level: 2; text: "二级标题 Heading 2"; }
+                Heading { level: 3; text: "三级标题 Heading 3"; }
+                Heading { level: 4; text: "四级标题 Heading 4"; }
+                Heading { level: 5; text: "五级标题 Heading 5"; }
+                Paragraph {
+                    width: 640px;
+                    text: "Tela UI 是一套参考 TDesign 设计规范的 Slint 第三方组件库，提供主题令牌、基础组件与常用组件，支持亮暗双主题实时切换。";
+                }
+                Caption { text: "这是辅助说明文字（Caption）。"; }
+            }
+        }
+
+        CodeBlock { code: "import { Heading, Paragraph, Caption } from \"@tela-ui/base.slint\";\n\nHeading { level: 1; text: \"一级标题\"; }\nParagraph { text: \"正文内容，wrap: word-wrap 自动换行。\"; }\nCaption { text: \"辅助说明文字\"; }"; }
+    }
+}

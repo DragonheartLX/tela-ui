@@ -1,0 +1,26 @@
+[package]
+name = "tela-ui"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+crate-type = ["lib", "cdylib"]
+path = "src/lib.rs"
+name = "tela_lib"
+
+[[bin]]
+path = "src/main.rs"
+name = "tela"
+
+[dependencies]
+slint = { version = "1.18.1", default-features = false, features = [
+    "accessibility",
+    "compat-1-2",
+    "backend-winit",
+    "renderer-skia",
+    "renderer-software",
+    "std",
+] }
+
+[build-dependencies]
+slint-build = "1.18.1"

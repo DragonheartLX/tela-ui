@@ -1,0 +1,109 @@
+// Tela UI component gallery — showcases the whole tela-ui library.
+// The demo itself is organized by the NavBar component: each menu item
+// switches a demo group, and every group pairs live examples with code
+// blocks. Toggle 深色模式 in the nav bar to switch light/dark live.
+
+import { TelaTheme, TelaThemePreference } from "@tela-ui/theme.slint";
+import { TIconSet, Paragraph, Button } from "@tela-ui/base.slint";
+import { NavBar, NavItem, Switch, Dialog, Drawer, MessageOverlay, TelaMessage } from "@tela-ui/common.slint";
+import { ScrollView } from "std-widgets.slint";
+
+import { BasicsSection } from "demo/basics.slint";
+import { DataDisplaySection } from "demo/data-display.slint";
+import { FormSection } from "demo/form-section.slint";
+import { FeedbackSection } from "demo/feedback.slint";
+import { NavigationSection } from "demo/navigation.slint";
+import { ExperimentalSection } from "demo/experimental.slint";
+
+export component MainWindow inherits Window {
+    title: "Tela UI";
+    preferred-width: 1200px;
+    preferred-height: 800px;
+    background: TelaTheme.bg-color-page;
+
+    // ------------------------------------------------------------------
+    // Demo state
+    // ------------------------------------------------------------------
+    in property <[NavItem]> group-items: [
+        { label: "基础组件", value: "basics" },
+        { label: "数据展示", value: "display" },
+        { label: "数据录入", value: "form" },
+        { label: "反馈", value: "feedback" },
+        { label: "导航", value: "navigation" },
+        { label: "实验性", value: "experimental" },
+    ];
+    in-out property <string> group-value: "basics";
+    in-out property <bool> dialog-open: false;
+    in-out property <bool> drawer-open: false;
+
+    VerticalLayout {
+        NavBar {
+            title: "Tela UI";
+            logo: TIconSet.LayoutDashboard;
+            items: root.group-items;
+            current-value <=> root.group-value;
+
+            Switch {
+                y: (parent.height - self.height) / 2;
+                // Reflects the mode actually in effect (system resolved).
+                checked: TelaTheme.is-dark;
+                changed(c) => {
+                    TelaTheme.preference = c ? TelaThemePreference.dark : TelaThemePreference.light;
+                }
+            }
+        }
+
+        // Content ---------------------------------------------------------
+        Rectangle {
+            vertical-stretch: 1;
+
+            ScrollView {
+                VerticalLayout {
+                    padding: 32px;
+                    spacing: 28px;
+
+                    if root.group-value == "basics": BasicsSection { vertical-stretch: 0; }
+                    if root.group-value == "display": DataDisplaySection { vertical-stretch: 0; }
+                    if root.group-value == "form": FormSection { vertical-stretch: 0; }
+                    if root.group-value == "feedback": FeedbackSection {
+                        vertical-stretch: 0;
+                        dialog-open <=> root.dialog-open;
+                        drawer-open <=> root.drawer-open;
+                    }
+                    if root.group-value == "navigation": NavigationSection { vertical-stretch: 0; }
+                    if root.group-value == "experimental": ExperimentalSection { vertical-stretch: 0; }
+
+                    // Spacer: keep sections at their natural height when the
+                    // viewport is taller than the content.
+                    Rectangle { vertical-stretch: 1; }
+                }
+            }
+        }
+    }
+
+    Dialog {
+        open <=> root.dialog-open;
+        title: "对话框标题";
+        content: "这是 Tela UI 的对话框组件，用于确认操作或展示重要信息。点击遮罩层可关闭。";
+        accepted => { TelaMessage.success("已确认操作"); }
+        canceled => { TelaMessage.info("已取消操作"); }
+    }
+
+    Drawer {
+        open <=> root.drawer-open;
+        title: "抽屉标题";
+
+        Paragraph { text: "这是 Tela UI 的抽屉组件，从窗口右侧滑出，适合放置表单、详情等较大面积的临时内容。"; }
+        Button {
+            variant: 1;
+            text: "关闭抽屉";
+            clicked => { root.drawer-open = false; }
+        }
+    }
+
+    MessageOverlay { }
+}
+
+// Re-export the theme global so hosts can control it from Rust:
+//   TelaTheme::get(ui).set_preference(TelaThemePreference::Dark);
+export { TelaTheme, TelaThemePreference }

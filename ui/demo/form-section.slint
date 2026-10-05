@@ -1,0 +1,177 @@
+// Demo section: 数据录入 (Input / Select / TextArea / CheckBox / Radio /
+// Switch / Slider).
+
+import { TelaTheme } from "@tela-ui/theme.slint";
+import { TIconSet } from "@tela-ui/base.slint";
+import { Input, TextArea, Select, SelectItem, CheckBox, RadioGroup, RadioItem, Switch, Slider, Card } from "@tela-ui/common.slint";
+import { CodeBlock } from "code-block.slint";
+
+export component FormSection inherits VerticalLayout {
+    spacing: 28px;
+
+    in-out property <string> input-text: "";
+    in-out property <bool> check-a: true;
+    in-out property <bool> check-b: false;
+    in-out property <string> textarea-text: "";
+    in-out property <string> city-value: "sh";
+    in property <[SelectItem]> city-items: [
+        { label: "北京", value: "bj", disabled: false },
+        { label: "上海", value: "sh", disabled: false },
+        { label: "广州", value: "gz", disabled: false },
+        { label: "深圳", value: "sz", disabled: false },
+        { label: "杭州", value: "hz", disabled: true },
+        { label: "成都", value: "cd", disabled: false },
+    ];
+    in-out property <string> radio-value: "bj";
+    in property <[RadioItem]> radio-items: [
+        { text: "北京", value: "bj" },
+        { text: "上海", value: "sh" },
+        { text: "广州", value: "gz" },
+    ];
+    in-out property <bool> switch-on: true;
+    in-out property <float> slider-value: 40;
+
+    Card {
+        title: "数据录入 Form";
+
+        GridLayout {
+            spacing: 16px;
+
+            // Row 1: Input
+            Text {
+                row: 0;
+                col: 0;
+                text: "输入框";
+                font-size: TelaTheme.font-size-m;
+                color: TelaTheme.text-color-secondary;
+                vertical-alignment: center;
+            }
+            Input {
+                row: 0;
+                col: 1;
+                colspan: 2;
+                placeholder-text: "请输入内容";
+                clearable: true;
+                prefix-icon: TIconSet.Search;
+                text <=> root.input-text;
+            }
+
+            // Row 2: Select
+            Text {
+                row: 1;
+                col: 0;
+                text: "选择器";
+                font-size: TelaTheme.font-size-m;
+                color: TelaTheme.text-color-secondary;
+                vertical-alignment: center;
+            }
+            Select {
+                row: 1;
+                col: 1;
+                colspan: 2;
+                placeholder-text: "请选择城市";
+                items: root.city-items;
+                current-value <=> root.city-value;
+            }
+
+            // Row 3: TextArea
+            Text {
+                row: 2;
+                col: 0;
+                text: "多行输入";
+                font-size: TelaTheme.font-size-m;
+                color: TelaTheme.text-color-secondary;
+                vertical-alignment: top;
+            }
+            TextArea {
+                row: 2;
+                col: 1;
+                colspan: 2;
+                rows: 3;
+                placeholder-text: "请输入描述…";
+                text <=> root.textarea-text;
+            }
+
+            // Row 4: Checkbox
+            Text {
+                row: 3;
+                col: 0;
+                text: "复选框";
+                font-size: TelaTheme.font-size-m;
+                color: TelaTheme.text-color-secondary;
+                vertical-alignment: center;
+            }
+            HorizontalLayout {
+                row: 3;
+                col: 1;
+                colspan: 2;
+                spacing: 24px;
+
+                CheckBox { text: "全选"; indeterminate: root.check-a != root.check-b; checked: root.check-a && root.check-b;
+                    changed(c) => { root.check-a = c; root.check-b = c; } }
+                CheckBox { text: "选项 A"; checked <=> root.check-a; }
+                CheckBox { text: "选项 B"; checked <=> root.check-b; }
+                CheckBox { text: "禁用"; disabled: true; }
+                CheckBox { text: "选中禁用"; checked: true; disabled: true; }
+            }
+
+            // Row 5: Radio
+            Text {
+                row: 4;
+                col: 0;
+                text: "单选框";
+                font-size: TelaTheme.font-size-m;
+                color: TelaTheme.text-color-secondary;
+                vertical-alignment: center;
+            }
+            RadioGroup {
+                row: 4;
+                col: 1;
+                colspan: 2;
+                items: root.radio-items;
+                value <=> root.radio-value;
+            }
+
+            // Row 6: Switch
+            Text {
+                row: 5;
+                col: 0;
+                text: "开关";
+                font-size: TelaTheme.font-size-m;
+                color: TelaTheme.text-color-secondary;
+                vertical-alignment: center;
+            }
+            HorizontalLayout {
+                row: 5;
+                col: 1;
+                colspan: 2;
+                spacing: 24px;
+
+                Switch { checked <=> root.switch-on; }
+                Switch { checked: false; }
+                Switch { checked: true; disabled: true; }
+                Switch { checked: false; disabled: true; }
+                Switch { size: 0; checked: true; }
+                Switch { size: 2; checked: false; }
+            }
+
+            // Row 7: Slider
+            Text {
+                row: 6;
+                col: 0;
+                text: "滑块";
+                font-size: TelaTheme.font-size-m;
+                color: TelaTheme.text-color-secondary;
+                vertical-alignment: center;
+            }
+            Slider {
+                row: 6;
+                col: 1;
+                colspan: 2;
+                value <=> root.slider-value;
+            }
+        }
+    }
+
+    CodeBlock { code: "import { Input, Select, CheckBox, RadioGroup, Switch, Slider } from \"@tela-ui/common.slint\";\n\nInput { placeholder-text: \"请输入内容\"; clearable: true; }\nSelect { items: city-items; current-value <=> city; }\nCheckBox { text: \"选项 A\"; checked <=> a; }\nSwitch { checked <=> on; }"; }
+}

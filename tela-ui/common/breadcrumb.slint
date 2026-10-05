@@ -1,0 +1,76 @@
+// Tela UI — Breadcrumb
+//
+// Navigation trail. Items whose value differs from `current-value` render
+// as links and emit `changed` when clicked; the current one is plain
+// primary text.
+
+import { TelaTheme } from "../theme.slint";
+
+export struct CrumbItem {
+    label: string,
+    value: string,
+}
+
+export component Breadcrumb inherits Rectangle {
+    in property <[CrumbItem]> items;
+    // The current crumb; defaults to the last item.
+    in-out property <string> current-value:
+        items.length > 0 ? items[items.length - 1].value : "";
+    in property <string> separator: "/";
+    in property <color> separator-color: TelaTheme.text-color-disabled;
+
+    callback changed(string);
+
+    height: TelaTheme.line-height-m;
+    width: row.preferred-width;
+
+    row := HorizontalLayout {
+        x: 0;
+        y: 0;
+        width: self.preferred-width;
+        height: parent.height;
+
+        for it[i] in root.items: Rectangle {
+            height: parent.height;
+            width: crumb-row.preferred-width;
+
+            crumb-row := HorizontalLayout {
+                height: parent.height;
+                spacing: TelaTheme.spacing-2;
+
+                if i > 0: Text {
+                    text: root.separator;
+                    font-size: TelaTheme.font-size-m;
+                    color: root.separator-color;
+                    vertical-alignment: center;
+                }
+
+                crumb-label := Text {
+                    text: it.label;
+                    font-size: TelaTheme.font-size-m;
+                    vertical-alignment: center;
+                    color: TelaTheme.text-color-link;
+                    animate color { duration: TelaTheme.duration-fast; }
+
+                    // Later states win over earlier ones.
+                    states [
+                        hovered when crumb-ta.has-hover && it.value != root.current-value: {
+                            color: TelaTheme.brand-color-hover;
+                        }
+                        current when it.value == root.current-value: {
+                            color: TelaTheme.text-color-primary;
+                        }
+                    ]
+                }
+            }
+
+            crumb-ta := TouchArea {
+                enabled: it.value != root.current-value;
+                mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;
+                clicked => {
+                    root.changed(it.value);
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,121 @@
+// Tela UI — Tag
+//
+// Small status descriptor. theme: 0 default, 1 primary, 2 success,
+// 3 warning, 4 danger; variant: 0 dark (filled), 1 light, 2 outline;
+// size: 0 small, 1 medium, 2 large. Closable tags emit `closed`; tags
+// emit `clicked` when `clickable` styling is desired.
+
+import { TelaTheme } from "../theme.slint";
+import { Icon } from "icon/icon.slint";
+import { TIconSet, TIconData } from "icon/data.slint";
+
+export component Tag inherits Rectangle {
+    in property <int> theme: 0;
+    in property <int> variant: 0;
+    in property <int> size: 1;
+    in property <string> text;
+    in property <TIconData> icon;
+    in property <bool> closable;
+    in property <bool> disabled;
+    in property <bool> clickable: false;
+
+    callback closed();
+    callback clicked();
+
+    private property <length> h: size == 0 ? 20px : size == 2 ? 28px : 24px;
+    private property <length> fs: TelaTheme.font-size-s;
+    private property <length> pad-lr: size == 0 ? 6px : size == 2 ? 12px : 8px;
+
+    // Rest state; overridden by the `states` below.
+    private property <brush> bg:
+        variant == 0 ? (theme == 0 ? TelaTheme.bg-color-component : TelaTheme.theme-color(theme))
+        : variant == 1 ? (theme == 0 ? TelaTheme.bg-color-secondarycontainer : TelaTheme.theme-color-light(theme))
+        : transparent;
+    private property <brush> content-color:
+        variant == 0 ? (theme == 0 ? TelaTheme.text-color-primary : TelaTheme.text-color-anti)
+        : variant == 1 ? (theme == 0 ? TelaTheme.text-color-primary : TelaTheme.theme-color(theme))
+        : (theme == 0 ? TelaTheme.text-color-secondary : TelaTheme.theme-color(theme));
+    private property <brush> border-brush:
+        variant == 2 ? (theme == 0 ? TelaTheme.component-border : TelaTheme.theme-color(theme))
+        : transparent;
+
+    background: bg;
+    border-width: variant == 2 ? 1px : 0;
+    border-color: border-brush;
+    border-radius: TelaTheme.radius-default;
+    height: h;
+    width: max(h, content.preferred-width + pad-lr * 2 + (closable ? 16px : 0));
+    animate bg { duration: TelaTheme.duration-fast; }
+    animate content-color { duration: TelaTheme.duration-fast; }
+    animate border-brush { duration: TelaTheme.duration-fast; }
+
+    // Later states win over earlier ones.
+    states [
+        hovered when touch.has-hover && root.clickable && !root.disabled: {
+            bg: variant == 0 ? (theme == 0 ? TelaTheme.bg-color-component-hover : TelaTheme.theme-color-hover(theme))
+                : variant == 1 ? (theme == 0 ? TelaTheme.bg-color-secondarycontainer-hover : TelaTheme.theme-color-light-hover(theme))
+                : transparent;
+        }
+        disabled when root.disabled: {
+            bg: variant == 0 ? TelaTheme.bg-color-component-disabled : transparent;
+            content-color: TelaTheme.text-color-disabled;
+            border-brush: variant == 2 ? TelaTheme.border-level-1-color : transparent;
+        }
+    ]
+
+    touch := TouchArea {
+        enabled: root.clickable && !root.disabled;
+        mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;
+        clicked => {
+            root.clicked();
+        }
+    }
+
+    content := HorizontalLayout {
+        x: (parent.width - self.width) / 2;
+        y: (parent.height - self.height) / 2;
+        width: self.preferred-width;
+        height: self.preferred-height;
+        spacing: TelaTheme.spacing-1;
+
+        if root.icon.paths.length > 0: Icon {
+            y: (parent.height - self.height) / 2;
+            icon: root.icon;
+            size: 12px;
+            icon-color: root.content-color;
+        }
+
+        if root.text != "": Text {
+            text: root.text;
+            font-size: root.fs;
+            color: root.content-color;
+            vertical-alignment: center;
+        }
+
+        if root.closable: Rectangle {
+            width: 16px;
+            height: 16px;
+            y: (parent.height - self.height) / 2;
+
+            Icon {
+                x: 2px;
+                y: 2px;
+                icon: TIconSet.X;
+                size: 12px;
+                icon-color: close-ta.has-hover ? root.content-color : TelaTheme.text-color-secondary;
+                animate icon-color { duration: TelaTheme.duration-fast; }
+            }
+            close-ta := TouchArea {
+                enabled: !root.disabled;
+                mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;
+                clicked => {
+                    root.closed();
+                    root.visible = false;
+                }
+            }
+        }
+    }
+
+    accessible-role: AccessibleRole.text;
+    accessible-label: text;
+}

@@ -1,0 +1,74 @@
+// Tela UI — Tabs
+//
+// Tab header bar with an animated underline; each tab stretches equally.
+// Render page content in the host with `if current-index == i : ...`.
+
+import { TelaTheme } from "../theme.slint";
+
+export component Tabs inherits Rectangle {
+    in property <[string]> items;
+    in-out property <int> current-index: 0;
+
+    callback changed(int);
+
+    height: 40px;
+
+    HorizontalLayout {
+        width: parent.width;
+        height: parent.height;
+
+        for it[i] in root.items: Rectangle {
+            height: parent.height;
+
+            touch := TouchArea {
+                mouse-cursor: MouseCursor.pointer;
+                clicked => {
+                    if root.current-index != i {
+                        root.current-index = i;
+                        root.changed(i);
+                    }
+                }
+            }
+
+            Text {
+                width: 100%;
+                height: 100%;
+                text: it;
+                font-size: TelaTheme.font-size-m;
+                font-weight: TelaTheme.font-weight-regular;
+                color: TelaTheme.text-color-primary;
+                animate color { duration: TelaTheme.duration-fast; }
+
+                // Later states win over earlier ones.
+                states [
+                    hovered when touch.has-hover: {
+                        color: TelaTheme.brand-color-hover;
+                    }
+                    selected when i == root.current-index: {
+                        color: TelaTheme.brand-color;
+                        font-weight: TelaTheme.font-weight-semibold;
+                    }
+                ]
+            }
+        }
+    }
+
+    Rectangle {
+        y: parent.height - self.height;
+        x: root.current-index * (parent.width / max(1, root.items.length));
+        width: parent.width / max(1, root.items.length);
+        height: 3px;
+        border-radius: 2px;
+        background: TelaTheme.brand-color;
+        animate x { duration: TelaTheme.duration-base; easing: ease-out; }
+    }
+
+    Rectangle {
+        y: parent.height - 1px;
+        width: 100%;
+        height: 1px;
+        background: TelaTheme.component-stroke;
+    }
+
+    accessible-role: AccessibleRole.tab;
+}

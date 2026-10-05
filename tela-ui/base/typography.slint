@@ -1,0 +1,40 @@
+// Tela UI — Typography
+//
+// TDesign type scale as ready-made text components.
+//   Heading   : page/section headings, level 1 (36px) .. 5 (18px), semibold
+//   Paragraph : body copy (14px), optional `secondary` gray
+//   Caption   : auxiliary notes (12px, secondary)
+
+import { TelaTheme } from "../theme.slint";
+
+export component Heading inherits Text {
+    // 1 = 36px, 2 = 28px, 3 = 24px, 4 = 20px, 5 = 18px
+    in property <int> level: 3;
+
+    text: "Heading";
+    font-size:
+        level == 1 ? TelaTheme.font-size-headline-l
+        : level == 2 ? TelaTheme.font-size-headline-m
+        : level == 3 ? TelaTheme.font-size-headline-s
+        : level == 4 ? TelaTheme.font-size-title-xl
+        : TelaTheme.font-size-title-l;
+    font-weight: TelaTheme.font-weight-semibold;
+    color: TelaTheme.text-color-primary;
+    vertical-alignment: center;
+}
+
+export component Paragraph inherits Text {
+    in property <bool> secondary: false;
+
+    text: "";
+    wrap: word-wrap;
+    font-size: TelaTheme.font-size-m;
+    color: secondary ? TelaTheme.text-color-secondary : TelaTheme.text-color-primary;
+}
+
+export component Caption inherits Text {
+    text: "";
+    wrap: word-wrap;
+    font-size: TelaTheme.font-size-s;
+    color: TelaTheme.text-color-secondary;
+}

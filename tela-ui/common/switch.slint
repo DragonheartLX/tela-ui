@@ -1,0 +1,70 @@
+// Tela UI — Switch
+//
+// Toggle switch. size: 0 small (36×18), 1 medium (40×22), 2 large (48×24).
+
+import { TelaTheme } from "../theme.slint";
+
+export component Switch inherits Rectangle {
+    in-out property <bool> checked;
+    in property <bool> disabled;
+    // 0 small, 1 medium, 2 large
+    in property <int> size: 1;
+
+    callback changed(bool);
+
+    private property <length> w: size == 0 ? 36px : size == 2 ? 48px : 40px;
+    private property <length> h: size == 0 ? 18px : size == 2 ? 24px : 22px;
+    private property <length> thumb: h - 6px;
+    private property <length> inset: 3px;
+
+    width: w;
+    height: h;
+    border-radius: self.height / 2;
+    background: checked ? TelaTheme.brand-color : TelaTheme.bg-color-component;
+    animate background { duration: TelaTheme.duration-fast; }
+
+    // Later states win over earlier ones.
+    states [
+        on-hovered when checked && touch.has-hover: {
+            background: TelaTheme.brand-color-hover;
+        }
+        on-pressed when checked && touch.pressed: {
+            background: TelaTheme.brand-color-active;
+        }
+        off-hovered when !checked && touch.has-hover: {
+            background: TelaTheme.bg-color-component-hover;
+        }
+        disabled when root.disabled: {
+            background: checked ? TelaTheme.brand-color-disabled : TelaTheme.bg-color-component-disabled;
+        }
+    ]
+
+    touch := TouchArea {
+        enabled: !root.disabled;
+        mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;
+        clicked => {
+            root.checked = !root.checked;
+            root.changed(root.checked);
+        }
+    }
+
+    Rectangle {
+        x: root.checked ? parent.width - self.width - root.inset : root.inset;
+        y: (parent.height - self.height) / 2;
+        width: root.thumb;
+        height: root.thumb;
+        border-radius: self.width / 2;
+        background: root.disabled ? TelaTheme.text-color-disabled : TelaTheme.text-color-anti;
+        drop-shadow-blur: 2px;
+        drop-shadow-offset-y: 1px;
+        drop-shadow-color: rgba(0, 0, 0, 0.2);
+        animate x { duration: TelaTheme.duration-fast; easing: ease-out; }
+    }
+
+    accessible-role: AccessibleRole.checkbox;
+    accessible-checked: checked;
+    accessible-action-default => {
+        root.checked = !root.checked;
+        root.changed(root.checked);
+    }
+}

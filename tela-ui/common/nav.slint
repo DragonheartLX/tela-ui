@@ -1,0 +1,126 @@
+// Tela UI — NavBar
+//
+// Top navigation bar: brand (logo + title) on the left, menu items with an
+// active underline in the middle, and a trailing action slot (the default
+// children) on the right.
+
+import { TelaTheme } from "../theme.slint";
+import { Icon } from "../base/icon/icon.slint";
+import { TIconData } from "../base/icon/data.slint";
+
+export struct NavItem {
+    label: string,
+    value: string,
+}
+
+export component NavBar inherits Rectangle {
+    in property <string> title;
+    in property <TIconData> logo;
+    in property <[NavItem]> items;
+    in-out property <string> current-value;
+    in property <bool> bordered: true;
+
+    callback changed(string);
+
+    height: 56px;
+    background: TelaTheme.bg-color-container;
+
+    HorizontalLayout {
+        padding-left: TelaTheme.margin-xl;
+        padding-right: TelaTheme.margin-xl;
+        spacing: TelaTheme.margin-l;
+
+        // Brand -----------------------------------------------------------
+        if root.title != "" || root.logo.paths.length > 0: VerticalLayout {
+            y: (parent.height - self.preferred-height) / 2;
+            height: self.preferred-height;
+            horizontal-stretch: 0;
+
+            HorizontalLayout {
+                spacing: TelaTheme.spacing-2;
+
+                if root.logo.paths.length > 0: Icon {
+                    y: (parent.height - self.height) / 2;
+                    icon: root.logo;
+                    size: 24px;
+                    icon-color: TelaTheme.brand-color;
+                }
+
+                if root.title != "": Text {
+                    text: root.title;
+                    font-size: TelaTheme.font-size-title-m;
+                    font-weight: TelaTheme.font-weight-semibold;
+                    color: TelaTheme.text-color-primary;
+                    vertical-alignment: center;
+                }
+            }
+        }
+
+        // Menu ------------------------------------------------------------
+        for it[i] in root.items: Rectangle {
+            width: nav-text.preferred-width + TelaTheme.padding-lr-m * 2;
+            height: parent.height;
+
+            nav-text := Text {
+                width: 100%;
+                height: 100%;
+                text: it.label;
+                font-size: TelaTheme.font-size-m;
+                horizontal-alignment: center;
+                vertical-alignment: center;
+                color: TelaTheme.text-color-primary;
+                animate color { duration: TelaTheme.duration-fast; }
+
+                // Later states win over earlier ones.
+                states [
+                    hovered when item-ta.has-hover && it.value != root.current-value: {
+                        color: TelaTheme.brand-color-hover;
+                    }
+                    active when it.value == root.current-value: {
+                        color: TelaTheme.brand-color;
+                    }
+                ]
+            }
+
+            if it.value == root.current-value: Rectangle {
+                x: (parent.width - self.width) / 2;
+                y: parent.height - self.height;
+                width: nav-text.preferred-width;
+                height: 3px;
+                border-radius: 2px;
+                background: TelaTheme.brand-color;
+            }
+
+            item-ta := TouchArea {
+                mouse-cursor: MouseCursor.pointer;
+                clicked => {
+                    if it.value != root.current-value {
+                        root.current-value = it.value;
+                        root.changed(it.value);
+                    }
+                }
+            }
+        }
+
+        Rectangle { horizontal-stretch: 1; }
+
+        // Trailing actions (default children) ------------------------------
+        VerticalLayout {
+            y: (parent.height - self.preferred-height) / 2;
+            height: self.preferred-height;
+            horizontal-stretch: 0;
+
+            HorizontalLayout {
+                spacing: TelaTheme.margin-s;
+                @children
+            }
+        }
+    }
+
+    if root.bordered: Rectangle {
+        y: parent.height - self.height;
+        width: 100%;
+        height: 1px;
+        background: TelaTheme.component-stroke;
+    }
+}

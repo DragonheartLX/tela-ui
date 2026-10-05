@@ -1,0 +1,137 @@
+// Tela UI — Pagination
+//
+// Page navigator with prev/next buttons and a sliding window of page
+// numbers (up to 7). Emits `changed` with the new 1-based page.
+
+import { TelaTheme } from "../theme.slint";
+import { Icon } from "../base/icon/icon.slint";
+import { TIconData, TIconSet } from "../base/icon/data.slint";
+
+component PageBtn inherits Rectangle {
+    // Page number label; empty for icon-only buttons (prev/next).
+    in property <string> label: "";
+    in property <TIconData> icon;
+    in property <bool> active;
+    in property <bool> disabled;
+
+    callback clicked();
+
+    width: TelaTheme.height-m;
+    height: TelaTheme.height-m;
+    border-radius: TelaTheme.radius-default;
+    background: transparent;
+    animate background { duration: TelaTheme.duration-fast; }
+
+    // Later states win over earlier ones.
+    states [
+        hovered when ta.has-hover && !root.disabled && !root.active: {
+            background: TelaTheme.bg-color-component-hover;
+        }
+        active when root.active: {
+            background: TelaTheme.brand-color;
+        }
+        disabled when root.disabled: {
+            background: transparent;
+        }
+    ]
+
+    ta := TouchArea {
+        enabled: !root.disabled;
+        mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;
+        clicked => {
+            root.clicked();
+        }
+    }
+
+    if root.label == "": Icon {
+        x: (parent.width - self.width) / 2;
+        y: (parent.height - self.height) / 2;
+        icon: root.icon;
+        size: 16px;
+        icon-color: TelaTheme.text-color-secondary;
+        animate icon-color { duration: TelaTheme.duration-fast; }
+
+        // Later states win over earlier ones.
+        states [
+            hovered when ta.has-hover && !root.disabled: {
+                icon-color: TelaTheme.brand-color;
+            }
+            disabled when root.disabled: {
+                icon-color: TelaTheme.text-color-disabled;
+            }
+        ]
+    }
+
+    if root.label != "": Text {
+        width: 100%;
+        height: 100%;
+        text: root.label;
+        font-size: TelaTheme.font-size-m;
+        color: TelaTheme.text-color-primary;
+        horizontal-alignment: center;
+        vertical-alignment: center;
+        animate color { duration: TelaTheme.duration-fast; }
+
+        // Later states win over earlier ones.
+        states [
+            hovered when ta.has-hover && !root.disabled && !root.active: {
+                color: TelaTheme.brand-color;
+            }
+            active when root.active: {
+                color: TelaTheme.text-color-anti;
+            }
+            disabled when root.disabled: {
+                color: TelaTheme.text-color-disabled;
+            }
+        ]
+    }
+}
+
+export component Pagination inherits Rectangle {
+    in property <int> total-pages: 1;
+    in-out property <int> current: 1;
+
+    callback changed(int);
+
+    // Sliding window of up to 7 page numbers.
+    private property <int> visible-count: min(7, total-pages);
+    private property <int> start: max(1, min(total-pages - visible-count + 1, current - 3));
+
+    height: TelaTheme.height-m;
+    width: row.preferred-width;
+
+    row := HorizontalLayout {
+        x: 0;
+        y: 0;
+        width: self.preferred-width;
+        height: parent.height;
+        spacing: TelaTheme.spacing-2;
+
+        PageBtn {
+            icon: TIconSet.ChevronLeft;
+            disabled: root.current <= 1;
+            clicked => {
+                root.current = root.current - 1;
+                root.changed(root.current);
+            }
+        }
+
+        for i in root.visible-count: PageBtn {
+            label: "\{root.start + i}";
+            active: root.start + i == root.current;
+            clicked => {
+                root.current = root.start + i;
+                root.changed(root.current);
+            }
+        }
+
+        PageBtn {
+            icon: TIconSet.ChevronRight;
+            disabled: root.current >= root.total-pages;
+            clicked => {
+                root.current = root.current + 1;
+                root.changed(root.current);
+            }
+        }
+    }
+}

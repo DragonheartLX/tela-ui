@@ -1,0 +1,86 @@
+// Tela UI — Alert
+//
+// Inline feedback banner. theme: 0 info, 1 primary, 2 success, 3 warning,
+// 4 error. Title is styled in the theme color, description in primary
+// text; optionally closable (sets `open = false`).
+
+import { TelaTheme } from "../theme.slint";
+import { Icon } from "../base/icon/icon.slint";
+import { TIconSet } from "../base/icon/data.slint";
+
+export component Alert inherits Rectangle {
+    in property <int> theme: 0;
+    in property <string> title;
+    in property <string> description;
+    in property <bool> closable: false;
+    in-out property <bool> open: true;
+
+    callback closed();
+
+    background: TelaTheme.theme-color-light(theme);
+    border-radius: TelaTheme.radius-medium;
+    visible: open;
+
+    HorizontalLayout {
+        padding-left: TelaTheme.margin-l;
+        padding-right: TelaTheme.margin-s;
+        padding-top: TelaTheme.margin-m;
+        padding-bottom: TelaTheme.margin-m;
+        spacing: TelaTheme.margin-s;
+
+        Icon {
+            y: root.description == "" ? (parent.height - self.height) / 2 : 3px;
+            icon: root.theme == 2 ? TIconSet.CircleCheck
+                : root.theme == 3 ? TIconSet.CircleAlert
+                : root.theme == 4 ? TIconSet.CircleX
+                : TIconSet.Info;
+            size: 20px;
+            icon-color: TelaTheme.theme-color(root.theme);
+        }
+
+        VerticalLayout {
+            spacing: TelaTheme.spacing-1;
+            horizontal-stretch: 1;
+
+            Text {
+                text: root.title;
+                font-size: TelaTheme.font-size-m;
+                font-weight: TelaTheme.font-weight-semibold;
+                color: TelaTheme.theme-color(root.theme);
+                wrap: word-wrap;
+            }
+
+            if root.description != "": Text {
+                text: root.description;
+                font-size: TelaTheme.font-size-m;
+                color: TelaTheme.text-color-primary;
+                wrap: word-wrap;
+            }
+        }
+
+        if root.closable: Rectangle {
+            width: 24px;
+            height: 24px;
+            y: root.description == "" ? (parent.height - self.height) / 2 : 0px;
+
+            Icon {
+                x: 5px;
+                y: 5px;
+                icon: TIconSet.X;
+                size: 14px;
+                icon-color: close-ta.has-hover ? TelaTheme.theme-color(root.theme) : TelaTheme.text-color-secondary;
+                animate icon-color { duration: TelaTheme.duration-fast; }
+            }
+            close-ta := TouchArea {
+                mouse-cursor: MouseCursor.pointer;
+                clicked => {
+                    root.open = false;
+                    root.closed();
+                }
+            }
+        }
+    }
+
+    accessible-role: AccessibleRole.text;
+    accessible-label: title;
+}

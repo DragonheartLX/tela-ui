@@ -1,0 +1,5 @@
+{
+    "slint.libraryPaths": {
+        "tela-ui": "tela-ui/",
+    }
+}

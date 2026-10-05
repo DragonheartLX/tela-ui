@@ -1,0 +1,124 @@
+// Tela UI — Progress
+//
+// Linear or circular progress. value: 0..100.
+// variant: 0 line, 1 circle; theme: 0 default, 1 primary, 2 success,
+// 3 warning, 4 error; size: 0 small, 1 medium, 2 large.
+
+import { TelaTheme } from "../theme.slint";
+
+export component Progress inherits Rectangle {
+    in property <int> variant: 0;
+    in property <float> value: 0;
+    in property <int> theme: 1;
+    in property <int> size: 1;
+    in property <bool> show-label: true;
+
+    private property <float> p: max(0, min(100, value)) / 100;
+    // One animated source drives both the linear fill width and the
+    // circular arc, so value changes ease in both variants.
+    animate p { duration: TelaTheme.duration-base; }
+    private property <length> th: size == 0 ? 4px : size == 2 ? 10px : 6px;
+    private property <length> d: size == 0 ? 64px : size == 2 ? 96px : 80px;
+    private property <brush> bar-color:
+        theme == 0 ? TelaTheme.brand-color : TelaTheme.theme-color(theme);
+
+    height: variant == 0 ? TelaTheme.height-m : d;
+    width: d;
+    // Line variant shares the surrounding layout's space; circle is fixed.
+    horizontal-stretch: variant == 0 ? 1 : 0;
+
+    if variant == 0: HorizontalLayout {
+        spacing: TelaTheme.spacing-2;
+
+        Rectangle {
+            y: (parent.height - root.th) / 2;
+            height: root.th;
+            horizontal-stretch: 1;
+            border-radius: root.th / 2;
+            background: TelaTheme.bg-color-component;
+
+            Rectangle {
+                x: 0;
+                y: 0;
+                width: max(self.height, root.p * parent.width);
+                height: parent.height;
+                border-radius: self.height / 2;
+                background: root.bar-color;
+            }
+        }
+
+        if root.show-label: Text {
+            text: "\{Math.round(root.p * 100)}%";
+            width: 40px;
+            font-size: TelaTheme.font-size-s;
+            color: TelaTheme.text-color-secondary;
+            vertical-alignment: center;
+        }
+    }
+
+    if variant == 1: Rectangle {
+        width: root.d;
+        height: root.d;
+
+        // Track ring: full circle drawn as two half arcs.
+        Path {
+            private property <float> sw: root.th / root.d * 24;
+            private property <float> r: 12 - sw / 2;
+
+            viewbox-width: 24;
+            viewbox-height: 24;
+            width: 100%;
+            height: 100%;
+
+            stroke: TelaTheme.bg-color-component;
+            stroke-width: sw * 1px;
+
+            MoveTo { x: 12; y: 12 - parent.r; }
+            ArcTo { x: 12; y: 12 + parent.r; radius-x: parent.r; radius-y: parent.r; sweep: true; large-arc: false; }
+            ArcTo { x: 12; y: 12 - parent.r; radius-x: parent.r; radius-y: parent.r; sweep: true; large-arc: false; }
+        }
+
+        // Value arc: starts at 12 o'clock, sweeps clockwise.
+        if root.p > 0.001: Path {
+            private property <float> sw: root.th / root.d * 24;
+            private property <float> r: 12 - sw / 2;
+            private property <float> sweep: min(0.9999, root.p);
+
+            viewbox-width: 24;
+            viewbox-height: 24;
+            width: 100%;
+            height: 100%;
+
+            stroke: root.bar-color;
+            stroke-width: sw * 1px;
+            stroke-line-cap: round;
+
+            MoveTo {
+                x: 12 - parent.r * sin(-0.0001 * 360deg);
+                y: 12 - parent.r * cos(0.0001 * 360deg);
+            }
+            LineTo {
+                x: 12 - parent.r * sin(-0.0002 * 360deg);
+                y: 12 - parent.r * cos(0.0002 * 360deg);
+            }
+            ArcTo {
+                x: 12 - parent.r * sin(-parent.sweep * 360deg);
+                y: 12 - parent.r * cos(parent.sweep * 360deg);
+                radius-x: parent.r;
+                radius-y: parent.r;
+                sweep: parent.sweep > 0;
+                large-arc: parent.sweep > 0.5;
+            }
+        }
+
+        if root.show-label: Text {
+            width: 100%;
+            y: (parent.height - self.preferred-height) / 2;
+            text: Math.round(root.p * 100) + "%";
+            font-size: root.d / 5;
+            font-weight: TelaTheme.font-weight-semibold;
+            color: TelaTheme.text-color-primary;
+            horizontal-alignment: center;
+        }
+    }
+}

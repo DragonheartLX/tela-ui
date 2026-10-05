@@ -1,0 +1,235 @@
+// Tela UI — Input & TextArea
+//
+// Single-line input with prefix/suffix icons, clearable, status colors and
+// password mode; multi-line TextArea.
+// status: 0 default, 1 success, 2 warning, 3 error.
+
+import { TelaTheme } from "../theme.slint";
+import { Icon } from "../base/icon/icon.slint";
+import { TIconData, TIconSet } from "../base/icon/data.slint";
+
+export component Input inherits Rectangle {
+    // 0 small, 1 medium, 2 large
+    in property <int> size: 1;
+    in property <string> placeholder-text;
+    in-out property <string> text <=> ti.text;
+    in property <bool> disabled;
+    in property <bool> read-only <=> ti.read-only;
+    in property <int> status: 0;
+    in property <TIconData> prefix-icon;
+    in property <TIconData> suffix-icon;
+    in property <bool> clearable: false;
+    in property <InputType> input-type: InputType.text;
+
+    callback accepted(string);
+    callback changed(string);
+    callback cleared();
+
+    private property <length> h:
+        size == 0 ? TelaTheme.height-s : size == 2 ? TelaTheme.height-l : TelaTheme.height-m;
+    private property <length> fs:
+        size == 0 ? TelaTheme.font-size-s : size == 2 ? TelaTheme.font-size-l : TelaTheme.font-size-m;
+    private property <length> pad:
+        size == 2 ? TelaTheme.spacing-3 : TelaTheme.spacing-2;
+    private property <length> spacing-left: TelaTheme.spacing-2;
+
+    private property <bool> clear-visible:
+        clearable && !disabled && !read-only && text != "" && touch-bg.has-hover;
+
+    // Rest border follows the status color; overridden by `states`.
+    private property <brush> border-c:
+        status == 3 ? TelaTheme.error-color
+        : status == 2 ? TelaTheme.warning-color
+        : status == 1 ? TelaTheme.success-color
+        : TelaTheme.component-border;
+
+    height: h;
+    background: TelaTheme.bg-color-specialcomponent;
+    border-width: 1px;
+    border-color: border-c;
+    border-radius: TelaTheme.radius-default;
+    animate border-c { duration: TelaTheme.duration-fast; }
+    forward-focus: ti;
+
+    // Later states win over earlier ones.
+    states [
+        hovered when touch-bg.has-hover && status == 0 && !root.disabled: {
+            border-c: TelaTheme.border-level-2-color;
+        }
+        focused when ti.has-focus && status == 0: {
+            border-c: TelaTheme.brand-color;
+        }
+        disabled when root.disabled: {
+            border-c: TelaTheme.border-level-1-color;
+        }
+    ]
+
+    touch-bg := TouchArea {
+        enabled: !root.disabled;
+        mouse-cursor: root.disabled ? MouseCursor.default : MouseCursor.text;
+        clicked => {
+            ti.focus();
+        }
+    }
+
+    HorizontalLayout {
+        x: 0;
+        y: 0;
+        width: parent.width;
+        height: parent.height;
+        padding-left: pad;
+        padding-right: pad;
+        spacing: TelaTheme.spacing-2;
+
+        if root.prefix-icon.paths.length > 0: Icon {
+            y: (parent.height - self.height) / 2;
+            icon: root.prefix-icon;
+            size: root.fs + 2px;
+            icon-color: root.disabled ? TelaTheme.text-color-disabled : TelaTheme.text-color-placeholder;
+        }
+
+        ti := TextInput {
+            vertical-alignment: center;
+            single-line: true;
+            color: root.disabled ? TelaTheme.text-color-disabled : TelaTheme.text-color-primary;
+            font-size: root.fs;
+            font-family: TelaTheme.font-family;
+            selection-background-color: TelaTheme.brand-color-light;
+            selection-foreground-color: TelaTheme.text-color-primary;
+            enabled: !root.disabled && !root.read-only;
+            horizontal-stretch: 1;
+
+            accepted => {
+                root.accepted(self.text);
+            }
+            edited => {
+                root.changed(self.text);
+            }
+        }
+
+        if root.clear-visible: Rectangle {
+            width: 16px;
+            height: 16px;
+            y: (parent.height - self.height) / 2;
+
+            Icon {
+                x: 1px;
+                y: 1px;
+                icon: TIconSet.CircleX;
+                size: 14px;
+                icon-color: clear-ta.has-hover ? TelaTheme.text-color-secondary : TelaTheme.text-color-placeholder;
+                animate icon-color { duration: TelaTheme.duration-fast; }
+            }
+            clear-ta := TouchArea {
+                mouse-cursor: MouseCursor.pointer;
+                clicked => {
+                    root.text = "";
+                    root.cleared();
+                }
+            }
+        }
+
+        if root.suffix-icon.paths.length > 0 && !root.clear-visible: Icon {
+            y: (parent.height - self.height) / 2;
+            icon: root.suffix-icon;
+            size: root.fs + 2px;
+            icon-color: root.disabled ? TelaTheme.text-color-disabled : TelaTheme.text-color-placeholder;
+        }
+    }
+
+    // Placeholder (above the background, hidden once text is entered)
+    placeholder := Text {
+        x: root.prefix-icon.paths.length > 0 ? pad + 16px + spacing-left : pad;
+        y: 0;
+        height: parent.height;
+        vertical-alignment: center;
+        text: (root.text == "" && ti.preedit-text == "") ? root.placeholder-text : "";
+        font-size: root.fs;
+        font-family: TelaTheme.font-family;
+        color: root.disabled ? TelaTheme.text-color-disabled : TelaTheme.text-color-placeholder;
+        overflow: elide;
+        width: parent.width - self.x - pad;
+    }
+
+    accessible-role: AccessibleRole.text-input;
+    accessible-label: placeholder-text;
+}
+
+export component TextArea inherits Rectangle {
+    in property <string> placeholder-text;
+    in-out property <string> text <=> ti.text;
+    in property <bool> disabled;
+    in property <bool> read-only <=> ti.read-only;
+    in property <int> status: 0;
+    // Preferred visible line count.
+    in property <int> rows: 4;
+
+    callback changed(string);
+
+    private property <brush> border-c:
+        status == 3 ? TelaTheme.error-color
+        : status == 2 ? TelaTheme.warning-color
+        : status == 1 ? TelaTheme.success-color
+        : TelaTheme.component-border;
+
+    height: rows * TelaTheme.line-height-m + TelaTheme.spacing-3 * 2;
+    background: TelaTheme.bg-color-specialcomponent;
+    border-width: 1px;
+    border-color: border-c;
+    border-radius: TelaTheme.radius-medium;
+    animate border-c { duration: TelaTheme.duration-fast; }
+    clip: true;
+    forward-focus: ti;
+
+    states [
+        hovered when touch-bg.has-hover && status == 0 && !root.disabled: {
+            border-c: TelaTheme.border-level-2-color;
+        }
+        focused when ti.has-focus && status == 0: {
+            border-c: TelaTheme.brand-color;
+        }
+        disabled when root.disabled: {
+            border-c: TelaTheme.border-level-1-color;
+        }
+    ]
+
+    touch-bg := TouchArea {
+        enabled: !root.disabled;
+        mouse-cursor: root.disabled ? MouseCursor.default : MouseCursor.text;
+        clicked => {
+            ti.focus();
+        }
+    }
+
+    ti := TextInput {
+        x: TelaTheme.spacing-3;
+        y: TelaTheme.spacing-3;
+        width: parent.width - self.x * 2;
+        height: parent.height - self.y * 2;
+        wrap: word-wrap;
+        color: root.disabled ? TelaTheme.text-color-disabled : TelaTheme.text-color-primary;
+        font-size: TelaTheme.font-size-m;
+        font-family: TelaTheme.font-family;
+        selection-background-color: TelaTheme.brand-color-light;
+        selection-foreground-color: TelaTheme.text-color-primary;
+        enabled: !root.disabled && !root.read-only;
+
+        edited => {
+            root.changed(self.text);
+        }
+    }
+
+    placeholder := Text {
+        x: TelaTheme.spacing-3;
+        y: TelaTheme.spacing-3;
+        width: parent.width - self.x * 2;
+        text: (root.text == "" && ti.preedit-text == "") ? root.placeholder-text : "";
+        wrap: word-wrap;
+        font-size: TelaTheme.font-size-m;
+        font-family: TelaTheme.font-family;
+        color: TelaTheme.text-color-placeholder;
+    }
+
+    accessible-role: AccessibleRole.text-input;
+    accessible-label: placeholder-text;
+}

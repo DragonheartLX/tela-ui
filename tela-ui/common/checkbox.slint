@@ -1,0 +1,102 @@
+// Tela UI — CheckBox
+//
+// Checkbox with label, indeterminate state and disabled state.
+
+import { TelaTheme } from "../theme.slint";
+import { Icon } from "../base/icon/icon.slint";
+import { TIconSet } from "../base/icon/data.slint";
+
+export component CheckBox inherits Rectangle {
+    in property <string> text;
+    in-out property <bool> checked;
+    in property <bool> indeterminate;
+    in property <bool> disabled;
+
+    callback changed(bool);
+
+    private property <bool> on: checked || indeterminate;
+
+    // Rest state; overridden by the `states` below.
+    private property <brush> box-bg: TelaTheme.bg-color-specialcomponent;
+    private property <brush> box-border: TelaTheme.component-border;
+
+    height: TelaTheme.height-m;
+    width: content.preferred-width;
+    animate box-bg { duration: TelaTheme.duration-fast; }
+    animate box-border { duration: TelaTheme.duration-fast; }
+
+    // Later states win over earlier ones.
+    states [
+        hovered when touch.has-hover && !root.disabled: {
+            box-border: TelaTheme.brand-color;
+        }
+        on when root.on && !root.disabled: {
+            box-bg: TelaTheme.brand-color;
+            box-border: TelaTheme.brand-color;
+        }
+        disabled when root.disabled: {
+            box-bg: root.on ? TelaTheme.brand-color-disabled : TelaTheme.bg-color-component-disabled;
+            box-border: TelaTheme.border-level-1-color;
+        }
+    ]
+
+    touch := TouchArea {
+        enabled: !root.disabled;
+        mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;
+        clicked => {
+            root.checked = !root.checked;
+            root.changed(root.checked);
+        }
+    }
+
+    content := HorizontalLayout {
+        x: 0;
+        y: 0;
+        width: self.preferred-width;
+        height: parent.height;
+        spacing: TelaTheme.spacing-2;
+
+        Rectangle {
+            width: 16px;
+            height: 16px;
+            y: (parent.height - self.height) / 2;
+            background: root.box-bg;
+            border-width: 1px;
+            border-color: root.box-border;
+            border-radius: TelaTheme.radius-default;
+
+            if root.indeterminate: Icon {
+                x: 2px;
+                y: 2px;
+                icon: TIconSet.Minus;
+                size: 12px;
+                icon-color: TelaTheme.text-color-anti;
+                stroke-width: 2.4;
+            }
+
+            if root.checked && !root.indeterminate: Icon {
+                x: 2px;
+                y: 2px;
+                icon: TIconSet.Check;
+                size: 12px;
+                icon-color: TelaTheme.text-color-anti;
+                stroke-width: 2.4;
+            }
+        }
+
+        if root.text != "": Text {
+            text: root.text;
+            font-size: TelaTheme.font-size-m;
+            color: root.disabled ? TelaTheme.text-color-disabled : TelaTheme.text-color-primary;
+            vertical-alignment: center;
+        }
+    }
+
+    accessible-role: AccessibleRole.checkbox;
+    accessible-label: text;
+    accessible-checked: checked;
+    accessible-action-default => {
+        root.checked = !root.checked;
+        root.changed(root.checked);
+    }
+}

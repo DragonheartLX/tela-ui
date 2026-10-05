@@ -1,0 +1,135 @@
+// Tela UI — Button
+//
+// TDesign button: theme × variant × size, optional icon, loading and
+// disabled states, square (icon button) / round shapes, block width.
+//
+//   theme   : 0 default, 1 primary, 2 success, 3 warning, 4 danger
+//   variant : 0 base (solid), 1 outline, 2 text
+//   size    : 0 small, 1 medium, 2 large
+//   shape   : 0 rectangle, 1 square (icon button), 2 round
+
+import { TelaTheme } from "../theme.slint";
+import { Icon } from "icon/icon.slint";
+import { LoadingSpinner } from "loading.slint";
+import { TIconData } from "icon/data.slint";
+
+export component Button inherits Rectangle {
+    in property <int> theme: 0;
+    in property <int> variant: 0;
+    in property <int> size: 1;
+    in property <int> shape: 0;
+    in property <bool> block: false;
+    in property <string> text;
+    in property <TIconData> icon;
+    in property <bool> loading;
+    in property <bool> disabled;
+
+    callback clicked();
+
+    private property <length> h:
+        size == 0 ? TelaTheme.height-s : size == 2 ? TelaTheme.height-l : TelaTheme.height-m;
+    private property <length> fs:
+        size == 0 ? TelaTheme.font-size-s : size == 2 ? TelaTheme.font-size-l : TelaTheme.font-size-m;
+    private property <length> pad-lr:
+        size == 0 ? TelaTheme.padding-lr-s : size == 2 ? TelaTheme.padding-lr-l : TelaTheme.padding-lr-m;
+
+    // Rest state; overridden by the `states` below.
+    private property <brush> bg:
+        variant == 0 ? (theme == 0 ? TelaTheme.bg-color-component : TelaTheme.theme-color(theme))
+        : transparent;
+    private property <brush> content-color:
+        variant == 0 ? (theme == 0 ? TelaTheme.text-color-primary : TelaTheme.text-color-anti)
+        : theme == 0 ? TelaTheme.text-color-primary
+        : TelaTheme.theme-color(theme);
+    private property <brush> border-brush:
+        variant == 1 ? (theme == 0 ? TelaTheme.component-border : TelaTheme.theme-color(theme))
+        : transparent;
+
+    background: bg;
+    border-width: variant == 1 ? 1px : 0;
+    border-color: border-brush;
+    border-radius: shape == 2 ? TelaTheme.radius-round : TelaTheme.radius-default;
+    height: h;
+    width: shape == 1 ? h : max(h, content.preferred-width + pad-lr * 2);
+    // Block buttons absorb the extra space of the surrounding layout.
+    horizontal-stretch: block ? 1 : 0;
+    animate bg { duration: TelaTheme.duration-fast; }
+    animate content-color { duration: TelaTheme.duration-fast; }
+    animate border-brush { duration: TelaTheme.duration-fast; }
+
+    // Later states win over earlier ones.
+    states [
+        hovered when touch.has-hover: {
+            bg: variant == 0 ? (theme == 0 ? TelaTheme.bg-color-component-hover : TelaTheme.theme-color-hover(theme))
+                : variant == 1 ? (theme == 0 ? transparent : TelaTheme.theme-color-light-hover(theme))
+                : (theme == 0 ? TelaTheme.bg-color-component : TelaTheme.theme-color-light-hover(theme));
+            content-color: variant == 0 ? (theme == 0 ? TelaTheme.text-color-primary : TelaTheme.text-color-anti)
+                : theme == 0 ? TelaTheme.brand-color
+                : TelaTheme.theme-color-hover(theme);
+            border-brush: variant == 1 ? (theme == 0 ? TelaTheme.brand-color : TelaTheme.theme-color-hover(theme))
+                : transparent;
+        }
+
+        pressed when touch.pressed: {
+            bg: variant == 0 ? (theme == 0 ? TelaTheme.bg-color-component-active : TelaTheme.theme-color-active(theme))
+                : variant == 1 ? transparent
+                : (theme == 0 ? TelaTheme.bg-color-component : TelaTheme.theme-color-light(theme));
+            content-color: variant == 0 ? (theme == 0 ? TelaTheme.text-color-primary : TelaTheme.text-color-anti)
+                : theme == 0 ? TelaTheme.brand-color-active
+                : TelaTheme.theme-color-active(theme);
+            border-brush: variant == 1 ? (theme == 0 ? TelaTheme.brand-color-active : TelaTheme.theme-color-active(theme))
+                : transparent;
+        }
+
+        disabled when root.disabled: {
+            bg: variant == 0 ? (theme == 0 ? TelaTheme.bg-color-component-disabled : TelaTheme.theme-color-disabled(theme))
+                : transparent;
+            content-color: variant == 0 && theme > 0 ? TelaTheme.text-color-anti
+                : theme > 0 ? TelaTheme.theme-color-disabled(theme)
+                : TelaTheme.text-color-disabled;
+            border-brush: variant == 1 ? (theme == 0 ? TelaTheme.border-level-2-color : TelaTheme.theme-color-disabled(theme))
+                : transparent;
+        }
+    ]
+
+    touch := TouchArea {
+        enabled: !root.disabled && !root.loading;
+        mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;
+        clicked => {
+            root.clicked();
+        }
+    }
+
+    content := HorizontalLayout {
+        x: (parent.width - self.width) / 2;
+        y: (parent.height - self.height) / 2;
+        width: self.preferred-width;
+        height: self.preferred-height;
+        spacing: TelaTheme.spacing-2;
+
+        if root.loading: LoadingSpinner {
+            y: (parent.height - self.height) / 2;
+            size: root.fs + 2px;
+            spinner-color: root.content-color;
+        }
+
+        if !root.loading && root.icon.paths.length > 0: Icon {
+            y: (parent.height - self.height) / 2;
+            icon: root.icon;
+            size: root.fs + 2px;
+            icon-color: root.content-color;
+        }
+
+        if root.text != "": Text {
+            text: root.text;
+            font-size: root.fs;
+            font-weight: TelaTheme.font-weight-regular;
+            color: root.content-color;
+            vertical-alignment: center;
+        }
+    }
+
+    accessible-role: AccessibleRole.button;
+    accessible-label: text;
+    accessible-action-default => { root.clicked(); }
+}

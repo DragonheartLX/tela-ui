@@ -1,0 +1,109 @@
+// Tela UI — Radio & RadioGroup
+//
+// RadioGroup lays out a set of options and owns the selected `value`.
+// Standalone Radio buttons can be composed the same way via `checked`.
+
+import { TelaTheme } from "../theme.slint";
+
+export struct RadioItem {
+    text: string,
+    value: string,
+}
+
+export component Radio inherits Rectangle {
+    in property <string> text;
+    in property <bool> selected;
+    in property <bool> disabled;
+
+    callback clicked();
+
+    // Rest state; overridden by the `states` below.
+    private property <brush> ring: TelaTheme.component-border;
+    private property <brush> dot: TelaTheme.brand-color;
+
+    height: TelaTheme.height-m;
+    width: content.preferred-width;
+    animate ring { duration: TelaTheme.duration-fast; }
+    animate dot { duration: TelaTheme.duration-fast; }
+
+    // Later states win over earlier ones.
+    states [
+        hovered when touch.has-hover: {
+            ring: TelaTheme.brand-color;
+        }
+        selected when root.selected: {
+            ring: TelaTheme.brand-color;
+        }
+        disabled when root.disabled: {
+            ring: TelaTheme.border-level-1-color;
+            dot: TelaTheme.brand-color-disabled;
+        }
+    ]
+
+    touch := TouchArea {
+        enabled: !root.disabled;
+        mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;
+        clicked => {
+            root.clicked();
+        }
+    }
+
+    content := HorizontalLayout {
+        x: 0;
+        y: 0;
+        width: self.preferred-width;
+        height: parent.height;
+        spacing: TelaTheme.spacing-2;
+
+        Rectangle {
+            width: 16px;
+            height: 16px;
+            y: (parent.height - self.height) / 2;
+            border-width: 1px;
+            border-color: root.ring;
+            border-radius: self.width / 2;
+            background: TelaTheme.bg-color-specialcomponent;
+
+            if root.selected: Rectangle {
+                width: 6px;
+                height: 6px;
+                x: (parent.width - self.width) / 2;
+                y: (parent.height - self.height) / 2;
+                border-radius: self.width / 2;
+                background: root.dot;
+            }
+        }
+
+        if root.text != "": Text {
+            text: root.text;
+            font-size: TelaTheme.font-size-m;
+            color: root.disabled ? TelaTheme.text-color-disabled : TelaTheme.text-color-primary;
+            vertical-alignment: center;
+        }
+    }
+
+    accessible-role: AccessibleRole.radio-button;
+    accessible-label: text;
+    accessible-checked: selected;
+    accessible-action-default => { root.clicked(); }
+}
+
+export component RadioGroup inherits HorizontalLayout {
+    in property <[RadioItem]> items;
+    in-out property <string> value;
+    in property <bool> disabled;
+
+    callback changed(string);
+
+    spacing: TelaTheme.margin-l;
+
+    for it[i] in items: Radio {
+        text: it.text;
+        selected: it.value == root.value;
+        disabled: root.disabled;
+        clicked => {
+            root.value = it.value;
+            root.changed(it.value);
+        }
+    }
+}

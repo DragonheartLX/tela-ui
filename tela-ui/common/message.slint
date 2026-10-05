@@ -1,0 +1,130 @@
+// Tela UI — Message
+//
+// Global toast. Any code (Slint or Rust) can call:
+//   TelaMessage.info("Saved");     TelaMessage.success("..."),
+//   TelaMessage.warning("..."),    TelaMessage.error("...")
+// then place ONE `MessageOverlay` near the top of the window; it renders
+// the current message and auto-hides after 3 seconds. Set
+// `TelaMessage.placement` to move it to any window corner (default:
+// centered at the top).
+
+import { TelaTheme } from "../theme.slint";
+import { Icon } from "../base/icon/icon.slint";
+import { TIconSet } from "../base/icon/data.slint";
+
+// Where the overlay pins the message pill.
+export enum MessagePlacement {
+    top-left,
+    top-center,
+    top-right,
+    bottom-left,
+    bottom-center,
+    bottom-right,
+}
+
+export global TelaMessage {
+    in-out property <string> text;
+    // 0 info, 1 success, 2 warning, 3 error
+    in-out property <int> theme: 0;
+    in-out property <bool> visible: false;
+    // Defaults to centered at the top of the window.
+    in-out property <MessagePlacement> placement: MessagePlacement.top-center;
+
+    public function show(t: string, th: int) {
+        text = t;
+        theme = th;
+        visible = true;
+    }
+
+    public function info(t: string) {
+        root.show(t, 0);
+    }
+
+    public function success(t: string) {
+        root.show(t, 1);
+    }
+
+    public function warning(t: string) {
+        root.show(t, 2);
+    }
+
+    public function error(t: string) {
+        root.show(t, 3);
+    }
+}
+
+export component MessageOverlay inherits Rectangle {
+    // A thin strip anchoring the pill to a window edge; position follows
+    // TelaMessage.placement.
+    height: 0px;
+    clip: false;
+
+    private property <bool> to-left:
+        TelaMessage.placement == MessagePlacement.top-left
+        || TelaMessage.placement == MessagePlacement.bottom-left;
+    private property <bool> to-right:
+        TelaMessage.placement == MessagePlacement.top-right
+        || TelaMessage.placement == MessagePlacement.bottom-right;
+    private property <bool> to-bottom:
+        TelaMessage.placement == MessagePlacement.bottom-left
+        || TelaMessage.placement == MessagePlacement.bottom-center
+        || TelaMessage.placement == MessagePlacement.bottom-right;
+
+    timer := Timer {
+        interval: 3s;
+        running: TelaMessage.visible;
+        triggered => {
+            TelaMessage.visible = false;
+        }
+    }
+
+    pill := Rectangle {
+        x: root.to-left ? 24px
+            : root.to-right ? parent.width - self.width - 24px
+            : (parent.width - self.width) / 2;
+        y: root.to-bottom
+            ? parent.height - self.height - (TelaMessage.visible ? 24px : 12px)
+            : (TelaMessage.visible ? 24px : 12px);
+        width: row.preferred-width + TelaTheme.padding-lr-m * 2;
+        height: TelaTheme.height-m + 8px;
+        border-radius: TelaTheme.radius-medium;
+        background: TelaTheme.bg-color-container;
+        border-width: 1px;
+        border-color: TelaTheme.component-stroke;
+        drop-shadow-blur: TelaTheme.shadow-2-blur;
+        drop-shadow-offset-y: TelaTheme.shadow-2-offset-y;
+        drop-shadow-color: TelaTheme.shadow-2-color;
+        opacity: TelaMessage.visible ? 1 : 0;
+        animate opacity { duration: TelaTheme.duration-base; }
+        animate y { duration: TelaTheme.duration-base; }
+        animate x { duration: TelaTheme.duration-base; }
+
+        row := HorizontalLayout {
+            x: TelaTheme.padding-lr-m;
+            y: (parent.height - self.height) / 2;
+            width: self.preferred-width;
+            height: self.preferred-height;
+            spacing: TelaTheme.spacing-2;
+
+            Icon {
+                y: (parent.height - self.height) / 2;
+                icon: TelaMessage.theme == 1 ? TIconSet.CircleCheck
+                    : TelaMessage.theme == 2 ? TIconSet.CircleAlert
+                    : TelaMessage.theme == 3 ? TIconSet.CircleX
+                    : TIconSet.Info;
+                size: 16px;
+                icon-color: TelaMessage.theme == 1 ? TelaTheme.success-color
+                    : TelaMessage.theme == 2 ? TelaTheme.warning-color
+                    : TelaMessage.theme == 3 ? TelaTheme.error-color
+                    : TelaTheme.brand-color;
+            }
+
+            Text {
+                text: TelaMessage.text;
+                font-size: TelaTheme.font-size-m;
+                color: TelaTheme.text-color-primary;
+                vertical-alignment: center;
+            }
+        }
+    }
+}

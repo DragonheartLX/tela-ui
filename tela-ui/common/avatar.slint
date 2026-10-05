@@ -1,0 +1,53 @@
+// Tela UI — Avatar
+//
+// User/project avatar: image or text, circle or rounded square.
+// size: 0 small (32), 1 medium (40), 2 large (48), 3 extra large (64).
+
+import { TelaTheme } from "../theme.slint";
+import { Icon } from "../base/icon/icon.slint";
+import { TIconSet } from "../base/icon/data.slint";
+
+export component Avatar inherits Rectangle {
+    in property <int> size: 1;
+    in property <string> text;
+    in property <image> source;
+    // 0 circle, 1 square (rounded)
+    in property <int> shape: 0;
+    in property <int> theme: 1;
+
+    private property <length> d: size == 0 ? 32px : size == 2 ? 48px : size == 3 ? 64px : 40px;
+
+    width: d;
+    height: d;
+    border-radius: shape == 0 ? self.width / 2 : TelaTheme.radius-medium;
+    background: TelaTheme.theme-color-light(theme);
+    clip: true;
+
+    if source.width > 0: Image {
+        x: 0;
+        y: 0;
+        width: parent.width;
+        height: parent.height;
+        source: root.source;
+        image-fit: ImageFit.cover;
+    }
+
+    if source.width == 0 && text != "": Text {
+        width: parent.width;
+        height: parent.height;
+        text: root.text;
+        font-size: parent.width / 2.8;
+        font-weight: TelaTheme.font-weight-semibold;
+        color: TelaTheme.theme-color(theme);
+        horizontal-alignment: center;
+        vertical-alignment: center;
+    }
+
+    if source.width == 0 && text == "": Icon {
+        x: (parent.width - self.width) / 2;
+        y: (parent.height - self.height) / 2;
+        icon: TIconSet.User;
+        size: parent.width / 2;
+        icon-color: TelaTheme.theme-color(theme);
+    }
+}

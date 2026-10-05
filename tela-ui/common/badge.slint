@@ -1,0 +1,60 @@
+// Tela UI — Badge
+//
+// Notification marker overlaid on the wrapped content (default children):
+// a red dot or a count pill (capped at `max-count`, hidden at 0).
+
+import { TelaTheme } from "../theme.slint";
+
+export component Badge inherits Rectangle {
+    in property <int> count: 0;
+    in property <bool> dot: false;
+    in property <int> max-count: 99;
+    in property <color> badge-color: TelaTheme.error-color;
+    // Show the pill even when count == 0.
+    in property <bool> show-zero: false;
+
+    private property <bool> show-badge: dot || show-zero || count > 0;
+    private property <string> label: count > max-count ? "\{max-count}+" : "\{count}";
+
+    width: inner.preferred-width;
+    height: inner.preferred-height;
+
+    inner := HorizontalLayout {
+        x: 0;
+        y: 0;
+        width: parent.width;
+        height: parent.height;
+
+        @children
+    }
+
+    if show-badge && dot: Rectangle {
+        x: parent.width - self.width / 2 - 2px;
+        y: -self.height / 2 + 2px;
+        width: 8px;
+        height: 8px;
+        border-radius: self.width / 2;
+        background: root.badge-color;
+        border-width: 1px;
+        border-color: TelaTheme.bg-color-container;
+    }
+
+    if show-badge && !dot: Rectangle {
+        x: parent.width - self.width / 2;
+        y: -self.height / 2 + 2px;
+        width: max(16px, label-text.preferred-width + 8px);
+        height: 16px;
+        border-radius: self.height / 2;
+        background: root.badge-color;
+        border-width: 1px;
+        border-color: TelaTheme.bg-color-container;
+
+        label-text := Text {
+            x: (parent.width - self.width) / 2;
+            y: (parent.height - self.height) / 2;
+            text: root.label;
+            font-size: TelaTheme.font-size-s;
+            color: TelaTheme.text-color-anti;
+        }
+    }
+}

@@ -1,0 +1,24 @@
+// Demo-only helper: dark code panel shown under each live example so the
+// effect and its usage stay side by side.
+
+import { TelaTheme } from "@tela-ui/theme.slint";
+
+export component CodeBlock inherits Rectangle {
+    in property <string> code;
+
+    background: #1e1e2e;
+    border-radius: TelaTheme.radius-medium;
+    clip: true;
+    height: code-text.preferred-height + TelaTheme.spacing-4 * 2;
+
+    code-text := Text {
+        x: TelaTheme.spacing-4;
+        y: TelaTheme.spacing-4;
+        width: parent.width - self.x * 2;
+        text: root.code;
+        font-family: "Consolas";
+        font-size: TelaTheme.font-size-s;
+        color: #c3cee3;
+        wrap: no-wrap;
+    }
+}

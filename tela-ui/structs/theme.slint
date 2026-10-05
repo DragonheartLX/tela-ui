@@ -1,0 +1,161 @@
+// Tela UI — theme structs
+//
+// `TPrimaryColor`  : one color family (10-step ramp + semantic shortcuts).
+// `TAppThemeConfig`: the full set of design tokens for one mode (light/dark).
+// Users customize the theme by assigning a whole new config (or individual
+// fields) to `TelaTheme.light` / `TelaTheme.dark` / `TelaTheme.theme`.
+
+// A TDesign color family: the 10-step ramp (1 lightest .. 10 darkest) plus
+// the semantic shortcuts TDesign derives from it.
+export struct TPrimaryColor {
+    color-1: color,
+    color-2: color,
+    color-3: color,
+    color-4: color,
+    color-5: color,
+    color-6: color,
+    color-7: color,
+    color-8: color,
+    color-9: color,
+    color-10: color,
+
+    color: color,          // main actionable color
+    hover: color,          // hover state
+    focus: color,          // focus state (light shade)
+    active: color,         // pressed state
+    disabled: color,       // disabled state
+    light: color,          // light tint used for selected / soft backgrounds
+    light-hover: color,    // light tint, hovered
+}
+
+// The complete token set for one theme mode.
+export struct TAppThemeConfig {
+    // Animation
+    animation-duration: duration,
+    duration-fast: duration,
+    duration-slow: duration,
+
+    // Primary colors (brand + functional)
+    primary: TPrimaryColor,
+    success: TPrimaryColor,
+    warning: TPrimaryColor,
+    error: TPrimaryColor,
+
+    // Background colors
+    bg-page: color,
+    bg-container: color,
+    bg-container-hover: color,
+    bg-container-active: color,
+    bg-secondarycontainer: color,
+    bg-secondarycontainer-hover: color,
+    bg-secondarycontainer-active: color,
+    bg-component: color,
+    bg-component-hover: color,
+    bg-component-active: color,
+    bg-secondarycomponent: color,
+    bg-secondarycomponent-hover: color,
+    bg-secondarycomponent-active: color,
+    bg-component-disabled: color,
+    bg-specialcomponent: color,   // white in light, transparent in dark
+
+    // Text colors
+    text-primary: color,
+    text-secondary: color,
+    text-placeholder: color,
+    text-disabled: color,
+    text-anti: color,
+    text-brand: color,
+    text-link: color,
+    text-watermark: color,
+
+    // Borders / strokes
+    border-level-1: color,
+    border-level-2: color,
+
+    // Mask (dialog backdrop etc.)
+    mask-active: color,
+    mask-disabled: color,
+
+    // Shadows (TDesign shadow-1/2/3, approximated as single drop shadows)
+    shadow-1-color: color,
+    shadow-1-blur: length,
+    shadow-1-offset-y: length,
+    shadow-2-color: color,
+    shadow-2-blur: length,
+    shadow-2-offset-y: length,
+    shadow-3-color: color,
+    shadow-3-blur: length,
+    shadow-3-offset-y: length,
+
+    // Radius
+    radius-small: length,
+    radius-default: length,
+    radius-medium: length,
+    radius-large: length,
+    radius-extra-large: length,
+    radius-round: length,
+
+    // Spacing system (TDesign size-1 .. size-16)
+    spacing-1: length,
+    spacing-2: length,
+    spacing-3: length,
+    spacing-4: length,
+    spacing-5: length,
+    spacing-6: length,
+    spacing-7: length,
+    spacing-8: length,
+    spacing-9: length,
+    spacing-10: length,
+    spacing-11: length,
+    spacing-12: length,
+    spacing-13: length,
+    spacing-14: length,
+    spacing-15: length,
+    spacing-16: length,
+
+    // Component horizontal padding
+    padding-lr-xs: length,
+    padding-lr-s: length,
+    padding-lr-m: length,
+    padding-lr-l: length,
+    padding-lr-xl: length,
+
+    // Component vertical margins
+    margin-xs: length,
+    margin-s: length,
+    margin-m: length,
+    margin-l: length,
+    margin-xl: length,
+    margin-xxl: length,
+
+    // Control heights (small 24 / medium 32 / large 40)
+    height-s: length,
+    height-m: length,
+    height-l: length,
+
+    // Typography
+    font-family: string,
+    font-family-medium: string,
+    font-weight-regular: int,
+    font-weight-medium: int,
+    font-weight-semibold: int,
+    font-size-s: length,
+    font-size-m: length,
+    font-size-l: length,
+    font-size-title-s: length,
+    font-size-title-m: length,
+    font-size-title-l: length,
+    font-size-title-xl: length,
+    font-size-headline-s: length,
+    font-size-headline-m: length,
+    font-size-headline-l: length,
+    font-size-display-m: length,
+    font-size-display-l: length,
+    line-height-s: length,
+    line-height-m: length,
+    line-height-l: length,
+    line-height-title: length,
+    line-height-headline-s: length,
+    line-height-headline-m: length,
+    line-height-headline-l: length,
+}

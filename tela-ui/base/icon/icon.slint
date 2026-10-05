@@ -1,0 +1,42 @@
+// Tela UI — Icon
+//
+// Shared renderer for the icon data in "data.slint" (lucide-slint style):
+// pass an entry from TIconSet — or your own TIconData — no string lookup.
+//
+// Usage:
+//   import { Icon, TIconSet } from "@tela-ui/base.slint";
+//   Icon { icon: TIconSet.ChevronDown; size: 16px; }
+
+import { TelaTheme } from "../../theme.slint";
+import { TIconData, TIconPath, TIconSet } from "data.slint";
+
+export component Icon inherits Rectangle {
+    // Icon geometry: an entry from TIconSet or custom TIconData.
+    in property <TIconData> icon;
+    in property <brush> icon-color: TelaTheme.text-color-primary;
+    // TDesign base icon size is 16px.
+    in-out property <length> size: 16px;
+    // Stroke width in 24-grid units, scaled to `size` unless absolute.
+    in-out property <float> stroke-width: 2.0;
+    in property <bool> absolute-stroke-width: false;
+
+    out property <length> computed-stroke-width:
+        absolute-stroke-width ? stroke-width * 1px : size / 24 * stroke-width;
+
+    private property <[TIconPath]> paths: icon.paths;
+
+    width: size;
+    height: size;
+    clip: false;
+
+    for p in paths: Path {
+        viewbox-width: 24;
+        viewbox-height: 24;
+        commands: p.command;
+        stroke: root.icon-color;
+        fill: p.has_fill ? root.icon-color : transparent;
+        stroke-width: root.computed-stroke-width;
+        stroke-line-cap: round;
+        stroke-line-join: round;
+    }
+}

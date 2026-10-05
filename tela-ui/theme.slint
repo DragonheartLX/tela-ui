@@ -1,0 +1,499 @@
+// Tela UI — theme global
+//
+// All design tokens follow the TDesign specification (https://tdesign.tencent.com).
+//
+// Customization:
+//   * Swap the whole active config:      TelaTheme.theme = { ... };
+//   * Override one mode preset:          TelaTheme.dark = { ... };
+//   * Patch a single token of a preset:  TelaTheme.dark.bg-page = #101010;
+//   * From Rust:                         TelaTheme::get(ui).set_preference(TelaThemePreference::Dark);
+//
+// When `preference` is `system` the theme follows the OS color scheme and
+// updates live.
+
+import { Palette } from "std-widgets.slint";
+import { TPrimaryColor, TAppThemeConfig } from "structs/theme.slint";
+import { TLightColors, TDarkColors } from "colors.slint";
+
+export enum TelaThemePreference {
+    system,
+    light,
+    dark,
+}
+
+export global TelaTheme {
+    // User intent; defaults to following the OS color scheme.
+    in-out property <TelaThemePreference> preference: TelaThemePreference.system;
+
+    // The mode actually in effect: `system` resolved against the OS scheme.
+    // Bind toggles to this, not to `preference`, so they reflect the real mode.
+    out property <bool> is-dark:
+        preference == TelaThemePreference.dark
+        || (preference == TelaThemePreference.system && Palette.color-scheme == ColorScheme.dark);
+
+    // The active configuration. Assign to it directly to take full control.
+    in-out property <TAppThemeConfig> theme:
+        preference == TelaThemePreference.dark ? root.dark
+        : preference == TelaThemePreference.light ? root.light
+        : Palette.color-scheme == ColorScheme.dark ? root.dark : root.light;
+
+    // Mode presets. They are `in-out` so applications can override any token.
+    in-out property <TAppThemeConfig> light: {
+        animation-duration: 200ms,
+        duration-fast: 150ms,
+        duration-slow: 300ms,
+
+        primary: TLightColors.brand,
+        success: TLightColors.success,
+        warning: TLightColors.warning,
+        error: TLightColors.error,
+
+        bg-page: #eeeeee,
+        bg-container: #ffffff,
+        bg-container-hover: #f3f3f3,
+        bg-container-active: #e8e8e8,
+        bg-secondarycontainer: #f3f3f3,
+        bg-secondarycontainer-hover: #eeeeee,
+        bg-secondarycontainer-active: #dddddd,
+        bg-component: #e8e8e8,
+        bg-component-hover: #dddddd,
+        bg-component-active: #a6a6a6,
+        bg-secondarycomponent: #dddddd,
+        bg-secondarycomponent-hover: #c6c6c6,
+        bg-secondarycomponent-active: #a6a6a6,
+        bg-component-disabled: #eeeeee,
+        bg-specialcomponent: #ffffff,
+
+        text-primary: rgba(0, 0, 0, 0.9),
+        text-secondary: rgba(0, 0, 0, 0.6),
+        text-placeholder: rgba(0, 0, 0, 0.4),
+        text-disabled: rgba(0, 0, 0, 0.26),
+        text-anti: #ffffff,
+        text-brand: #0052d9,
+        text-link: #003cab,
+        text-watermark: rgba(0, 0, 0, 0.1),
+
+        border-level-1: #e8e8e8,
+        border-level-2: #dddddd,
+
+        mask-active: rgba(0, 0, 0, 0.6),
+        mask-disabled: rgba(255, 255, 255, 0.6),
+
+        shadow-1-color: rgba(0, 0, 0, 0.08),
+        shadow-1-blur: 10px,
+        shadow-1-offset-y: 2px,
+        shadow-2-color: rgba(0, 0, 0, 0.1),
+        shadow-2-blur: 14px,
+        shadow-2-offset-y: 3px,
+        shadow-3-color: rgba(0, 0, 0, 0.12),
+        shadow-3-blur: 24px,
+        shadow-3-offset-y: 8px,
+
+        radius-small: 2px,
+        radius-default: 3px,
+        radius-medium: 6px,
+        radius-large: 9px,
+        radius-extra-large: 12px,
+        radius-round: 999px,
+
+        spacing-1: 2px,
+        spacing-2: 4px,
+        spacing-3: 6px,
+        spacing-4: 8px,
+        spacing-5: 12px,
+        spacing-6: 16px,
+        spacing-7: 20px,
+        spacing-8: 24px,
+        spacing-9: 28px,
+        spacing-10: 32px,
+        spacing-11: 36px,
+        spacing-12: 40px,
+        spacing-13: 48px,
+        spacing-14: 56px,
+        spacing-15: 64px,
+        spacing-16: 72px,
+
+        padding-lr-xs: 4px,
+        padding-lr-s: 8px,
+        padding-lr-m: 12px,
+        padding-lr-l: 16px,
+        padding-lr-xl: 24px,
+
+        margin-xs: 4px,
+        margin-s: 8px,
+        margin-m: 12px,
+        margin-l: 16px,
+        margin-xl: 20px,
+        margin-xxl: 24px,
+
+        height-s: 24px,
+        height-m: 32px,
+        height-l: 40px,
+
+        font-family: "PingFang SC, Microsoft YaHei, Arial",
+        font-family-medium: "PingFang SC, Microsoft YaHei, Arial Medium",
+        font-weight-regular: 400,
+        font-weight-medium: 500,
+        font-weight-semibold: 600,
+        font-size-s: 12px,
+        font-size-m: 14px,
+        font-size-l: 16px,
+        font-size-title-s: 14px,
+        font-size-title-m: 16px,
+        font-size-title-l: 18px,
+        font-size-title-xl: 20px,
+        font-size-headline-s: 24px,
+        font-size-headline-m: 28px,
+        font-size-headline-l: 36px,
+        font-size-display-m: 48px,
+        font-size-display-l: 64px,
+        line-height-s: 20px,
+        line-height-m: 22px,
+        line-height-l: 24px,
+        line-height-title: 24px,
+        line-height-headline-s: 32px,
+        line-height-headline-m: 36px,
+        line-height-headline-l: 44px,
+    };
+
+    in-out property <TAppThemeConfig> dark: {
+        animation-duration: 200ms,
+        duration-fast: 150ms,
+        duration-slow: 300ms,
+
+        primary: TDarkColors.brand,
+        success: TDarkColors.success,
+        warning: TDarkColors.warning,
+        error: TDarkColors.error,
+
+        bg-page: #181818,
+        bg-container: #242424,
+        bg-container-hover: #2c2c2c,
+        bg-container-active: #4b4b4b,
+        bg-secondarycontainer: #2c2c2c,
+        bg-secondarycontainer-hover: #393939,
+        bg-secondarycontainer-active: #5e5e5e,
+        bg-component: #393939,
+        bg-component-hover: #4b4b4b,
+        bg-component-active: #5e5e5e,
+        bg-secondarycomponent: #4b4b4b,
+        bg-secondarycomponent-hover: #5e5e5e,
+        bg-secondarycomponent-active: #777777,
+        bg-component-disabled: #2c2c2c,
+        bg-specialcomponent: transparent,
+
+        text-primary: rgba(255, 255, 255, 0.9),
+        text-secondary: rgba(255, 255, 255, 0.55),
+        text-placeholder: rgba(255, 255, 255, 0.35),
+        text-disabled: rgba(255, 255, 255, 0.22),
+        text-anti: #ffffff,
+        text-brand: #4582e6,
+        text-link: #4582e6,
+        text-watermark: rgba(255, 255, 255, 0.1),
+
+        border-level-1: #393939,
+        border-level-2: #5e5e5e,
+
+        mask-active: rgba(0, 0, 0, 0.4),
+        mask-disabled: rgba(0, 0, 0, 0.6),
+
+        shadow-1-color: rgba(0, 0, 0, 0.3),
+        shadow-1-blur: 10px,
+        shadow-1-offset-y: 2px,
+        shadow-2-color: rgba(0, 0, 0, 0.4),
+        shadow-2-blur: 14px,
+        shadow-2-offset-y: 3px,
+        shadow-3-color: rgba(0, 0, 0, 0.5),
+        shadow-3-blur: 24px,
+        shadow-3-offset-y: 8px,
+
+        radius-small: 2px,
+        radius-default: 3px,
+        radius-medium: 6px,
+        radius-large: 9px,
+        radius-extra-large: 12px,
+        radius-round: 999px,
+
+        spacing-1: 2px,
+        spacing-2: 4px,
+        spacing-3: 6px,
+        spacing-4: 8px,
+        spacing-5: 12px,
+        spacing-6: 16px,
+        spacing-7: 20px,
+        spacing-8: 24px,
+        spacing-9: 28px,
+        spacing-10: 32px,
+        spacing-11: 36px,
+        spacing-12: 40px,
+        spacing-13: 48px,
+        spacing-14: 56px,
+        spacing-15: 64px,
+        spacing-16: 72px,
+
+        padding-lr-xs: 4px,
+        padding-lr-s: 8px,
+        padding-lr-m: 12px,
+        padding-lr-l: 16px,
+        padding-lr-xl: 24px,
+
+        margin-xs: 4px,
+        margin-s: 8px,
+        margin-m: 12px,
+        margin-l: 16px,
+        margin-xl: 20px,
+        margin-xxl: 24px,
+
+        height-s: 24px,
+        height-m: 32px,
+        height-l: 40px,
+
+        font-family: "PingFang SC, Microsoft YaHei, Arial",
+        font-family-medium: "PingFang SC, Microsoft YaHei, Arial Medium",
+        font-weight-regular: 400,
+        font-weight-medium: 500,
+        font-weight-semibold: 600,
+        font-size-s: 12px,
+        font-size-m: 14px,
+        font-size-l: 16px,
+        font-size-title-s: 14px,
+        font-size-title-m: 16px,
+        font-size-title-l: 18px,
+        font-size-title-xl: 20px,
+        font-size-headline-s: 24px,
+        font-size-headline-m: 28px,
+        font-size-headline-l: 36px,
+        font-size-display-m: 48px,
+        font-size-display-l: 64px,
+        line-height-s: 20px,
+        line-height-m: 22px,
+        line-height-l: 24px,
+        line-height-title: 24px,
+        line-height-headline-s: 32px,
+        line-height-headline-m: 36px,
+        line-height-headline-l: 44px,
+    };
+
+    // ------------------------------------------------------------------
+    // Forwarded tokens (shorthand access for components & applications)
+    // ------------------------------------------------------------------
+
+    // Primary color families
+    out property <TPrimaryColor> primary: root.theme.primary;
+    out property <TPrimaryColor> success: root.theme.success;
+    out property <TPrimaryColor> warning: root.theme.warning;
+    out property <TPrimaryColor> error: root.theme.error;
+
+    // Brand / functional color shortcuts
+    out property <color> brand-color: root.theme.primary.color;
+    out property <color> brand-color-hover: root.theme.primary.hover;
+    out property <color> brand-color-focus: root.theme.primary.focus;
+    out property <color> brand-color-active: root.theme.primary.active;
+    out property <color> brand-color-disabled: root.theme.primary.disabled;
+    out property <color> brand-color-light: root.theme.primary.light;
+    out property <color> brand-color-light-hover: root.theme.primary.light-hover;
+    out property <color> success-color: root.theme.success.color;
+    out property <color> success-color-hover: root.theme.success.hover;
+    out property <color> success-color-focus: root.theme.success.focus;
+    out property <color> success-color-active: root.theme.success.active;
+    out property <color> success-color-disabled: root.theme.success.disabled;
+    out property <color> success-color-light: root.theme.success.light;
+    out property <color> success-color-light-hover: root.theme.success.light-hover;
+    out property <color> warning-color: root.theme.warning.color;
+    out property <color> warning-color-hover: root.theme.warning.hover;
+    out property <color> warning-color-focus: root.theme.warning.focus;
+    out property <color> warning-color-active: root.theme.warning.active;
+    out property <color> warning-color-disabled: root.theme.warning.disabled;
+    out property <color> warning-color-light: root.theme.warning.light;
+    out property <color> warning-color-light-hover: root.theme.warning.light-hover;
+    out property <color> error-color: root.theme.error.color;
+    out property <color> error-color-hover: root.theme.error.hover;
+    out property <color> error-color-focus: root.theme.error.focus;
+    out property <color> error-color-active: root.theme.error.active;
+    out property <color> error-color-disabled: root.theme.error.disabled;
+    out property <color> error-color-light: root.theme.error.light;
+    out property <color> error-color-light-hover: root.theme.error.light-hover;
+
+    // Gray ramp (identical in both modes, per TDesign)
+    out property <color> gray-1: #f3f3f3;
+    out property <color> gray-2: #eeeeee;
+    out property <color> gray-3: #e8e8e8;
+    out property <color> gray-4: #dddddd;
+    out property <color> gray-5: #c6c6c6;
+    out property <color> gray-6: #a6a6a6;
+    out property <color> gray-7: #8b8b8b;
+    out property <color> gray-8: #777777;
+    out property <color> gray-9: #5e5e5e;
+    out property <color> gray-10: #4b4b4b;
+    out property <color> gray-11: #393939;
+    out property <color> gray-12: #2c2c2c;
+    out property <color> gray-13: #242424;
+    out property <color> gray-14: #181818;
+
+    // Backgrounds
+    out property <color> bg-color-page: root.theme.bg-page;
+    out property <color> bg-color-container: root.theme.bg-container;
+    out property <color> bg-color-container-hover: root.theme.bg-container-hover;
+    out property <color> bg-color-container-active: root.theme.bg-container-active;
+    out property <color> bg-color-secondarycontainer: root.theme.bg-secondarycontainer;
+    out property <color> bg-color-secondarycontainer-hover: root.theme.bg-secondarycontainer-hover;
+    out property <color> bg-color-secondarycontainer-active: root.theme.bg-secondarycontainer-active;
+    out property <color> bg-color-component: root.theme.bg-component;
+    out property <color> bg-color-component-hover: root.theme.bg-component-hover;
+    out property <color> bg-color-component-active: root.theme.bg-component-active;
+    out property <color> bg-color-secondarycomponent: root.theme.bg-secondarycomponent;
+    out property <color> bg-color-secondarycomponent-hover: root.theme.bg-secondarycomponent-hover;
+    out property <color> bg-color-secondarycomponent-active: root.theme.bg-secondarycomponent-active;
+    out property <color> bg-color-component-disabled: root.theme.bg-component-disabled;
+    out property <color> bg-color-specialcomponent: root.theme.bg-specialcomponent;
+
+    // Text
+    out property <color> text-color-primary: root.theme.text-primary;
+    out property <color> text-color-secondary: root.theme.text-secondary;
+    out property <color> text-color-placeholder: root.theme.text-placeholder;
+    out property <color> text-color-disabled: root.theme.text-disabled;
+    out property <color> text-color-anti: root.theme.text-anti;
+    out property <color> text-color-brand: root.theme.text-brand;
+    out property <color> text-color-link: root.theme.text-link;
+    out property <color> text-color-watermark: root.theme.text-watermark;
+
+    // Borders & mask
+    out property <color> border-level-1-color: root.theme.border-level-1;
+    out property <color> component-stroke: root.theme.border-level-1;
+    out property <color> border-level-2-color: root.theme.border-level-2;
+    out property <color> component-border: root.theme.border-level-2;
+    out property <color> mask-active: root.theme.mask-active;
+    out property <color> mask-disabled: root.theme.mask-disabled;
+
+    // Shadows
+    out property <color> shadow-1-color: root.theme.shadow-1-color;
+    out property <length> shadow-1-blur: root.theme.shadow-1-blur;
+    out property <length> shadow-1-offset-y: root.theme.shadow-1-offset-y;
+    out property <color> shadow-2-color: root.theme.shadow-2-color;
+    out property <length> shadow-2-blur: root.theme.shadow-2-blur;
+    out property <length> shadow-2-offset-y: root.theme.shadow-2-offset-y;
+    out property <color> shadow-3-color: root.theme.shadow-3-color;
+    out property <length> shadow-3-blur: root.theme.shadow-3-blur;
+    out property <length> shadow-3-offset-y: root.theme.shadow-3-offset-y;
+
+    // Radius
+    out property <length> radius-small: root.theme.radius-small;
+    out property <length> radius-default: root.theme.radius-default;
+    out property <length> radius-medium: root.theme.radius-medium;
+    out property <length> radius-large: root.theme.radius-large;
+    out property <length> radius-extra-large: root.theme.radius-extra-large;
+    out property <length> radius-round: root.theme.radius-round;
+
+    // Spacing
+    out property <length> spacing-1: root.theme.spacing-1;
+    out property <length> spacing-2: root.theme.spacing-2;
+    out property <length> spacing-3: root.theme.spacing-3;
+    out property <length> spacing-4: root.theme.spacing-4;
+    out property <length> spacing-5: root.theme.spacing-5;
+    out property <length> spacing-6: root.theme.spacing-6;
+    out property <length> spacing-7: root.theme.spacing-7;
+    out property <length> spacing-8: root.theme.spacing-8;
+    out property <length> spacing-9: root.theme.spacing-9;
+    out property <length> spacing-10: root.theme.spacing-10;
+    out property <length> spacing-11: root.theme.spacing-11;
+    out property <length> spacing-12: root.theme.spacing-12;
+    out property <length> spacing-13: root.theme.spacing-13;
+    out property <length> spacing-14: root.theme.spacing-14;
+    out property <length> spacing-15: root.theme.spacing-15;
+    out property <length> spacing-16: root.theme.spacing-16;
+    out property <length> padding-lr-xs: root.theme.padding-lr-xs;
+    out property <length> padding-lr-s: root.theme.padding-lr-s;
+    out property <length> padding-lr-m: root.theme.padding-lr-m;
+    out property <length> padding-lr-l: root.theme.padding-lr-l;
+    out property <length> padding-lr-xl: root.theme.padding-lr-xl;
+    out property <length> margin-xs: root.theme.margin-xs;
+    out property <length> margin-s: root.theme.margin-s;
+    out property <length> margin-m: root.theme.margin-m;
+    out property <length> margin-l: root.theme.margin-l;
+    out property <length> margin-xl: root.theme.margin-xl;
+    out property <length> margin-xxl: root.theme.margin-xxl;
+
+    // Control heights
+    out property <length> height-s: root.theme.height-s;
+    out property <length> height-m: root.theme.height-m;
+    out property <length> height-l: root.theme.height-l;
+
+    // Typography
+    out property <string> font-family: root.theme.font-family;
+    out property <string> font-family-medium: root.theme.font-family-medium;
+    out property <int> font-weight-regular: root.theme.font-weight-regular;
+    out property <int> font-weight-medium: root.theme.font-weight-medium;
+    out property <int> font-weight-semibold: root.theme.font-weight-semibold;
+    out property <length> font-size-s: root.theme.font-size-s;
+    out property <length> font-size-m: root.theme.font-size-m;
+    out property <length> font-size-l: root.theme.font-size-l;
+    out property <length> font-size-title-s: root.theme.font-size-title-s;
+    out property <length> font-size-title-m: root.theme.font-size-title-m;
+    out property <length> font-size-title-l: root.theme.font-size-title-l;
+    out property <length> font-size-title-xl: root.theme.font-size-title-xl;
+    out property <length> font-size-headline-s: root.theme.font-size-headline-s;
+    out property <length> font-size-headline-m: root.theme.font-size-headline-m;
+    out property <length> font-size-headline-l: root.theme.font-size-headline-l;
+    out property <length> font-size-display-m: root.theme.font-size-display-m;
+    out property <length> font-size-display-l: root.theme.font-size-display-l;
+    out property <length> line-height-s: root.theme.line-height-s;
+    out property <length> line-height-m: root.theme.line-height-m;
+    out property <length> line-height-l: root.theme.line-height-l;
+
+    // Motion
+    out property <duration> duration-fast: root.theme.duration-fast;
+    out property <duration> duration-base: root.theme.animation-duration;
+    out property <duration> duration-slow: root.theme.duration-slow;
+
+    // ------------------------------------------------------------------
+    // Helpers for components keyed by a `theme` index:
+    // 0 = default, 1 = primary/brand, 2 = success, 3 = warning, 4 = error
+    // ------------------------------------------------------------------
+    public pure function theme-color(t: int) -> color {
+        t == 1 ? root.theme.primary.color
+        : t == 2 ? root.theme.success.color
+        : t == 3 ? root.theme.warning.color
+        : t == 4 ? root.theme.error.color
+        : root.theme.text-primary;
+    }
+
+    public pure function theme-color-hover(t: int) -> color {
+        t == 1 ? root.theme.primary.hover
+        : t == 2 ? root.theme.success.hover
+        : t == 3 ? root.theme.warning.hover
+        : t == 4 ? root.theme.error.hover
+        : root.theme.text-primary;
+    }
+
+    public pure function theme-color-active(t: int) -> color {
+        t == 1 ? root.theme.primary.active
+        : t == 2 ? root.theme.success.active
+        : t == 3 ? root.theme.warning.active
+        : t == 4 ? root.theme.error.active
+        : root.theme.text-primary;
+    }
+
+    public pure function theme-color-light(t: int) -> color {
+        t == 1 ? root.theme.primary.light
+        : t == 2 ? root.theme.success.light
+        : t == 3 ? root.theme.warning.light
+        : t == 4 ? root.theme.error.light
+        : root.theme.bg-secondarycontainer;
+    }
+
+    public pure function theme-color-light-hover(t: int) -> color {
+        t == 1 ? root.theme.primary.light-hover
+        : t == 2 ? root.theme.success.light-hover
+        : t == 3 ? root.theme.warning.light-hover
+        : t == 4 ? root.theme.error.light-hover
+        : root.theme.bg-secondarycontainer-hover;
+    }
+
+    public pure function theme-color-disabled(t: int) -> color {
+        t == 1 ? root.theme.primary.disabled
+        : t == 2 ? root.theme.success.disabled
+        : t == 3 ? root.theme.warning.disabled
+        : t == 4 ? root.theme.error.disabled
+        : root.theme.text-disabled;
+    }
+}
