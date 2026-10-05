@@ -181,3 +181,12 @@ Switch {
   (https://tdesign.tencent.com).
 - Known limitations: no dashed button variant (Slint borders are solid only),
   Select has no keyboard navigation yet, TextArea has no maxLength counter.
+
+## License
+
+Copyright 2026 DragonheartLX. Licensed under the
+[Apache-2.0](LICENSE) license.
+
+Note: this covers the tela-ui sources only. Applications built with Slint are
+additionally subject to Slint's own licensing (GPL-3.0 or the royalty-free
+Slint license).
