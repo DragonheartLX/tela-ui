@@ -84,7 +84,7 @@ export component MainWindow inherits Window {
     Dialog {
         open <=> root.dialog-open;
         title: "对话框标题";
-        content: "这是 Tela UI 的对话框组件，用于确认操作或展示重要信息。点击遮罩层可关闭。";
+        content: "这是 Tela UI 的对话框组件,用于确认操作或展示重要信息。点击遮罩层可关闭。";
         accepted => { TelaMessage.success("已确认操作"); }
         canceled => { TelaMessage.info("已取消操作"); }
     }
@@ -93,7 +93,7 @@ export component MainWindow inherits Window {
         open <=> root.drawer-open;
         title: "抽屉标题";
 
-        Paragraph { text: "这是 Tela UI 的抽屉组件，从窗口右侧滑出，适合放置表单、详情等较大面积的临时内容。"; }
+        Paragraph { text: "这是 Tela UI 的抽屉组件,从窗口右侧滑出,适合放置表单、详情等较大面积的临时内容。"; }
         Button {
             variant: 1;
             text: "关闭抽屉";
