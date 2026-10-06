@@ -1,25 +1,40 @@
 // Tela UI — Avatar
 //
 // User/project avatar: image or text, circle or rounded square.
-// size: 0 small (32), 1 medium (40), 2 large (48), 3 extra large (64).
+// size: AvatarSize (32/40/48/64).
 
 import { TelaTheme } from "../theme.slint";
 import { Icon } from "../base/icon/icon.slint";
 import { TIconSet } from "../base/icon/data.slint";
+import { Theme } from "../structs/enums.slint";
+
+export enum AvatarSize {
+    small,
+    medium,
+    large,
+    extra-large,
+}
+
+export enum AvatarShape {
+    circle,
+    square,
+}
+import { TIconSet } from "../base/icon/data.slint";
 
 export component Avatar inherits Rectangle {
-    in property <int> size: 1;
+    in property <AvatarSize> size: AvatarSize.medium;
     in property <string> text;
     in property <image> source;
-    // 0 circle, 1 square (rounded)
-    in property <int> shape: 0;
-    in property <int> theme: 1;
+    in property <AvatarShape> shape: AvatarShape.circle;
+    in property <Theme> theme: Theme.primary;
 
-    private property <length> d: size == 0 ? 32px : size == 2 ? 48px : size == 3 ? 64px : 40px;
+    private property <length> d: size == AvatarSize.small ? 32px
+        : size == AvatarSize.large ? 48px
+        : size == AvatarSize.extra-large ? 64px : 40px;
 
     width: d;
     height: d;
-    border-radius: shape == 0 ? self.width / 2 : TelaTheme.radius-medium;
+    border-radius: shape == AvatarShape.circle ? self.width / 2 : TelaTheme.radius-medium;
     background: TelaTheme.theme-color-light(theme);
     clip: true;
 

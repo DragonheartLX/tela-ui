@@ -1,0 +1,23 @@
+// Tela UI — shared enums
+//
+// Semantic vocabularies shared by several components. Import from
+// "@tela-ui/theme.slint" (re-exported there) or relatively like the theme
+// structs. Component-specific enums (ButtonVariant, TagVariant, …) live in
+// their component files and are re-exported by the matching aggregator.
+
+// Semantic color roles, following the TDesign `theme` axis. Components map
+// these onto brand/success/warning/error ramps; `default` renders neutrally.
+export enum Theme {
+    default,
+    primary,
+    success,
+    warning,
+    error,
+}
+
+// Standard control size (heights and paddings scale with it).
+export enum Size {
+    small,
+    medium,
+    large,
+}

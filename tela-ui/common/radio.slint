@@ -97,6 +97,8 @@ export component RadioGroup inherits HorizontalLayout {
 
     spacing: TelaTheme.margin-l;
 
+    // Absorber: keeps radios left-packed when the group stretches wider
+    // than its content (else the layout spreads the slack as extra gaps).
     for it[i] in items: Radio {
         text: it.text;
         selected: it.value == root.value;
@@ -106,4 +108,9 @@ export component RadioGroup inherits HorizontalLayout {
             root.changed(it.value);
         }
     }
+
+    // Absorber: keeps radios left-packed when the group stretches wider
+    // than its content (an all-fixed-width layout would otherwise spread
+    // the slack as extra gaps between the items).
+    Rectangle { }
 }

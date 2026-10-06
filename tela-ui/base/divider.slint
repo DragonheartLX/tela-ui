@@ -1,14 +1,22 @@
 // Tela UI — Divider
 //
-// Horizontal separator with optional label (align: 0 left, 1 center,
-// 2 right) or a vertical rule (orientation: Orientation.vertical).
+// Horizontal separator with optional label (DividerAlign) or a vertical
+// rule (orientation: Orientation.vertical).
 
+import { TelaTheme } from "../theme.slint";
+import { Theme, Size } from "../structs/enums.slint";
+
+export enum DividerAlign {
+    left,
+    center,
+    right,
+}
 import { TelaTheme } from "../theme.slint";
 
 export component Divider inherits Rectangle {
     in property <Orientation> orientation: Orientation.horizontal;
     in property <string> text;
-    in property <int> align: 1;
+    in property <DividerAlign> align: DividerAlign.center;
     in property <color> line-color: TelaTheme.border-level-1-color;
     in property <color> text-color: TelaTheme.text-color-secondary;
     in property <length> content-gap: TelaTheme.margin-l;
@@ -37,7 +45,7 @@ export component Divider inherits Rectangle {
         padding-left: root.inset;
         padding-right: root.inset;
 
-        if root.align != 0: Rectangle {
+        if root.align != DividerAlign.left: Rectangle {
             background: root.line-color;
             height: 1px;
             y: (parent.height - self.height) / 2;
@@ -51,7 +59,7 @@ export component Divider inherits Rectangle {
             vertical-alignment: center;
         }
 
-        if root.align != 2: Rectangle {
+        if root.align != DividerAlign.right: Rectangle {
             background: root.line-color;
             height: 1px;
             y: (parent.height - self.height) / 2;

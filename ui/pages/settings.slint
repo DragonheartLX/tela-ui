@@ -1,0 +1,60 @@
+// Page: 设置 (Settings) — theme-mode preferences, written straight to the
+// TelaTheme global so the whole gallery (light and dark) switches live.
+// Standalone Radio buttons (not RadioGroup) so `selected` stays a reactive
+// binding to `TelaTheme.preference` instead of the group's internal value.
+
+import { TelaTheme, TelaThemePreference } from "@tela-ui/theme.slint";
+import { Caption, Paragraph } from "@tela-ui/base.slint";
+import { Card, CodeBlock, Radio } from "@tela-ui/common.slint";
+
+export component SettingsSection inherits VerticalLayout {
+    spacing: 28px;
+
+    Card {
+        title: "主题模式 Theme mode";
+
+        VerticalLayout {
+            spacing: 12px;
+
+            HorizontalLayout {
+                spacing: TelaTheme.margin-l;
+
+                Radio {
+                    text: "浅色";
+                    selected: TelaTheme.preference == TelaThemePreference.light;
+                    clicked => {
+                        TelaTheme.preference = TelaThemePreference.light;
+                    }
+                }
+                Radio {
+                    text: "深色";
+                    selected: TelaTheme.preference == TelaThemePreference.dark;
+                    clicked => {
+                        TelaTheme.preference = TelaThemePreference.dark;
+                    }
+                }
+                Radio {
+                    text: "跟随系统";
+                    selected: TelaTheme.preference == TelaThemePreference.system;
+                    clicked => {
+                        TelaTheme.preference = TelaThemePreference.system;
+                    }
+                }
+            }
+
+            Caption { text: "选择即时写入 TelaTheme.preference; 跟随系统时实际模式由操作系统的深浅色设置决定, 侧边栏底部的按钮仍是亮暗快捷切换。"; }
+        }
+    }
+
+    CodeBlock { code: "import { TelaTheme, TelaThemePreference } from \"@tela-ui/theme.slint\";\n\nTelaTheme.preference = TelaThemePreference.dark;\n// TelaTheme.is-dark 是实际生效的模式 (system 已按系统解析)"; }
+
+    Card {
+        title: "关于 About";
+
+        VerticalLayout {
+            spacing: 8px;
+
+            Paragraph { text: "Tela UI — TDesign 风格的 Slint 组件库。所有 token 都在 TelaTheme 单例上, 此页的修改即时作用于整个演示应用。"; }
+        }
+    }
+}

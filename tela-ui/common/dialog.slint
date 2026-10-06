@@ -6,7 +6,8 @@
 // component are rendered below the content text as custom body content.
 
 import { TelaTheme } from "../theme.slint";
-import { Button } from "../base/button.slint";
+import { Theme } from "../structs/enums.slint";
+import { Button, ButtonVariant } from "../base/button.slint";
 
 export component Dialog inherits Rectangle {
     in-out property <bool> open: false;
@@ -80,7 +81,7 @@ export component Dialog inherits Rectangle {
 
                 Button {
                     text: root.cancel-text;
-                    variant: 1;
+                    variant: ButtonVariant.outline;
                     clicked => {
                         root.canceled();
                         root.close();
@@ -89,7 +90,7 @@ export component Dialog inherits Rectangle {
 
                 Button {
                     text: root.confirm-text;
-                    theme: 1;
+                    theme: Theme.primary;
                     clicked => {
                         root.accepted();
                         root.close();

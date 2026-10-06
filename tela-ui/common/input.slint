@@ -5,17 +5,25 @@
 // status: 0 default, 1 success, 2 warning, 3 error.
 
 import { TelaTheme } from "../theme.slint";
+import { Theme, Size } from "../structs/enums.slint";
+
+export enum InputStatus {
+    default,
+    success,
+    warning,
+    error,
+}
 import { Icon } from "../base/icon/icon.slint";
 import { TIconData, TIconSet } from "../base/icon/data.slint";
 
 export component Input inherits Rectangle {
     // 0 small, 1 medium, 2 large
-    in property <int> size: 1;
+    in property <Size> size: Size.medium;
     in property <string> placeholder-text;
     in-out property <string> text <=> ti.text;
     in property <bool> disabled;
     in property <bool> read-only <=> ti.read-only;
-    in property <int> status: 0;
+    in property <InputStatus> status: InputStatus.default;
     in property <TIconData> prefix-icon;
     in property <TIconData> suffix-icon;
     in property <bool> clearable: false;
@@ -26,11 +34,11 @@ export component Input inherits Rectangle {
     callback cleared();
 
     private property <length> h:
-        size == 0 ? TelaTheme.height-s : size == 2 ? TelaTheme.height-l : TelaTheme.height-m;
+        size == Size.small ? TelaTheme.height-s : size == Size.large ? TelaTheme.height-l : TelaTheme.height-m;
     private property <length> fs:
-        size == 0 ? TelaTheme.font-size-s : size == 2 ? TelaTheme.font-size-l : TelaTheme.font-size-m;
+        size == Size.small ? TelaTheme.font-size-s : size == Size.large ? TelaTheme.font-size-l : TelaTheme.font-size-m;
     private property <length> pad:
-        size == 2 ? TelaTheme.spacing-3 : TelaTheme.spacing-2;
+        size == Size.large ? TelaTheme.spacing-3 : TelaTheme.spacing-2;
     private property <length> spacing-left: TelaTheme.spacing-2;
 
     private property <bool> clear-visible:
@@ -38,9 +46,9 @@ export component Input inherits Rectangle {
 
     // Rest border follows the status color; overridden by `states`.
     private property <brush> border-c:
-        status == 3 ? TelaTheme.error-color
-        : status == 2 ? TelaTheme.warning-color
-        : status == 1 ? TelaTheme.success-color
+        status == InputStatus.error ? TelaTheme.error-color
+        : status == InputStatus.warning ? TelaTheme.warning-color
+        : status == InputStatus.success ? TelaTheme.success-color
         : TelaTheme.component-border;
 
     height: h;
@@ -53,10 +61,10 @@ export component Input inherits Rectangle {
 
     // Later states win over earlier ones.
     states [
-        hovered when touch-bg.has-hover && status == 0 && !root.disabled: {
+        hovered when touch-bg.has-hover && status == InputStatus.default && !root.disabled: {
             border-c: TelaTheme.border-level-2-color;
         }
-        focused when ti.has-focus && status == 0: {
+        focused when ti.has-focus && status == InputStatus.default: {
             border-c: TelaTheme.brand-color;
         }
         disabled when root.disabled: {
@@ -160,16 +168,16 @@ export component TextArea inherits Rectangle {
     in-out property <string> text <=> ti.text;
     in property <bool> disabled;
     in property <bool> read-only <=> ti.read-only;
-    in property <int> status: 0;
+    in property <InputStatus> status: InputStatus.default;
     // Preferred visible line count.
     in property <int> rows: 4;
 
     callback changed(string);
 
     private property <brush> border-c:
-        status == 3 ? TelaTheme.error-color
-        : status == 2 ? TelaTheme.warning-color
-        : status == 1 ? TelaTheme.success-color
+        status == InputStatus.error ? TelaTheme.error-color
+        : status == InputStatus.warning ? TelaTheme.warning-color
+        : status == InputStatus.success ? TelaTheme.success-color
         : TelaTheme.component-border;
 
     height: rows * TelaTheme.line-height-m + TelaTheme.spacing-3 * 2;
@@ -182,10 +190,10 @@ export component TextArea inherits Rectangle {
     forward-focus: ti;
 
     states [
-        hovered when touch-bg.has-hover && status == 0 && !root.disabled: {
+        hovered when touch-bg.has-hover && status == InputStatus.default && !root.disabled: {
             border-c: TelaTheme.border-level-2-color;
         }
-        focused when ti.has-focus && status == 0: {
+        focused when ti.has-focus && status == InputStatus.default: {
             border-c: TelaTheme.brand-color;
         }
         disabled when root.disabled: {

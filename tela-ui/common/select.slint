@@ -4,6 +4,8 @@
 // the trigger width (at least 120px). Keyboard support is not included yet.
 
 import { TelaTheme } from "../theme.slint";
+import { Size } from "../structs/enums.slint";
+import { TelaTheme } from "../theme.slint";
 import { Icon } from "../base/icon/icon.slint";
 import { TIconData, TIconSet } from "../base/icon/data.slint";
 
@@ -21,14 +23,14 @@ export component Select inherits Rectangle {
     in property <bool> disabled;
     in property <TIconData> prefix-icon;
     // 0 small, 1 medium, 2 large
-    in property <int> size: 1;
+    in property <Size> size: Size.medium;
 
     callback selected(int, string);
 
     private property <length> h:
-        size == 0 ? TelaTheme.height-s : size == 2 ? TelaTheme.height-l : TelaTheme.height-m;
+        size == Size.small ? TelaTheme.height-s : size == Size.large ? TelaTheme.height-l : TelaTheme.height-m;
     private property <length> fs:
-        size == 0 ? TelaTheme.font-size-s : size == 2 ? TelaTheme.font-size-l : TelaTheme.font-size-m;
+        size == Size.small ? TelaTheme.font-size-s : size == Size.large ? TelaTheme.font-size-l : TelaTheme.font-size-m;
     private property <length> item-h: 32px;
 
     private property <string> display-label:

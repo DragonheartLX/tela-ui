@@ -2,10 +2,9 @@
 // The app's own top navigation bar is the live NavBar demo; this section
 // covers the rest.
 
-import { TelaTheme } from "@tela-ui/theme.slint";
+import { TelaTheme, Theme, Size } from "@tela-ui/theme.slint";
 import { TIconSet, Caption, Divider, Button, Paragraph } from "@tela-ui/base.slint";
-import { Tabs, Pagination, NavBar, NavItem, Breadcrumb, CrumbItem, Steps, Card } from "@tela-ui/common.slint";
-import { CodeBlock } from "code-block.slint";
+import { Tabs, Pagination, NavBar, NavItem, SideNav, SideNavItem, SideNavMode, SideNavTogglePosition, Breadcrumb, CrumbItem, Steps, Card, CodeBlock} from "@tela-ui/common.slint";
 
 export component NavigationSection inherits VerticalLayout {
     spacing: 28px;
@@ -27,6 +26,15 @@ export component NavigationSection inherits VerticalLayout {
     ];
     in-out property <string> crumb-value: "nav";
     in property <[string]> step-items: ["注册账号", "填写信息", "验证邮箱", "完成"];
+    in property <[SideNavItem]> side-nav-items: [
+        { label: "仪表盘", value: "dash", icon: TIconSet.LayoutDashboard },
+        { label: "数据展示", value: "display", icon: TIconSet.Image },
+        { label: "数据录入", value: "form", icon: TIconSet.Pencil },
+        { label: "消息反馈", value: "feedback", icon: TIconSet.Bell, disabled: true },
+        { label: "系统设置", value: "settings", icon: TIconSet.Settings },
+    ];
+    in-out property <string> side-nav-value: "display";
+    in-out property <bool> side-collapsed: false;
 
     // ======================= Tabs =========================
     VerticalLayout {
@@ -103,7 +111,7 @@ export component NavigationSection inherits VerticalLayout {
                     items: root.demo-nav-items;
                     current-value <=> root.demo-nav-value;
 
-                    Button { size: 0; theme: 1; text: "操作"; }
+                    Button { size: Size.small; theme: Theme.primary; text: "操作"; }
                 }
 
                 Caption { text: "右侧操作区由 NavBar 的子元素提供,点击菜单项切换高亮；本演示页顶部的分组导航也是这个组件。"; }
@@ -111,6 +119,72 @@ export component NavigationSection inherits VerticalLayout {
         }
 
         CodeBlock { code: "import { NavBar } from \"@tela-ui/common.slint\";\n\nNavBar {\n    title: \"Tela UI\";\n    logo: TIconSet.LayoutDashboard;\n    items: [{ label: \"首页\", value: \"home\" }, …];\n    current-value <=> nav;\n    Button { text: \"操作\"; } // 右侧操作区\n}"; }
+    }
+
+    // ======================= SideNav ======================
+    VerticalLayout {
+        spacing: 8px;
+
+        Card {
+            title: "侧边导航 SideNav";
+
+            VerticalLayout {
+                spacing: 16px;
+
+                HorizontalLayout {
+                    height: 360px;
+                    spacing: 24px;
+
+                    SideNav {
+                        title: "Tela UI";
+                        logo: TIconSet.LayoutDashboard;
+                        items: root.side-nav-items;
+                        current-value <=> root.side-nav-value;
+                        collapsed <=> root.side-collapsed;
+                    }
+
+                    SideNav {
+                        mode: SideNavMode.icon;
+                        title: "Tela UI";
+                        logo: TIconSet.LayoutDashboard;
+                        items: root.side-nav-items;
+                        current-value <=> root.side-nav-value;
+                    }
+
+                    SideNav {
+                        // Collapse toggle in a bottom row instead of the header.
+                        toggle-position: SideNavTogglePosition.bottom;
+                        title: "Tela UI";
+                        logo: TIconSet.LayoutDashboard;
+                        items: root.side-nav-items;
+                        current-value <=> root.side-nav-value;
+                    }
+
+                    VerticalLayout {
+                        spacing: TelaTheme.spacing-3;
+
+                        Button {
+                            size: Size.small;
+                            theme: Theme.primary;
+                            text: root.side-collapsed ? "展开导航" : "收起导航";
+                            clicked => {
+                                root.side-collapsed = !root.side-collapsed;
+                            }
+                        }
+
+                        // Absorbs the leftover row space so the navs and the
+                        // toggle stay left-packed instead of spreading.
+                        Rectangle { }
+                    }
+
+                    Rectangle { }
+                }
+
+                Paragraph { text: "左侧为可收起的图标+文本导航 (SideNavMode.icon-text), 头部按钮切换收起, 收起后按钮自动居中, 宽度在 232px 与 64px 间平滑过渡; 中间为纯图标导航 (SideNavMode.icon); 右侧为收起按钮置于底部的变体 (SideNavTogglePosition.bottom)。三者共享 current-value, 选中项联动高亮; 消息反馈为 disabled 状态。"; }
+            }
+        }
+
+        CodeBlock { code: "import { SideNav, SideNavItem } from \"@tela-ui/common.slint\";\n\nSideNav {\n    title: \"Tela UI\";\n    logo: TIconSet.LayoutDashboard;\n    items: [{ label: \"仪表盘\", value: \"dash\", icon: TIconSet.LayoutDashboard }, …];\n    current-value <=> nav;\n    collapsed <=> c; // 收起后仅显示图标\n}"; }
     }
 
     // ================ Breadcrumb & Steps ==================

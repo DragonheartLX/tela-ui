@@ -13,12 +13,15 @@ tokens, basic components and common components with live light/dark theming.
   radii, type scale, shadows) exposed as a customizable struct config with
   light & dark presets and live switching. `TelaTheme.is-dark` exposes the
   mode actually in effect (`system` resolved against the OS scheme).
-- **基础组件 Basic** — Button, Link, Icon (36 built-in Lucide glyphs),
-  Heading / Paragraph / Caption, Divider, Tag, Loading.
+- **基础组件 Basic** — Button, Link, Icon (39 built-in Lucide glyphs),
+  Heading / Paragraph / Caption, Divider, Tag, Loading, BorderlessWindow
+  (frameless window with themed custom title bar).
 - **常用组件 Common** — Input, TextArea, Select, CheckBox, Radio /
   RadioGroup, Switch, Slider, Progress (line & circle), Avatar, Badge, Card,
   Alert, Dialog, Drawer, Message (global toast with 6-way placement), Tabs,
-  Pagination, NavBar, Breadcrumb, Steps.
+  Pagination, NavBar, SideNav (collapsible, with bottom footer entries and a
+  TDesign-style fold toggle), Breadcrumb, Steps,
+  CodeBlock (themed code panel), Drawer (top/right/bottom/left placements).
 
 ## Project layout
 
@@ -27,24 +30,27 @@ tela-ui/                 ← the component library (registered as import name "t
   theme.slint            ← TelaTheme global: light/dark presets + forwarded tokens
   colors.slint           ← TLightColors / TDarkColors palettes
   structs/theme.slint    ← TPrimaryColor / TAppThemeConfig structs
+  structs/enums.slint    ← shared semantic enums (Theme, Size)
   base.slint             ← aggregate re-exports: 基础组件
-  base/                  ← button, link, typography, divider, tag, loading
+  base/                  ← button, link, typography, divider, tag, loading,
+                           borderless-window
     icon/                ← icon data split lucide-slint style:
       data.slint           structs (TIconPath/TIconData) + TIconSet path data
       icon.slint           shared `Icon` renderer (data-driven, lucide-slint style)
   common.slint           ← aggregate re-exports: 常用组件
   common/                ← input, select, checkbox, radio, switch, slider,
                            progress, avatar, badge, card, alert, dialog,
-                           drawer, message, tabs, pagination, nav,
-                           breadcrumb, steps
+                           drawer, message, tabs, pagination, nav, side-nav,
+                           breadcrumb, steps, code-block
   experimental.slint     ← aggregate re-exports: 实验性组件 (APIs may change)
   experimental/          ← skeleton, …
-ui/MainWindow.slint      ← gallery demo shell: a NavBar switches demo groups,
-                           window-level Dialog / Drawer / MessageOverlay
-ui/demo/                 ← one file per demo group (basics, data-display,
-                           form-section, feedback, navigation, experimental)
-                           plus code-block.slint — every live example is
-                           paired with a usage snippet
+ui/MainWindow.slint      ← gallery shell: brand header + collapsible SideNav
+                           switch pages; window-level Dialog / Drawer /
+                           MessageOverlay
+ui/pages/                ← one file per page (basics, data-display,
+                           form-section, feedback, navigation,
+                           experimental, settings) — every live example is
+                           paired with a themed CodeBlock from the library
 src/                     ← Rust host (reads TELA_THEME=light|dark env var)
 ```
 
@@ -90,9 +96,9 @@ export component MainWindow inherits Window {
 > library use the `@tela-ui/` prefix, which resolves through the library path
 > registered in `build.rs`.
 
-Run the gallery demo (the demo is grouped by its own NavBar — 基础组件 /
-数据展示 / 数据录入 / 反馈 / 导航 / 实验性 — and every live example is
-paired with a code block):
+Run the gallery demo (pages are switched by the collapsible SideNav —
+基础组件 / 数据展示 / 数据录入 / 反馈 / 导航 / 实验性 / 设置 — and every
+live example is paired with a code block):
 
 ```sh
 cargo run                     # follow OS color scheme
@@ -148,8 +154,8 @@ Switch {
 | Link        | `theme` `underline` `icon: TIconSet.X` `disabled` `clicked()`                   |
 | Icon        | `icon: TIconSet.X` `size` `icon-color` (all entries in `base/icon/data.slint`)  |
 | Heading     | `level` 1..5                                                                    |
-| Divider     | `orientation` `text` `align` (0 left / 1 center / 2 right)                       |
-| Tag         | `theme` `variant` (0 dark / 1 light / 2 outline) `size` `closable` `closed()`    |
+| Divider     | `orientation` `text` `align: DividerAlign` (left/center/right)                   |
+| Tag         | `theme` `variant: TagVariant` (dark/light/outline) `size` `closable` `closed()` `clicked()` |
 | Input       | `text` `placeholder-text` `prefix-icon: TIconSet.X` `suffix-icon` `clearable` `status` `size` |
 | TextArea    | `text` `rows` `status`                                                           |
 | Select      | `items: [SelectItem]` `current-index` `current-value` `selected(i, value)`       |
@@ -159,16 +165,17 @@ Switch {
 | Slider      | `minimum` `maximum` `step` `value` `changed(f)` `released(f)` (arrow keys)       |
 | Progress    | `variant` (0 line / 1 circle) `value: 0..100` `theme` `size`                     |
 | Loading     | `text` `theme` `size`                                                            |
-| Avatar      | `text` `source` `shape` (0 circle / 1 square) `size`                             |
+| Avatar      | `text` `source` `shape: AvatarShape` (circle/square) `size: AvatarSize` `theme`  |
 | Badge       | wraps children; `count` `dot` `max-count` `badge-color`                           |
 | Card        | wraps children; `title` `subtitle` `footer` `bordered` `shadowed`                 |
 | Alert       | `theme` `title` `description` `closable` `open` `closed()`                        |
 | Dialog      | place in an overlay; `open` `title` `content` `accepted()` `canceled()`           |
-| Drawer      | place in an overlay; `open` `title` `side` (0 right / 1 left) `drawer-width` `closed()` |
+| Drawer      | place in an overlay; `open` `title` `placement: DrawerPlacement` (top/right/bottom/left) `drawer-width` `drawer-height` `closed()` |
 | Message     | `TelaMessage.info/success/warning/error(text)` + one `MessageOverlay` in window; `TelaMessage.placement`: 6-way `MessagePlacement`, default top-center |
 | Tabs        | `items: [string]` `current-index` `changed(int)`                                  |
 | Pagination  | `total-pages` `current` `changed(int)`                                            |
 | NavBar      | `title` `logo` `items: [NavItem]` `current-value` `changed(string)`; children form the trailing action slot |
+| SideNav     | `title` `logo` `items: [SideNavItem]` `current-value` `collapsed` `mode: SideNavMode` `toggle-position` `footer-items: [SideNavFooterItem]` `changed(string)` `footer-clicked(item)` |
 | Breadcrumb  | `items: [CrumbItem]` `current-value` `separator` `changed(string)`                 |
 | Steps       | `items: [string]` `current` (earlier steps render as done)                         |
 

@@ -1,25 +1,44 @@
 // Tela UI — Drawer
 //
-// Side panel over a dimmed backdrop. `open` toggles it; the panel slides
-// in from the right (side: 0) or left (side: 1) edge. Overlay clicks close
-// it when `close-on-overlay` is set. Children of the component form the
-// body below the title.
+// Side panel over a dimmed backdrop. `placement` picks the edge the panel
+// slides in from (right/bottom sized by width & height, left/top mirrored);
+// the panel stays mounted and fades via animated opacity so the close
+// animation is actually visible. Overlay clicks close it when
+// `close-on-overlay` is set. Children of the component form the body below
+// the title.
 
 import { TelaTheme } from "../theme.slint";
 import { Icon } from "../base/icon/icon.slint";
 import { TIconSet } from "../base/icon/data.slint";
 
+export enum DrawerPlacement {
+    top,
+    right,
+    bottom,
+    left,
+}
+
 export component Drawer inherits Rectangle {
     in-out property <bool> open: false;
     in property <string> title;
-    // 0 = slide in from the right edge, 1 = from the left edge.
-    in property <int> side: 0;
+    in property <DrawerPlacement> placement: DrawerPlacement.right;
+    // Width for left/right drawers, height for top/bottom drawers.
     in property <length> drawer-width: 320px;
+    in property <length> drawer-height: 280px;
     in property <bool> close-on-overlay: true;
 
     callback closed();
 
-    visible: open;
+    private property <bool> horizontal:
+        root.placement == DrawerPlacement.left || root.placement == DrawerPlacement.right;
+
+    // Stays mounted and fades via animated opacity so the panel's slide-out
+    // is actually visible; binding `visible: open` would drop the whole
+    // subtree the instant `open` flips and no close animation would show.
+    // Input stays safe: the backdrop TouchArea is only enabled while open,
+    // and the panel rests fully off-window when closed.
+    opacity: root.open ? 1 : 0;
+    animate opacity { duration: TelaTheme.duration-base; easing: ease-out; }
     background: TelaTheme.mask-active;
 
     public function close() {
@@ -35,17 +54,22 @@ export component Drawer inherits Rectangle {
     }
 
     panel := Rectangle {
-        y: 0;
-        height: parent.height;
-        width: min(root.drawer-width, parent.width - 48px);
-        x: root.side == 1
-            ? (root.open ? 0px : -self.width)
-            : (root.open ? parent.width - self.width : parent.width);
+        width: root.horizontal ? min(root.drawer-width, parent.width - 48px) : parent.width;
+        height: root.horizontal ? parent.height : min(root.drawer-height, parent.height - 48px);
+        x: !root.horizontal ? 0
+            : root.placement == DrawerPlacement.left
+                ? (root.open ? 0px : -self.width)
+                : (root.open ? parent.width - self.width : parent.width);
+        y: root.horizontal ? 0
+            : root.placement == DrawerPlacement.top
+                ? (root.open ? 0px : -self.height)
+                : (root.open ? parent.height - self.height : parent.height);
         background: TelaTheme.bg-color-container;
         drop-shadow-blur: TelaTheme.shadow-3-blur;
         drop-shadow-offset-y: TelaTheme.shadow-3-offset-y;
         drop-shadow-color: TelaTheme.shadow-3-color;
         animate x { duration: TelaTheme.duration-base; easing: ease-out; }
+        animate y { duration: TelaTheme.duration-base; easing: ease-out; }
 
         VerticalLayout {
             padding: TelaTheme.margin-l;

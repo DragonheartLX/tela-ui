@@ -1,39 +1,40 @@
 // Tela UI — Link
 //
 // Hyperlink text: theme-colored, underlines on hover (or always with
-// `underline`). theme: 0 default, 2 success, 3 warning, 4 danger.
+// `underline`). theme: Theme (default/primary/success/warning/error).
 
 import { TelaTheme } from "../theme.slint";
 import { Icon } from "icon/icon.slint";
 import { TIconData } from "icon/data.slint";
+import { Theme, Size } from "../structs/enums.slint";
+import { TIconData } from "icon/data.slint";
 
 export component Link inherits Rectangle {
-    in property <int> theme: 0;
+    in property <Theme> theme: Theme.default;
     in property <string> text;
     in property <TIconData> icon;
     in property <bool> disabled;
     in property <bool> underline: false;
-    // 0 small, 1 medium, 2 large
-    in property <int> size: 1;
+    in property <Size> size: Size.medium;
 
     callback clicked();
 
     private property <length> fs:
-        size == 0 ? TelaTheme.font-size-s : size == 2 ? TelaTheme.font-size-l : TelaTheme.font-size-m;
+        size == Size.small ? TelaTheme.font-size-s : size == Size.large ? TelaTheme.font-size-l : TelaTheme.font-size-m;
 
     // Rest state; overridden by the `states` below.
     private property <brush> content-color:
-        theme == 0 ? TelaTheme.text-color-link : TelaTheme.theme-color(theme);
+        theme == Theme.default ? TelaTheme.text-color-link : TelaTheme.theme-color(theme);
 
     animate content-color { duration: TelaTheme.duration-fast; }
 
     // Later states win over earlier ones.
     states [
         hovered when touch.has-hover && !root.disabled: {
-            content-color: theme == 0 ? TelaTheme.brand-color-hover : TelaTheme.theme-color-hover(theme);
+            content-color: theme == Theme.default ? TelaTheme.brand-color-hover : TelaTheme.theme-color-hover(theme);
         }
         pressed when touch.pressed && !root.disabled: {
-            content-color: theme == 0 ? TelaTheme.brand-color-active : TelaTheme.theme-color-active(theme);
+            content-color: theme == Theme.default ? TelaTheme.brand-color-active : TelaTheme.theme-color-active(theme);
         }
         disabled when root.disabled: {
             content-color: TelaTheme.text-color-disabled;

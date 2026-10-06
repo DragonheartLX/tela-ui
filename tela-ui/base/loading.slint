@@ -4,6 +4,8 @@
 // indicator. Sizes: 16px default; use 24px/32px for standalone spinners.
 
 import { TelaTheme } from "../theme.slint";
+import { Theme } from "../structs/enums.slint";
+import { TelaTheme } from "../theme.slint";
 
 export component LoadingSpinner inherits Rectangle {
     in property <brush> spinner-color: TelaTheme.brand-color;
@@ -20,11 +22,14 @@ export component LoadingSpinner inherits Rectangle {
 
     Path {
         private property <float> start: 1 * mod(animation-tick(), 3s) / 3s;
-        // Sweep grows/shrinks with a sine for the classic spinner feel. The
-        // max must stay well below 1.0: a near-closed arc reads as a static
-        // ring and the rotation seems to freeze.
+        // One grow-and-shrink pulse per revolution: `abs(sin())` over half a
+        // turn (180deg) of the argument repeats every 3s, matching the
+        // rotation above, and dips to 0 between pulses (a round-cap dot for
+        // a frame). The 0.9999 cap closes the ring — exactly 1.0 would make
+        // start and end of the single ArcTo coincide and draw nothing; the
+        // round caps hide the remaining 0.036° gap.
         private property <float> sweep:
-            min(0.75, max(0.20, 1 * abs(sin(360deg * animation-tick() / 1.5s))));
+            min(0.9999, 1 * abs(sin(180deg * animation-tick() / 3s)));
 
         viewbox-width: 24;
         viewbox-height: 24;
@@ -59,7 +64,7 @@ export component LoadingSpinner inherits Rectangle {
 // Loading indicator with an optional label beside the spinner.
 export component Loading inherits HorizontalLayout {
     in property <string> text;
-    in property <int> theme: 1;
+    in property <Theme> theme: Theme.primary;
     in-out property <length> size: 24px;
     spacing: TelaTheme.spacing-2;
 

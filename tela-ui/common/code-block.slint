@@ -1,12 +1,15 @@
-// Demo-only helper: dark code panel shown under each live example so the
-// effect and its usage stay side by side.
+// Tela UI — CodeBlock
+//
+// Monospace code panel: themed surface (secondary container + primary text,
+// so it adapts to light/dark) with a fixed Consolas face. Non-wrapping —
+// wide lines require a wide container.
 
-import { TelaTheme } from "@tela-ui/theme.slint";
+import { TelaTheme } from "../theme.slint";
 
 export component CodeBlock inherits Rectangle {
     in property <string> code;
 
-    background: #1e1e2e;
+    background: TelaTheme.bg-color-secondarycontainer;
     border-radius: TelaTheme.radius-medium;
     clip: true;
     height: code-text.preferred-height + TelaTheme.spacing-4 * 2;
@@ -18,7 +21,7 @@ export component CodeBlock inherits Rectangle {
         text: root.code;
         font-family: "Consolas";
         font-size: TelaTheme.font-size-s;
-        color: #c3cee3;
+        color: TelaTheme.text-color-primary;
         wrap: no-wrap;
     }
 }

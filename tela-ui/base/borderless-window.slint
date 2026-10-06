@@ -1,0 +1,148 @@
+// Tela UI — BorderlessWindow
+//
+// Frameless application window (`no-frame`) with a themed custom title bar:
+// drag handle, minimize / maximize / close buttons. Desktop backends keep
+// edge-resizing for frameless windows.
+//
+// Dragging is handled by the built-in `WindowMoveArea` under the title-bar
+// buttons — no host wiring needed. `title` (the Window built-in) shows in
+// both the taskbar and the custom header; minimize/maximize/close work
+// purely from .slint via the `minimized` / `maximized` built-ins and
+// `hide()`.
+
+import { TelaTheme } from "../theme.slint";
+import { Icon } from "icon/icon.slint";
+import { TIconData, TIconSet } from "icon/data.slint";
+
+// One title-bar control: full-height hit target, hover highlight
+// (danger = close-style red hover, white glyph).
+component WindowButton inherits Rectangle {
+    in property <TIconData> icon;
+    in property <bool> danger: false;
+    callback clicked();
+
+    // No height binding: the title-bar layout stretches it (and component
+    // roots cannot reference `parent` anyway).
+    width: 46px;
+
+    states [
+        hovered when ta.has-hover && root.danger: {
+            background: TelaTheme.error-color;
+        }
+        hovered when ta.has-hover: {
+            background: TelaTheme.bg-color-component-hover;
+        }
+    ]
+
+    Icon {
+        x: (parent.width - self.width) / 2;
+        y: (parent.height - self.height) / 2;
+        icon: root.icon;
+        size: 14px;
+        icon-color: ta.has-hover && root.danger ? #ffffff : TelaTheme.text-color-secondary;
+        animate icon-color { duration: TelaTheme.duration-fast; }
+    }
+
+    ta := TouchArea {
+        mouse-cursor: MouseCursor.pointer;
+        clicked => { root.clicked(); }
+    }
+}
+
+export component BorderlessWindow inherits Window {
+    no-frame: true;
+    background: TelaTheme.bg-color-page;
+
+    in property <length> header-height: 40px;
+    in property <brush> header-background: TelaTheme.bg-color-container;
+    // Optional brand glyph shown before the header title.
+    in property <TIconData> logo;
+    // Hides the maximize/restore button (utility dialogs etc.).
+    in property <bool> maximizable: true;
+    // Apps that render their own brand row below the bar can hide the
+    // header text (the `title` still labels the taskbar).
+    in property <bool> header-title-visible: true;
+
+    VerticalLayout {
+        // Title bar -------------------------------------------------------
+        Rectangle {
+            height: root.header-height;
+            background: root.header-background;
+
+            // Drag handle covers the whole bar; declared first so the
+            // buttons (later siblings) stay on top of it. WindowMoveArea is
+            // a bare hit area (no background) — the header Rectangle behind
+            // it provides the surface.
+            WindowMoveArea { }
+
+            HorizontalLayout {
+                padding-left: TelaTheme.padding-lr-m;
+                spacing: TelaTheme.spacing-2;
+
+                if root.logo.paths.length > 0: Icon {
+                    y: (parent.height - self.height) / 2;
+                    icon: root.logo;
+                    size: 20px;
+                    icon-color: TelaTheme.brand-color;
+                }
+
+                Text {
+                    text: root.title;
+                    font-size: TelaTheme.font-size-m;
+                    color: TelaTheme.text-color-secondary;
+                    vertical-alignment: center;
+                    horizontal-stretch: 1;
+                    visible: root.header-title-visible;
+                }
+
+                WindowButton {
+                    icon: TIconSet.Minus;
+                    clicked => { root.minimized = true; }
+                }
+
+                if root.maximizable: Rectangle {
+                    width: 46px;
+                    height: parent.height;
+
+                    states [
+                        hovered when max-ta.has-hover: {
+                            background: TelaTheme.bg-color-component-hover;
+                        }
+                    ]
+
+                    Rectangle {
+                        width: 10px;
+                        height: 10px;
+                        x: (parent.width - self.width) / 2;
+                        y: (parent.height - self.height) / 2;
+                        border-width: 1px;
+                        border-color: max-ta.has-hover
+                            ? TelaTheme.text-color-primary
+                            : TelaTheme.text-color-secondary;
+                        animate border-color { duration: TelaTheme.duration-fast; }
+                    }
+
+                    max-ta := TouchArea {
+                        mouse-cursor: MouseCursor.pointer;
+                        clicked => { root.maximized = !root.maximized; }
+                    }
+                }
+
+                WindowButton {
+                    icon: TIconSet.X;
+                    danger: true;
+                    clicked => { root.hide(); }
+                }
+            }
+        }
+
+        // Content: a stretched Rectangle absorbs the leftover height — a
+        // bare @children inside the layout would only get its preferred
+        // size, since nested layouts don't take part in the distribution.
+        Rectangle {
+            vertical-stretch: 1;
+
+            @children
+        }
+    }
+}

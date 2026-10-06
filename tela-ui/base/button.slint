@@ -3,21 +3,34 @@
 // TDesign button: theme × variant × size, optional icon, loading and
 // disabled states, square (icon button) / round shapes, block width.
 //
-//   theme   : 0 default, 1 primary, 2 success, 3 warning, 4 danger
-//   variant : 0 base (solid), 1 outline, 2 text
-//   size    : 0 small, 1 medium, 2 large
-//   shape   : 0 rectangle, 1 square (icon button), 2 round
+//   theme   : Theme (default/primary/success/warning/error)
+//   variant : ButtonVariant (base solid / outline / text)
+//   size    : Size (small / medium / large)
+//   shape   : ButtonShape (rectangle / square icon button / round)
 
 import { TelaTheme } from "../theme.slint";
 import { Icon } from "icon/icon.slint";
 import { LoadingSpinner } from "loading.slint";
 import { TIconData } from "icon/data.slint";
+import { Theme, Size } from "../structs/enums.slint";
+export enum ButtonVariant {
+    base,
+    outline,
+    text,
+}
+
+export enum ButtonShape {
+    rectangle,
+    square,
+    round,
+}
+import { TIconData } from "icon/data.slint";
 
 export component Button inherits Rectangle {
-    in property <int> theme: 0;
-    in property <int> variant: 0;
-    in property <int> size: 1;
-    in property <int> shape: 0;
+    in property <Theme> theme: Theme.default;
+    in property <ButtonVariant> variant: ButtonVariant.base;
+    in property <Size> size: Size.medium;
+    in property <ButtonShape> shape: ButtonShape.rectangle;
     in property <bool> block: false;
     in property <string> text;
     in property <TIconData> icon;
@@ -27,30 +40,30 @@ export component Button inherits Rectangle {
     callback clicked();
 
     private property <length> h:
-        size == 0 ? TelaTheme.height-s : size == 2 ? TelaTheme.height-l : TelaTheme.height-m;
+        size == Size.small ? TelaTheme.height-s : size == Size.large ? TelaTheme.height-l : TelaTheme.height-m;
     private property <length> fs:
-        size == 0 ? TelaTheme.font-size-s : size == 2 ? TelaTheme.font-size-l : TelaTheme.font-size-m;
+        size == Size.small ? TelaTheme.font-size-s : size == Size.large ? TelaTheme.font-size-l : TelaTheme.font-size-m;
     private property <length> pad-lr:
-        size == 0 ? TelaTheme.padding-lr-s : size == 2 ? TelaTheme.padding-lr-l : TelaTheme.padding-lr-m;
+        size == Size.small ? TelaTheme.padding-lr-s : size == Size.large ? TelaTheme.padding-lr-l : TelaTheme.padding-lr-m;
 
     // Rest state; overridden by the `states` below.
     private property <brush> bg:
-        variant == 0 ? (theme == 0 ? TelaTheme.bg-color-component : TelaTheme.theme-color(theme))
+        variant == ButtonVariant.base ? (theme == Theme.default ? TelaTheme.bg-color-component : TelaTheme.theme-color(theme))
         : transparent;
     private property <brush> content-color:
-        variant == 0 ? (theme == 0 ? TelaTheme.text-color-primary : TelaTheme.text-color-anti)
-        : theme == 0 ? TelaTheme.text-color-primary
+        variant == ButtonVariant.base ? (theme == Theme.default ? TelaTheme.text-color-primary : TelaTheme.text-color-anti)
+        : theme == Theme.default ? TelaTheme.text-color-primary
         : TelaTheme.theme-color(theme);
     private property <brush> border-brush:
-        variant == 1 ? (theme == 0 ? TelaTheme.component-border : TelaTheme.theme-color(theme))
+        variant == ButtonVariant.outline ? (theme == Theme.default ? TelaTheme.component-border : TelaTheme.theme-color(theme))
         : transparent;
 
     background: bg;
-    border-width: variant == 1 ? 1px : 0;
+    border-width: variant == ButtonVariant.outline ? 1px : 0;
     border-color: border-brush;
-    border-radius: shape == 2 ? TelaTheme.radius-round : TelaTheme.radius-default;
+    border-radius: shape == ButtonShape.round ? TelaTheme.radius-round : TelaTheme.radius-default;
     height: h;
-    width: shape == 1 ? h : max(h, content.preferred-width + pad-lr * 2);
+    width: shape == ButtonShape.square ? h : max(h, content.preferred-width + pad-lr * 2);
     // Block buttons absorb the extra space of the surrounding layout.
     horizontal-stretch: block ? 1 : 0;
     animate bg { duration: TelaTheme.duration-fast; }
@@ -60,34 +73,34 @@ export component Button inherits Rectangle {
     // Later states win over earlier ones.
     states [
         hovered when touch.has-hover: {
-            bg: variant == 0 ? (theme == 0 ? TelaTheme.bg-color-component-hover : TelaTheme.theme-color-hover(theme))
-                : variant == 1 ? (theme == 0 ? transparent : TelaTheme.theme-color-light-hover(theme))
-                : (theme == 0 ? TelaTheme.bg-color-component : TelaTheme.theme-color-light-hover(theme));
-            content-color: variant == 0 ? (theme == 0 ? TelaTheme.text-color-primary : TelaTheme.text-color-anti)
-                : theme == 0 ? TelaTheme.brand-color
+            bg: variant == ButtonVariant.base ? (theme == Theme.default ? TelaTheme.bg-color-component-hover : TelaTheme.theme-color-hover(theme))
+                : variant == ButtonVariant.outline ? (theme == Theme.default ? transparent : TelaTheme.theme-color-light-hover(theme))
+                : (theme == Theme.default ? TelaTheme.bg-color-component : TelaTheme.theme-color-light-hover(theme));
+            content-color: variant == ButtonVariant.base ? (theme == Theme.default ? TelaTheme.text-color-primary : TelaTheme.text-color-anti)
+                : theme == Theme.default ? TelaTheme.brand-color
                 : TelaTheme.theme-color-hover(theme);
-            border-brush: variant == 1 ? (theme == 0 ? TelaTheme.brand-color : TelaTheme.theme-color-hover(theme))
+            border-brush: variant == ButtonVariant.outline ? (theme == Theme.default ? TelaTheme.brand-color : TelaTheme.theme-color-hover(theme))
                 : transparent;
         }
 
         pressed when touch.pressed: {
-            bg: variant == 0 ? (theme == 0 ? TelaTheme.bg-color-component-active : TelaTheme.theme-color-active(theme))
-                : variant == 1 ? transparent
-                : (theme == 0 ? TelaTheme.bg-color-component : TelaTheme.theme-color-light(theme));
-            content-color: variant == 0 ? (theme == 0 ? TelaTheme.text-color-primary : TelaTheme.text-color-anti)
-                : theme == 0 ? TelaTheme.brand-color-active
+            bg: variant == ButtonVariant.base ? (theme == Theme.default ? TelaTheme.bg-color-component-active : TelaTheme.theme-color-active(theme))
+                : variant == ButtonVariant.outline ? transparent
+                : (theme == Theme.default ? TelaTheme.bg-color-component : TelaTheme.theme-color-light(theme));
+            content-color: variant == ButtonVariant.base ? (theme == Theme.default ? TelaTheme.text-color-primary : TelaTheme.text-color-anti)
+                : theme == Theme.default ? TelaTheme.brand-color-active
                 : TelaTheme.theme-color-active(theme);
-            border-brush: variant == 1 ? (theme == 0 ? TelaTheme.brand-color-active : TelaTheme.theme-color-active(theme))
+            border-brush: variant == ButtonVariant.outline ? (theme == Theme.default ? TelaTheme.brand-color-active : TelaTheme.theme-color-active(theme))
                 : transparent;
         }
 
         disabled when root.disabled: {
-            bg: variant == 0 ? (theme == 0 ? TelaTheme.bg-color-component-disabled : TelaTheme.theme-color-disabled(theme))
+            bg: variant == ButtonVariant.base ? (theme == Theme.default ? TelaTheme.bg-color-component-disabled : TelaTheme.theme-color-disabled(theme))
                 : transparent;
-            content-color: variant == 0 && theme > 0 ? TelaTheme.text-color-anti
-                : theme > 0 ? TelaTheme.theme-color-disabled(theme)
+            content-color: variant == ButtonVariant.base && theme != Theme.default ? TelaTheme.text-color-anti
+                : theme != Theme.default ? TelaTheme.theme-color-disabled(theme)
                 : TelaTheme.text-color-disabled;
-            border-brush: variant == 1 ? (theme == 0 ? TelaTheme.border-level-2-color : TelaTheme.theme-color-disabled(theme))
+            border-brush: variant == ButtonVariant.outline ? (theme == Theme.default ? TelaTheme.border-level-2-color : TelaTheme.theme-color-disabled(theme))
                 : transparent;
         }
     ]

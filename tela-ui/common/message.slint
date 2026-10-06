@@ -12,6 +12,13 @@ import { TelaTheme } from "../theme.slint";
 import { Icon } from "../base/icon/icon.slint";
 import { TIconSet } from "../base/icon/data.slint";
 
+export enum MessageTheme {
+    info,
+    success,
+    warning,
+    error,
+}
+
 // Where the overlay pins the message pill.
 export enum MessagePlacement {
     top-left,
@@ -24,40 +31,40 @@ export enum MessagePlacement {
 
 export global TelaMessage {
     in-out property <string> text;
-    // 0 info, 1 success, 2 warning, 3 error
-    in-out property <int> theme: 0;
+    in-out property <MessageTheme> theme: MessageTheme.info;
     in-out property <bool> visible: false;
     // Defaults to centered at the top of the window.
     in-out property <MessagePlacement> placement: MessagePlacement.top-center;
 
-    public function show(t: string, th: int) {
+    public function show(t: string, th: MessageTheme) {
         text = t;
         theme = th;
         visible = true;
     }
 
     public function info(t: string) {
-        root.show(t, 0);
+        root.show(t, MessageTheme.info);
     }
 
     public function success(t: string) {
-        root.show(t, 1);
+        root.show(t, MessageTheme.success);
     }
 
     public function warning(t: string) {
-        root.show(t, 2);
+        root.show(t, MessageTheme.warning);
     }
 
     public function error(t: string) {
-        root.show(t, 3);
+        root.show(t, MessageTheme.error);
     }
 }
 
 export component MessageOverlay inherits Rectangle {
-    // A thin strip anchoring the pill to a window edge; position follows
-    // TelaMessage.placement.
-    height: 0px;
-    clip: false;
+    // A passive full-window overlay: no explicit size, so it fills the
+    // window it is dropped into (no TouchArea, so it never blocks input).
+    // The pill pins to a window edge per TelaMessage.placement. A former
+    // `height: 0px` collapsed this strip to zero and centered it in the
+    // window, landing messages mid-screen.
 
     private property <bool> to-left:
         TelaMessage.placement == MessagePlacement.top-left
@@ -108,14 +115,14 @@ export component MessageOverlay inherits Rectangle {
 
             Icon {
                 y: (parent.height - self.height) / 2;
-                icon: TelaMessage.theme == 1 ? TIconSet.CircleCheck
-                    : TelaMessage.theme == 2 ? TIconSet.CircleAlert
-                    : TelaMessage.theme == 3 ? TIconSet.CircleX
+                icon: TelaMessage.theme == MessageTheme.success ? TIconSet.CircleCheck
+                    : TelaMessage.theme == MessageTheme.warning ? TIconSet.CircleAlert
+                    : TelaMessage.theme == MessageTheme.error ? TIconSet.CircleX
                     : TIconSet.Info;
                 size: 16px;
-                icon-color: TelaMessage.theme == 1 ? TelaTheme.success-color
-                    : TelaMessage.theme == 2 ? TelaTheme.warning-color
-                    : TelaMessage.theme == 3 ? TelaTheme.error-color
+                icon-color: TelaMessage.theme == MessageTheme.success ? TelaTheme.success-color
+                    : TelaMessage.theme == MessageTheme.warning ? TelaTheme.warning-color
+                    : TelaMessage.theme == MessageTheme.error ? TelaTheme.error-color
                     : TelaTheme.brand-color;
             }
 

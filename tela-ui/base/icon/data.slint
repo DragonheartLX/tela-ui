@@ -15,7 +15,8 @@
 // ChevronDown/Up/Left/Right, Menu, Info, CircleCheck, CircleX, CircleAlert,
 // TriangleAlert, Eye, Calendar, User, LoaderCircle, Sun, Moon, Bell, House,
 // Lock, Mail, Star, Heart, Trash2, Pencil, Settings, Download, Upload,
-// RefreshCw, Image, Ellipsis, LayoutDashboard.
+// RefreshCw, Image, Ellipsis, LayoutDashboard, PanelLeftClose/PanelLeftOpen,
+// FlaskConical.
 
 export struct TIconPath {
     command: string,
@@ -339,6 +340,48 @@ export global TIconSet {
         paths: [
             {
                 command: "M 4 3 L 9 3 C 9.552285 3 10 3.4477153 10 4 L 10 11 C 10 11.552285 9.552285 12 9 12 L 4 12 C 3.4477153 12 3 11.552285 3 11 L 3 4 C 3 3.4477153 3.4477153 3 4 3 M 15 3 L 20 3 C 20.552284 3 21 3.4477153 21 4 L 21 7 C 21 7.5522847 20.552284 8 20 8 L 15 8 C 14.447715 8 14 7.5522847 14 7 L 14 4 C 14 3.4477153 14.447715 3 15 3 M 15 12 L 20 12 C 20.552284 12 21 12.447715 21 13 L 21 20 C 21 20.552284 20.552284 21 20 21 L 15 21 C 14.447715 21 14 20.552284 14 20 L 14 13 C 14 12.447715 14.447715 12 15 12 M 4 16 L 9 16 C 9.552285 16 10 16.447716 10 17 L 10 20 C 10 20.552284 9.552285 21 9 21 L 4 21 C 3.4477153 21 3 20.552284 3 20 L 3 17 C 3 16.447716 3.4477153 16 4 16",
+                has_fill: false,
+            }
+        ],
+    };
+    out property <TIconData> PanelLeftClose: {
+        paths: [
+            {
+                command: "M 5 3 L 19 3 C 20.10457 3 21 3.8954306 21 5 L 21 19 C 21 20.10457 20.10457 21 19 21 L 5 21 C 3.8954306 21 3 20.10457 3 19 L 3 5 C 3 3.8954306 3.8954306 3 5 3",
+                has_fill: false,
+            },{
+                command: "M 9 3 L 9 21",
+                has_fill: false,
+            },{
+                command: "M 16 15 L 13 12 L 16 9",
+                has_fill: false,
+            }
+        ],
+    };
+    out property <TIconData> PanelLeftOpen: {
+        paths: [
+            {
+                command: "M 5 3 L 19 3 C 20.10457 3 21 3.8954306 21 5 L 21 19 C 21 20.10457 20.10457 21 19 21 L 5 21 C 3.8954306 21 3 20.10457 3 19 L 3 5 C 3 3.8954306 3.8954306 3 5 3",
+                has_fill: false,
+            },{
+                command: "M 9 3 L 9 21",
+                has_fill: false,
+            },{
+                command: "M 14 9 L 17 12 L 14 15",
+                has_fill: false,
+            }
+        ],
+    };
+    out property <TIconData> FlaskConical: {
+        paths: [
+            {
+                command: "M 14 2 L 14 8 C 14 8.35 14.08 8.68 14.245 8.96 L 19.755 19.04 C 19.92 19.33 20 19.66 20 20 C 20 21.1 19.1 22 18 22 L 6 22 C 4.9 22 4 21.1 4 20 C 4 19.66 4.08 19.33 4.245 19.04 L 9.755 8.96 C 9.92 8.68 10 8.35 10 8 L 10 2",
+                has_fill: false,
+            },{
+                command: "M 6.453 15 L 17.547 15",
+                has_fill: false,
+            },{
+                command: "M 8.5 2 L 15.5 2",
                 has_fill: false,
             }
         ],

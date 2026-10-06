@@ -1,9 +1,8 @@
 // Demo section: 基础组件 (Button / Icon & Link / Typography).
 
-import { TelaTheme } from "@tela-ui/theme.slint";
-import { Button, Link, Icon, TIconSet, Heading, Paragraph, Caption } from "@tela-ui/base.slint";
-import { Card } from "@tela-ui/common.slint";
-import { CodeBlock } from "code-block.slint";
+import { TelaTheme, Theme, Size } from "@tela-ui/theme.slint";
+import { Button, ButtonVariant, ButtonShape, Link, Icon, TIconSet, Heading, Paragraph, Caption } from "@tela-ui/base.slint";
+import { Card , CodeBlock} from "@tela-ui/common.slint";
 
 export component BasicsSection inherits VerticalLayout {
     spacing: 28px;
@@ -21,38 +20,38 @@ export component BasicsSection inherits VerticalLayout {
                 HorizontalLayout {
                     spacing: 12px;
                     Button { text: "默认按钮"; }
-                    Button { theme: 1; text: "主要按钮"; }
-                    Button { theme: 2; text: "成功按钮"; }
-                    Button { theme: 3; text: "警告按钮"; }
-                    Button { theme: 4; text: "危险按钮"; }
+                    Button { theme: Theme.primary; text: "主要按钮"; }
+                    Button { theme: Theme.success; text: "成功按钮"; }
+                    Button { theme: Theme.warning; text: "警告按钮"; }
+                    Button { theme: Theme.error; text: "危险按钮"; }
                 }
 
                 HorizontalLayout {
                     spacing: 12px;
-                    Button { variant: 1; text: "描边按钮"; }
-                    Button { variant: 1; theme: 1; text: "描边按钮"; }
-                    Button { variant: 1; theme: 4; text: "描边按钮"; }
-                    Button { variant: 2; text: "文字按钮"; }
-                    Button { variant: 2; theme: 1; text: "文字按钮"; }
-                    Button { variant: 2; theme: 4; text: "文字按钮"; }
+                    Button { variant: ButtonVariant.outline; text: "描边按钮"; }
+                    Button { variant: ButtonVariant.outline; theme: Theme.primary; text: "描边按钮"; }
+                    Button { variant: ButtonVariant.outline; theme: Theme.error; text: "描边按钮"; }
+                    Button { variant: ButtonVariant.text; text: "文字按钮"; }
+                    Button { variant: ButtonVariant.text; theme: Theme.primary; text: "文字按钮"; }
+                    Button { variant: ButtonVariant.text; theme: Theme.error; text: "文字按钮"; }
                 }
 
                 HorizontalLayout {
                     spacing: 12px;
-                    Button { size: 0; theme: 1; text: "小按钮"; }
-                    Button { size: 1; theme: 1; text: "中按钮"; }
-                    Button { size: 2; theme: 1; text: "大按钮"; }
-                    Button { shape: 1; theme: 1; icon: TIconSet.Search; }
-                    Button { shape: 2; theme: 1; icon: TIconSet.Pencil; text: "圆形"; }
-                    Button { theme: 1; icon: TIconSet.Download; text: "下载"; }
-                    Button { theme: 1; text: "加载中"; loading: true; }
-                    Button { theme: 1; text: "禁用状态"; disabled: true; }
-                    Button { variant: 1; text: "禁用状态"; disabled: true; }
+                    Button { size: Size.small; theme: Theme.primary; text: "小按钮"; }
+                    Button { size: Size.medium; theme: Theme.primary; text: "中按钮"; }
+                    Button { size: Size.large; theme: Theme.primary; text: "大按钮"; }
+                    Button { shape: ButtonShape.square; theme: Theme.primary; icon: TIconSet.Search; }
+                    Button { shape: ButtonShape.round; theme: Theme.primary; icon: TIconSet.Pencil; text: "圆形"; }
+                    Button { theme: Theme.primary; icon: TIconSet.Download; text: "下载"; }
+                    Button { theme: Theme.primary; text: "加载中"; loading: true; }
+                    Button { theme: Theme.primary; text: "禁用状态"; disabled: true; }
+                    Button { variant: ButtonVariant.outline; text: "禁用状态"; disabled: true; }
                 }
             }
         }
 
-        CodeBlock { code: "import { Button } from \"@tela-ui/base.slint\";\n\nButton { text: \"主要按钮\"; theme: 1; }\nButton { text: \"描边按钮\"; variant: 1; }\nButton { text: \"下载\"; theme: 1; icon: TIconSet.Download; }\nButton { text: \"加载中\"; theme: 1; loading: true; }"; }
+        CodeBlock { code: "import { Button } from \"@tela-ui/base.slint\";\n\nButton { text: \"主要按钮\"; theme: Theme.primary; }\nButton { text: \"描边按钮\"; variant: ButtonVariant.outline; }\nButton { text: \"下载\"; theme: Theme.primary; icon: TIconSet.Download; }\nButton { text: \"加载中\"; theme: Theme.primary; loading: true; }"; }
     }
 
     // =================== Icon & Link ======================
@@ -90,15 +89,15 @@ export component BasicsSection inherits VerticalLayout {
                 HorizontalLayout {
                     spacing: 24px;
                     Link { text: "默认链接"; }
-                    Link { theme: 2; text: "成功链接"; underline: true; }
-                    Link { theme: 3; text: "警告链接"; }
-                    Link { theme: 4; text: "危险链接"; }
+                    Link { theme: Theme.success; text: "成功链接"; underline: true; }
+                    Link { theme: Theme.warning; text: "警告链接"; }
+                    Link { theme: Theme.error; text: "危险链接"; }
                     Link { text: "禁用链接"; disabled: true; }
                 }
             }
         }
 
-        CodeBlock { code: "import { Icon, Link, TIconSet } from \"@tela-ui/base.slint\";\n\nIcon { icon: TIconSet.Search; size: 20px; }\nLink { text: \"默认链接\"; }\nLink { text: \"成功链接\"; theme: 2; underline: true; }"; }
+        CodeBlock { code: "import { Icon, Link, TIconSet } from \"@tela-ui/base.slint\";\n\nIcon { icon: TIconSet.Search; size: 20px; }\nLink { text: \"默认链接\"; }\nLink { text: \"成功链接\"; theme: Theme.success; underline: true; }"; }
     }
 
     // ==================== Typography ======================

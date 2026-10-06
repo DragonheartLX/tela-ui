@@ -1,10 +1,9 @@
 // Demo section: 数据录入 (Input / Select / TextArea / CheckBox / Radio /
 // Switch / Slider).
 
-import { TelaTheme } from "@tela-ui/theme.slint";
+import { TelaTheme, Size } from "@tela-ui/theme.slint";
 import { TIconSet } from "@tela-ui/base.slint";
-import { Input, TextArea, Select, SelectItem, CheckBox, RadioGroup, RadioItem, Switch, Slider, Card } from "@tela-ui/common.slint";
-import { CodeBlock } from "code-block.slint";
+import { Input, TextArea, Select, SelectItem, CheckBox, RadioGroup, RadioItem, Switch, Slider, Card , CodeBlock} from "@tela-ui/common.slint";
 
 export component FormSection inherits VerticalLayout {
     spacing: 28px;
@@ -113,6 +112,10 @@ export component FormSection inherits VerticalLayout {
                 CheckBox { text: "选项 B"; checked <=> root.check-b; }
                 CheckBox { text: "禁用"; disabled: true; }
                 CheckBox { text: "选中禁用"; checked: true; disabled: true; }
+                // Absorbs the leftover row space: with only fixed-width
+                // children the layout spreads the slack between the items
+                // and shoves the row against the card edge.
+                Rectangle { }
             }
 
             // Row 5: Radio
@@ -151,8 +154,9 @@ export component FormSection inherits VerticalLayout {
                 Switch { checked: false; }
                 Switch { checked: true; disabled: true; }
                 Switch { checked: false; disabled: true; }
-                Switch { size: 0; checked: true; }
-                Switch { size: 2; checked: false; }
+                Switch { size: Size.small; checked: true; }
+                Switch { size: Size.large; checked: false; }
+                Rectangle { }
             }
 
             // Row 7: Slider

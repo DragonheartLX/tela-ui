@@ -1,18 +1,25 @@
 // Tela UI — Tag
 //
-// Small status descriptor. theme: 0 default, 1 primary, 2 success,
-// 3 warning, 4 danger; variant: 0 dark (filled), 1 light, 2 outline;
-// size: 0 small, 1 medium, 2 large. Closable tags emit `closed`; tags
-// emit `clicked` when `clickable` styling is desired.
+// Small status descriptor. theme: Theme (default/primary/success/warning/
+// error); variant: TagVariant (dark filled / light / outline); size: Size.
+// Closable tags emit `closed`; tags emit `clicked` when `clickable`
+// styling is desired.
 
 import { TelaTheme } from "../theme.slint";
 import { Icon } from "icon/icon.slint";
 import { TIconSet, TIconData } from "icon/data.slint";
+import { Theme, Size } from "../structs/enums.slint";
+export enum TagVariant {
+    dark,
+    light,
+    outline,
+}
+import { TIconSet, TIconData } from "icon/data.slint";
 
 export component Tag inherits Rectangle {
-    in property <int> theme: 0;
-    in property <int> variant: 0;
-    in property <int> size: 1;
+    in property <Theme> theme: Theme.default;
+    in property <TagVariant> variant: TagVariant.dark;
+    in property <Size> size: Size.medium;
     in property <string> text;
     in property <TIconData> icon;
     in property <bool> closable;
@@ -22,25 +29,25 @@ export component Tag inherits Rectangle {
     callback closed();
     callback clicked();
 
-    private property <length> h: size == 0 ? 20px : size == 2 ? 28px : 24px;
+    private property <length> h: size == Size.small ? 20px : size == Size.large ? 28px : 24px;
     private property <length> fs: TelaTheme.font-size-s;
-    private property <length> pad-lr: size == 0 ? 6px : size == 2 ? 12px : 8px;
+    private property <length> pad-lr: size == Size.small ? 6px : size == Size.large ? 12px : 8px;
 
     // Rest state; overridden by the `states` below.
     private property <brush> bg:
-        variant == 0 ? (theme == 0 ? TelaTheme.bg-color-component : TelaTheme.theme-color(theme))
-        : variant == 1 ? (theme == 0 ? TelaTheme.bg-color-secondarycontainer : TelaTheme.theme-color-light(theme))
+        variant == TagVariant.dark ? (theme == Theme.default ? TelaTheme.bg-color-component : TelaTheme.theme-color(theme))
+        : variant == TagVariant.light ? (theme == Theme.default ? TelaTheme.bg-color-secondarycontainer : TelaTheme.theme-color-light(theme))
         : transparent;
     private property <brush> content-color:
-        variant == 0 ? (theme == 0 ? TelaTheme.text-color-primary : TelaTheme.text-color-anti)
-        : variant == 1 ? (theme == 0 ? TelaTheme.text-color-primary : TelaTheme.theme-color(theme))
-        : (theme == 0 ? TelaTheme.text-color-secondary : TelaTheme.theme-color(theme));
+        variant == TagVariant.dark ? (theme == Theme.default ? TelaTheme.text-color-primary : TelaTheme.text-color-anti)
+        : variant == TagVariant.light ? (theme == Theme.default ? TelaTheme.text-color-primary : TelaTheme.theme-color(theme))
+        : (theme == Theme.default ? TelaTheme.text-color-secondary : TelaTheme.theme-color(theme));
     private property <brush> border-brush:
-        variant == 2 ? (theme == 0 ? TelaTheme.component-border : TelaTheme.theme-color(theme))
+        variant == TagVariant.outline ? (theme == Theme.default ? TelaTheme.component-border : TelaTheme.theme-color(theme))
         : transparent;
 
     background: bg;
-    border-width: variant == 2 ? 1px : 0;
+    border-width: variant == TagVariant.outline ? 1px : 0;
     border-color: border-brush;
     border-radius: TelaTheme.radius-default;
     height: h;
@@ -52,14 +59,14 @@ export component Tag inherits Rectangle {
     // Later states win over earlier ones.
     states [
         hovered when touch.has-hover && root.clickable && !root.disabled: {
-            bg: variant == 0 ? (theme == 0 ? TelaTheme.bg-color-component-hover : TelaTheme.theme-color-hover(theme))
-                : variant == 1 ? (theme == 0 ? TelaTheme.bg-color-secondarycontainer-hover : TelaTheme.theme-color-light-hover(theme))
+            bg: variant == TagVariant.dark ? (theme == Theme.default ? TelaTheme.bg-color-component-hover : TelaTheme.theme-color-hover(theme))
+                : variant == TagVariant.light ? (theme == Theme.default ? TelaTheme.bg-color-secondarycontainer-hover : TelaTheme.theme-color-light-hover(theme))
                 : transparent;
         }
         disabled when root.disabled: {
-            bg: variant == 0 ? TelaTheme.bg-color-component-disabled : transparent;
+            bg: variant == TagVariant.dark ? TelaTheme.bg-color-component-disabled : transparent;
             content-color: TelaTheme.text-color-disabled;
-            border-brush: variant == 2 ? TelaTheme.border-level-1-color : transparent;
+            border-brush: variant == TagVariant.outline ? TelaTheme.border-level-1-color : transparent;
         }
     ]
 

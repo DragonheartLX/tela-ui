@@ -1,22 +1,26 @@
 // Tela UI component gallery — showcases the whole tela-ui library.
-// The demo itself is organized by the NavBar component: each menu item
-// switches a demo group, and every group pairs live examples with code
-// blocks. Toggle 深色模式 in the nav bar to switch light/dark live.
+// The gallery itself runs on BorderlessWindow: its branded title bar
+// (logo + title at the top-left, min/max/close at the right) owns the top
+// edge; the collapsible SideNav below switches pages and carries the
+// dark-mode toggle at its bottom edge.
 
 import { TelaTheme, TelaThemePreference } from "@tela-ui/theme.slint";
-import { TIconSet, Paragraph, Button } from "@tela-ui/base.slint";
-import { NavBar, NavItem, Switch, Dialog, Drawer, MessageOverlay, TelaMessage } from "@tela-ui/common.slint";
+import { BorderlessWindow, TIconSet, Paragraph, Button, ButtonVariant } from "@tela-ui/base.slint";
+import { SideNav, SideNavItem, SideNavTogglePosition, Dialog, Drawer, DrawerPlacement, MessageOverlay, TelaMessage } from "@tela-ui/common.slint";
 import { ScrollView } from "std-widgets.slint";
 
-import { BasicsSection } from "demo/basics.slint";
-import { DataDisplaySection } from "demo/data-display.slint";
-import { FormSection } from "demo/form-section.slint";
-import { FeedbackSection } from "demo/feedback.slint";
-import { NavigationSection } from "demo/navigation.slint";
-import { ExperimentalSection } from "demo/experimental.slint";
+import { BasicsSection } from "pages/basics.slint";
+import { DataDisplaySection } from "pages/data-display.slint";
+import { FormSection } from "pages/form-section.slint";
+import { FeedbackSection } from "pages/feedback.slint";
+import { NavigationSection } from "pages/navigation.slint";
+import { ExperimentalSection } from "pages/experimental.slint";
+import { SettingsSection } from "pages/settings.slint";
 
-export component MainWindow inherits Window {
+export component MainWindow inherits BorderlessWindow {
     title: "Tela UI";
+    logo: TIconSet.LayoutDashboard;
+    header-height: 40px;
     preferred-width: 1200px;
     preferred-height: 800px;
     background: TelaTheme.bg-color-page;
@@ -24,58 +28,69 @@ export component MainWindow inherits Window {
     // ------------------------------------------------------------------
     // Demo state
     // ------------------------------------------------------------------
-    in property <[NavItem]> group-items: [
-        { label: "基础组件", value: "basics" },
-        { label: "数据展示", value: "display" },
-        { label: "数据录入", value: "form" },
-        { label: "反馈", value: "feedback" },
-        { label: "导航", value: "navigation" },
-        { label: "实验性", value: "experimental" },
+    in property <[SideNavItem]> group-items: [
+        { label: "基础组件", value: "basics", icon: TIconSet.LayoutDashboard },
+        { label: "数据展示", value: "display", icon: TIconSet.Image },
+        { label: "数据录入", value: "form", icon: TIconSet.Pencil },
+        { label: "反馈", value: "feedback", icon: TIconSet.Bell },
+        { label: "导航", value: "navigation", icon: TIconSet.Menu },
+        { label: "实验性", value: "experimental", icon: TIconSet.FlaskConical },
     ];
     in-out property <string> group-value: "basics";
     in-out property <bool> dialog-open: false;
     in-out property <bool> drawer-open: false;
+    in-out property <DrawerPlacement> drawer-placement: DrawerPlacement.right;
 
     VerticalLayout {
-        NavBar {
-            title: "Tela UI";
-            logo: TIconSet.LayoutDashboard;
-            items: root.group-items;
-            current-value <=> root.group-value;
-
-            Switch {
-                y: (parent.height - self.height) / 2;
-                // Reflects the mode actually in effect (system resolved).
-                checked: TelaTheme.is-dark;
-                changed(c) => {
-                    TelaTheme.preference = c ? TelaThemePreference.dark : TelaThemePreference.light;
+        HorizontalLayout {
+            // Left: collapsible page navigation. The footer stacks the
+            // dark-mode switch above the settings entry, with TDesign's fold
+            // button at the very bottom; the switch's label names the mode
+            // clicking moves to (moon → dark, sun → light).
+            SideNav {
+                toggle-position: SideNavTogglePosition.bottom;
+                footer-items: [
+                    {
+                        icon: TelaTheme.is-dark ? TIconSet.Sun : TIconSet.Moon,
+                        label: TelaTheme.is-dark ? "浅色模式" : "深色模式",
+                    },
+                    { icon: TIconSet.Settings, label: "设置", value: "settings" },
+                ];
+                footer-clicked(item) => {
+                    TelaTheme.preference = TelaTheme.is-dark
+                        ? TelaThemePreference.light
+                        : TelaThemePreference.dark;
                 }
+                items: root.group-items;
+                current-value <=> root.group-value;
             }
-        }
 
-        // Content ---------------------------------------------------------
-        Rectangle {
-            vertical-stretch: 1;
+            // Content -----------------------------------------------------
+            Rectangle {
+                vertical-stretch: 1;
 
-            ScrollView {
-                VerticalLayout {
-                    padding: 32px;
-                    spacing: 28px;
+                ScrollView {
+                    VerticalLayout {
+                        padding: 32px;
+                        spacing: 28px;
 
-                    if root.group-value == "basics": BasicsSection { vertical-stretch: 0; }
-                    if root.group-value == "display": DataDisplaySection { vertical-stretch: 0; }
-                    if root.group-value == "form": FormSection { vertical-stretch: 0; }
-                    if root.group-value == "feedback": FeedbackSection {
-                        vertical-stretch: 0;
-                        dialog-open <=> root.dialog-open;
-                        drawer-open <=> root.drawer-open;
+                        if root.group-value == "basics": BasicsSection { vertical-stretch: 0; }
+                        if root.group-value == "display": DataDisplaySection { vertical-stretch: 0; }
+                        if root.group-value == "form": FormSection { vertical-stretch: 0; }
+                        if root.group-value == "feedback": FeedbackSection {
+                            vertical-stretch: 0;
+                            dialog-open <=> root.dialog-open;
+                            drawer-open <=> root.drawer-open;
+                            drawer-placement <=> root.drawer-placement;
+                        }
+                        if root.group-value == "navigation": NavigationSection { vertical-stretch: 0; }
+                        if root.group-value == "experimental": ExperimentalSection { vertical-stretch: 0; }
+                        if root.group-value == "settings": SettingsSection { vertical-stretch: 0; }
+
+                        // Spacer: keep sections at their natural height when the
+                        // viewport is taller than the content.
+                        Rectangle { vertical-stretch: 1; }
                     }
-                    if root.group-value == "navigation": NavigationSection { vertical-stretch: 0; }
-                    if root.group-value == "experimental": ExperimentalSection { vertical-stretch: 0; }
-
-                    // Spacer: keep sections at their natural height when the
-                    // viewport is taller than the content.
-                    Rectangle { vertical-stretch: 1; }
                 }
             }
         }
@@ -91,11 +106,12 @@ export component MainWindow inherits Window {
 
     Drawer {
         open <=> root.drawer-open;
+        placement <=> root.drawer-placement;
         title: "抽屉标题";
 
-        Paragraph { text: "这是 Tela UI 的抽屉组件,从窗口右侧滑出,适合放置表单、详情等较大面积的临时内容。"; }
+        Paragraph { text: "这是 Tela UI 的抽屉组件,从窗口边缘滑出,适合放置表单、详情等较大面积的临时内容。"; }
         Button {
-            variant: 1;
+            variant: ButtonVariant.outline;
             text: "关闭抽屉";
             clicked => { root.drawer-open = false; }
         }

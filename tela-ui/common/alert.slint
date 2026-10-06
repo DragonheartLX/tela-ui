@@ -1,15 +1,17 @@
 // Tela UI — Alert
 //
-// Inline feedback banner. theme: 0 info, 1 primary, 2 success, 3 warning,
-// 4 error. Title is styled in the theme color, description in primary
+// Inline feedback banner. theme: Theme (default/primary/success/warning/
+// error). Title is styled in the theme color, description in primary
 // text; optionally closable (sets `open = false`).
 
 import { TelaTheme } from "../theme.slint";
 import { Icon } from "../base/icon/icon.slint";
 import { TIconSet } from "../base/icon/data.slint";
+import { Theme } from "../structs/enums.slint";
+import { TIconSet } from "../base/icon/data.slint";
 
 export component Alert inherits Rectangle {
-    in property <int> theme: 0;
+    in property <Theme> theme: Theme.default;
     in property <string> title;
     in property <string> description;
     in property <bool> closable: false;
@@ -30,9 +32,9 @@ export component Alert inherits Rectangle {
 
         Icon {
             y: root.description == "" ? (parent.height - self.height) / 2 : 3px;
-            icon: root.theme == 2 ? TIconSet.CircleCheck
-                : root.theme == 3 ? TIconSet.CircleAlert
-                : root.theme == 4 ? TIconSet.CircleX
+            icon: root.theme == Theme.success ? TIconSet.CircleCheck
+                : root.theme == Theme.warning ? TIconSet.CircleAlert
+                : root.theme == Theme.error ? TIconSet.CircleX
                 : TIconSet.Info;
             size: 20px;
             icon-color: TelaTheme.theme-color(root.theme);

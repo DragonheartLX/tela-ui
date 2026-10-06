@@ -1,0 +1,44 @@
+// Demo section: 实验性 (Skeleton). APIs here are unstable.
+
+import { Skeleton } from "@tela-ui/experimental.slint";
+import { Paragraph } from "@tela-ui/base.slint";
+import { Card , CodeBlock} from "@tela-ui/common.slint";
+
+export component ExperimentalSection inherits VerticalLayout {
+    spacing: 28px;
+
+    Card {
+        title: "实验性 Experimental(Skeleton)";
+
+        HorizontalLayout {
+            spacing: 16px;
+
+            Skeleton { width: 48px; height: 48px; circle: true; }
+
+            VerticalLayout {
+                spacing: 8px;
+
+                Skeleton { height: 14px; width: 260px; }
+                Skeleton { height: 14px; width: 220px; }
+                Skeleton { height: 14px; width: 180px; }
+            }
+
+            Skeleton { width: 120px; height: 80px; }
+        }
+    }
+
+    CodeBlock { code: "import { Skeleton } from \"@tela-ui/experimental.slint\";\n\nSkeleton { width: 240px; height: 14px; }\nSkeleton { width: 48px; height: 48px; circle: true; }"; }
+
+    // ================== BorderlessWindow ==================
+    VerticalLayout {
+        spacing: 8px;
+
+        Card {
+            title: "无边框窗口 BorderlessWindow";
+
+            Paragraph { text: "以 Window 为根的无边框应用窗口: no-frame 去掉系统装饰, 自绘标题栏含拖拽热区与最小化/最大化/关闭按钮, 关闭钮悬停为红色。最小化/最大化/关闭与拖拽全部纯 .slint 实现 (minimized/maximized 内建属性 + hide() + 内建 WindowMoveArea 拖拽热区)。把 BorderlessWindow 当作应用窗口的根使用 (替代 Window), 子元素即窗口内容。"; }
+        }
+
+        CodeBlock { code: "import { BorderlessWindow } from \"@tela-ui/base.slint\";\n\nBorderlessWindow {\n    title: \"我的应用\";\n    header-height: 40px;\n\n    VerticalLayout {\n        // 窗口内容…\n    }\n}"; }
+    }
+}

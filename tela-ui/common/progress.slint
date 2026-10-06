@@ -1,33 +1,39 @@
 // Tela UI — Progress
 //
 // Linear or circular progress. value: 0..100.
-// variant: 0 line, 1 circle; theme: 0 default, 1 primary, 2 success,
-// 3 warning, 4 error; size: 0 small, 1 medium, 2 large.
+// variant: ProgressVariant (line / circle); theme: Theme; size: Size.
 
+import { TelaTheme } from "../theme.slint";
+import { Theme, Size } from "../structs/enums.slint";
+
+export enum ProgressVariant {
+    line,
+    circle,
+}
 import { TelaTheme } from "../theme.slint";
 
 export component Progress inherits Rectangle {
-    in property <int> variant: 0;
+    in property <ProgressVariant> variant: ProgressVariant.line;
     in property <float> value: 0;
-    in property <int> theme: 1;
-    in property <int> size: 1;
+    in property <Theme> theme: Theme.primary;
+    in property <Size> size: Size.medium;
     in property <bool> show-label: true;
 
     private property <float> p: max(0, min(100, value)) / 100;
     // One animated source drives both the linear fill width and the
     // circular arc, so value changes ease in both variants.
     animate p { duration: TelaTheme.duration-base; }
-    private property <length> th: size == 0 ? 4px : size == 2 ? 10px : 6px;
-    private property <length> d: size == 0 ? 64px : size == 2 ? 96px : 80px;
+    private property <length> th: size == Size.small ? 4px : size == Size.large ? 10px : 6px;
+    private property <length> d: size == Size.small ? 64px : size == Size.large ? 96px : 80px;
     private property <brush> bar-color:
-        theme == 0 ? TelaTheme.brand-color : TelaTheme.theme-color(theme);
+        theme == Theme.default ? TelaTheme.brand-color : TelaTheme.theme-color(theme);
 
-    height: variant == 0 ? TelaTheme.height-m : d;
+    height: variant == ProgressVariant.line ? TelaTheme.height-m : d;
     width: d;
     // Line variant shares the surrounding layout's space; circle is fixed.
-    horizontal-stretch: variant == 0 ? 1 : 0;
+    horizontal-stretch: variant == ProgressVariant.line ? 1 : 0;
 
-    if variant == 0: HorizontalLayout {
+    if variant == ProgressVariant.line: HorizontalLayout {
         spacing: TelaTheme.spacing-2;
 
         Rectangle {
@@ -56,7 +62,7 @@ export component Progress inherits Rectangle {
         }
     }
 
-    if variant == 1: Rectangle {
+    if variant == ProgressVariant.circle: Rectangle {
         width: root.d;
         height: root.d;
 

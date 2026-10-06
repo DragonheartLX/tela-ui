@@ -1,19 +1,20 @@
 // Tela UI — Switch
 //
-// Toggle switch. size: 0 small (36×18), 1 medium (40×22), 2 large (48×24).
+// Toggle switch. size: Size (small 36×18 / medium 40×22 / large 48×24).
 
+import { TelaTheme } from "../theme.slint";
+import { Size } from "../structs/enums.slint";
 import { TelaTheme } from "../theme.slint";
 
 export component Switch inherits Rectangle {
     in-out property <bool> checked;
     in property <bool> disabled;
-    // 0 small, 1 medium, 2 large
-    in property <int> size: 1;
+    in property <Size> size: Size.medium;
 
     callback changed(bool);
 
-    private property <length> w: size == 0 ? 36px : size == 2 ? 48px : 40px;
-    private property <length> h: size == 0 ? 18px : size == 2 ? 24px : 22px;
+    private property <length> w: size == Size.small ? 36px : size == Size.large ? 48px : 40px;
+    private property <length> h: size == Size.small ? 18px : size == Size.large ? 24px : 22px;
     private property <length> thumb: h - 6px;
     private property <length> inset: 3px;
 

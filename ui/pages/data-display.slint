@@ -1,0 +1,128 @@
+// Demo section: 数据展示 (Tag/Badge/Avatar/Loading / Divider / Progress).
+
+import { TelaTheme, Theme, Size } from "@tela-ui/theme.slint";
+import { Icon, TIconSet, Divider, DividerAlign, Tag, TagVariant, Loading } from "@tela-ui/base.slint";
+import { Badge, Avatar, AvatarSize, AvatarShape, Card, Progress, ProgressVariant, Slider , CodeBlock} from "@tela-ui/common.slint";
+
+export component DataDisplaySection inherits VerticalLayout {
+    spacing: 28px;
+
+    // Own state: the slider drives both progress variants.
+    in-out property <float> progress-value: 40;
+
+    // ============= Tag / Badge / Avatar / Loading =========
+    VerticalLayout {
+        spacing: 8px;
+
+        Card {
+            title: "标签、徽标、头像与加载";
+
+            VerticalLayout {
+                spacing: 16px;
+
+                HorizontalLayout {
+                    spacing: 8px;
+                    Tag { text: "默认"; }
+                    Tag { theme: Theme.primary; text: "主要"; }
+                    Tag { theme: Theme.success; text: "成功"; }
+                    Tag { theme: Theme.warning; text: "警告"; }
+                    Tag { theme: Theme.error; text: "危险"; }
+                    Tag { theme: Theme.primary; variant: TagVariant.dark; text: "深色"; }
+                    Tag { theme: Theme.primary; variant: TagVariant.outline; text: "描边"; }
+                    Tag { theme: Theme.primary; text: "可关闭"; closable: true; }
+                    Tag { theme: Theme.primary; size: Size.small; text: "小"; }
+                    Tag { theme: Theme.primary; size: Size.large; text: "大"; }
+                }
+
+                HorizontalLayout {
+                    spacing: 28px;
+
+                    Badge {
+                        count: 6;
+                        Icon { icon: TIconSet.Bell; size: 24px; icon-color: TelaTheme.text-color-primary; }
+                    }
+                    Badge {
+                        count: 128;
+                        Icon { icon: TIconSet.Mail; size: 24px; icon-color: TelaTheme.text-color-primary; }
+                    }
+                    Badge {
+                        dot: true;
+                        Icon { icon: TIconSet.Settings; size: 24px; icon-color: TelaTheme.text-color-primary; }
+                    }
+
+                    Divider { orientation: Orientation.vertical; }
+
+                    Avatar { text: "T"; }
+                    Avatar { size: AvatarSize.small; text: "TD"; }
+                    Avatar { size: AvatarSize.large; text: "龙"; }
+                    Avatar { size: AvatarSize.extra-large; shape: AvatarShape.square; text: ""; }
+                }
+
+                HorizontalLayout {
+                    spacing: 28px;
+                    Loading { size: 16px; }
+                    Loading { size: 24px; text: "加载中…"; }
+                    Loading { size: 32px; theme: Theme.success; text: "上传中…"; }
+                }
+            }
+        }
+
+        CodeBlock { code: "import { Tag, Loading } from \"@tela-ui/base.slint\";\nimport { Badge, Avatar } from \"@tela-ui/common.slint\";\n\nTag { text: \"主要\"; theme: Theme.primary; closable: true; }\nBadge { count: 6; Icon { icon: TIconSet.Bell; } }\nAvatar { text: \"T\"; }\nLoading { size: 24px; text: \"加载中…\"; }"; }
+    }
+
+    // ======================= Divider =======================
+    VerticalLayout {
+        spacing: 8px;
+
+        Card {
+            title: "分割线 Divider";
+
+            VerticalLayout {
+                spacing: 4px;
+
+                Divider { text: "居中文字"; }
+                Divider { text: "左方文字"; align: DividerAlign.left; }
+                Divider { text: "右方文字"; align: DividerAlign.right; }
+                Divider { }
+            }
+        }
+
+        CodeBlock { code: "import { Divider } from \"@tela-ui/base.slint\";\n\nDivider { text: \"居中文字\"; }\nDivider { text: \"左方文字\"; align: DividerAlign.left; }\nDivider { orientation: Orientation.vertical; }"; }
+    }
+
+    // ====================== Progress =======================
+    VerticalLayout {
+        spacing: 8px;
+
+        Card {
+            title: "进度 Progress(拖动滑块实时变化)";
+
+            VerticalLayout {
+                spacing: 16px;
+
+                HorizontalLayout {
+                    spacing: 32px;
+
+                    Progress { value: root.progress-value; theme: Theme.primary; horizontal-stretch: 1; }
+                    Progress { value: 66; theme: Theme.success; horizontal-stretch: 1; }
+                    Progress { value: 30; theme: Theme.warning; horizontal-stretch: 1; }
+                    Progress { value: 90; theme: Theme.error; horizontal-stretch: 1; show-label: false; }
+                }
+
+                HorizontalLayout {
+                    spacing: 32px;
+                    Progress { variant: ProgressVariant.circle; value: root.progress-value; theme: Theme.primary; }
+                    Progress { variant: ProgressVariant.circle; value: 66; theme: Theme.success; }
+                    Progress { variant: ProgressVariant.circle; value: 30; theme: Theme.warning; }
+                    Progress { variant: ProgressVariant.circle; value: 100; theme: Theme.error; }
+                }
+
+                Slider {
+                    value <=> root.progress-value;
+                }
+            }
+        }
+
+        CodeBlock { code: "import { Progress } from \"@tela-ui/common.slint\";\n\nProgress { value: 40; theme: Theme.primary; }\nProgress { value: 66; theme: Theme.success; variant: ProgressVariant.circle; }\nProgress { value: 90; theme: Theme.error; show-label: false; }"; }
+    }
+}

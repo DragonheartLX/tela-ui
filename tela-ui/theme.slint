@@ -13,6 +13,11 @@
 
 import { Palette } from "std-widgets.slint";
 import { TPrimaryColor, TAppThemeConfig } from "structs/theme.slint";
+import { Theme } from "structs/enums.slint";
+
+// Shared semantic enums ride along with the tokens, so one import covers
+// both: import { TelaTheme, Theme, Size } from "@tela-ui/theme.slint";
+export { Theme, Size } from "structs/enums.slint";
 import { TLightColors, TDarkColors } from "colors.slint";
 
 export enum TelaThemePreference {
@@ -446,54 +451,53 @@ export global TelaTheme {
     out property <duration> duration-slow: root.theme.duration-slow;
 
     // ------------------------------------------------------------------
-    // Helpers for components keyed by a `theme` index:
-    // 0 = default, 1 = primary/brand, 2 = success, 3 = warning, 4 = error
+    // Helpers for components keyed by the `Theme` semantic role.
     // ------------------------------------------------------------------
-    public pure function theme-color(t: int) -> color {
-        t == 1 ? root.theme.primary.color
-        : t == 2 ? root.theme.success.color
-        : t == 3 ? root.theme.warning.color
-        : t == 4 ? root.theme.error.color
+    public pure function theme-color(t: Theme) -> color {
+        t == Theme.primary ? root.theme.primary.color
+        : t == Theme.success ? root.theme.success.color
+        : t == Theme.warning ? root.theme.warning.color
+        : t == Theme.error ? root.theme.error.color
         : root.theme.text-primary;
     }
 
-    public pure function theme-color-hover(t: int) -> color {
-        t == 1 ? root.theme.primary.hover
-        : t == 2 ? root.theme.success.hover
-        : t == 3 ? root.theme.warning.hover
-        : t == 4 ? root.theme.error.hover
+    public pure function theme-color-hover(t: Theme) -> color {
+        t == Theme.primary ? root.theme.primary.hover
+        : t == Theme.success ? root.theme.success.hover
+        : t == Theme.warning ? root.theme.warning.hover
+        : t == Theme.error ? root.theme.error.hover
         : root.theme.text-primary;
     }
 
-    public pure function theme-color-active(t: int) -> color {
-        t == 1 ? root.theme.primary.active
-        : t == 2 ? root.theme.success.active
-        : t == 3 ? root.theme.warning.active
-        : t == 4 ? root.theme.error.active
+    public pure function theme-color-active(t: Theme) -> color {
+        t == Theme.primary ? root.theme.primary.active
+        : t == Theme.success ? root.theme.success.active
+        : t == Theme.warning ? root.theme.warning.active
+        : t == Theme.error ? root.theme.error.active
         : root.theme.text-primary;
     }
 
-    public pure function theme-color-light(t: int) -> color {
-        t == 1 ? root.theme.primary.light
-        : t == 2 ? root.theme.success.light
-        : t == 3 ? root.theme.warning.light
-        : t == 4 ? root.theme.error.light
+    public pure function theme-color-light(t: Theme) -> color {
+        t == Theme.primary ? root.theme.primary.light
+        : t == Theme.success ? root.theme.success.light
+        : t == Theme.warning ? root.theme.warning.light
+        : t == Theme.error ? root.theme.error.light
         : root.theme.bg-secondarycontainer;
     }
 
-    public pure function theme-color-light-hover(t: int) -> color {
-        t == 1 ? root.theme.primary.light-hover
-        : t == 2 ? root.theme.success.light-hover
-        : t == 3 ? root.theme.warning.light-hover
-        : t == 4 ? root.theme.error.light-hover
+    public pure function theme-color-light-hover(t: Theme) -> color {
+        t == Theme.primary ? root.theme.primary.light-hover
+        : t == Theme.success ? root.theme.success.light-hover
+        : t == Theme.warning ? root.theme.warning.light-hover
+        : t == Theme.error ? root.theme.error.light-hover
         : root.theme.bg-secondarycontainer-hover;
     }
 
-    public pure function theme-color-disabled(t: int) -> color {
-        t == 1 ? root.theme.primary.disabled
-        : t == 2 ? root.theme.success.disabled
-        : t == 3 ? root.theme.warning.disabled
-        : t == 4 ? root.theme.error.disabled
+    public pure function theme-color-disabled(t: Theme) -> color {
+        t == Theme.primary ? root.theme.primary.disabled
+        : t == Theme.success ? root.theme.success.disabled
+        : t == Theme.warning ? root.theme.warning.disabled
+        : t == Theme.error ? root.theme.error.disabled
         : root.theme.text-disabled;
     }
 }

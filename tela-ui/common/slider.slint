@@ -65,8 +65,10 @@ export component Slider inherits Rectangle {
     }
 
     // Filled portion: ends at the handle center (t * width), so 0% shows no
-    // fill and 100% fills the whole track.
+    // fill and 100% fills the whole track. x must be bound: outside a layout
+    // an unbound x centers the element, growing the fill from the middle.
     Rectangle {
+        x: 0;
         y: (parent.height - root.track-h) / 2;
         width: root.t * parent.width;
         height: root.track-h;
