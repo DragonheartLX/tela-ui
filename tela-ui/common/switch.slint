@@ -13,8 +13,14 @@ export component Switch inherits Rectangle {
 
     callback changed(bool);
 
-    private property <length> w: size == Size.small ? 36px : size == Size.large ? 48px : 40px;
-    private property <length> h: size == Size.small ? 18px : size == Size.large ? 24px : 22px;
+    private property <length> w:
+        size == Size.small ? 36px
+        : size == Size.large ? 48px
+        : 40px;
+    private property <length> h:
+        size == Size.small ? 18px
+        : size == Size.large ? 24px
+        : 22px;
     private property <length> thumb: h - 6px;
     private property <length> inset: 3px;
 

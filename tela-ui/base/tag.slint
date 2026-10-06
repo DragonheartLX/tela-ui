@@ -29,21 +29,39 @@ export component Tag inherits Rectangle {
     callback closed();
     callback clicked();
 
-    private property <length> h: size == Size.small ? 20px : size == Size.large ? 28px : 24px;
+    private property <length> h:
+        size == Size.small ? 20px
+        : size == Size.large ? 28px
+        : 24px;
     private property <length> fs: TelaTheme.font-size-s;
-    private property <length> pad-lr: size == Size.small ? 6px : size == Size.large ? 12px : 8px;
+    private property <length> pad-lr:
+        size == Size.small ? 6px
+        : size == Size.large ? 12px
+        : 8px;
+
+    // Per-role colors for the current theme (default renders neutral grays,
+    // other themes use their color ramp) so the rest binding and `states`
+    // below stay flat.
+    private property <color> fill: theme == Theme.default ? TelaTheme.bg-color-component : TelaTheme.theme-color(theme);
+    private property <color> fill-hover: theme == Theme.default ? TelaTheme.bg-color-component-hover : TelaTheme.theme-color-hover(theme);
+    private property <color> tint: theme == Theme.default ? TelaTheme.bg-color-secondarycontainer : TelaTheme.theme-color-light(theme);
+    private property <color> tint-hover: theme == Theme.default ? TelaTheme.bg-color-secondarycontainer-hover : TelaTheme.theme-color-light-hover(theme);
+    private property <color> text-dark: theme == Theme.default ? TelaTheme.text-color-primary : TelaTheme.text-color-anti;
+    private property <color> text-tonal: theme == Theme.default ? TelaTheme.text-color-primary : TelaTheme.theme-color(theme);
+    private property <color> text-outline: theme == Theme.default ? TelaTheme.text-color-secondary : TelaTheme.theme-color(theme);
+    private property <color> border-rest: theme == Theme.default ? TelaTheme.component-border : TelaTheme.theme-color(theme);
 
     // Rest state; overridden by the `states` below.
     private property <brush> bg:
-        variant == TagVariant.dark ? (theme == Theme.default ? TelaTheme.bg-color-component : TelaTheme.theme-color(theme))
-        : variant == TagVariant.light ? (theme == Theme.default ? TelaTheme.bg-color-secondarycontainer : TelaTheme.theme-color-light(theme))
+        variant == TagVariant.dark ? root.fill
+        : variant == TagVariant.light ? root.tint
         : transparent;
     private property <brush> content-color:
-        variant == TagVariant.dark ? (theme == Theme.default ? TelaTheme.text-color-primary : TelaTheme.text-color-anti)
-        : variant == TagVariant.light ? (theme == Theme.default ? TelaTheme.text-color-primary : TelaTheme.theme-color(theme))
-        : (theme == Theme.default ? TelaTheme.text-color-secondary : TelaTheme.theme-color(theme));
+        variant == TagVariant.dark ? root.text-dark
+        : variant == TagVariant.light ? root.text-tonal
+        : root.text-outline;
     private property <brush> border-brush:
-        variant == TagVariant.outline ? (theme == Theme.default ? TelaTheme.component-border : TelaTheme.theme-color(theme))
+        variant == TagVariant.outline ? root.border-rest
         : transparent;
 
     background: bg;
@@ -59,8 +77,8 @@ export component Tag inherits Rectangle {
     // Later states win over earlier ones.
     states [
         hovered when touch.has-hover && root.clickable && !root.disabled: {
-            bg: variant == TagVariant.dark ? (theme == Theme.default ? TelaTheme.bg-color-component-hover : TelaTheme.theme-color-hover(theme))
-                : variant == TagVariant.light ? (theme == Theme.default ? TelaTheme.bg-color-secondarycontainer-hover : TelaTheme.theme-color-light-hover(theme))
+            bg: variant == TagVariant.dark ? root.fill-hover
+                : variant == TagVariant.light ? root.tint-hover
                 : transparent;
         }
         disabled when root.disabled: {

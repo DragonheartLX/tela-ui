@@ -5,7 +5,6 @@
 
 import { TelaTheme } from "../theme.slint";
 import { Theme } from "../structs/enums.slint";
-import { TelaTheme } from "../theme.slint";
 
 export component LoadingSpinner inherits Rectangle {
     in property <brush> spinner-color: TelaTheme.brand-color;
@@ -61,22 +60,34 @@ export component LoadingSpinner inherits Rectangle {
     }
 }
 
-// Loading indicator with an optional label beside the spinner.
-export component Loading inherits HorizontalLayout {
+// Loading indicator with an optional label beside the spinner. The outer
+// Rectangle absorbs whatever height the surrounding layout assigns (e.g. a
+// row with taller siblings — a stretched layout top-aligns the fixed-height
+// spinner but center-stretches the label, so their centers drift apart);
+// the inner row keeps its preferred height pinned to the vertical center,
+// so ring and label always share one center line.
+export component Loading inherits Rectangle {
     in property <string> text;
     in property <Theme> theme: Theme.primary;
     in-out property <length> size: 24px;
-    spacing: TelaTheme.spacing-2;
 
-    LoadingSpinner {
-        spinner-color: TelaTheme.theme-color(root.theme);
-        size: root.size;
-    }
+    row := HorizontalLayout {
+        x: 0;
+        y: (parent.height - self.preferred-height) / 2;
+        width: self.preferred-width;
+        height: self.preferred-height;
+        spacing: TelaTheme.spacing-2;
 
-    if root.text != "": Text {
-        text: root.text;
-        font-size: TelaTheme.font-size-m;
-        color: TelaTheme.text-color-secondary;
-        vertical-alignment: center;
+        LoadingSpinner {
+            spinner-color: TelaTheme.theme-color(root.theme);
+            size: root.size;
+        }
+
+        if root.text != "": Text {
+            text: root.text;
+            font-size: TelaTheme.font-size-m;
+            color: TelaTheme.text-color-secondary;
+            vertical-alignment: center;
+        }
     }
 }

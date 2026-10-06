@@ -86,12 +86,16 @@ export component MessageOverlay inherits Rectangle {
     }
 
     pill := Rectangle {
+        // Gap to the window edge: tucked closer while animating in, resting
+        // gap once visible.
+        property <length> edge-gap: TelaMessage.visible ? 24px : 12px;
+
         x: root.to-left ? 24px
             : root.to-right ? parent.width - self.width - 24px
             : (parent.width - self.width) / 2;
         y: root.to-bottom
-            ? parent.height - self.height - (TelaMessage.visible ? 24px : 12px)
-            : (TelaMessage.visible ? 24px : 12px);
+            ? parent.height - self.height - self.edge-gap
+            : self.edge-gap;
         width: row.preferred-width + TelaTheme.padding-lr-m * 2;
         height: TelaTheme.height-m + 8px;
         border-radius: TelaTheme.radius-medium;

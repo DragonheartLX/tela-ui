@@ -23,8 +23,14 @@ export component Progress inherits Rectangle {
     // One animated source drives both the linear fill width and the
     // circular arc, so value changes ease in both variants.
     animate p { duration: TelaTheme.duration-base; }
-    private property <length> th: size == Size.small ? 4px : size == Size.large ? 10px : 6px;
-    private property <length> d: size == Size.small ? 64px : size == Size.large ? 96px : 80px;
+    private property <length> th:
+        size == Size.small ? 4px
+        : size == Size.large ? 10px
+        : 6px;
+    private property <length> d:
+        size == Size.small ? 64px
+        : size == Size.large ? 96px
+        : 80px;
     private property <brush> bar-color:
         theme == Theme.default ? TelaTheme.brand-color : TelaTheme.theme-color(theme);
 

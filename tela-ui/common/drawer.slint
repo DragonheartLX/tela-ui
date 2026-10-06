@@ -56,14 +56,16 @@ export component Drawer inherits Rectangle {
     panel := Rectangle {
         width: root.horizontal ? min(root.drawer-width, parent.width - 48px) : parent.width;
         height: root.horizontal ? parent.height : min(root.drawer-height, parent.height - 48px);
+        // Slide targets per edge, named so the x/y bindings stay flat:
+        // left/top rest just off-window, right/bottom just past it.
+        property <length> left-x: root.open ? 0px : -self.width;
+        property <length> right-x: root.open ? parent.width - self.width : parent.width;
+        property <length> top-y: root.open ? 0px : -self.height;
+        property <length> bottom-y: root.open ? parent.height - self.height : parent.height;
         x: !root.horizontal ? 0
-            : root.placement == DrawerPlacement.left
-                ? (root.open ? 0px : -self.width)
-                : (root.open ? parent.width - self.width : parent.width);
+            : root.placement == DrawerPlacement.left ? self.left-x : self.right-x;
         y: root.horizontal ? 0
-            : root.placement == DrawerPlacement.top
-                ? (root.open ? 0px : -self.height)
-                : (root.open ? parent.height - self.height : parent.height);
+            : root.placement == DrawerPlacement.top ? self.top-y : self.bottom-y;
         background: TelaTheme.bg-color-container;
         drop-shadow-blur: TelaTheme.shadow-3-blur;
         drop-shadow-offset-y: TelaTheme.shadow-3-offset-y;

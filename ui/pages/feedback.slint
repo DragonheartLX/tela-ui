@@ -21,6 +21,13 @@ export component FeedbackSection inherits VerticalLayout {
         { label: "底部", value: "bottom", disabled: false },
     ];
     in-out property <int> drawer-side-index: 0;
+    // Same order as `drawer-side-items`, so the Select index picks directly.
+    in property <[DrawerPlacement]> drawer-placements: [
+        DrawerPlacement.right,
+        DrawerPlacement.left,
+        DrawerPlacement.top,
+        DrawerPlacement.bottom,
+    ];
 
     in property <[SelectItem]> placement-items: [
         { label: "顶部居中", value: "top-center", disabled: false },
@@ -31,6 +38,15 @@ export component FeedbackSection inherits VerticalLayout {
         { label: "底部居右", value: "bottom-right", disabled: false },
     ];
     in-out property <int> placement-index: 0;
+    // Same order as `placement-items`.
+    in property <[MessagePlacement]> message-placements: [
+        MessagePlacement.top-center,
+        MessagePlacement.top-left,
+        MessagePlacement.top-right,
+        MessagePlacement.bottom-center,
+        MessagePlacement.bottom-left,
+        MessagePlacement.bottom-right,
+    ];
 
     Card {
         title: "反馈 Alert & Message & Dialog";
@@ -58,12 +74,7 @@ export component FeedbackSection inherits VerticalLayout {
                     items: root.placement-items;
                     current-index <=> root.placement-index;
                     selected(i, v) => {
-                        TelaMessage.placement = i == 0 ? MessagePlacement.top-center
-                            : i == 1 ? MessagePlacement.top-left
-                            : i == 2 ? MessagePlacement.top-right
-                            : i == 3 ? MessagePlacement.bottom-center
-                            : i == 4 ? MessagePlacement.bottom-left
-                            : MessagePlacement.bottom-right;
+                        TelaMessage.placement = root.message-placements[i];
                     }
                 }
             }
@@ -89,10 +100,7 @@ export component FeedbackSection inherits VerticalLayout {
                     items: root.drawer-side-items;
                     current-index <=> root.drawer-side-index;
                     selected(i, v) => {
-                        root.drawer-placement = i == 0 ? DrawerPlacement.right
-                            : i == 1 ? DrawerPlacement.left
-                            : i == 2 ? DrawerPlacement.top
-                            : DrawerPlacement.bottom;
+                        root.drawer-placement = root.drawer-placements[i];
                     }
                 }
 

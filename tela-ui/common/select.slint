@@ -5,7 +5,6 @@
 
 import { TelaTheme } from "../theme.slint";
 import { Size } from "../structs/enums.slint";
-import { TelaTheme } from "../theme.slint";
 import { Icon } from "../base/icon/icon.slint";
 import { TIconData, TIconSet } from "../base/icon/data.slint";
 
@@ -22,15 +21,12 @@ export component Select inherits Rectangle {
     in property <string> placeholder-text;
     in property <bool> disabled;
     in property <TIconData> prefix-icon;
-    // 0 small, 1 medium, 2 large
     in property <Size> size: Size.medium;
 
     callback selected(int, string);
 
-    private property <length> h:
-        size == Size.small ? TelaTheme.height-s : size == Size.large ? TelaTheme.height-l : TelaTheme.height-m;
-    private property <length> fs:
-        size == Size.small ? TelaTheme.font-size-s : size == Size.large ? TelaTheme.font-size-l : TelaTheme.font-size-m;
+    private property <length> h: TelaTheme.size-height(size);
+    private property <length> fs: TelaTheme.size-font(size);
     private property <length> item-h: 32px;
 
     private property <string> display-label:
@@ -82,12 +78,20 @@ export component Select inherits Rectangle {
             text: root.has-selection ? root.display-label : root.placeholder-text;
             font-size: root.fs;
             font-family: TelaTheme.font-family;
-            color: root.disabled ? TelaTheme.text-color-disabled
-                : root.has-selection ? TelaTheme.text-color-primary
-                : TelaTheme.text-color-placeholder;
+            color: TelaTheme.text-color-placeholder;
             vertical-alignment: center;
             horizontal-stretch: 1;
             overflow: elide;
+
+            // Later states win over earlier ones.
+            states [
+                selected when root.has-selection: {
+                    color: TelaTheme.text-color-primary;
+                }
+                disabled when root.disabled: {
+                    color: TelaTheme.text-color-disabled;
+                }
+            ]
         }
 
         Icon {
@@ -145,12 +149,20 @@ export component Select inherits Rectangle {
                             text: it.label;
                             font-size: root.fs;
                             font-family: TelaTheme.font-family;
-                            color: it.disabled ? TelaTheme.text-color-disabled
-                                : i == root.current-index ? TelaTheme.brand-color
-                                : TelaTheme.text-color-primary;
+                            color: TelaTheme.text-color-primary;
                             vertical-alignment: center;
                             horizontal-stretch: 1;
                             overflow: elide;
+
+                            // Later states win over earlier ones.
+                            states [
+                                active when i == root.current-index: {
+                                    color: TelaTheme.brand-color;
+                                }
+                                disabled when it.disabled: {
+                                    color: TelaTheme.text-color-disabled;
+                                }
+                            ]
                         }
 
                         if i == root.current-index: Icon {

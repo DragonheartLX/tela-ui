@@ -7,7 +7,6 @@ import { TelaTheme } from "../theme.slint";
 import { Icon } from "icon/icon.slint";
 import { TIconData } from "icon/data.slint";
 import { Theme, Size } from "../structs/enums.slint";
-import { TIconData } from "icon/data.slint";
 
 export component Link inherits Rectangle {
     in property <Theme> theme: Theme.default;
@@ -19,22 +18,26 @@ export component Link inherits Rectangle {
 
     callback clicked();
 
-    private property <length> fs:
-        size == Size.small ? TelaTheme.font-size-s : size == Size.large ? TelaTheme.font-size-l : TelaTheme.font-size-m;
+    private property <length> fs: TelaTheme.size-font(size);
+
+    // Per-state colors for the current theme (default uses the link/brand
+    // tokens, other themes their color ramp) so the `states` stay flat.
+    private property <color> content-rest: theme == Theme.default ? TelaTheme.text-color-link : TelaTheme.theme-color(theme);
+    private property <color> content-hover: theme == Theme.default ? TelaTheme.brand-color-hover : TelaTheme.theme-color-hover(theme);
+    private property <color> content-pressed: theme == Theme.default ? TelaTheme.brand-color-active : TelaTheme.theme-color-active(theme);
 
     // Rest state; overridden by the `states` below.
-    private property <brush> content-color:
-        theme == Theme.default ? TelaTheme.text-color-link : TelaTheme.theme-color(theme);
+    private property <brush> content-color: root.content-rest;
 
     animate content-color { duration: TelaTheme.duration-fast; }
 
     // Later states win over earlier ones.
     states [
         hovered when touch.has-hover && !root.disabled: {
-            content-color: theme == Theme.default ? TelaTheme.brand-color-hover : TelaTheme.theme-color-hover(theme);
+            content-color: root.content-hover;
         }
         pressed when touch.pressed && !root.disabled: {
-            content-color: theme == Theme.default ? TelaTheme.brand-color-active : TelaTheme.theme-color-active(theme);
+            content-color: root.content-pressed;
         }
         disabled when root.disabled: {
             content-color: TelaTheme.text-color-disabled;

@@ -13,7 +13,7 @@
 
 import { Palette } from "std-widgets.slint";
 import { TPrimaryColor, TAppThemeConfig } from "structs/theme.slint";
-import { Theme } from "structs/enums.slint";
+import { Theme, Size } from "structs/enums.slint";
 
 // Shared semantic enums ride along with the tokens, so one import covers
 // both: import { TelaTheme, Theme, Size } from "@tela-ui/theme.slint";
@@ -37,10 +37,7 @@ export global TelaTheme {
         || (preference == TelaThemePreference.system && Palette.color-scheme == ColorScheme.dark);
 
     // The active configuration. Assign to it directly to take full control.
-    in-out property <TAppThemeConfig> theme:
-        preference == TelaThemePreference.dark ? root.dark
-        : preference == TelaThemePreference.light ? root.light
-        : Palette.color-scheme == ColorScheme.dark ? root.dark : root.light;
+    in-out property <TAppThemeConfig> theme: root.is-dark ? root.dark : root.light;
 
     // Mode presets. They are `in-out` so applications can override any token.
     in-out property <TAppThemeConfig> light: {
@@ -453,51 +450,57 @@ export global TelaTheme {
     // ------------------------------------------------------------------
     // Helpers for components keyed by the `Theme` semantic role.
     // ------------------------------------------------------------------
+
+    // The color ramp of a semantic role. Theme.default has no ramp of its
+    // own and resolves to the brand ramp here; helpers that must keep the
+    // default theme gray check for `Theme.default` before calling this.
+    public pure function theme-scheme(t: Theme) -> TPrimaryColor {
+        t == Theme.success ? root.theme.success
+        : t == Theme.warning ? root.theme.warning
+        : t == Theme.error ? root.theme.error
+        : root.theme.primary;
+    }
+
     public pure function theme-color(t: Theme) -> color {
-        t == Theme.primary ? root.theme.primary.color
-        : t == Theme.success ? root.theme.success.color
-        : t == Theme.warning ? root.theme.warning.color
-        : t == Theme.error ? root.theme.error.color
-        : root.theme.text-primary;
+        t == Theme.default ? root.theme.text-primary : root.theme-scheme(t).color;
     }
 
     public pure function theme-color-hover(t: Theme) -> color {
-        t == Theme.primary ? root.theme.primary.hover
-        : t == Theme.success ? root.theme.success.hover
-        : t == Theme.warning ? root.theme.warning.hover
-        : t == Theme.error ? root.theme.error.hover
-        : root.theme.text-primary;
+        t == Theme.default ? root.theme.text-primary : root.theme-scheme(t).hover;
     }
 
     public pure function theme-color-active(t: Theme) -> color {
-        t == Theme.primary ? root.theme.primary.active
-        : t == Theme.success ? root.theme.success.active
-        : t == Theme.warning ? root.theme.warning.active
-        : t == Theme.error ? root.theme.error.active
-        : root.theme.text-primary;
+        t == Theme.default ? root.theme.text-primary : root.theme-scheme(t).active;
     }
 
     public pure function theme-color-light(t: Theme) -> color {
-        t == Theme.primary ? root.theme.primary.light
-        : t == Theme.success ? root.theme.success.light
-        : t == Theme.warning ? root.theme.warning.light
-        : t == Theme.error ? root.theme.error.light
-        : root.theme.bg-secondarycontainer;
+        t == Theme.default ? root.theme.bg-secondarycontainer : root.theme-scheme(t).light;
     }
 
     public pure function theme-color-light-hover(t: Theme) -> color {
-        t == Theme.primary ? root.theme.primary.light-hover
-        : t == Theme.success ? root.theme.success.light-hover
-        : t == Theme.warning ? root.theme.warning.light-hover
-        : t == Theme.error ? root.theme.error.light-hover
-        : root.theme.bg-secondarycontainer-hover;
+        t == Theme.default ? root.theme.bg-secondarycontainer-hover : root.theme-scheme(t).light-hover;
     }
 
     public pure function theme-color-disabled(t: Theme) -> color {
-        t == Theme.primary ? root.theme.primary.disabled
-        : t == Theme.success ? root.theme.success.disabled
-        : t == Theme.warning ? root.theme.warning.disabled
-        : t == Theme.error ? root.theme.error.disabled
-        : root.theme.text-disabled;
+        t == Theme.default ? root.theme.text-disabled : root.theme-scheme(t).disabled;
+    }
+
+    // Control metrics by `Size`, shared by Button / Select / Link / ...
+    public pure function size-height(s: Size) -> length {
+        s == Size.small ? root.theme.height-s
+        : s == Size.large ? root.theme.height-l
+        : root.theme.height-m;
+    }
+
+    public pure function size-font(s: Size) -> length {
+        s == Size.small ? root.theme.font-size-s
+        : s == Size.large ? root.theme.font-size-l
+        : root.theme.font-size-m;
+    }
+
+    public pure function size-padding(s: Size) -> length {
+        s == Size.small ? root.theme.padding-lr-s
+        : s == Size.large ? root.theme.padding-lr-l
+        : root.theme.padding-lr-m;
     }
 }
