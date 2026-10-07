@@ -1,10 +1,13 @@
 # 组件文档
 
 本文档列出 tela-ui 的全部组件, 说明每个组件的继承关系, 参数, 参数类型与回调。
-组件按 `base/` (基础), `common/` (常用), `experimental/` (实验性) 三组组织, 分别由
-`@tela-ui/base.slint`, `@tela-ui/common.slint`, `@tela-ui/experimental.slint` 聚合导出,
-也可以直接从组件文件导入 (如 `@tela-ui/base/button.slint`)。主题令牌统一从
-`@tela-ui/theme.slint` 导入。
+组件按功能分为五类, 每类一个目录与聚合器: `base/` (基础), `data-entry/` (数据录入),
+`data-display/` (数据展示), `feedback/` (反馈), `navigation/` (导航), 另有
+`experimental/` (实验性); 分别由 `@tela-ui/base.slint`, `@tela-ui/data-entry.slint`,
+`@tela-ui/data-display.slint`, `@tela-ui/feedback.slint`, `@tela-ui/navigation.slint`,
+`@tela-ui/experimental.slint` 聚合导出, 也可以直接从组件文件导入
+(如 `@tela-ui/base/button.slint`)。`@tela-ui/common.slint` 保留为全量兼容出口,
+汇总全部类别。主题令牌统一从 `@tela-ui/theme.slint` 导入。
 
 文中类型均按 Slint 类型书写。未标注读写的参数为 `in` (只读输入), `in-out` 表示
 可从外部读写, `out` 表示组件只写, 调用方只能读取。默认值一栏给出 Slint 默认绑定。
@@ -18,7 +21,7 @@
   或自行构造的字形数据, 见 [TIconSet](#ticonset-图标数据)。
 - **回调命名**: 状态变化用 `changed`, 主动点击用 `clicked`, 结果性动作按语义命名
   (`accepted`, `canceled`, `closed`, `selected` 等)。
-- **枚举导入**: 共享枚举 `Theme`, `Size` 从 `@tela-ui/theme.slint` 导入; 组件专属枚举
+- **枚举导入**: 共享枚举 `Theme`, `Size`, `PopupPlacement` 从 `@tela-ui/theme.slint` 导入; 组件专属枚举
   (如 `ButtonVariant`, `DrawerPlacement`) 从所属聚合器导入。同名类型不要经由两条
   聚合路径重复导入, 以免命名冲突。
 
@@ -32,6 +35,8 @@ Slint 组件为单继承 (`inherits`), 子类可直接使用基类的全部属�
 | BorderlessWindow | `Window` | 在 Window 内建属性 (`title`, `no-frame` 等) 上叠加自绘标题栏 |
 | Heading, Paragraph, Caption | `Text` | 保留 Text 全部内建属性 (`text`, `color`, `wrap` 等) |
 | RadioGroup | `HorizontalLayout` | 本身就是一行布局 |
+| Timeline, Statistic, Collapse | `VerticalLayout` | 本身即纵向布局, 首选尺寸随内容 |
+| Loading, Segmented, Carousel (内部) | 布局参与 sizing | 见各组件说明 (布局根的约束是头等公民) |
 | 其余全部组件 | `Rectangle` | 基础容器 |
 
 组合关系 (has-a, 内部使用的组件):
@@ -43,22 +48,23 @@ Slint 组件为单继承 (`inherits`), 子类可直接使用基类的全部属�
 - RadioGroup = Radio xN
 - SideNav = 私有 NavRow xN (菜单行, 底部行与收起行共用)
 - Tag, CheckBox, Alert, MessageOverlay, NotificationOverlay, NavBar, SideNav,
-  Select, Pagination, Avatar, DropdownMenu, Rate, Empty, BorderlessWindow
-  内部均使用 Icon 渲染字形
+  Select, Pagination, Avatar, DropdownMenu, Rate, Empty, Result,
+  Collapse, BorderlessWindow 内部均使用 Icon 渲染字形
 - 提供 `@children` 插槽的组件: Badge (被标记内容), Card (卡片主体), Dialog
   (自定义主体), Drawer (面板主体), NavBar (右侧操作区), Empty (操作区),
-  TooltipArea (触发内容), BorderlessWindow (窗口内容)
+  TooltipArea (触发内容), Result (操作区), BorderlessWindow (窗口内容)
 
-私有组件 (仅供实现参考, 不经聚合器导出): `InputFrame` (input.slint, 已对库内
-导出供 InputNumber 复用), `NavRow` (side-nav.slint), `WindowButton`
-(borderless-window.slint), `PageBtn` (pagination.slint)。
+私有组件 (仅供实现参考, 不经聚合器导出): `InputFrame` (data-entry/input.slint,
+已对库内导出供 InputNumber 复用), `NavRow` (navigation/side-nav.slint),
+`WindowButton` (base/borderless-window.slint), `PageBtn`
+(navigation/pagination.slint)。
 
 ---
 
 ## 基础组件 base
 
 ```slint
-import { Button, Link, Icon, Heading, Paragraph, Caption, Divider, Tag, Loading, BorderlessWindow } from "@tela-ui/base.slint";
+import { Button, Link, Icon, Heading, Paragraph, Caption, Divider, Loading, Kbd, BorderlessWindow } from "@tela-ui/base.slint";
 ```
 
 ### Button
@@ -147,27 +153,6 @@ import { Button, Link, Icon, Heading, Paragraph, Caption, Divider, Tag, Loading,
 
 相关枚举: `DividerAlign { left, center, right }`。
 
-### Tag
-
-小标签。三种填充变体, 可带图标与关闭钮。
-
-继承: `Rectangle`。内部组合 Icon。
-
-| 参数 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| theme | `Theme` | `Theme.default` | 语义色 |
-| variant | `TagVariant` | `TagVariant.dark` | `dark` 实底 / `light` 浅色底 / `outline` 描边 |
-| size | `Size` | `Size.medium` | 高度 20/24/28px |
-| text | `string` | `""` | 标签文字 |
-| icon | `TIconData` | 空 | 前置图标 |
-| closable | `bool` | `false` | 显示关闭钮; 点击后触发 `closed()` 并自设 `visible = false` |
-| disabled | `bool` | `false` | 禁用态 |
-| clickable | `bool` | `false` | 启用悬停高亮与 `clicked()` |
-
-回调: `closed()`, `clicked()`。
-
-相关枚举: `TagVariant { dark, light, outline }`。
-
 ### Loading / LoadingSpinner
 
 加载指示。`Loading` 是带文字标签的完整组件, `LoadingSpinner` 是裸转圈
@@ -207,10 +192,21 @@ import { Button, Link, Icon, Heading, Paragraph, Caption, Divider, Tag, Loading,
 
 ---
 
-## 常用组件 common
+### Kbd
+
+键位标签 (如 `Ctrl + C` 中的按键帽)。小号文字 + 浅底细边圆角, 宽度随文字
+收紧; 与 `Text` 的 "+" 混排组合成快捷键说明。
+
+继承: `Rectangle`。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| text | `string` | `""` | 键帽文字 |
+
+## 数据录入 data-entry
 
 ```slint
-import { Input, TextArea, Select, CheckBox, Radio, RadioGroup, Switch, Slider, Progress, Avatar, Badge, Card, Alert, Dialog, Drawer, MessageOverlay, TelaMessage, CodeBlock, Tabs, Pagination, NavBar, SideNav, Breadcrumb, Steps } from "@tela-ui/common.slint";
+import { Input, TextArea, InputNumber, Select, CheckBox, RadioGroup, Switch, Slider, Rate, Segmented } from "@tela-ui/data-entry.slint";
 ```
 
 ### Input / TextArea
@@ -395,21 +391,49 @@ RadioGroup 参数:
 
 回调: `changed(float)` — 点击后的新分值。
 
-### Progress
+### Segmented
 
-进度条。线性或圆环, value 变化带缓动动画。
+分段控制器 (iOS 风格)。填满容器宽度, 各段等分, 选中段白底加投影;
+段文字单行居中。
 
-继承: `Rectangle`。
+继承: `Rectangle` (内部为等分布局)。
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| variant | `ProgressVariant` | `ProgressVariant.line` | `line` / `circle` |
-| value | `float` | `0` | 0..100 |
-| theme | `Theme` | `Theme.primary` | 进度色 |
-| size | `Size` | `Size.medium` | 线粗 4/6/10px, 圆环直径 64/80/96px |
-| show-label | `bool` | `true` | 是否显示百分比文字 |
+| items | `[string]` | `[]` | 选项文本 |
+| current-index | `int` (in-out) | `0` | 选中下标 |
+| size | `Size` | `Size.medium` | 高度与字号 |
+| disabled | `bool` | `false` | 禁用态 |
 
-相关枚举: `ProgressVariant { line, circle }`。
+回调: `changed(int)` — 选中下标变化时触发。
+
+
+## 数据展示 data-display
+
+```slint
+import { Tag, Avatar, Badge, Card, Empty, Descriptions, Timeline, Statistic, Collapse, TooltipArea, Carousel, CodeBlock } from "@tela-ui/data-display.slint";
+```
+
+### Tag
+
+小标签。三种填充变体, 可带图标与关闭钮。
+
+继承: `Rectangle`。内部组合 Icon。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| theme | `Theme` | `Theme.default` | 语义色 |
+| variant | `TagVariant` | `TagVariant.dark` | `dark` 实底 / `light` 浅色底 / `outline` 描边 |
+| size | `Size` | `Size.medium` | 高度 20/24/28px |
+| text | `string` | `""` | 标签文字 |
+| icon | `TIconData` | 空 | 前置图标 |
+| closable | `bool` | `false` | 显示关闭钮; 点击后触发 `closed()` 并自设 `visible = false` |
+| disabled | `bool` | `false` | 禁用态 |
+| clickable | `bool` | `false` | 启用悬停高亮与 `clicked()` |
+
+回调: `closed()`, `clicked()`。
+
+相关枚举: `TagVariant { dark, light, outline }`。
 
 ### Avatar
 
@@ -446,20 +470,6 @@ RadioGroup 参数:
 
 插槽: 默认子元素 (`@children`) 为被标记的内容。
 
-### Empty
-
-空状态占位: 大图标 + 描述文字 + 操作区, 整体在容器内居中。
-
-继承: `Rectangle`。内部组合 Icon。
-
-| 参数 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| icon | `TIconData` | `TIconSet.Inbox` | 占位图标 |
-| description | `string` | `"暂无数据"` | 为空字符串时隐藏 |
-| icon-size | `length` (in-out) | `48px` | 图标边长 |
-
-插槽: 默认子元素为描述下方的操作区, 在一行内居中排布, 通常放按钮。
-
 ### Card
 
 卡片容器。可选标题/副标题头部与带分隔线的页脚。
@@ -476,6 +486,168 @@ RadioGroup 参数:
 | card-padding | `length` | `TelaTheme.margin-l` | 内边距 |
 
 插槽: 默认子元素为卡片主体。
+
+### Empty
+
+空状态占位: 大图标 + 描述文字 + 操作区, 整体在容器内居中。
+
+继承: `Rectangle`。内部组合 Icon。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| icon | `TIconData` | `TIconSet.Inbox` | 占位图标 |
+| description | `string` | `"暂无数据"` | 为空字符串时隐藏 |
+| icon-size | `length` (in-out) | `48px` | 图标边长 |
+
+插槽: 默认子元素为描述下方的操作区, 在一行内居中排布, 通常放按钮。
+
+### Descriptions
+
+键值描述列表。`columns` 等宽分列; `bordered` 为网格样式 (标签底色 + 细边框),
+否则为无框样式。单元格单行省略。
+
+继承: `Rectangle`。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| items | `[DescriptionItem]` | `[]` | 条目 |
+| bordered | `bool` | `false` | 网格样式 |
+| columns | `int` | `2` | 列数, 最小 1 |
+
+相关结构: `DescriptionItem { label: string, value: string }`。
+
+### Timeline
+
+垂直时间线。条目按 `Theme` 语义色着色, 末项空心圆点, 连线自动贯穿条目间距;
+描述为空时隐藏。
+
+继承: `VerticalLayout` (本身即纵向布局)。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| items | `[TimelineItem]` | `[]` | 条目 |
+
+相关结构: `TimelineItem { label: string, content: string, theme: Theme }`
+(theme 缺省为 `Theme.default`)。
+
+### Statistic
+
+数值统计块: 标题 + 大号数值 + 可选前后缀, 数值按 `Theme` 语义色着色;
+`loading` 时数值位显示转圈。
+
+继承: `VerticalLayout`。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| title | `string` | `""` | 标题, 为空隐藏 |
+| value | `string` | `""` | 数值文本 (由调用方格式化) |
+| prefix / suffix | `string` | `""` | 数值前后缀, 为空隐藏 |
+| theme | `Theme` | `Theme.default` | 数值颜色 (default → 主文本色) |
+| loading | `bool` | `false` | 加载态 |
+
+### Collapse
+
+折叠面板。`accordion: true` 为手风琴模式 (单开, `current-index` 记录展开项,
+-1 全收); 否则各面板独立开合 (状态在面板内部, 不支持外部预设)。内容多行
+换行, 展开收起带高度过渡动画。
+
+继承: `VerticalLayout`。内部组合 Icon。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| items | `[CollapseItem]` | `[]` | 面板 |
+| accordion | `bool` | `false` | 手风琴模式 |
+| current-index | `int` (in-out) | `-1` | 仅手风琴模式有效 |
+
+相关结构: `CollapseItem { label: string, content: string, disabled: bool }`。
+
+### Tooltip
+
+悬停提示气泡。渲染在窗口级 (参考 sleek-ui 的实现): 触发物通过 `TelaTooltip`
+全局上报几何, 窗口根部的 `TooltipOverlay` 统一绘制气泡 — 不会被卡片或
+ScrollView 裁剪, 也没有包裹组件的尺寸问题。气泡延迟 250ms 出现 (可配),
+移开立即消失, 反色底配菱形箭头, 文本超宽自动换行。
+
+静态触发物用 `TooltipArea` (自动充满父容器并接管悬停):
+
+```slint
+// 窗口根部放置一次:
+TooltipOverlay { }
+
+TooltipArea {
+    width: 120px; height: 32px;
+    text: "提示"; placement: TooltipPlacement.top;
+    Text { text: "目标"; }
+}
+```
+
+交互式触发物 (Button) 自行上报:
+
+```slint
+ta := TouchArea {
+    changed has-hover => {
+        TelaTooltip.show("提示", TooltipPlacement.top,
+                         self.has-hover, self.absolute-position,
+                         self.width, self.height);
+    }
+}
+```
+
+`TelaTooltip` 全局函数: `show(text, placement, hovering, coords, width, height)`
+— coords 传触发物的 `absolute-position` (窗口坐标), hovering 为 false 时仅
+驱动隐藏, 不覆盖状态。
+
+`TooltipArea` 参数:
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| text | `string` | `""` | 气泡文字 |
+| placement | `TooltipPlacement` | `TooltipPlacement.top` | 弹出方向 |
+
+插槽: 默认子元素为触发内容 (悬停层在其之上, 静态内容适用)。
+
+`TooltipOverlay` 参数 (应用级配置):
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| delay | `duration` (in-out) | `250ms` | 显示延迟 |
+| wrap-width | `length` (in-out) | `240px` | 换行阈值 |
+| show-arrow | `bool` (in-out) | `true` | 菱形箭头 |
+
+相关枚举: `TooltipPlacement { top, bottom, left, right }`。
+
+### Carousel
+
+走马灯。滑动切换 (缓动), 底部居中指示点 (当前项加宽), 可选自动轮播。
+
+继承: `Rectangle`。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| items | `[CarouselSlide]` | `[]` | 幻灯片 |
+| current | `int` (in-out) | `0` | 当前页下标 |
+| autoplay | `bool` | `false` | 自动轮播 |
+| interval | `duration` | `3s` | 轮播间隔 |
+
+相关结构: `CarouselSlide { image: image }`。
+
+### CodeBlock
+
+代码块。主题化底色的等宽字体面板 (固定 Consolas), 不换行, 高度随内容自适应。
+
+继承: `Rectangle`。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| code | `string` | `""` | 代码文本 |
+
+---
+
+## 反馈 feedback
+
+```slint
+import { Alert, Dialog, Drawer, Popconfirm, TelaMessage, TelaNotification, Progress, Result } from "@tela-ui/feedback.slint";
+```
 
 ### Alert
 
@@ -534,86 +706,6 @@ RadioGroup 参数:
 回调: `closed()`。公开函数: `close()`。
 
 插槽: 默认子元素为标题下方的面板主体。
-
-### Tooltip
-
-悬停提示气泡。渲染在窗口级 (参考 sleek-ui 的实现): 触发物通过 `TelaTooltip`
-全局上报几何, 窗口根部的 `TooltipOverlay` 统一绘制气泡 — 不会被卡片或
-ScrollView 裁剪, 也没有包裹组件的尺寸问题。气泡延迟 250ms 出现 (可配),
-移开立即消失, 反色底配菱形箭头, 文本超宽自动换行。
-
-静态触发物用 `TooltipArea` (自动充满父容器并接管悬停):
-
-```slint
-// 窗口根部放置一次:
-TooltipOverlay { }
-
-TooltipArea {
-    width: 120px; height: 32px;
-    text: "提示"; placement: TooltipPlacement.top;
-    Text { text: "目标"; }
-}
-```
-
-交互式触发物 (Button) 自行上报:
-
-```slint
-ta := TouchArea {
-    changed has-hover => {
-        TelaTooltip.show("提示", TooltipPlacement.top,
-                         self.has-hover, self.absolute-position,
-                         self.width, self.height);
-    }
-}
-```
-
-`TelaTooltip` 全局函数: `show(text, placement, hovering, coords, width, height)`
-— coords 传触发物的 `absolute-position` (窗口坐标), hovering 为 false 时仅
-驱动隐藏, 不覆盖状态。
-
-`TooltipArea` 参数:
-
-| 参数 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| text | `string` | `""` | 气泡文字 |
-| placement | `TooltipPlacement` | `TooltipPlacement.top` | 弹出方向 |
-
-插槽: 默认子元素为触发内容 (悬停层在其之上, 静态内容适用)。
-
-`TooltipOverlay` 参数 (应用级配置):
-
-| 参数 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| delay | `duration` (in-out) | `250ms` | 显示延迟 |
-| wrap-width | `length` (in-out) | `240px` | 换行阈值 |
-| show-arrow | `bool` (in-out) | `true` | 菱形箭头 |
-
-相关枚举: `TooltipPlacement { top, bottom, left, right }`。
-
-### DropdownMenu
-
-下拉动作菜单。锚定触发内容的 PopupWindow 弹层; `auto-open` (默认开) 在触发
-内容之上叠加点击层, 适合静态触发物 (图标/文本/头像); Button 触发请设
-`auto-open: false` 并在 `clicked` 中调用 `toggle()`。点击外部或选中后关闭;
-暂无键盘导航, 超宽条目省略显示, 超过 max-visible-items 后弹层内滚动。
-
-继承: `Rectangle`。内部组合 Icon。
-
-| 参数 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| items | `[DropdownMenuItem]` | `[]` | 菜单项 |
-| placement | `PopupPlacement` | `PopupPlacement.bottom-start` | 弹出锚点 |
-| auto-open | `bool` | `true` | 内置点击层开合; 交互式触发器关掉它 |
-| item-height | `length` | `32px` | 单项高度 (分隔线行 9px) |
-| max-visible-items | `int` | `6` | 弹层内直接可见的行数, 超出后滚动 |
-
-回调: `selected(int, string)` — (下标, value)。公开函数: `show()`, `close()`,
-`toggle()`。只读输出: `open` (`bool`, 弹层是否展开)。
-
-相关结构/枚举: `DropdownMenuItem { label, value, icon, disabled, danger,
-divider }` (icon 为 `TIconData` 默认空; divider 为 true 时渲染分隔线并忽略
-其余字段); `PopupPlacement { bottom-start, bottom-end, top-start, top-end }`
-与 Popconfirm 共用。
 
 ### Popconfirm
 
@@ -679,6 +771,45 @@ divider }` (icon 为 `TIconData` 默认空; divider 为 true 时渲染分隔线�
 `NotificationPlacement { top-left, top-right, bottom-left, bottom-right }`,
 `NotificationData { title, content, theme, visible }` (visible 为槽位占用
 标记, 仅 Overlay 内部使用)。
+
+### Progress
+
+进度条。线性或圆环, value 变化带缓动动画。
+
+继承: `Rectangle`。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| variant | `ProgressVariant` | `ProgressVariant.line` | `line` / `circle` |
+| value | `float` | `0` | 0..100 |
+| theme | `Theme` | `Theme.primary` | 进度色 |
+| size | `Size` | `Size.medium` | 线粗 4/6/10px, 圆环直径 64/80/96px |
+| show-label | `bool` | `true` | 是否显示百分比文字 |
+
+相关枚举: `ProgressVariant { line, circle }`。
+
+### Result
+
+结果页块: 大号状态图标 + 标题 + 描述 + 操作区, 整体在容器内居中。
+
+继承: `Rectangle`。内部组合 Icon。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| status | `ResultStatus` | `ResultStatus.info` | 状态, 决定图标与颜色 |
+| title | `string` | `""` | 标题, 为空隐藏 |
+| description | `string` | `""` | 描述, 为空隐藏, 单行省略 |
+
+插槽: 默认子元素为操作区 (一行居中, 通常放按钮)。
+
+相关枚举: `ResultStatus { info, success, warning, error }`。
+
+
+## 导航 navigation
+
+```slint
+import { Tabs, Pagination, NavBar, SideNav, Breadcrumb, Steps, DropdownMenu, BackTop } from "@tela-ui/navigation.slint";
+```
 
 ### Tabs
 
@@ -787,17 +918,46 @@ divider }` (icon 为 `TIconData` 默认空; divider 为 true 时渲染分隔线�
 | items | `[string]` | `[]` | 步骤名 |
 | current | `int` | `0` | 当前步骤下标, 之前的步骤计为已完成 |
 
-### CodeBlock
+### DropdownMenu
 
-代码块。主题化底色的等宽字体面板 (固定 Consolas), 不换行, 高度随内容自适应。
+下拉动作菜单。锚定触发内容的 PopupWindow 弹层; `auto-open` (默认开) 在触发
+内容之上叠加点击层, 适合静态触发物 (图标/文本/头像); Button 触发请设
+`auto-open: false` 并在 `clicked` 中调用 `toggle()`。点击外部或选中后关闭;
+暂无键盘导航, 超宽条目省略显示, 超过 max-visible-items 后弹层内滚动。
+
+继承: `Rectangle`。内部组合 Icon。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| items | `[DropdownMenuItem]` | `[]` | 菜单项 |
+| placement | `PopupPlacement` | `PopupPlacement.bottom-start` | 弹出锚点 |
+| auto-open | `bool` | `true` | 内置点击层开合; 交互式触发器关掉它 |
+| item-height | `length` | `32px` | 单项高度 (分隔线行 9px) |
+| max-visible-items | `int` | `6` | 弹层内直接可见的行数, 超出后滚动 |
+
+回调: `selected(int, string)` — (下标, value)。公开函数: `show()`, `close()`,
+`toggle()`。只读输出: `open` (`bool`, 弹层是否展开)。
+
+相关结构/枚举: `DropdownMenuItem { label, value, icon, disabled, danger,
+divider }` (icon 为 `TIconData` 默认空; divider 为 true 时渲染分隔线并忽略
+其余字段); `PopupPlacement { bottom-start, bottom-end, top-start, top-end }`
+与 Popconfirm 共用。
+
+### BackTop
+
+回到顶部按钮。`content-y` 与目标 ScrollView 的 `content-y` 双向绑定:
+滚动超过 `threshold` 显示, 点击滚动归零。需绝对定位于滚动容器内
+(参见演示页)。
 
 继承: `Rectangle`。
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| code | `string` | `""` | 代码文本 |
+| content-y | `length` (in-out) | `0` | 双向绑定目标滚动位置 |
+| threshold | `length` | `200px` | 显隐阈值 |
 
----
+回调: `clicked()` — 归零之外附加动作时使用。
+
 
 ## 实验性组件 experimental
 
@@ -807,18 +967,6 @@ API 不稳定, 可能随版本调整或移除。
 import { Skeleton } from "@tela-ui/experimental.slint";
 ```
 
-### Skeleton
-
-加载占位块。透明度呼吸动画; 通过 `width`/`height` 自定形状。
-
-继承: `Rectangle`。
-
-| 参数 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| animated | `bool` | `true` | 呼吸动画开关 |
-| circle | `bool` | `false` | 渲染为圆形 (如头像占位) |
-
----
 
 ## 全局对象
 
@@ -915,7 +1063,12 @@ PanelLeftClose, PanelLeftOpen, FlaskConical。
 | NotificationTheme / NotificationPlacement / NotificationData | Notification | info, success, warning, error / 四角贴靠 / title, content, theme, visible |
 | TooltipPlacement | Tooltip | top, bottom, left, right |
 | DropdownMenuItem | DropdownMenu | label, value, icon, disabled, danger, divider |
-| PopupPlacement | DropdownMenu, Popconfirm | bottom-start, bottom-end, top-start, top-end |
+| PopupPlacement | DropdownMenu, Popconfirm (经 @tela-ui/theme.slint 再导出) | bottom-start, bottom-end, top-start, top-end |
+| TimelineItem | Timeline | label, content, theme |
+| DescriptionItem | Descriptions | label, value |
+| ResultStatus | Result | info, success, warning, error |
+| CollapseItem | Collapse | label, content, disabled |
+| CarouselSlide | Carousel | image |
 | NavItem | NavBar | label, value |
 | SideNavMode / SideNavTogglePosition | SideNav | icon-text, text, icon / top, bottom |
 | SideNavItem | SideNav | label, value, icon, disabled |

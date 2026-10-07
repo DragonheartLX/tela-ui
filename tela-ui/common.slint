@@ -1,33 +1,63 @@
-// Tela UI — common components (常用组件)
+// Tela UI — common (全量兼容出口)
 //
-// Aggregate re-exports. Import from here instead of individual files:
-//   import { Input, Select, Card } from "@tela-ui/common.slint";
+// Legacy umbrella aggregating EVERY category aggregator. Kept so existing
+// consumers of "@tela-ui/common.slint" keep working; new code can import
+// from the category files instead:
+//   @tela-ui/base.slint          基础组件
+//   @tela-ui/data-entry.slint    数据录入
+//   @tela-ui/data-display.slint  数据展示
+//   @tela-ui/feedback.slint      反馈
+//   @tela-ui/navigation.slint    导航
+//   @tela-ui/experimental.slint  实验性
 
-export { Input, TextArea, InputStatus } from "common/input.slint";
-export { InputNumber } from "common/input-number.slint";
-export { Select, SelectItem } from "common/select.slint";
-export { CheckBox } from "common/checkbox.slint";
-export { Radio, RadioGroup, RadioItem } from "common/radio.slint";
-export { Switch } from "common/switch.slint";
-export { Slider } from "common/slider.slint";
-export { Rate } from "common/rate.slint";
-export { Progress, ProgressVariant } from "common/progress.slint";
-export { Avatar, AvatarSize, AvatarShape } from "common/avatar.slint";
-export { Badge } from "common/badge.slint";
-export { Card } from "common/card.slint";
-export { Empty } from "common/empty.slint";
-export { Alert } from "common/alert.slint";
-export { Dialog } from "common/dialog.slint";
-export { Drawer, DrawerPlacement } from "common/drawer.slint";
-export { TooltipOverlay, TelaTooltip, TooltipArea, TooltipPlacement } from "common/tooltip.slint";
-export { DropdownMenu, DropdownMenuItem, PopupPlacement } from "common/dropdown-menu.slint";
-export { Popconfirm } from "common/popconfirm.slint";
-export { MessageOverlay, TelaMessage, MessageTheme, MessagePlacement } from "common/message.slint";
-export { NotificationOverlay, TelaNotification, NotificationTheme, NotificationPlacement, NotificationData } from "common/notification.slint";
-export { CodeBlock } from "common/code-block.slint";
-export { Tabs } from "common/tabs.slint";
-export { Pagination } from "common/pagination.slint";
-export { NavBar, NavItem } from "common/nav.slint";
-export { SideNav, SideNavItem, SideNavFooterItem, SideNavMode, SideNavTogglePosition } from "common/side-nav.slint";
-export { Breadcrumb, CrumbItem } from "common/breadcrumb.slint";
-export { Steps } from "common/steps.slint";
+export { Button, ButtonVariant, ButtonShape } from "base.slint";
+export { Link } from "base.slint";
+export { Icon } from "base.slint";
+export { TIconData, TIconPath, TIconSet } from "base.slint";
+export { Heading, Paragraph, Caption } from "base.slint";
+export { Divider, DividerAlign } from "base.slint";
+export { Loading, LoadingSpinner } from "base.slint";
+export { Kbd } from "base.slint";
+export { BorderlessWindow } from "base.slint";
+
+export { Input, TextArea, InputStatus } from "data-entry.slint";
+export { InputNumber } from "data-entry.slint";
+export { Select, SelectItem } from "data-entry.slint";
+export { CheckBox } from "data-entry.slint";
+export { Radio, RadioGroup, RadioItem } from "data-entry.slint";
+export { Switch } from "data-entry.slint";
+export { Slider } from "data-entry.slint";
+export { Rate } from "data-entry.slint";
+export { Segmented } from "data-entry.slint";
+
+export { Tag, TagVariant } from "data-display.slint";
+export { Avatar, AvatarSize, AvatarShape } from "data-display.slint";
+export { Badge } from "data-display.slint";
+export { Card } from "data-display.slint";
+export { Empty } from "data-display.slint";
+export { Descriptions, DescriptionItem } from "data-display.slint";
+export { Timeline, TimelineItem } from "data-display.slint";
+export { Statistic } from "data-display.slint";
+export { Collapse, CollapseItem } from "data-display.slint";
+export { TooltipOverlay, TelaTooltip, TooltipArea, TooltipPlacement } from "data-display.slint";
+export { Carousel, CarouselSlide } from "data-display.slint";
+export { CodeBlock } from "data-display.slint";
+
+export { Alert } from "feedback.slint";
+export { MessageOverlay, TelaMessage, MessageTheme, MessagePlacement } from "feedback.slint";
+export { NotificationOverlay, TelaNotification, NotificationTheme, NotificationPlacement, NotificationData } from "feedback.slint";
+export { Dialog } from "feedback.slint";
+export { Drawer, DrawerPlacement } from "feedback.slint";
+export { Popconfirm } from "feedback.slint";
+export { Progress, ProgressVariant } from "feedback.slint";
+export { Result, ResultStatus } from "feedback.slint";
+
+export { Tabs } from "navigation.slint";
+export { Pagination } from "navigation.slint";
+export { NavBar, NavItem } from "navigation.slint";
+export { SideNav, SideNavItem, SideNavFooterItem, SideNavMode, SideNavTogglePosition } from "navigation.slint";
+export { Breadcrumb, CrumbItem } from "navigation.slint";
+export { Steps } from "navigation.slint";
+export { DropdownMenu, DropdownMenuItem } from "navigation.slint";
+export { PopupPlacement } from "theme.slint";
+export { BackTop } from "navigation.slint";

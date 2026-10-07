@@ -1,0 +1,85 @@
+// Tela UI — Result
+//
+// Full-result page block: big status icon, title, description and an action
+// area fed by the children slot (buttons etc., centered below).
+
+import { TelaTheme } from "../theme.slint";
+import { Icon } from "../base/icon/icon.slint";
+import { TIconData, TIconSet } from "../base/icon/data.slint";
+
+export enum ResultStatus {
+    info,
+    success,
+    warning,
+    error,
+}
+
+export component Result inherits Rectangle {
+    in property <ResultStatus> status: ResultStatus.info;
+    in property <string> title;
+    in property <string> description;
+
+    // Status icon / color dispatch (flat chains, no nesting).
+    private property <TIconData> icon: status == ResultStatus.success ? TIconSet.CircleCheck
+        : status == ResultStatus.warning ? TIconSet.CircleAlert
+        : status == ResultStatus.error ? TIconSet.CircleX
+        : TIconSet.Info;
+    private property <color> icon-color: status == ResultStatus.success ? TelaTheme.success-color
+        : status == ResultStatus.warning ? TelaTheme.warning-color
+        : status == ResultStatus.error ? TelaTheme.error-color
+        : TelaTheme.brand-color;
+
+    // Vertical metrics: icon → gap → title → gap → description → gap → actions.
+    private property <length> gap-1: TelaTheme.spacing-6;
+    private property <length> gap-2: TelaTheme.spacing-4;
+    private property <length> gap-3: TelaTheme.spacing-8;
+    private property <length> desc-h: root.description != "" ? TelaTheme.line-height-m : 0px;
+    private property <length> block-h: icon-size + gap-1 + TelaTheme.line-height-title + gap-2 + desc-h + gap-3 + actions.preferred-height;
+    private property <length> y0: (self.height - block-h) / 2;
+    private property <length> icon-size: 48px;
+
+    Icon {
+        x: (parent.width - root.icon-size) / 2;
+        y: root.y0;
+        icon: root.icon;
+        size: root.icon-size;
+        stroke-width: 1.5;
+        icon-color: root.icon-color;
+    }
+
+    if root.title != "": Text {
+        y: root.y0 + root.icon-size + root.gap-1;
+        height: TelaTheme.line-height-title;
+        width: parent.width;
+        horizontal-alignment: center;
+        vertical-alignment: center;
+        text: root.title;
+        font-size: TelaTheme.font-size-title-l;
+        font-family: TelaTheme.font-family;
+        font-weight: TelaTheme.font-weight-medium;
+        color: TelaTheme.text-color-primary;
+    }
+
+    if root.description != "": Text {
+        y: root.y0 + root.icon-size + root.gap-1 + TelaTheme.line-height-title + root.gap-2;
+        height: root.desc-h;
+        width: parent.width;
+        horizontal-alignment: center;
+        vertical-alignment: center;
+        text: root.description;
+        font-size: TelaTheme.font-size-m;
+        font-family: TelaTheme.font-family;
+        color: TelaTheme.text-color-secondary;
+        overflow: elide;
+    }
+
+    actions := HorizontalLayout {
+        y: root.y0 + root.icon-size + root.gap-1 + TelaTheme.line-height-title + root.gap-2 + root.desc-h + root.gap-3;
+        x: (parent.width - self.preferred-width) / 2;
+        width: self.preferred-width;
+        height: self.preferred-height;
+        spacing: TelaTheme.spacing-3;
+
+        @children
+    }
+}

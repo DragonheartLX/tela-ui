@@ -17,7 +17,7 @@ import { Theme, Size } from "structs/enums.slint";
 
 // Shared semantic enums ride along with the tokens, so one import covers
 // both: import { TelaTheme, Theme, Size } from "@tela-ui/theme.slint";
-export { Theme, Size } from "structs/enums.slint";
+export { Theme, Size, PopupPlacement } from "structs/enums.slint";
 import { TLightColors, TDarkColors } from "colors.slint";
 
 export enum TelaThemePreference {
@@ -441,6 +441,7 @@ export global TelaTheme {
     out property <length> line-height-s: root.theme.line-height-s;
     out property <length> line-height-m: root.theme.line-height-m;
     out property <length> line-height-l: root.theme.line-height-l;
+    out property <length> line-height-title: root.theme.line-height-title;
 
     // Motion
     out property <duration> duration-fast: root.theme.duration-fast;

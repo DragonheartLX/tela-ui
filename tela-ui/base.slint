@@ -1,7 +1,8 @@
 // Tela UI — base components (基础组件)
 //
-// Aggregate re-exports. Import from here instead of individual files:
-//   import { Button, Icon, Tag } from "@tela-ui/base.slint";
+// Atoms with no business semantics: controls and primitives every other
+// category builds on. Import from here instead of individual files:
+//   import { Button, Icon } from "@tela-ui/base.slint";
 //
 // Theme tokens remain at "@tela-ui/theme.slint".
 
@@ -11,6 +12,6 @@ export { Icon } from "base/icon/icon.slint";
 export { TIconData, TIconPath, TIconSet } from "base/icon/data.slint";
 export { Heading, Paragraph, Caption } from "base/typography.slint";
 export { Divider, DividerAlign } from "base/divider.slint";
-export { Tag, TagVariant } from "base/tag.slint";
 export { Loading, LoadingSpinner } from "base/loading.slint";
+export { Kbd } from "base/kbd.slint";
 export { BorderlessWindow } from "base/borderless-window.slint";

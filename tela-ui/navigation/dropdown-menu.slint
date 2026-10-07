@@ -8,6 +8,7 @@
 // clicks and after selecting an entry.
 
 import { TelaTheme } from "../theme.slint";
+import { PopupPlacement } from "../structs/enums.slint";
 import { Icon } from "../base/icon/icon.slint";
 import { TIconData } from "../base/icon/data.slint";
 import { ScrollView } from "std-widgets.slint";
@@ -20,14 +21,6 @@ export struct DropdownMenuItem {
     danger: bool,
     // Render a hairline separator instead of the entry.
     divider: bool,
-}
-
-// Anchoring of trigger-attached popups, shared with Popconfirm.
-export enum PopupPlacement {
-    bottom-start,
-    bottom-end,
-    top-start,
-    top-end,
 }
 
 export component DropdownMenu inherits Rectangle {

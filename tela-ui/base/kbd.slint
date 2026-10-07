@@ -1,0 +1,30 @@
+// Tela UI — Kbd
+//
+// Keyboard-key tag (e.g. Ctrl + C): small bordered chip with system-font
+// feel. Chain several with a "+" Text between them.
+
+import { TelaTheme } from "../theme.slint";
+
+export component Kbd inherits Rectangle {
+    in property <string> text;
+
+    height: 22px;
+    background: TelaTheme.bg-color-secondarycontainer;
+    border-width: 1px;
+    border-color: TelaTheme.component-border;
+    border-radius: TelaTheme.radius-small;
+
+    HorizontalLayout {
+        padding-left: 6px;
+        padding-right: 6px;
+
+        Text {
+            text: root.text;
+            font-size: TelaTheme.font-size-s;
+            font-family: TelaTheme.font-family;
+            color: TelaTheme.text-color-secondary;
+            vertical-alignment: center;
+            horizontal-alignment: center;
+        }
+    }
+}

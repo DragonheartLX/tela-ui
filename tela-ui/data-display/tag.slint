@@ -6,15 +6,15 @@
 // styling is desired.
 
 import { TelaTheme } from "../theme.slint";
-import { Icon } from "icon/icon.slint";
-import { TIconSet, TIconData } from "icon/data.slint";
+import { Icon } from "../base/icon/icon.slint";
+import { TIconSet, TIconData } from "../base/icon/data.slint";
 import { Theme, Size } from "../structs/enums.slint";
 export enum TagVariant {
     dark,
     light,
     outline,
 }
-import { TIconSet, TIconData } from "icon/data.slint";
+import { TIconSet, TIconData } from "../base/icon/data.slint";
 
 export component Tag inherits Rectangle {
     in property <Theme> theme: Theme.default;

@@ -4,7 +4,8 @@
 
 import { TelaTheme, Theme, Size } from "@tela-ui/theme.slint";
 import { TIconSet, Caption, Divider, Button, ButtonVariant, Paragraph } from "@tela-ui/base.slint";
-import { Tabs, Pagination, NavBar, NavItem, SideNav, SideNavItem, SideNavMode, SideNavTogglePosition, Breadcrumb, CrumbItem, Steps, DropdownMenu, DropdownMenuItem, PopupPlacement, TelaMessage, Card, CodeBlock} from "@tela-ui/common.slint";
+import { Tabs, Pagination, NavBar, NavItem, SideNav, SideNavItem, SideNavMode, SideNavTogglePosition, Breadcrumb, CrumbItem, Steps, DropdownMenu, DropdownMenuItem, PopupPlacement, BackTop, TelaMessage, Card, CodeBlock} from "@tela-ui/common.slint";
+import { ScrollView } from "std-widgets.slint";
 
 export component NavigationSection inherits VerticalLayout {
     spacing: 28px;
@@ -289,4 +290,36 @@ export component NavigationSection inherits VerticalLayout {
 
         CodeBlock { code: "import { Steps } from \"@tela-ui/common.slint\";\n\nSteps { items: [\"注册账号\", \"填写信息\", \"验证邮箱\", \"完成\"]; current: 1; }"; }
     }
+    // ======================== BackTop ======================
+    VerticalLayout {
+        spacing: 8px;
+
+        Card {
+            title: "回到顶部 BackTop";
+
+            Rectangle {
+                height: 240px;
+                border-radius: TelaTheme.radius-medium;
+                clip: true;
+
+                sv := ScrollView {
+                    VerticalLayout {
+                        padding: TelaTheme.padding-lr-l;
+                        spacing: TelaTheme.spacing-3;
+
+                        for i in 12: Paragraph { text: "滚动内容第 \{i + 1} 行,滚动超过阈值后右下角出现回到顶部按钮。"; }
+                    }
+                }
+
+                BackTop {
+                    x: parent.width - self.width - 16px;
+                    y: parent.height - self.height - 16px;
+                    content-y <=> sv.content-y;
+                }
+            }
+        }
+
+        CodeBlock { code: "import { BackTop } from \"@tela-ui/common.slint\";\n\nRectangle {\n    sv := ScrollView { … }\n    BackTop {\n        x: …; y: …;\n        content-y <=> sv.content-y; // 超过阈值显示, 点击回顶\n    }\n}"; }
+    }
+
 }

@@ -1,7 +1,8 @@
-// Demo section: 基础组件 (Button / Icon / Link / Typography), 一个组件一张卡.
+// Demo section: 基础组件 (Button / Icon / Link / Typography / Divider /
+// Loading / Kbd), 一个组件一张卡.
 
 import { TelaTheme, Theme, Size } from "@tela-ui/theme.slint";
-import { Button, ButtonVariant, ButtonShape, Link, Icon, TIconSet, Heading, Paragraph, Caption } from "@tela-ui/base.slint";
+import { Button, ButtonVariant, ButtonShape, Link, Icon, TIconSet, Heading, Paragraph, Caption, Kbd, Divider, DividerAlign, Loading } from "@tela-ui/base.slint";
 import { Card , CodeBlock} from "@tela-ui/common.slint";
 
 export component BasicsSection inherits VerticalLayout {
@@ -137,5 +138,72 @@ export component BasicsSection inherits VerticalLayout {
         }
 
         CodeBlock { code: "import { Heading, Paragraph, Caption } from \"@tela-ui/base.slint\";\n\nHeading { level: 1; text: \"一级标题\"; }\nParagraph { text: \"正文内容,wrap: word-wrap 自动换行。\"; }\nCaption { text: \"辅助说明文字\"; }"; }
+    }
+
+    // ======================= Divider ======================
+    VerticalLayout {
+        spacing: 8px;
+
+        Card {
+            title: "分割线 Divider";
+
+            VerticalLayout {
+                spacing: 4px;
+
+                Divider { text: "居中文字"; }
+                Divider { text: "左方文字"; align: DividerAlign.left; }
+                Divider { text: "右方文字"; align: DividerAlign.right; }
+                Divider { }
+            }
+        }
+
+        CodeBlock { code: "import { Divider } from \"@tela-ui/base.slint\";\n\nDivider { text: \"居中文字\"; }\nDivider { text: \"左方文字\"; align: DividerAlign.left; }\nDivider { orientation: Orientation.vertical; }"; }
+    }
+
+    // ======================= Loading ======================
+    VerticalLayout {
+        spacing: 8px;
+
+        Card {
+            title: "加载 Loading";
+
+            HorizontalLayout {
+                spacing: 28px;
+                // stretch: 0 — the label's Text leaves the layout's max
+                // width unbounded, so the row would otherwise stretch them.
+                Loading { size: 16px; horizontal-stretch: 0; }
+                Loading { size: 24px; text: "加载中…"; horizontal-stretch: 0; }
+                Loading { size: 32px; theme: Theme.success; text: "上传中…"; horizontal-stretch: 0; }
+                // Absorbs the leftover row space.
+                Rectangle { }
+            }
+        }
+
+        CodeBlock { code: "import { Loading } from \"@tela-ui/base.slint\";\n\nLoading { size: 24px; text: \"加载中…\"; }\nLoading { size: 32px; theme: Theme.success; }"; }
+    }
+
+    // ========================= Kbd ========================
+    VerticalLayout {
+        spacing: 8px;
+
+        Card {
+            title: "键位 Kbd";
+
+            HorizontalLayout {
+                spacing: 8px;
+
+                Text { text: "复制"; font-size: TelaTheme.font-size-m; color: TelaTheme.text-color-secondary; vertical-alignment: center; }
+                Kbd { text: "Ctrl"; horizontal-stretch: 0; }
+                Text { text: "+"; font-size: TelaTheme.font-size-m; color: TelaTheme.text-color-secondary; vertical-alignment: center; }
+                Kbd { text: "C"; horizontal-stretch: 0; }
+                Text { text: "粘贴"; font-size: TelaTheme.font-size-m; color: TelaTheme.text-color-secondary; vertical-alignment: center; }
+                Kbd { text: "Ctrl"; horizontal-stretch: 0; }
+                Text { text: "+"; font-size: TelaTheme.font-size-m; color: TelaTheme.text-color-secondary; vertical-alignment: center; }
+                Kbd { text: "V"; horizontal-stretch: 0; }
+                Rectangle { }
+            }
+        }
+
+        CodeBlock { code: "import { Kbd } from \"@tela-ui/base.slint\";\n\nText { text: \"复制\"; }\nKbd { text: \"Ctrl\"; }\nKbd { text: \"C\"; }"; }
     }
 }

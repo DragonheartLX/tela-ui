@@ -3,7 +3,7 @@
 
 import { TelaTheme, Theme, Size } from "@tela-ui/theme.slint";
 import { TIconSet, Caption } from "@tela-ui/base.slint";
-import { Input, TextArea, Select, SelectItem, CheckBox, RadioGroup, RadioItem, Switch, Slider, InputNumber, Rate, Card , CodeBlock} from "@tela-ui/common.slint";
+import { Input, TextArea, Select, SelectItem, CheckBox, RadioGroup, RadioItem, Switch, Slider, InputNumber, Rate, Segmented, Card , CodeBlock} from "@tela-ui/common.slint";
 
 export component FormSection inherits VerticalLayout {
     spacing: 28px;
@@ -31,6 +31,7 @@ export component FormSection inherits VerticalLayout {
     in-out property <float> slider-value: 40;
     in-out property <float> num-value: 1;
     in-out property <float> rate-value: 3;
+    in-out property <int> seg-index: 1;
 
     // ======================== Input ========================
     VerticalLayout {
@@ -236,4 +237,30 @@ export component FormSection inherits VerticalLayout {
 
         CodeBlock { code: "import { Rate } from \"@tela-ui/common.slint\";\n\nRate { value <=> score; }\nRate { value: 2; read-only: true; }\nRate { theme: Theme.primary; size: Size.small; }"; }
     }
+    // ====================== Segmented =====================
+    VerticalLayout {
+        spacing: 8px;
+
+        Card {
+            title: "分段控制器 Segmented";
+
+            VerticalLayout {
+                spacing: 12px;
+
+                Rectangle {
+                    width: 480px;
+
+                    Segmented {
+                        items: ["日", "周", "月", "年"];
+                        current-index <=> root.seg-index;
+                    }
+                }
+
+                Caption { text: "当前选中下标: \{root.seg-index}"; }
+            }
+        }
+
+        CodeBlock { code: "import { Segmented } from \"@tela-ui/common.slint\";\n\nRectangle {\n    width: 480px;\n    Segmented { items: [\"日\", \"周\", \"月\", \"年\"]; current-index <=> i; }\n}"; }
+    }
+
 }

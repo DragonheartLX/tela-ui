@@ -1,0 +1,74 @@
+// Tela UI — Carousel
+//
+// Sliding slideshow: one image per slide, dots indicator, optional autoplay.
+// Slides keep the component's own size — set width/height on the instance.
+
+import { TelaTheme } from "../theme.slint";
+
+export struct CarouselSlide {
+    image: image,
+}
+
+export component Carousel inherits Rectangle {
+    in property <[CarouselSlide]> items;
+    in-out property <int> current: 0;
+    in property <bool> autoplay: false;
+    in property <duration> interval: 3s;
+
+    clip: true;
+
+    track := Rectangle {
+        x: -root.current * parent.width;
+        y: 0;
+        width: parent.width;
+        height: parent.height;
+        animate x { duration: TelaTheme.duration-slow; }
+
+        for it[i] in root.items: Image {
+            x: i * root.width;
+            y: 0;
+            width: root.width;
+            height: root.height;
+            source: it.image;
+            image-fit: cover;
+        }
+    }
+
+    // Dots indicator, centered at the bottom edge.
+    HorizontalLayout {
+        x: (parent.width - self.preferred-width) / 2;
+        y: parent.height - self.preferred-height - 12px;
+        height: self.preferred-height;
+        spacing: TelaTheme.spacing-3;
+
+        for it[i] in root.items: Rectangle {
+            width: i == root.current ? 16px : 6px;
+            height: 6px;
+            y: (parent.height - self.height) / 2;
+            border-radius: TelaTheme.radius-round;
+            background: i == root.current ? TelaTheme.text-color-anti : TelaTheme.text-color-anti.with-alpha(0.4);
+            animate width { duration: TelaTheme.duration-fast; }
+            animate background { duration: TelaTheme.duration-fast; }
+
+            dot-ta := TouchArea {
+                mouse-cursor: MouseCursor.pointer;
+                clicked => {
+                    root.current = i;
+                }
+            }
+        }
+    }
+
+    Timer {
+        // Timer defaults to running: bind explicitly.
+        running: root.autoplay && root.items.length > 1;
+        interval: root.interval;
+        triggered => {
+            if (root.current + 1 >= root.items.length) {
+                root.current = 0;
+            } else {
+                root.current = root.current + 1;
+            }
+        }
+    }
+}

@@ -1,11 +1,11 @@
 // Demo section: 反馈 (Alert / Message / Dialog / Drawer / Notification /
-// Tooltip / Popconfirm), 一个组件一张卡. The dialog and drawer overlays live
-// at window level in MainWindow; this section only hosts the trigger buttons
-// via two-way bound properties.
+// Popconfirm / Progress / Result), 一个组件一张卡. The dialog and drawer
+// overlays live at window level in MainWindow; this section only hosts the
+// trigger buttons via two-way bound properties.
 
 import { TelaTheme, Theme } from "@tela-ui/theme.slint";
 import { Button, ButtonVariant, Caption } from "@tela-ui/base.slint";
-import { Alert, Select, SelectItem, TelaMessage, MessagePlacement, DrawerPlacement, TelaNotification, TooltipArea, TooltipPlacement, Popconfirm, PopupPlacement, Card, CodeBlock } from "@tela-ui/common.slint";
+import { Alert, Select, SelectItem, TelaMessage, MessagePlacement, DrawerPlacement, TelaNotification, Popconfirm, PopupPlacement, Result, ResultStatus, Progress, ProgressVariant, Slider, Card, CodeBlock } from "@tela-ui/common.slint";
 
 export component FeedbackSection inherits VerticalLayout {
     spacing: 28px;
@@ -14,6 +14,7 @@ export component FeedbackSection inherits VerticalLayout {
     in-out property <bool> dialog-open: false;
     in-out property <bool> drawer-open: false;
     in-out property <DrawerPlacement> drawer-placement: DrawerPlacement.right;
+    in-out property <float> progress-value: 40;
 
     in property <[SelectItem]> drawer-side-items: [
         { label: "右侧", value: "right", disabled: false },
@@ -191,59 +192,6 @@ export component FeedbackSection inherits VerticalLayout {
         CodeBlock { code: "import { Drawer } from \"@tela-ui/common.slint\";\n\n// 窗口根部:\nDrawer {\n    open <=> open;\n    placement: DrawerPlacement.right;\n    title: \"抽屉标题\";\n    Paragraph { text: \"面板主体由子元素提供\"; }\n}"; }
     }
 
-    // ======================== Tooltip ======================
-    VerticalLayout {
-        spacing: 8px;
-
-        Card {
-            title: "气泡提示 Tooltip";
-
-            HorizontalLayout {
-                spacing: 24px;
-
-                // TooltipArea fills its parent, wires the hover and reports
-                // to the window-level overlay — no clipping worries.
-                TooltipArea {
-                    width: 120px;
-                    height: TelaTheme.height-m;
-                    background: TelaTheme.bg-color-secondarycontainer;
-                    border-radius: TelaTheme.radius-default;
-                    text: "我是 Tooltip, 鼠标移开即消失, 250ms 延迟出现";
-                    placement: TooltipPlacement.top;
-
-                    Text {
-                        text: "上方提示";
-                        font-size: TelaTheme.font-size-m;
-                        color: TelaTheme.text-color-secondary;
-                        horizontal-alignment: center;
-                        vertical-alignment: center;
-                    }
-                }
-
-                TooltipArea {
-                    width: 120px;
-                    height: TelaTheme.height-m;
-                    background: TelaTheme.bg-color-secondarycontainer;
-                    border-radius: TelaTheme.radius-default;
-                    text: "placement: TooltipPlacement.bottom";
-                    placement: TooltipPlacement.bottom;
-
-                    Text {
-                        text: "下方提示";
-                        font-size: TelaTheme.font-size-m;
-                        color: TelaTheme.text-color-secondary;
-                        horizontal-alignment: center;
-                        vertical-alignment: center;
-                    }
-                }
-
-                Caption { text: "渲染在窗口级 (TooltipOverlay), 不受卡片或滚动容器裁剪; 亮暗均为深色气泡。"; vertical-alignment: center; wrap: word-wrap; horizontal-stretch: 1; }
-            }
-        }
-
-        CodeBlock { code: "import { TooltipArea, TooltipOverlay } from \"@tela-ui/common.slint\";\n\n// 窗口根部放置一次:\nTooltipOverlay { }\n\nTooltipArea {\n    text: \"提示\"; placement: TooltipPlacement.top;\n    Text { text: \"目标\"; }\n}"; }
-    }
-
     // ======================= Popconfirm ====================
     VerticalLayout {
         spacing: 8px;
@@ -296,5 +244,88 @@ export component FeedbackSection inherits VerticalLayout {
         }
 
         CodeBlock { code: "import { Popconfirm } from \"@tela-ui/common.slint\";\n\nPopconfirm {\n    text: \"确定删除吗?\";\n    confirm => { … }\n    Button { text: \"删除\"; clicked => pc.toggle(); } // auto-open: false\n}"; }
+    }
+
+    // ======================== Progress =====================
+    VerticalLayout {
+        spacing: 8px;
+
+        Card {
+            title: "进度 Progress(拖动滑块实时变化)";
+
+            VerticalLayout {
+                spacing: 16px;
+
+                HorizontalLayout {
+                    spacing: 32px;
+
+                    Progress { value: root.progress-value; theme: Theme.primary; horizontal-stretch: 1; }
+                    Progress { value: 66; theme: Theme.success; horizontal-stretch: 1; }
+                    Progress { value: 30; theme: Theme.warning; horizontal-stretch: 1; }
+                    Progress { value: 90; theme: Theme.error; horizontal-stretch: 1; show-label: false; }
+                }
+
+                HorizontalLayout {
+                    spacing: 32px;
+                    Progress { variant: ProgressVariant.circle; value: root.progress-value; theme: Theme.primary; }
+                    Progress { variant: ProgressVariant.circle; value: 66; theme: Theme.success; }
+                    Progress { variant: ProgressVariant.circle; value: 30; theme: Theme.warning; }
+                    Progress { variant: ProgressVariant.circle; value: 100; theme: Theme.error; }
+                    // Absorbs the leftover row space.
+                    Rectangle { }
+                }
+
+                Slider {
+                    value <=> root.progress-value;
+                }
+            }
+        }
+
+        CodeBlock { code: "import { Progress } from \"@tela-ui/common.slint\";\n\nProgress { value: 40; theme: Theme.primary; }\nProgress { value: 66; theme: Theme.success; variant: ProgressVariant.circle; }\nProgress { value: 90; theme: Theme.error; show-label: false; }"; }
+    }
+
+    // ========================= Result ======================
+    VerticalLayout {
+        spacing: 8px;
+
+        Card {
+            title: "结果页 Result";
+
+            HorizontalLayout {
+                spacing: 24px;
+
+                Rectangle {
+                    width: 380px;
+                    height: 260px;
+
+                    Result {
+                        status: ResultStatus.success;
+                        title: "提交成功";
+                        description: "表单已提交,审核结果将以消息通知。";
+
+                        Button { text: "继续填写"; }
+                        Button { theme: Theme.primary; text: "查看详情"; }
+                    }
+                }
+
+                Rectangle {
+                    width: 380px;
+                    height: 260px;
+
+                    Result {
+                        status: ResultStatus.error;
+                        title: "提交失败";
+                        description: "网络连接失败,请检查网络后重试。";
+
+                        Button { variant: ButtonVariant.outline; text: "返回修改"; }
+                        Button { theme: Theme.error; text: "重新提交"; }
+                    }
+                }
+
+                Rectangle { }
+            }
+        }
+
+        CodeBlock { code: "import { Result } from \"@tela-ui/common.slint\";\n\nResult {\n    status: ResultStatus.success;\n    title: \"提交成功\";\n    description: \"表单已提交。\";\n    Button { text: \"查看详情\"; } // 子元素作为操作区\n}"; }
     }
 }

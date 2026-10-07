@@ -1,0 +1,76 @@
+// Tela UI — Timeline
+//
+// Vertical timeline: a theme-colored dot per entry joined by a rail line,
+// label and optional description on the right. The rail line fills each
+// row below its dot; the last entry draws none.
+
+import { TelaTheme, Theme } from "../theme.slint";
+
+export struct TimelineItem {
+    label: string,
+    content: string,
+    theme: Theme,
+}
+
+export component Timeline inherits VerticalLayout {
+    in property <[TimelineItem]> items;
+
+    spacing: 0px;
+
+    for it[i] in root.items: HorizontalLayout {
+        // Rail: dot on top, connector line filling the rest of the row.
+        VerticalLayout {
+            width: 18px;
+
+            Rectangle {
+                height: 20px;
+
+                Rectangle {
+                    x: (parent.width - self.width) / 2;
+                    y: 5px;
+                    width: 10px;
+                    height: 10px;
+                    border-radius: TelaTheme.radius-round;
+                    // The last entry hollows out: container fill with a
+                    // themed ring instead of a solid dot.
+                    background: i == root.items.length - 1 ? TelaTheme.bg-color-container : TelaTheme.theme-color(it.theme);
+                    border-width: 2px;
+                    border-color: TelaTheme.theme-color(it.theme);
+                }
+            }
+
+            if i < root.items.length - 1: Rectangle {
+                vertical-stretch: 1;
+                width: 2px;
+                x: (parent.width - self.width) / 2;
+                background: TelaTheme.border-level-1-color;
+            }
+        }
+
+        VerticalLayout {
+            horizontal-stretch: 1;
+            // Inter-entry breathing room lives here so the rail line can
+            // span it; the last entry drops the padding.
+            padding-bottom: i == root.items.length - 1 ? 0px : TelaTheme.spacing-6;
+            padding-top: 2px;
+            spacing: TelaTheme.spacing-2;
+
+            Text {
+                text: it.label;
+                font-size: TelaTheme.font-size-m;
+                font-family: TelaTheme.font-family;
+                font-weight: TelaTheme.font-weight-medium;
+                color: TelaTheme.text-color-primary;
+                overflow: elide;
+            }
+
+            if it.content != "": Text {
+                text: it.content;
+                font-size: TelaTheme.font-size-s;
+                font-family: TelaTheme.font-family;
+                color: TelaTheme.text-color-secondary;
+                wrap: word-wrap;
+            }
+        }
+    }
+}

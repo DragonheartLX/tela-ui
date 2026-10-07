@@ -1,0 +1,100 @@
+// Tela UI — Collapse
+//
+// Foldable panels. `accordion: true` keeps a single open panel tracked in
+// `current-index` (-1 = none); with `accordion: false` each panel toggles
+// independently (its open state is local, no external preset).
+
+import { TelaTheme } from "../theme.slint";
+import { Icon } from "../base/icon/icon.slint";
+import { TIconSet } from "../base/icon/data.slint";
+
+export struct CollapseItem {
+    label: string,
+    content: string,
+    disabled: bool,
+}
+
+export component Collapse inherits VerticalLayout {
+    in property <[CollapseItem]> items;
+    in property <bool> accordion: false;
+    // Accordion mode only: index of the open panel, -1 = all closed.
+    in-out property <int> current-index: -1;
+
+    spacing: 0px;
+
+    for it[i] in root.items: VerticalLayout {
+        private property <bool> local-open: false;
+        private property <bool> open: root.accordion ? i == root.current-index : self.local-open;
+
+        header := HorizontalLayout {
+            height: 44px;
+            padding-left: TelaTheme.padding-lr-l;
+            padding-right: TelaTheme.padding-lr-l;
+            spacing: TelaTheme.spacing-4;
+
+            Text {
+                horizontal-stretch: 1;
+                text: it.label;
+                font-size: TelaTheme.font-size-m;
+                font-family: TelaTheme.font-family;
+                font-weight: TelaTheme.font-weight-medium;
+                color: open ? TelaTheme.brand-color : TelaTheme.text-color-primary;
+                vertical-alignment: center;
+                overflow: elide;
+
+                states [
+                    disabled when it.disabled: {
+                        color: TelaTheme.text-color-disabled;
+                    }
+                ]
+            }
+
+            Icon {
+                width: 16px;
+                y: (parent.height - self.height) / 2;
+                icon: TIconSet.ChevronDown;
+                size: 16px;
+                icon-color: it.disabled ? TelaTheme.text-color-disabled : TelaTheme.text-color-secondary;
+                transform-rotation: open ? 180deg : 0deg;
+                transform-origin: { x: self.width / 2, y: self.height / 2 };
+                animate transform-rotation { duration: TelaTheme.duration-fast; }
+            }
+
+            header-ta := TouchArea {
+                enabled: !it.disabled;
+                mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;
+                clicked => {
+                    if (root.accordion) {
+                        root.current-index = open ? -1 : i;
+                    } else {
+                        local-open = !local-open;
+                    }
+                }
+            }
+        }
+
+        // Content folds by height (animated) instead of mount/unmount.
+        content-wrap := Rectangle {
+            height: open ? content.preferred-height + TelaTheme.padding-lr-l : 0px;
+            clip: true;
+            animate height { duration: TelaTheme.duration-base; }
+
+            content := Text {
+                x: TelaTheme.padding-lr-l;
+                y: TelaTheme.spacing-4;
+                width: parent.width - TelaTheme.padding-lr-l * 2;
+                text: it.content;
+                font-size: TelaTheme.font-size-m;
+                font-family: TelaTheme.font-family;
+                color: TelaTheme.text-color-secondary;
+                wrap: word-wrap;
+            }
+        }
+
+        // Hairline under every panel closes the stack visually.
+        Rectangle {
+            height: 1px;
+            background: TelaTheme.border-level-1-color;
+        }
+    }
+}

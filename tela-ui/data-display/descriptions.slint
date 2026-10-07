@@ -1,0 +1,81 @@
+// Tela UI — Descriptions
+//
+// Key/value description list in `columns` equal columns. `bordered` renders
+// a TDesign-style grid (tinted label cells, hairline borders); otherwise a
+// plain label/value stack. Cells are single-line and elide.
+
+import { TelaTheme } from "../theme.slint";
+
+export struct DescriptionItem {
+    label: string,
+    value: string,
+}
+
+export component Descriptions inherits Rectangle {
+    in property <[DescriptionItem]> items;
+    in property <bool> bordered: false;
+    in property <int> columns: 2;
+
+    private property <int> cols: Math.max(1, root.columns);
+    private property <length> row-h: root.bordered ? 40px : 32px;
+    // Cell row/column from the flat index (int math kept float-safe).
+    function col-of(i: int) -> int {
+        return Math.mod(i, self.cols);
+    }
+    function row-of(i: int) -> int {
+        return Math.floor(i / (self.cols * 1.0));
+    }
+
+    height: Math.ceil(root.items.length / (self.cols * 1.0)) * row-h;
+    border-width: root.bordered ? 1px : 0;
+    border-color: TelaTheme.component-border;
+
+    for it[i] in root.items: Rectangle {
+        x: root.col-of(i) * (parent.width / root.cols);
+        y: root.row-of(i) * parent.row-h;
+        width: parent.width / root.cols;
+        height: parent.row-h;
+
+        HorizontalLayout {
+            // Label cell
+            Rectangle {
+                width: 96px;
+                background: root.bordered ? TelaTheme.bg-color-secondarycontainer : transparent;
+                border-width: root.bordered ? 1px : 0;
+                // Only right/bottom hairlines: the container border closes
+                // the grid without doubled lines.
+                border-color: TelaTheme.component-border;
+
+                Text {
+                    x: TelaTheme.padding-lr-m;
+                    y: (parent.height - self.preferred-height) / 2;
+                    text: it.label;
+                    font-size: TelaTheme.font-size-m;
+                    font-family: TelaTheme.font-family;
+                    color: TelaTheme.text-color-secondary;
+                    overflow: elide;
+                    width: parent.width - TelaTheme.padding-lr-m * 2;
+                }
+            }
+
+            // Value cell
+            Rectangle {
+                horizontal-stretch: 1;
+                background: transparent;
+                border-width: root.bordered ? 1px : 0;
+                border-color: TelaTheme.component-border;
+
+                Text {
+                    x: TelaTheme.padding-lr-m;
+                    y: (parent.height - self.preferred-height) / 2;
+                    width: parent.width - TelaTheme.padding-lr-m * 2;
+                    text: it.value;
+                    font-size: TelaTheme.font-size-m;
+                    font-family: TelaTheme.font-family;
+                    color: TelaTheme.text-color-primary;
+                    overflow: elide;
+                }
+            }
+        }
+    }
+}
