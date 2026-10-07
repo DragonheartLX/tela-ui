@@ -7,8 +7,8 @@
 // mounted and animate position/opacity so the fold plays smoothly instead
 // of popping. The collapse toggle (TDesign's panel-fold button) lives in
 // the header (`toggle-position: top`) or as the footer's last row
-// (`bottom`). `mode`: icon-text (collapsible, default), text, or icon
-// (always 64px wide).
+// (`bottom`), labeled "收起" like any menu row while expanded. `mode`:
+// icon-text (collapsible, default), text, or icon (always 64px wide).
 
 import { TelaTheme } from "../theme.slint";
 import { Icon } from "../base/icon/icon.slint";
@@ -45,6 +45,92 @@ export struct SideNavFooterItem {
     label: string = "",
     icon: TIconData = { paths: [] },
     value: string = "",
+}
+
+// One menu/footer row: icon slides between the expanded left slot and the
+// collapsed center, the label fades with the fold, hover/active/disabled
+// recolor. Selection behavior lives in the `clicked` handlers of the
+// callers (menu rows select, footer rows may fire `footer-clicked`).
+component NavRow inherits Rectangle {
+    in property <string> label;
+    in property <TIconData> icon;
+    in property <string> value;
+    in property <bool> disabled: false;
+    in property <bool> show-text;
+    in property <bool> show-icon;
+    in property <string> current-value;
+    callback clicked();
+
+    height: 40px;
+    border-radius: TelaTheme.radius-medium;
+    clip: true;
+    background: transparent;
+    animate background { duration: TelaTheme.duration-fast; }
+
+    states [
+        hovered when row-ta.has-hover && !root.disabled: {
+            background: TelaTheme.bg-color-component-hover;
+        }
+        active when root.value != "" && root.value == root.current-value && !root.disabled: {
+            background: TelaTheme.brand-color-light;
+        }
+    ]
+
+    if root.show-icon && root.icon.paths.length > 0: Icon {
+        // Slides between the expanded left slot and the collapsed center;
+        // stays mounted so the fold animates instead of pop.
+        x: root.show-text ? TelaTheme.padding-lr-m
+            : (parent.width - self.width) / 2;
+        y: (parent.height - self.height) / 2;
+        icon: root.icon;
+        size: 20px;
+        icon-color: TelaTheme.text-color-secondary;
+        animate x { duration: TelaTheme.duration-base; easing: ease-out; }
+        animate icon-color { duration: TelaTheme.duration-fast; }
+
+        states [
+            hovered when row-ta.has-hover && !root.disabled: {
+                icon-color: TelaTheme.text-color-primary;
+            }
+            active when root.value != "" && root.value == root.current-value && !root.disabled: {
+                icon-color: TelaTheme.brand-color;
+            }
+            disabled when root.disabled: {
+                icon-color: TelaTheme.text-color-disabled;
+            }
+        ]
+    }
+
+    if root.label != "": Text {
+        x: root.icon.paths.length > 0 && root.show-icon ? 44px : TelaTheme.padding-lr-m;
+        y: (parent.height - self.preferred-height) / 2;
+        height: self.preferred-height;
+        text: root.label;
+        font-size: TelaTheme.font-size-m;
+        color: TelaTheme.text-color-primary;
+        vertical-alignment: center;
+        opacity: root.show-text ? 1 : 0;
+        animate opacity { duration: TelaTheme.duration-base; }
+        animate color { duration: TelaTheme.duration-fast; }
+
+        states [
+            hovered when row-ta.has-hover && !root.disabled: {
+                color: TelaTheme.text-color-primary;
+            }
+            active when root.value != "" && root.value == root.current-value && !root.disabled: {
+                color: TelaTheme.brand-color;
+            }
+            disabled when root.disabled: {
+                color: TelaTheme.text-color-disabled;
+            }
+        ]
+    }
+
+    row-ta := TouchArea {
+        enabled: !root.disabled;
+        mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;
+        clicked => { root.clicked(); }
+    }
 }
 
 export component SideNav inherits Rectangle {
@@ -154,83 +240,18 @@ export component SideNav inherits Rectangle {
         }
 
         // Menu ------------------------------------------------------------
-        for it[i] in root.items: Rectangle {
-            height: 40px;
-            border-radius: TelaTheme.radius-medium;
-            clip: true;
-            background: transparent;
-            animate background { duration: TelaTheme.duration-fast; }
-
-            states [
-                hovered when item-ta.has-hover && !it.disabled: {
-                    background: TelaTheme.bg-color-component-hover;
-                }
-                active when it.value == root.current-value && !it.disabled: {
-                    background: TelaTheme.brand-color-light;
-                }
-                disabled when it.disabled: {
-                    background: transparent;
-                }
-            ]
-
-            if root.show-icon && it.icon.paths.length > 0: Icon {
-                // Slides between the expanded left slot and the collapsed
-                // center; stays mounted so the fold animates instead of pop.
-                x: root.show-text ? TelaTheme.padding-lr-m
-                    : (parent.width - self.width) / 2;
-                y: (parent.height - self.height) / 2;
-                icon: it.icon;
-                size: 20px;
-                icon-color: TelaTheme.text-color-secondary;
-                animate x { duration: TelaTheme.duration-base; easing: ease-out; }
-                animate icon-color { duration: TelaTheme.duration-fast; }
-
-                states [
-                    hovered when item-ta.has-hover && !it.disabled: {
-                        icon-color: TelaTheme.text-color-primary;
-                    }
-                    active when it.value == root.current-value && !it.disabled: {
-                        icon-color: TelaTheme.brand-color;
-                    }
-                    disabled when it.disabled: {
-                        icon-color: TelaTheme.text-color-disabled;
-                    }
-                ]
-            }
-
-            if it.label != "": Text {
-                x: it.icon.paths.length > 0 && root.show-icon ? 44px : TelaTheme.padding-lr-m;
-                y: (parent.height - self.preferred-height) / 2;
-                height: self.preferred-height;
-                text: it.label;
-                font-size: TelaTheme.font-size-m;
-                color: TelaTheme.text-color-primary;
-                vertical-alignment: center;
-                opacity: root.show-text ? 1 : 0;
-                animate opacity { duration: TelaTheme.duration-base; }
-                animate color { duration: TelaTheme.duration-fast; }
-
-                states [
-                    hovered when item-ta.has-hover && !it.disabled: {
-                        color: TelaTheme.text-color-primary;
-                    }
-                    active when it.value == root.current-value && !it.disabled: {
-                        color: TelaTheme.brand-color;
-                    }
-                    disabled when it.disabled: {
-                        color: TelaTheme.text-color-disabled;
-                    }
-                ]
-            }
-
-            item-ta := TouchArea {
-                enabled: !it.disabled;
-                mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;
-                clicked => {
-                    if it.value != root.current-value {
-                        root.current-value = it.value;
-                        root.changed(it.value);
-                    }
+        for it in root.items: NavRow {
+            label: it.label;
+            icon: it.icon;
+            value: it.value;
+            disabled: it.disabled;
+            show-text: root.show-text;
+            show-icon: root.show-icon;
+            current-value: root.current-value;
+            clicked => {
+                if it.value != root.current-value {
+                    root.current-value = it.value;
+                    root.changed(it.value);
                 }
             }
         }
@@ -238,114 +259,37 @@ export component SideNav inherits Rectangle {
         Rectangle { vertical-stretch: 1; }
 
         // Footer entries ---------------------------------------------------
-        // Pinned to the bottom edge above the collapse toggle; styled like
-        // menu rows — icon plus label while expanded, a centered icon once
-        // collapsed.
-        for it in root.footer-items: Rectangle {
-            height: 40px;
-            border-radius: TelaTheme.radius-medium;
-            clip: true;
-            background: transparent;
-            animate background { duration: TelaTheme.duration-fast; }
-
-            states [
-                hovered when footer-ta.has-hover: {
-                    background: TelaTheme.bg-color-component-hover;
-                }
-                active when it.value != "" && it.value == root.current-value: {
-                    background: TelaTheme.brand-color-light;
-                }
-            ]
-
-            if root.show-icon && it.icon.paths.length > 0: Icon {
-                x: root.show-text ? TelaTheme.padding-lr-m
-                    : (parent.width - self.width) / 2;
-                y: (parent.height - self.height) / 2;
-                icon: it.icon;
-                size: 20px;
-                icon-color: TelaTheme.text-color-secondary;
-                animate x { duration: TelaTheme.duration-base; easing: ease-out; }
-                animate icon-color { duration: TelaTheme.duration-fast; }
-
-                states [
-                    hovered when footer-ta.has-hover: {
-                        icon-color: TelaTheme.text-color-primary;
-                    }
-                    active when it.value != "" && it.value == root.current-value: {
-                        icon-color: TelaTheme.brand-color;
-                    }
-                ]
-            }
-
-            if it.label != "": Text {
-                x: it.icon.paths.length > 0 && root.show-icon ? 44px : TelaTheme.padding-lr-m;
-                y: (parent.height - self.preferred-height) / 2;
-                height: self.preferred-height;
-                text: it.label;
-                font-size: TelaTheme.font-size-m;
-                color: TelaTheme.text-color-primary;
-                vertical-alignment: center;
-                opacity: root.show-text ? 1 : 0;
-                animate opacity { duration: TelaTheme.duration-base; }
-                animate color { duration: TelaTheme.duration-fast; }
-
-                states [
-                    hovered when footer-ta.has-hover: {
-                        color: TelaTheme.text-color-primary;
-                    }
-                    active when it.value != "" && it.value == root.current-value: {
-                        color: TelaTheme.brand-color;
-                    }
-                ]
-            }
-
-            footer-ta := TouchArea {
-                mouse-cursor: MouseCursor.pointer;
-                clicked => {
-                    if it.value != "" {
-                        if it.value != root.current-value {
-                            root.current-value = it.value;
-                            root.changed(it.value);
-                        }
-                    } else {
-                        root.footer-clicked(it);
-                    }
+        // Pinned to the bottom edge above the collapse toggle.
+        for it in root.footer-items: NavRow {
+            label: it.label;
+            icon: it.icon;
+            value: it.value;
+            show-text: root.show-text;
+            show-icon: root.show-icon;
+            current-value: root.current-value;
+            clicked => {
+                if it.value == "" {
+                    root.footer-clicked(it);
+                } else if it.value != root.current-value {
+                    root.current-value = it.value;
+                    root.changed(it.value);
                 }
             }
         }
 
-        // Collapse toggle, bottom variant: TDesign's fold button — a quiet
-        // row with the panel-fold glyph (arrow pointing at the divider while
-        // expanded, outward once collapsed), left-aligned with the menu
-        // while expanded, centered after folding.
-        if root.footer-chevron: Rectangle {
-            height: 40px;
-            border-radius: TelaTheme.radius-medium;
-            background: transparent;
-            animate background { duration: TelaTheme.duration-fast; }
-
-            states [
-                hovered when collapse-ta.has-hover: {
-                    background: TelaTheme.bg-color-component-hover;
-                }
-            ]
-
-            Icon {
-                x: root.show-text ? TelaTheme.padding-lr-m
-                    : (parent.width - self.width) / 2;
-                y: (parent.height - self.height) / 2;
-                icon: root.show-text ? TIconSet.PanelLeftClose : TIconSet.PanelLeftOpen;
-                size: 20px;
-                icon-color: collapse-ta.has-hover ? TelaTheme.brand-color : TelaTheme.text-color-secondary;
-                animate x { duration: TelaTheme.duration-base; easing: ease-out; }
-                animate icon-color { duration: TelaTheme.duration-fast; }
-            }
-
-            collapse-ta := TouchArea {
-                mouse-cursor: MouseCursor.pointer;
-                clicked => {
-                    root.collapsed = !root.collapsed;
-                }
+        // Collapse toggle, bottom variant: a quiet nav row like the footer
+        // entries — panel-fold glyph (arrow pointing at the divider while
+        // expanded, outward once collapsed) plus a "收起" label that fades
+        // with the fold, left-aligned with the menu while expanded, centered
+        // after folding.
+        if root.footer-chevron: NavRow {
+            label: "收起";
+            icon: root.show-text ? TIconSet.PanelLeftClose : TIconSet.PanelLeftOpen;
+            show-text: root.show-text;
+            show-icon: root.show-icon;
+            current-value: root.current-value;
+            clicked => {
+                root.collapsed = !root.collapsed;
             }
         }
     }

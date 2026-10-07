@@ -8,7 +8,7 @@
 //   Icon { icon: TIconSet.ChevronDown; size: 16px; }
 
 import { TelaTheme } from "../../theme.slint";
-import { TIconData, TIconPath, TIconSet } from "data.slint";
+import { TIconData } from "data.slint";
 
 export component Icon inherits Rectangle {
     // Icon geometry: an entry from TIconSet or custom TIconData.
@@ -23,13 +23,11 @@ export component Icon inherits Rectangle {
     out property <length> computed-stroke-width:
         absolute-stroke-width ? stroke-width * 1px : size / 24 * stroke-width;
 
-    private property <[TIconPath]> paths: icon.paths;
-
     width: size;
     height: size;
     clip: false;
 
-    for p in paths: Path {
+    for p in icon.paths: Path {
         viewbox-width: 24;
         viewbox-height: 24;
         commands: p.command;

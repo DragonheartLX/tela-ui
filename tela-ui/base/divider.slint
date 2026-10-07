@@ -4,14 +4,12 @@
 // rule (orientation: Orientation.vertical).
 
 import { TelaTheme } from "../theme.slint";
-import { Theme, Size } from "../structs/enums.slint";
 
 export enum DividerAlign {
     left,
     center,
     right,
 }
-import { TelaTheme } from "../theme.slint";
 
 export component Divider inherits Rectangle {
     in property <Orientation> orientation: Orientation.horizontal;

@@ -2,10 +2,11 @@
 //
 // Single-line input with prefix/suffix icons, clearable, status colors and
 // password mode; multi-line TextArea.
-// status: 0 default, 1 success, 2 warning, 3 error.
 
 import { TelaTheme } from "../theme.slint";
-import { Theme, Size } from "../structs/enums.slint";
+import { Size } from "../structs/enums.slint";
+import { Icon } from "../base/icon/icon.slint";
+import { TIconData, TIconSet } from "../base/icon/data.slint";
 
 export enum InputStatus {
     default,
@@ -13,17 +14,61 @@ export enum InputStatus {
     warning,
     error,
 }
-import { Icon } from "../base/icon/icon.slint";
-import { TIconData, TIconSet } from "../base/icon/data.slint";
 
-export component Input inherits Rectangle {
-    // 0 small, 1 medium, 2 large
+// Shared frame for Input / TextArea: background and border follow the
+// status, hover / focus / disabled override it, and clicking the frame
+// focuses the text input (subclasses wire `focus-request` to theirs).
+component InputFrame inherits Rectangle {
+    in property <InputStatus> status: InputStatus.default;
+    in property <bool> disabled;
+    // Whether the subclass TextInput holds keyboard focus.
+    in property <bool> focused;
+    in property <length> radius: TelaTheme.radius-default;
+    callback focus-request();
+    // Subclasses can't reach `touch-bg` directly (base elements are not in
+    // their scope), so the frame publishes its hover state.
+    out property <bool> frame-hovered: touch-bg.has-hover;
+
+    // Rest border follows the status color; overridden by `states`
+    // (later states win over earlier ones).
+    private property <brush> border-c:
+        root.status == InputStatus.error ? TelaTheme.error-color
+        : root.status == InputStatus.warning ? TelaTheme.warning-color
+        : root.status == InputStatus.success ? TelaTheme.success-color
+        : TelaTheme.component-border;
+
+    background: TelaTheme.bg-color-specialcomponent;
+    border-width: 1px;
+    border-color: border-c;
+    border-radius: root.radius;
+    animate border-c { duration: TelaTheme.duration-fast; }
+
+    states [
+        hovered when touch-bg.has-hover && root.status == InputStatus.default && !root.disabled: {
+            border-c: TelaTheme.border-level-2-color;
+        }
+        focused when root.focused && root.status == InputStatus.default: {
+            border-c: TelaTheme.brand-color;
+        }
+        disabled when root.disabled: {
+            border-c: TelaTheme.border-level-1-color;
+        }
+    ]
+
+    touch-bg := TouchArea {
+        enabled: !root.disabled;
+        mouse-cursor: root.disabled ? MouseCursor.default : MouseCursor.text;
+        clicked => {
+            root.focus-request();
+        }
+    }
+}
+
+export component Input inherits InputFrame {
     in property <Size> size: Size.medium;
     in property <string> placeholder-text;
     in-out property <string> text <=> ti.text;
-    in property <bool> disabled;
     in property <bool> read-only <=> ti.read-only;
-    in property <InputStatus> status: InputStatus.default;
     in property <TIconData> prefix-icon;
     in property <TIconData> suffix-icon;
     in property <bool> clearable: false;
@@ -40,43 +85,12 @@ export component Input inherits Rectangle {
     private property <length> spacing-left: TelaTheme.spacing-2;
 
     private property <bool> clear-visible:
-        clearable && !disabled && !read-only && text != "" && touch-bg.has-hover;
-
-    // Rest border follows the status color; overridden by `states`.
-    private property <brush> border-c:
-        status == InputStatus.error ? TelaTheme.error-color
-        : status == InputStatus.warning ? TelaTheme.warning-color
-        : status == InputStatus.success ? TelaTheme.success-color
-        : TelaTheme.component-border;
+        clearable && !root.disabled && !read-only && text != "" && root.frame-hovered;
 
     height: h;
-    background: TelaTheme.bg-color-specialcomponent;
-    border-width: 1px;
-    border-color: border-c;
-    border-radius: TelaTheme.radius-default;
-    animate border-c { duration: TelaTheme.duration-fast; }
     forward-focus: ti;
-
-    // Later states win over earlier ones.
-    states [
-        hovered when touch-bg.has-hover && status == InputStatus.default && !root.disabled: {
-            border-c: TelaTheme.border-level-2-color;
-        }
-        focused when ti.has-focus && status == InputStatus.default: {
-            border-c: TelaTheme.brand-color;
-        }
-        disabled when root.disabled: {
-            border-c: TelaTheme.border-level-1-color;
-        }
-    ]
-
-    touch-bg := TouchArea {
-        enabled: !root.disabled;
-        mouse-cursor: root.disabled ? MouseCursor.default : MouseCursor.text;
-        clicked => {
-            ti.focus();
-        }
-    }
+    focused: ti.has-focus;
+    focus-request => { ti.focus(); }
 
     HorizontalLayout {
         x: 0;
@@ -97,6 +111,7 @@ export component Input inherits Rectangle {
         ti := TextInput {
             vertical-alignment: center;
             single-line: true;
+            input-type: root.input-type;
             color: root.disabled ? TelaTheme.text-color-disabled : TelaTheme.text-color-primary;
             font-size: root.fs;
             font-family: TelaTheme.font-family;
@@ -161,51 +176,21 @@ export component Input inherits Rectangle {
     accessible-label: placeholder-text;
 }
 
-export component TextArea inherits Rectangle {
+export component TextArea inherits InputFrame {
     in property <string> placeholder-text;
     in-out property <string> text <=> ti.text;
-    in property <bool> disabled;
     in property <bool> read-only <=> ti.read-only;
-    in property <InputStatus> status: InputStatus.default;
     // Preferred visible line count.
     in property <int> rows: 4;
 
     callback changed(string);
 
-    private property <brush> border-c:
-        status == InputStatus.error ? TelaTheme.error-color
-        : status == InputStatus.warning ? TelaTheme.warning-color
-        : status == InputStatus.success ? TelaTheme.success-color
-        : TelaTheme.component-border;
-
     height: rows * TelaTheme.line-height-m + TelaTheme.spacing-3 * 2;
-    background: TelaTheme.bg-color-specialcomponent;
-    border-width: 1px;
-    border-color: border-c;
-    border-radius: TelaTheme.radius-medium;
-    animate border-c { duration: TelaTheme.duration-fast; }
+    radius: TelaTheme.radius-medium;
     clip: true;
     forward-focus: ti;
-
-    states [
-        hovered when touch-bg.has-hover && status == InputStatus.default && !root.disabled: {
-            border-c: TelaTheme.border-level-2-color;
-        }
-        focused when ti.has-focus && status == InputStatus.default: {
-            border-c: TelaTheme.brand-color;
-        }
-        disabled when root.disabled: {
-            border-c: TelaTheme.border-level-1-color;
-        }
-    ]
-
-    touch-bg := TouchArea {
-        enabled: !root.disabled;
-        mouse-cursor: root.disabled ? MouseCursor.default : MouseCursor.text;
-        clicked => {
-            ti.focus();
-        }
-    }
+    focused: ti.has-focus;
+    focus-request => { ti.focus(); }
 
     ti := TextInput {
         x: TelaTheme.spacing-3;
@@ -233,7 +218,7 @@ export component TextArea inherits Rectangle {
         wrap: word-wrap;
         font-size: TelaTheme.font-size-m;
         font-family: TelaTheme.font-family;
-        color: TelaTheme.text-color-placeholder;
+        color: root.disabled ? TelaTheme.text-color-disabled : TelaTheme.text-color-placeholder;
     }
 
     accessible-role: AccessibleRole.text-input;
