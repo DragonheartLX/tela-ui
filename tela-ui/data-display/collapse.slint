@@ -26,41 +26,49 @@ export component Collapse inherits VerticalLayout {
         private property <bool> local-open: false;
         private property <bool> open: root.accordion ? i == root.current-index : self.local-open;
 
-        header := HorizontalLayout {
+        // The TouchArea overlays the whole header: inside the layout it
+        // only ever received a slice of the free space, so clicks on the
+        // label and chevron did nothing.
+        header := Rectangle {
             height: 44px;
-            padding-left: TelaTheme.padding-lr-l;
-            padding-right: TelaTheme.padding-lr-l;
-            spacing: TelaTheme.spacing-4;
 
-            Text {
-                horizontal-stretch: 1;
-                text: it.label;
-                font-size: TelaTheme.font-size-m;
-                font-family: TelaTheme.font-family;
-                font-weight: TelaTheme.font-weight-medium;
-                color: open ? TelaTheme.brand-color : TelaTheme.text-color-primary;
-                vertical-alignment: center;
-                overflow: elide;
+            HorizontalLayout {
+                padding-left: TelaTheme.padding-lr-l;
+                padding-right: TelaTheme.padding-lr-l;
+                spacing: TelaTheme.spacing-4;
 
-                states [
-                    disabled when it.disabled: {
-                        color: TelaTheme.text-color-disabled;
-                    }
-                ]
-            }
+                Text {
+                    horizontal-stretch: 1;
+                    text: it.label;
+                    font-size: TelaTheme.font-size-m;
+                    font-family: TelaTheme.font-family;
+                    font-weight: TelaTheme.font-weight-medium;
+                    color: open ? TelaTheme.brand-color : TelaTheme.text-color-primary;
+                    vertical-alignment: center;
+                    overflow: elide;
 
-            Icon {
-                width: 16px;
-                y: (parent.height - self.height) / 2;
-                icon: TIconSet.ChevronDown;
-                size: 16px;
-                icon-color: it.disabled ? TelaTheme.text-color-disabled : TelaTheme.text-color-secondary;
-                transform-rotation: open ? 180deg : 0deg;
-                transform-origin: { x: self.width / 2, y: self.height / 2 };
-                animate transform-rotation { duration: TelaTheme.duration-fast; }
+                    states [
+                        disabled when it.disabled: {
+                            color: TelaTheme.text-color-disabled;
+                        }
+                    ]
+                }
+
+                Icon {
+                    width: 16px;
+                    y: (parent.height - self.height) / 2;
+                    icon: TIconSet.ChevronDown;
+                    size: 16px;
+                    icon-color: it.disabled ? TelaTheme.text-color-disabled : TelaTheme.text-color-secondary;
+                    transform-rotation: open ? 180deg : 0deg;
+                    transform-origin: { x: self.width / 2, y: self.height / 2 };
+                    animate transform-rotation { duration: TelaTheme.duration-fast; }
+                }
             }
 
             header-ta := TouchArea {
+                width: 100%;
+                height: 100%;
                 enabled: !it.disabled;
                 mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;
                 clicked => {
