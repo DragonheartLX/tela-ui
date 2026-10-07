@@ -1,10 +1,11 @@
-// Demo section: 反馈 (Alert / Message / Dialog / Drawer). The dialog and
-// drawer overlays live at window level in MainWindow; this section only
-// hosts the trigger buttons via two-way bound properties.
+// Demo section: 反馈 (Alert / Message / Dialog / Drawer / Notification /
+// Tooltip / Popconfirm), 一个组件一张卡. The dialog and drawer overlays live
+// at window level in MainWindow; this section only hosts the trigger buttons
+// via two-way bound properties.
 
 import { TelaTheme, Theme } from "@tela-ui/theme.slint";
-import { Button, ButtonVariant } from "@tela-ui/base.slint";
-import { Alert, Select, SelectItem, TelaMessage, MessagePlacement, DrawerPlacement, Card, CodeBlock } from "@tela-ui/common.slint";
+import { Button, ButtonVariant, Caption } from "@tela-ui/base.slint";
+import { Alert, Select, SelectItem, TelaMessage, MessagePlacement, DrawerPlacement, TelaNotification, TooltipArea, TooltipPlacement, Popconfirm, PopupPlacement, Card, CodeBlock } from "@tela-ui/common.slint";
 
 export component FeedbackSection inherits VerticalLayout {
     spacing: 28px;
@@ -48,52 +49,130 @@ export component FeedbackSection inherits VerticalLayout {
         MessagePlacement.bottom-right,
     ];
 
-    Card {
-        title: "反馈 Alert & Message & Dialog";
+    // ======================== Alert ========================
+    VerticalLayout {
+        spacing: 8px;
 
-        VerticalLayout {
-            spacing: 12px;
+        Card {
+            title: "警告提示 Alert";
 
-            Alert { theme: Theme.default; title: "信息提示"; description: "这是一条普通的信息提示,用于展示需要用户关注的内容。"; closable: true; }
-            Alert { theme: Theme.success; title: "操作成功"; description: "表单已成功提交。"; closable: true; }
-            Alert { theme: Theme.warning; title: "警告提示"; description: "磁盘剩余空间不足 10%,请及时清理。"; closable: true; }
-            Alert { theme: Theme.error; title: "错误提示"; description: "网络连接失败,请检查网络后重试。"; closable: true; }
-
-            HorizontalLayout {
+            VerticalLayout {
                 spacing: 12px;
 
-                Text {
-                    text: "消息位置";
-                    font-size: TelaTheme.font-size-m;
-                    color: TelaTheme.text-color-secondary;
-                    vertical-alignment: center;
+                Alert { theme: Theme.default; title: "信息提示"; description: "这是一条普通的信息提示,用于展示需要用户关注的内容。"; closable: true; }
+                Alert { theme: Theme.success; title: "操作成功"; description: "表单已成功提交。"; closable: true; }
+                Alert { theme: Theme.warning; title: "警告提示"; description: "磁盘剩余空间不足 10%,请及时清理。"; closable: true; }
+                Alert { theme: Theme.error; title: "错误提示"; description: "网络连接失败,请检查网络后重试。"; closable: true; }
+            }
+        }
+
+        CodeBlock { code: "import { Alert } from \"@tela-ui/common.slint\";\n\nAlert { theme: Theme.success; title: \"操作成功\"; description: \"表单已成功提交。\"; closable: true; }"; }
+    }
+
+    // ======================== Message ======================
+    VerticalLayout {
+        spacing: 8px;
+
+        Card {
+            title: "全局消息 Message";
+
+            VerticalLayout {
+                spacing: 12px;
+
+                HorizontalLayout {
+                    spacing: 12px;
+
+                    Text {
+                        text: "消息位置";
+                        font-size: TelaTheme.font-size-m;
+                        color: TelaTheme.text-color-secondary;
+                        vertical-alignment: center;
+                    }
+
+                    Select {
+                        width: 160px;
+                        items: root.placement-items;
+                        current-index <=> root.placement-index;
+                        selected(i, v) => {
+                            TelaMessage.placement = root.message-placements[i];
+                        }
+                    }
+
+                    // Absorbs the leftover row space.
+                    Rectangle { }
                 }
 
-                Select {
-                    width: 160px;
-                    items: root.placement-items;
-                    current-index <=> root.placement-index;
-                    selected(i, v) => {
-                        TelaMessage.placement = root.message-placements[i];
-                    }
+                HorizontalLayout {
+                    spacing: 12px;
+
+                    Button { text: "信息"; clicked => { TelaMessage.info("这是一条信息消息"); } }
+                    Button { theme: Theme.success; text: "成功"; clicked => { TelaMessage.success("保存成功"); } }
+                    Button { theme: Theme.warning; text: "警告"; clicked => { TelaMessage.warning("请注意潜在风险"); } }
+                    Button { theme: Theme.error; text: "错误"; clicked => { TelaMessage.error("操作失败,请重试"); } }
+                    Rectangle { }
                 }
             }
+        }
+
+        CodeBlock { code: "import { TelaMessage, MessagePlacement } from \"@tela-ui/common.slint\";\n\nTelaMessage.success(\"保存成功\");\nTelaMessage.placement = MessagePlacement.bottom-right;"; }
+    }
+
+    // ======================= Notification ==================
+    VerticalLayout {
+        spacing: 8px;
+
+        Card {
+            title: "通知 Notification";
+
+            VerticalLayout {
+                spacing: 12px;
+
+                HorizontalLayout {
+                    spacing: 12px;
+
+                    Button { text: "信息通知"; clicked => { TelaNotification.info("提示", "这是一条信息通知,右上角堆叠展示"); } }
+                    Button { theme: Theme.success; text: "成功通知"; clicked => { TelaNotification.success("操作成功", "数据已保存"); } }
+                    Button { theme: Theme.warning; text: "警告通知"; clicked => { TelaNotification.warning("空间不足", "磁盘剩余空间不足 10%,请及时清理,或考虑升级更大容量的磁盘以获得更好的使用体验。"); } }
+                    Button { theme: Theme.error; text: "错误通知"; clicked => { TelaNotification.error("操作失败", "网络连接失败,请重试"); } }
+
+                    // Absorbs the leftover row space.
+                    Rectangle { }
+                }
+
+                Caption { text: "通知显示在窗口右上角, 多条自动堆叠 (最多 4 条, 满员时挤掉最旧一条), 4.5 秒后自动消失, 也可点击关闭。窗口根部需要一个 NotificationOverlay。"; wrap: word-wrap; }
+            }
+        }
+
+        CodeBlock { code: "import { TelaNotification, NotificationOverlay } from \"@tela-ui/common.slint\";\n\n// 窗口根部放置一次:\nNotificationOverlay { }\n\n// 任意代码调用:\nTelaNotification.info(\"提示\", \"这是一条信息通知\");\nTelaNotification.success(\"操作成功\", \"数据已保存\");"; }
+    }
+
+    // ======================== Dialog =======================
+    VerticalLayout {
+        spacing: 8px;
+
+        Card {
+            title: "对话框 Dialog";
 
             HorizontalLayout {
                 spacing: 12px;
 
-                Button { text: "信息"; clicked => { TelaMessage.info("这是一条信息消息"); } }
-                Button { theme: Theme.success; text: "成功"; clicked => { TelaMessage.success("保存成功"); } }
-                Button { theme: Theme.warning; text: "警告"; clicked => { TelaMessage.warning("请注意潜在风险"); } }
-                Button { theme: Theme.error; text: "错误"; clicked => { TelaMessage.error("操作失败,请重试"); } }
                 Button { variant: ButtonVariant.outline; theme: Theme.primary; text: "打开对话框"; clicked => { root.dialog-open = true; } }
+                Caption { text: "对话框本体挂载在窗口根部 (MainWindow), 点击遮罩或按钮关闭。"; vertical-alignment: center; wrap: word-wrap; horizontal-stretch: 1; }
+            }
+        }
 
-                Text {
-                    text: "抽屉位置";
-                    font-size: TelaTheme.font-size-m;
-                    color: TelaTheme.text-color-secondary;
-                    vertical-alignment: center;
-                }
+        CodeBlock { code: "import { Dialog } from \"@tela-ui/common.slint\";\n\n// 窗口根部:\nDialog {\n    open <=> open;\n    title: \"对话框标题\";\n    content: \"这是内容\";\n    accepted => { … }\n    canceled => { … }\n}"; }
+    }
+
+    // ======================== Drawer =======================
+    VerticalLayout {
+        spacing: 8px;
+
+        Card {
+            title: "抽屉 Drawer";
+
+            HorizontalLayout {
+                spacing: 12px;
 
                 Select {
                     width: 120px;
@@ -105,9 +184,117 @@ export component FeedbackSection inherits VerticalLayout {
                 }
 
                 Button { variant: ButtonVariant.outline; theme: Theme.primary; text: "打开抽屉"; clicked => { root.drawer-open = true; } }
+                Caption { text: "抽屉本体挂载在窗口根部, 从指定边缘滑出。"; vertical-alignment: center; wrap: word-wrap; horizontal-stretch: 1; }
             }
         }
+
+        CodeBlock { code: "import { Drawer } from \"@tela-ui/common.slint\";\n\n// 窗口根部:\nDrawer {\n    open <=> open;\n    placement: DrawerPlacement.right;\n    title: \"抽屉标题\";\n    Paragraph { text: \"面板主体由子元素提供\"; }\n}"; }
     }
 
-    CodeBlock { code: "import { Alert, TelaMessage, MessagePlacement } from \"@tela-ui/common.slint\";\n\nAlert { theme: Theme.success; title: \"操作成功\"; closable: true; }\nTelaMessage.success(\"保存成功\");\nTelaMessage.placement = MessagePlacement.bottom-right;"; }
+    // ======================== Tooltip ======================
+    VerticalLayout {
+        spacing: 8px;
+
+        Card {
+            title: "气泡提示 Tooltip";
+
+            HorizontalLayout {
+                spacing: 24px;
+
+                // TooltipArea fills its parent, wires the hover and reports
+                // to the window-level overlay — no clipping worries.
+                TooltipArea {
+                    width: 120px;
+                    height: TelaTheme.height-m;
+                    background: TelaTheme.bg-color-secondarycontainer;
+                    border-radius: TelaTheme.radius-default;
+                    text: "我是 Tooltip, 鼠标移开即消失, 250ms 延迟出现";
+                    placement: TooltipPlacement.top;
+
+                    Text {
+                        text: "上方提示";
+                        font-size: TelaTheme.font-size-m;
+                        color: TelaTheme.text-color-secondary;
+                        horizontal-alignment: center;
+                        vertical-alignment: center;
+                    }
+                }
+
+                TooltipArea {
+                    width: 120px;
+                    height: TelaTheme.height-m;
+                    background: TelaTheme.bg-color-secondarycontainer;
+                    border-radius: TelaTheme.radius-default;
+                    text: "placement: TooltipPlacement.bottom";
+                    placement: TooltipPlacement.bottom;
+
+                    Text {
+                        text: "下方提示";
+                        font-size: TelaTheme.font-size-m;
+                        color: TelaTheme.text-color-secondary;
+                        horizontal-alignment: center;
+                        vertical-alignment: center;
+                    }
+                }
+
+                Caption { text: "渲染在窗口级 (TooltipOverlay), 不受卡片或滚动容器裁剪; 亮暗均为深色气泡。"; vertical-alignment: center; wrap: word-wrap; horizontal-stretch: 1; }
+            }
+        }
+
+        CodeBlock { code: "import { TooltipArea, TooltipOverlay } from \"@tela-ui/common.slint\";\n\n// 窗口根部放置一次:\nTooltipOverlay { }\n\nTooltipArea {\n    text: \"提示\"; placement: TooltipPlacement.top;\n    Text { text: \"目标\"; }\n}"; }
+    }
+
+    // ======================= Popconfirm ====================
+    VerticalLayout {
+        spacing: 8px;
+
+        Card {
+            title: "气泡确认 Popconfirm";
+
+            HorizontalLayout {
+                spacing: 24px;
+
+                // Popconfirm on a Button trigger: auto-open off, toggle from
+                // the button's clicked handler.
+                pc := Popconfirm {
+                    auto-open: false;
+                    text: "确定删除这条数据吗?";
+                    confirm => { TelaMessage.success("已删除"); }
+                    cancel => { TelaMessage.info("已取消"); }
+
+                    Button {
+                        theme: Theme.error;
+                        variant: ButtonVariant.outline;
+                        text: "删除";
+                        clicked => { pc.toggle(); }
+                    }
+                }
+
+                // Popconfirm on a static trigger: auto-open handles it.
+                Popconfirm {
+                    text: "确认提交表单吗?";
+                    placement: PopupPlacement.bottom-start;
+
+                    Rectangle {
+                        width: 120px;
+                        height: TelaTheme.height-m;
+                        background: TelaTheme.bg-color-secondarycontainer;
+                        border-radius: TelaTheme.radius-default;
+
+                        Text {
+                            text: "点击确认";
+                            font-size: TelaTheme.font-size-m;
+                            color: TelaTheme.text-color-secondary;
+                            horizontal-alignment: center;
+                            vertical-alignment: center;
+                        }
+                    }
+                }
+
+                Rectangle { }
+            }
+        }
+
+        CodeBlock { code: "import { Popconfirm } from \"@tela-ui/common.slint\";\n\nPopconfirm {\n    text: \"确定删除吗?\";\n    confirm => { … }\n    Button { text: \"删除\"; clicked => pc.toggle(); } // auto-open: false\n}"; }
+    }
 }

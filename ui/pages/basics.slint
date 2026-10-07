@@ -1,4 +1,4 @@
-// Demo section: 基础组件 (Button / Icon & Link / Typography).
+// Demo section: 基础组件 (Button / Icon / Link / Typography), 一个组件一张卡.
 
 import { TelaTheme, Theme, Size } from "@tela-ui/theme.slint";
 import { Button, ButtonVariant, ButtonShape, Link, Icon, TIconSet, Heading, Paragraph, Caption } from "@tela-ui/base.slint";
@@ -24,6 +24,8 @@ export component BasicsSection inherits VerticalLayout {
                     Button { theme: Theme.success; text: "成功按钮"; }
                     Button { theme: Theme.warning; text: "警告按钮"; }
                     Button { theme: Theme.error; text: "危险按钮"; }
+                    // Absorbs the leftover row space.
+                    Rectangle { }
                 }
 
                 HorizontalLayout {
@@ -34,6 +36,7 @@ export component BasicsSection inherits VerticalLayout {
                     Button { variant: ButtonVariant.text; text: "文字按钮"; }
                     Button { variant: ButtonVariant.text; theme: Theme.primary; text: "文字按钮"; }
                     Button { variant: ButtonVariant.text; theme: Theme.error; text: "文字按钮"; }
+                    Rectangle { }
                 }
 
                 HorizontalLayout {
@@ -47,6 +50,7 @@ export component BasicsSection inherits VerticalLayout {
                     Button { theme: Theme.primary; text: "加载中"; loading: true; }
                     Button { theme: Theme.primary; text: "禁用状态"; disabled: true; }
                     Button { variant: ButtonVariant.outline; text: "禁用状态"; disabled: true; }
+                    Rectangle { }
                 }
             }
         }
@@ -54,50 +58,59 @@ export component BasicsSection inherits VerticalLayout {
         CodeBlock { code: "import { Button } from \"@tela-ui/base.slint\";\n\nButton { text: \"主要按钮\"; theme: Theme.primary; }\nButton { text: \"描边按钮\"; variant: ButtonVariant.outline; }\nButton { text: \"下载\"; theme: Theme.primary; icon: TIconSet.Download; }\nButton { text: \"加载中\"; theme: Theme.primary; loading: true; }"; }
     }
 
-    // =================== Icon & Link ======================
+    // ======================== Icon ========================
     VerticalLayout {
         spacing: 8px;
 
         Card {
-            title: "图标与链接 Icon & Link";
+            title: "图标 Icon";
 
-            VerticalLayout {
-                spacing: 16px;
+            FlexboxLayout {
+                spacing: 20px;
 
-                FlexboxLayout {
-                    spacing: 20px;
-
-                    for ic in [
-                        TIconSet.Search, TIconSet.Plus, TIconSet.Minus,
-                        TIconSet.X, TIconSet.Check, TIconSet.Menu,
-                        TIconSet.Info, TIconSet.CircleCheck, TIconSet.CircleX,
-                        TIconSet.CircleAlert, TIconSet.TriangleAlert,
-                        TIconSet.Eye, TIconSet.Calendar, TIconSet.User,
-                        TIconSet.Bell, TIconSet.Star, TIconSet.Heart,
-                        TIconSet.Trash2, TIconSet.Pencil, TIconSet.Settings,
-                        TIconSet.Download, TIconSet.Upload, TIconSet.RefreshCw,
-                        TIconSet.Image, TIconSet.House, TIconSet.Lock,
-                        TIconSet.Mail, TIconSet.Ellipsis, TIconSet.Moon,
-                        TIconSet.Sun,
-                    ]: Icon {
-                        icon: ic;
-                        size: 20px;
-                        icon-color: TelaTheme.text-color-primary;
-                    }
-                }
-
-                HorizontalLayout {
-                    spacing: 24px;
-                    Link { text: "默认链接"; }
-                    Link { theme: Theme.success; text: "成功链接"; underline: true; }
-                    Link { theme: Theme.warning; text: "警告链接"; }
-                    Link { theme: Theme.error; text: "危险链接"; }
-                    Link { text: "禁用链接"; disabled: true; }
+                for ic in [
+                    TIconSet.Search, TIconSet.Plus, TIconSet.Minus,
+                    TIconSet.X, TIconSet.Check, TIconSet.Menu,
+                    TIconSet.Info, TIconSet.CircleCheck, TIconSet.CircleX,
+                    TIconSet.CircleAlert, TIconSet.TriangleAlert,
+                    TIconSet.Eye, TIconSet.Calendar, TIconSet.User,
+                    TIconSet.Bell, TIconSet.Star, TIconSet.Heart,
+                    TIconSet.Trash2, TIconSet.Pencil, TIconSet.Settings,
+                    TIconSet.Download, TIconSet.Upload, TIconSet.RefreshCw,
+                    TIconSet.Image, TIconSet.House, TIconSet.Lock,
+                    TIconSet.Mail, TIconSet.Ellipsis, TIconSet.Moon,
+                    TIconSet.Sun, TIconSet.StarFill, TIconSet.Inbox,
+                ]: Icon {
+                    icon: ic;
+                    size: 20px;
+                    icon-color: TelaTheme.text-color-primary;
                 }
             }
         }
 
-        CodeBlock { code: "import { Icon, Link, TIconSet } from \"@tela-ui/base.slint\";\n\nIcon { icon: TIconSet.Search; size: 20px; }\nLink { text: \"默认链接\"; }\nLink { text: \"成功链接\"; theme: Theme.success; underline: true; }"; }
+        CodeBlock { code: "import { Icon, TIconSet } from \"@tela-ui/base.slint\";\n\nIcon { icon: TIconSet.Search; size: 20px; }\n// 图标是数据 (TIconData): 传 TIconSet 的内置字形或自构 TIconData。"; }
+    }
+
+    // ========================= Link =======================
+    VerticalLayout {
+        spacing: 8px;
+
+        Card {
+            title: "链接 Link";
+
+            HorizontalLayout {
+                spacing: 24px;
+                Link { text: "默认链接"; }
+                Link { theme: Theme.success; text: "成功链接"; underline: true; }
+                Link { theme: Theme.warning; text: "警告链接"; }
+                Link { theme: Theme.error; text: "危险链接"; }
+                Link { text: "禁用链接"; disabled: true; }
+                // Absorbs the leftover row space.
+                Rectangle { }
+            }
+        }
+
+        CodeBlock { code: "import { Link } from \"@tela-ui/base.slint\";\n\nLink { text: \"默认链接\"; }\nLink { text: \"成功链接\"; theme: Theme.success; underline: true; }"; }
     }
 
     // ==================== Typography ======================

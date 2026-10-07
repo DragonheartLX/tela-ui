@@ -6,7 +6,7 @@
 
 import { TelaTheme, TelaThemePreference } from "@tela-ui/theme.slint";
 import { BorderlessWindow, TIconSet, Paragraph, Button, ButtonVariant } from "@tela-ui/base.slint";
-import { SideNav, SideNavItem, SideNavTogglePosition, Dialog, Drawer, DrawerPlacement, MessageOverlay, TelaMessage } from "@tela-ui/common.slint";
+import { SideNav, SideNavItem, SideNavTogglePosition, Dialog, Drawer, DrawerPlacement, MessageOverlay, TelaMessage, NotificationOverlay, TooltipOverlay } from "@tela-ui/common.slint";
 import { ScrollView } from "std-widgets.slint";
 
 import { BasicsSection } from "pages/basics.slint";
@@ -120,6 +120,10 @@ export component MainWindow inherits BorderlessWindow {
     }
 
     MessageOverlay { }
+
+    NotificationOverlay { }
+
+    TooltipOverlay { }
 }
 
 // Re-export the theme global so hosts can control it from Rust:

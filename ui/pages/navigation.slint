@@ -1,10 +1,10 @@
-// Demo section: 导航 (Tabs / Pagination / NavBar / Breadcrumb & Steps).
-// The app's own top navigation bar is the live NavBar demo; this section
-// covers the rest.
+// Demo section: 导航 (Tabs / Pagination / NavBar / DropdownMenu /
+// Breadcrumb / Steps), 一个组件一张卡. The app's own top navigation bar is
+// the live NavBar demo; this section covers the rest.
 
 import { TelaTheme, Theme, Size } from "@tela-ui/theme.slint";
-import { TIconSet, Caption, Divider, Button, Paragraph } from "@tela-ui/base.slint";
-import { Tabs, Pagination, NavBar, NavItem, SideNav, SideNavItem, SideNavMode, SideNavTogglePosition, Breadcrumb, CrumbItem, Steps, Card, CodeBlock} from "@tela-ui/common.slint";
+import { TIconSet, Caption, Divider, Button, ButtonVariant, Paragraph } from "@tela-ui/base.slint";
+import { Tabs, Pagination, NavBar, NavItem, SideNav, SideNavItem, SideNavMode, SideNavTogglePosition, Breadcrumb, CrumbItem, Steps, DropdownMenu, DropdownMenuItem, PopupPlacement, TelaMessage, Card, CodeBlock} from "@tela-ui/common.slint";
 
 export component NavigationSection inherits VerticalLayout {
     spacing: 28px;
@@ -26,6 +26,13 @@ export component NavigationSection inherits VerticalLayout {
     ];
     in-out property <string> crumb-value: "nav";
     in property <[string]> step-items: ["注册账号", "填写信息", "验证邮箱", "完成"];
+    in property <[DropdownMenuItem]> menu-items: [
+        { label: "编辑", value: "edit", icon: TIconSet.Pencil },
+        { label: "下载", value: "download", icon: TIconSet.Download },
+        { label: "分隔线", value: "", divider: true },
+        { label: "分享", value: "share", icon: TIconSet.Upload, disabled: true },
+        { label: "删除", value: "delete", icon: TIconSet.Trash2, danger: true },
+    ];
     in property <[SideNavItem]> side-nav-items: [
         { label: "仪表盘", value: "dash", icon: TIconSet.LayoutDashboard },
         { label: "数据展示", value: "display", icon: TIconSet.Image },
@@ -187,30 +194,99 @@ export component NavigationSection inherits VerticalLayout {
         CodeBlock { code: "import { SideNav, SideNavItem } from \"@tela-ui/common.slint\";\n\nSideNav {\n    title: \"Tela UI\";\n    logo: TIconSet.LayoutDashboard;\n    items: [{ label: \"仪表盘\", value: \"dash\", icon: TIconSet.LayoutDashboard }, …];\n    current-value <=> nav;\n    collapsed <=> c; // 收起后仅显示图标\n}"; }
     }
 
-    // ================ Breadcrumb & Steps ==================
+    // ================== DropdownMenu =====================
     VerticalLayout {
         spacing: 8px;
 
         Card {
-            title: "面包屑与步骤条 Breadcrumb & Steps";
+            title: "下拉菜单 DropdownMenu";
 
             VerticalLayout {
                 spacing: 16px;
 
-                Breadcrumb {
-                    items: root.crumb-items;
-                    current-value <=> root.crumb-value;
+                HorizontalLayout {
+                    spacing: 24px;
+
+                    // Button trigger: auto-open off, toggle from clicked.
+                    dm := DropdownMenu {
+                        auto-open: false;
+                        items: root.menu-items;
+                        selected(i, v) => {
+                            TelaMessage.info("选中: \{root.menu-items[i].label}");
+                        }
+
+                        Button {
+                            variant: ButtonVariant.outline;
+                            text: "更多操作";
+                            clicked => { dm.toggle(); }
+                        }
+                    }
+
+                    // Static trigger: the internal auto-open TouchArea
+                    // handles the click.
+                    DropdownMenu {
+                        items: root.menu-items;
+                        placement: PopupPlacement.bottom-end;
+                        selected(i, v) => {
+                            TelaMessage.info("选中: \{root.menu-items[i].label}");
+                        }
+
+                        Rectangle {
+                            width: 140px;
+                            height: TelaTheme.height-m;
+                            background: TelaTheme.bg-color-secondarycontainer;
+                            border-radius: TelaTheme.radius-default;
+
+                            Text {
+                                text: "点击打开 (自动)";
+                                font-size: TelaTheme.font-size-m;
+                                color: TelaTheme.text-color-secondary;
+                                horizontal-alignment: center;
+                                vertical-alignment: center;
+                            }
+                        }
+                    }
+
+                    // Absorbs the leftover row space.
+                    Rectangle { }
                 }
 
-                Divider { }
-
-                Steps {
-                    items: root.step-items;
-                    current: 1;
-                }
+                Caption { text: "按钮触发需设 auto-open: false 并在 clicked 中调用 toggle(); 静态内容由内部 TouchArea 自动开合。支持图标, 禁用, 危险项与分隔线; 点击外部或选中后关闭。"; wrap: word-wrap; }
             }
         }
 
-        CodeBlock { code: "import { Breadcrumb, Steps } from \"@tela-ui/common.slint\";\n\nBreadcrumb { items: crumbs; current-value <=> crumb; }\nSteps { items: [\"注册账号\", \"填写信息\", \"验证邮箱\", \"完成\"]; current: 1; }"; }
+        CodeBlock { code: "import { DropdownMenu, DropdownMenuItem } from \"@tela-ui/common.slint\";\n\ndm := DropdownMenu {\n    auto-open: false;\n    items: [\n        { label: \"编辑\", value: \"edit\", icon: TIconSet.Pencil },\n        { label: \"删除\", value: \"delete\", danger: true },\n        { label: \"分隔线\", value: \"\", divider: true },\n    ];\n    selected(i, v) => { … }\n    Button { text: \"更多操作\"; clicked => dm.toggle(); }\n}"; }
+    }
+
+    // ==================== Breadcrumb ======================
+    VerticalLayout {
+        spacing: 8px;
+
+        Card {
+            title: "面包屑 Breadcrumb";
+
+            Breadcrumb {
+                items: root.crumb-items;
+                current-value <=> root.crumb-value;
+            }
+        }
+
+        CodeBlock { code: "import { Breadcrumb } from \"@tela-ui/common.slint\";\n\nBreadcrumb {\n    items: [{ label: \"首页\", value: \"home\" }, …];\n    current-value <=> crumb;\n}"; }
+    }
+
+    // ======================== Steps ========================
+    VerticalLayout {
+        spacing: 8px;
+
+        Card {
+            title: "步骤条 Steps";
+
+            Steps {
+                items: root.step-items;
+                current: 1;
+            }
+        }
+
+        CodeBlock { code: "import { Steps } from \"@tela-ui/common.slint\";\n\nSteps { items: [\"注册账号\", \"填写信息\", \"验证邮箱\", \"完成\"]; current: 1; }"; }
     }
 }
