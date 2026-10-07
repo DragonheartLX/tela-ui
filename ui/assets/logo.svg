@@ -1,0 +1,9 @@
+<!-- Tela UI app logo — TIconSet.LayoutDashboard geometry (Lucide "layout-dashboard",
+     ISC license, https://lucide.dev) on a dark rounded tile.
+     Colors match the app's dark theme: page background #181818, brand #4582e6. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+  <rect width="24" height="24" rx="5.5" fill="#181818"/>
+  <g transform="translate(4.5 4.5) scale(0.625)" stroke="#4582e6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 4 3 L 9 3 C 9.552285 3 10 3.4477153 10 4 L 10 11 C 10 11.552285 9.552285 12 9 12 L 4 12 C 3.4477153 12 3 11.552285 3 11 L 3 4 C 3 3.4477153 3.4477153 3 4 3 M 15 3 L 20 3 C 20.552284 3 21 3.4477153 21 4 L 21 7 C 21 7.5522847 20.552284 8 20 8 L 15 8 C 14.447715 8 14 7.5522847 14 7 L 14 4 C 14 3.4477153 14.447715 3 15 3 M 15 12 L 20 12 C 20.552284 12 21 12.447715 21 13 L 21 20 C 21 20.552284 20.552284 21 20 21 L 15 21 C 14.447715 21 14 20.552284 14 20 L 14 13 C 14 12.447715 14.447715 12 15 12 M 4 16 L 9 16 C 9.552285 16 10 16.447716 10 17 L 10 20 C 10 20.552284 9.552285 21 9 21 L 4 21 C 3.4477153 21 3 20.552284 3 20 L 3 17 C 3 16.447716 3.4477153 16 4 16"/>
+  </g>
+</svg>

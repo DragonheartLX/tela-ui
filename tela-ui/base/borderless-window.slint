@@ -1,23 +1,38 @@
 // Tela UI — BorderlessWindow
 //
 // Frameless application window (`no-frame`) with a themed custom title bar:
-// drag handle, minimize / maximize / close buttons. Desktop backends keep
-// edge-resizing for frameless windows.
+// drag handle, minimize / maximize / close buttons.
 //
 // Dragging is handled by the built-in `WindowMoveArea` under the title-bar
 // buttons — no host wiring needed. `title` (the Window built-in) shows in
 // both the taskbar and the custom header; minimize/maximize/close work
 // purely from .slint via the `minimized` / `maximized` built-ins and
 // `hide()`.
+//
+// Edge-resizing: the winit backend reads the Window's `resize-border-width`
+// on cursor moves and starts a native drag-resize near the edges — but that
+// property defaults to 0 (= disabled), so BorderlessWindow binds it from
+// `resize-border`, collapsing to 0 while maximized.
+//
+// Rounded corners: the Window surface itself stays transparent and all
+// content is clipped to a rounded rectangle, so consumers must set
+// `window-background` (NOT the Window's own `background`, which would paint
+// the corners opaque again). `window-radius` collapses to 0 while maximized.
 
 import { TelaTheme } from "../theme.slint";
 import { Icon } from "icon/icon.slint";
 import { TIconData, TIconSet } from "icon/data.slint";
 
 // One title-bar control: full-height hit target, hover highlight
-// (danger = close-style red hover, white glyph).
+// (danger = close-style red hover, white glyph). Caption glyphs are
+// normalized to Windows' 10px optical box — lucide Minus draws 14/24 and
+// X 12/24 of the icon size, so call sites pass per-glyph sizes with an
+// absolute ~1.1px stroke to match the maximize square's 1px border.
 component WindowButton inherits Rectangle {
     in property <TIconData> icon;
+    in property <length> icon-size: 14px;
+    in property <float> icon-stroke: 2.0;
+    in property <bool> icon-absolute-stroke: false;
     in property <bool> danger: false;
     callback clicked();
 
@@ -38,7 +53,9 @@ component WindowButton inherits Rectangle {
         x: (parent.width - self.width) / 2;
         y: (parent.height - self.height) / 2;
         icon: root.icon;
-        size: 14px;
+        size: root.icon-size;
+        stroke-width: root.icon-stroke;
+        absolute-stroke-width: root.icon-absolute-stroke;
         icon-color: ta.has-hover && root.danger ? #ffffff : TelaTheme.text-color-secondary;
         animate icon-color { duration: TelaTheme.duration-fast; }
     }
@@ -51,7 +68,20 @@ component WindowButton inherits Rectangle {
 
 export component BorderlessWindow inherits Window {
     no-frame: true;
-    background: TelaTheme.bg-color-page;
+    // Must stay transparent — the rounded rectangle below is the window's
+    // visible surface (see the header comment).
+    background: transparent;
+
+    // Visible surface color of the rounded window rectangle.
+    in property <brush> window-background: TelaTheme.bg-color-page;
+    // Window corner radius; 0 while maximized.
+    in property <length> window-radius: 8px;
+    // Edge hit zone (logical px) for frameless resizing. The winit backend
+    // reads the Window's `resize-border-width` (which defaults to 0 =
+    // resizing disabled) and starts a native drag-resize when the cursor
+    // nears an edge; 0 while maximized — a maximized window must not resize.
+    in property <length> resize-border: 8px;
+    resize-border-width: root.maximized ? 0px : root.resize-border;
 
     in property <length> header-height: 40px;
     in property <brush> header-background: TelaTheme.bg-color-container;
@@ -63,86 +93,107 @@ export component BorderlessWindow inherits Window {
     // header text (the `title` still labels the taskbar).
     in property <bool> header-title-visible: true;
 
-    VerticalLayout {
-        // Title bar -------------------------------------------------------
-        Rectangle {
-            height: root.header-height;
-            background: root.header-background;
+    // The window's visible surface: everything is clipped to the rounded
+    // corners; the hairline border replaces the native frame edge that
+    // frameless windows lose.
+    Rectangle {
+        border-radius: root.maximized ? 0 : root.window-radius;
+        clip: true;
+        background: root.window-background;
+        border-width: 1px;
+        border-color: TelaTheme.component-stroke;
 
-            // Drag handle covers the whole bar; declared first so the
-            // buttons (later siblings) stay on top of it. WindowMoveArea is
-            // a bare hit area (no background) — the header Rectangle behind
-            // it provides the surface.
-            WindowMoveArea { }
+        VerticalLayout {
+            // Title bar -------------------------------------------------------
+            Rectangle {
+                height: root.header-height;
+                background: root.header-background;
 
-            HorizontalLayout {
-                padding-left: TelaTheme.padding-lr-m;
-                spacing: TelaTheme.spacing-2;
+                // Drag handle covers the whole bar; declared first so the
+                // buttons (later siblings) stay on top of it. WindowMoveArea is
+                // a bare hit area (no background) — the header Rectangle behind
+                // it provides the surface.
+                WindowMoveArea { }
 
-                if root.logo.paths.length > 0: Icon {
-                    y: (parent.height - self.height) / 2;
-                    icon: root.logo;
-                    size: 20px;
-                    icon-color: TelaTheme.brand-color;
-                }
+                HorizontalLayout {
+                    padding-left: TelaTheme.padding-lr-m;
+                    spacing: TelaTheme.spacing-2;
 
-                Text {
-                    text: root.title;
-                    font-size: TelaTheme.font-size-m;
-                    color: TelaTheme.text-color-secondary;
-                    vertical-alignment: center;
-                    horizontal-stretch: 1;
-                    visible: root.header-title-visible;
-                }
-
-                WindowButton {
-                    icon: TIconSet.Minus;
-                    clicked => { root.minimized = true; }
-                }
-
-                if root.maximizable: Rectangle {
-                    width: 46px;
-                    height: parent.height;
-
-                    states [
-                        hovered when max-ta.has-hover: {
-                            background: TelaTheme.bg-color-component-hover;
-                        }
-                    ]
-
-                    Rectangle {
-                        width: 10px;
-                        height: 10px;
-                        x: (parent.width - self.width) / 2;
+                    if root.logo.paths.length > 0: Icon {
                         y: (parent.height - self.height) / 2;
-                        border-width: 1px;
-                        border-color: max-ta.has-hover
-                            ? TelaTheme.text-color-primary
-                            : TelaTheme.text-color-secondary;
-                        animate border-color { duration: TelaTheme.duration-fast; }
+                        icon: root.logo;
+                        size: 20px;
+                        icon-color: TelaTheme.brand-color;
                     }
 
-                    max-ta := TouchArea {
-                        mouse-cursor: MouseCursor.pointer;
-                        clicked => { root.maximized = !root.maximized; }
+                    Text {
+                        text: root.title;
+                        font-size: TelaTheme.font-size-m;
+                        color: TelaTheme.text-color-secondary;
+                        vertical-alignment: center;
+                        horizontal-stretch: 1;
+                        visible: root.header-title-visible;
                     }
-                }
 
-                WindowButton {
-                    icon: TIconSet.X;
-                    danger: true;
-                    clicked => { root.hide(); }
+                    WindowButton {
+                        icon: TIconSet.Minus;
+                        // 10px optical line + round caps (lucide Minus is 14/24 wide).
+                        // Stroke 1.3: the centered line straddles a pixel row at
+                        // 1x scale, so it needs extra ink to match the square/X.
+                        icon-size: 17px;
+                        icon-stroke: 1.3;
+                        icon-absolute-stroke: true;
+                        clicked => { root.minimized = true; }
+                    }
+
+                    if root.maximizable: Rectangle {
+                        width: 46px;
+                        height: parent.height;
+
+                        states [
+                            hovered when max-ta.has-hover: {
+                                background: TelaTheme.bg-color-component-hover;
+                            }
+                        ]
+
+                        Rectangle {
+                            width: 10px;
+                            height: 10px;
+                            x: (parent.width - self.width) / 2;
+                            y: (parent.height - self.height) / 2;
+                            border-width: 1px;
+                            border-color: max-ta.has-hover
+                                ? TelaTheme.text-color-primary
+                                : TelaTheme.text-color-secondary;
+                            animate border-color { duration: TelaTheme.duration-fast; }
+                        }
+
+                        max-ta := TouchArea {
+                            mouse-cursor: MouseCursor.pointer;
+                            clicked => { root.maximized = !root.maximized; }
+                        }
+                    }
+
+                    WindowButton {
+                        icon: TIconSet.X;
+                        // 10px optical X (lucide X is 12/24 wide).
+                        icon-size: 20px;
+                        icon-stroke: 1.1;
+                        icon-absolute-stroke: true;
+                        danger: true;
+                        clicked => { root.hide(); }
+                    }
                 }
             }
-        }
 
-        // Content: a stretched Rectangle absorbs the leftover height — a
-        // bare @children inside the layout would only get its preferred
-        // size, since nested layouts don't take part in the distribution.
-        Rectangle {
-            vertical-stretch: 1;
+            // Content: a stretched Rectangle absorbs the leftover height — a
+            // bare @children inside the layout would only get its preferred
+            // size, since nested layouts don't take part in the distribution.
+            Rectangle {
+                vertical-stretch: 1;
 
-            @children
+                @children
+            }
         }
     }
 }

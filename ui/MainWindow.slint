@@ -19,11 +19,13 @@ import { SettingsSection } from "pages/settings.slint";
 
 export component MainWindow inherits BorderlessWindow {
     title: "Tela UI";
+    // OS-level window icon (taskbar etc.): the exported LayoutDashboard logo.
+    icon: @image-url("assets/logo.svg");
     logo: TIconSet.LayoutDashboard;
     header-height: 40px;
     preferred-width: 1200px;
     preferred-height: 800px;
-    background: TelaTheme.bg-color-page;
+    window-background: TelaTheme.bg-color-page;
 
     // ------------------------------------------------------------------
     // Demo state
