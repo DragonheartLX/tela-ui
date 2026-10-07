@@ -1,30 +1,77 @@
 // Tela UI — Kbd
 //
-// Keyboard-key tag (e.g. Ctrl + C): small bordered chip with system-font
-// feel. Chain several with a "+" Text between them.
+// Keyboard-key chip (e.g. Ctrl + C): small bordered chip with system-font
+// feel. Render a single key with `text`, or a combination with `keys` —
+// the chips are then joined by "+" automatically. size: Size
+// (small/medium/large).
 
 import { TelaTheme } from "../theme.slint";
+import { Size } from "../structs/enums.slint";
 
 export component Kbd inherits Rectangle {
     in property <string> text;
+    in property <[string]> keys;
+    in property <Size> size: Size.medium;
 
-    height: 22px;
-    background: TelaTheme.bg-color-secondarycontainer;
-    border-width: 1px;
-    border-color: TelaTheme.component-border;
-    border-radius: TelaTheme.radius-small;
+    private property <length> h:
+        size == Size.small ? 20px
+        : size == Size.large ? 28px
+        : 24px;
+    private property <length> fs:
+        size == Size.small ? TelaTheme.font-size-s
+        : size == Size.large ? TelaTheme.font-size-m
+        : TelaTheme.font-size-s;
+    private property <length> pad-lr:
+        size == Size.small ? 5px
+        : size == Size.large ? 9px
+        : 7px;
+    // A combination wins over the single `text`.
+    private property <[string]> items:
+        keys.length > 0 ? keys : [text];
 
-    HorizontalLayout {
-        padding-left: 6px;
-        padding-right: 6px;
+    height: h;
+    width: body.preferred-width;
+    horizontal-stretch: 0;
 
-        Text {
-            text: root.text;
-            font-size: TelaTheme.font-size-s;
-            font-family: TelaTheme.font-family;
-            color: TelaTheme.text-color-secondary;
-            vertical-alignment: center;
-            horizontal-alignment: center;
+    body := HorizontalLayout {
+        spacing: TelaTheme.spacing-2;
+
+        // Same spacing as `body` so the "+" sits centered between chips —
+        // the outer spacing only applies between iterations.
+        for k[i] in root.items: HorizontalLayout {
+            spacing: TelaTheme.spacing-2;
+            if k != "": Rectangle {
+                height: root.h;
+                width: cap-label.preferred-width + root.pad-lr * 2;
+                background: TelaTheme.bg-color-secondarycontainer;
+                border-width: 1px;
+                border-color: TelaTheme.component-border;
+                border-radius: TelaTheme.radius-small;
+
+                cap-label := Text {
+                    x: root.pad-lr;
+                    width: parent.width - root.pad-lr * 2;
+                    height: parent.height;
+                    text: k;
+                    font-size: root.fs;
+                    font-family: TelaTheme.font-family;
+                    color: TelaTheme.text-color-secondary;
+                    vertical-alignment: center;
+                    horizontal-alignment: center;
+                }
+            }
+
+            // Full-height box so `vertical-alignment` actually centers the
+            // glyph against the chips — a bare Text stays at its preferred
+            // height and rides the top of the row.
+            if k != "" && i < root.items.length - 1: Text {
+                height: root.h;
+                text: "+";
+                font-size: root.fs;
+                font-family: TelaTheme.font-family;
+                color: TelaTheme.text-color-secondary;
+                vertical-alignment: center;
+            }
         }
     }
 }

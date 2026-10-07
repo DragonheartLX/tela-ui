@@ -189,21 +189,41 @@ export component BasicsSection inherits VerticalLayout {
         Card {
             title: "键位 Kbd";
 
-            HorizontalLayout {
+            VerticalLayout {
                 spacing: 8px;
 
-                Text { text: "复制"; font-size: TelaTheme.font-size-m; color: TelaTheme.text-color-secondary; vertical-alignment: center; }
-                Kbd { text: "Ctrl"; horizontal-stretch: 0; }
-                Text { text: "+"; font-size: TelaTheme.font-size-m; color: TelaTheme.text-color-secondary; vertical-alignment: center; }
-                Kbd { text: "C"; horizontal-stretch: 0; }
-                Text { text: "粘贴"; font-size: TelaTheme.font-size-m; color: TelaTheme.text-color-secondary; vertical-alignment: center; }
-                Kbd { text: "Ctrl"; horizontal-stretch: 0; }
-                Text { text: "+"; font-size: TelaTheme.font-size-m; color: TelaTheme.text-color-secondary; vertical-alignment: center; }
-                Kbd { text: "V"; horizontal-stretch: 0; }
-                Rectangle { }
+                HorizontalLayout {
+                    spacing: 8px;
+
+                    Text { text: "单键"; font-size: TelaTheme.font-size-m; color: TelaTheme.text-color-secondary; vertical-alignment: center; }
+                    Kbd { text: "Esc"; }
+                    Kbd { text: "Tab"; }
+                    Kbd { text: "Enter"; }
+                    Rectangle { }
+                }
+
+                HorizontalLayout {
+                    spacing: 8px;
+
+                    Text { text: "组合"; font-size: TelaTheme.font-size-m; color: TelaTheme.text-color-secondary; vertical-alignment: center; }
+                    Kbd { keys: ["Ctrl", "C"]; }
+                    Text { text: "复制"; font-size: TelaTheme.font-size-m; color: TelaTheme.text-color-secondary; vertical-alignment: center; }
+                    Kbd { keys: ["Ctrl", "Shift", "V"]; }
+                    Text { text: "粘贴为纯文本"; font-size: TelaTheme.font-size-m; color: TelaTheme.text-color-secondary; vertical-alignment: center; }
+                    Rectangle { }
+                }
+
+                HorizontalLayout {
+                    spacing: 8px;
+
+                    Kbd { text: "S"; size: Size.small; }
+                    Kbd { text: "M"; size: Size.medium; }
+                    Kbd { text: "L"; size: Size.large; }
+                    Rectangle { }
+                }
             }
         }
 
-        CodeBlock { code: "import { Kbd } from \"@tela-ui/base.slint\";\n\nText { text: \"复制\"; }\nKbd { text: \"Ctrl\"; }\nKbd { text: \"C\"; }"; }
+        CodeBlock { code: "import { Kbd } from \"@tela-ui/base.slint\";\n\nKbd { text: \"Esc\"; }\nKbd { keys: [\"Ctrl\", \"Shift\", \"V\"]; }\nKbd { text: \"Enter\"; size: Size.large; }"; }
     }
 }
