@@ -1,7 +1,8 @@
+![tela-ui](https://socialify.dev/DragonheartLX/tela-ui/image?description=1&font=JetBrains+Mono&logo=https%3A%2F%2Fraw.githubusercontent.com%2FDragonheartLX%2Ftela-ui%2Frefs%2Fheads%2Fmain%2Fui%2Fassets%2Flogo.svg&name=1&pattern=Plus&stargazers=1&theme=Auto)
+
 # Tela UI
 
-TDesign 风格的 [Slint](https://slint.dev) 第三方组件库 — 提供主题令牌,
-基础组件与常用组件, 支持亮暗主题实时切换。
+TDesign 风格的 [Slint](https://slint.dev) 第三方组件库
 
 ![亮色主题](docs/screenshot-light.png)
 ![暗色主题](docs/screenshot-dark.png)
@@ -88,15 +89,12 @@ Switch {
 }
 ```
 
-## 组件速查表
-
-完整参数说明 (类型, 默认值, 回调, 继承与组合) 见
-[docs/components.md](docs/components.md)。
+`@tela-ui/common.slint` 保留为全量兼容出口, 完整参数说明见 [docs/components.md](docs/components.md)。
 
 ## 致谢与说明
 
 - 图标几何数据来自 [Lucide](https://lucide.dev) (ISC 许可), 按 [lucide-slint](https://github.com/cnlancehu/lucide-slint) (MIT OR Apache-2.0)的数据化结构打包。
-- 设计令牌遵循 TDesign 规范 (https://tdesign.tencent.com)。
+- 设计令牌遵循 [TDesign 规范](https://tdesign.tencent.com)。
 - 已知限制: 按钮无虚线变体 (Slint 边框仅支持实线), Select 与 DropdownMenu 暂无键盘导航, TextArea 暂无 maxLength 字数统计。
 
 ## 许可证
