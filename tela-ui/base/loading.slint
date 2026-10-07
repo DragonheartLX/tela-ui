@@ -60,34 +60,36 @@ export component LoadingSpinner inherits Rectangle {
     }
 }
 
-// Loading indicator with an optional label beside the spinner. The outer
-// Rectangle absorbs whatever height the surrounding layout assigns (e.g. a
-// row with taller siblings — a stretched layout top-aligns the fixed-height
-// spinner but center-stretches the label, so their centers drift apart);
-// the inner row keeps its preferred height pinned to the vertical center,
-// so ring and label always share one center line.
-export component Loading inherits Rectangle {
+// Loading indicator with an optional label beside the spinner. The root is
+// a HorizontalLayout (like RadioGroup) so its preferred size — spinner plus
+// label — propagates to surrounding layouts correctly; a Rectangle root's
+// inner row reported a zero preferred width and siblings overlapped. The
+// spinner sits in a height-free Rectangle (stretching with the row) and is
+// centered inside it, so ring and label keep one center line even when a
+// taller row stretches the layout.
+export component Loading inherits HorizontalLayout {
     in property <string> text;
     in property <Theme> theme: Theme.primary;
     in-out property <length> size: 24px;
 
-    row := HorizontalLayout {
-        x: 0;
-        y: (parent.height - self.preferred-height) / 2;
-        width: self.preferred-width;
-        height: self.preferred-height;
-        spacing: TelaTheme.spacing-2;
+    spacing: TelaTheme.spacing-2;
+
+    Rectangle {
+        // Hugs the circle on the main axis so the label gap is exactly
+        // `spacing`; stretches on the cross axis to center the ring.
+        width: root.size;
 
         LoadingSpinner {
+            y: (parent.height - self.height) / 2;
             spinner-color: TelaTheme.theme-color(root.theme);
             size: root.size;
         }
+    }
 
-        if root.text != "": Text {
-            text: root.text;
-            font-size: TelaTheme.font-size-m;
-            color: TelaTheme.text-color-secondary;
-            vertical-alignment: center;
-        }
+    if root.text != "": Text {
+        text: root.text;
+        font-size: TelaTheme.font-size-m;
+        color: TelaTheme.text-color-secondary;
+        vertical-alignment: center;
     }
 }

@@ -28,7 +28,7 @@ Slint 组件为单继承 (`inherits`), 子类可直接使用基类的全部属�
 
 | 组件 | 继承自 | 说明 |
 | --- | --- | --- |
-| Input, TextArea | `InputFrame` (私有) | 共享状态边框, 悬停/聚焦/禁用态与点击聚焦行为 |
+| Input, TextArea, InputNumber | `InputFrame` (私有) | 共享状态边框, 悬停/聚焦/禁用态与点击聚焦行为 |
 | BorderlessWindow | `Window` | 在 Window 内建属性 (`title`, `no-frame` 等) 上叠加自绘标题栏 |
 | Heading, Paragraph, Caption | `Text` | 保留 Text 全部内建属性 (`text`, `color`, `wrap` 等) |
 | RadioGroup | `HorizontalLayout` | 本身就是一行布局 |
@@ -39,15 +39,19 @@ Slint 组件为单继承 (`inherits`), 子类可直接使用基类的全部属�
 - Button = Icon + LoadingSpinner
 - Loading = LoadingSpinner
 - Dialog = Button x2 (确认/取消)
+- Popconfirm = Button x2 (取消/确认)
 - RadioGroup = Radio xN
 - SideNav = 私有 NavRow xN (菜单行, 底部行与收起行共用)
-- Tag, CheckBox, Alert, MessageOverlay, NavBar, SideNav, Select, Pagination,
-  Avatar, BorderlessWindow 内部均使用 Icon 渲染字形
+- Tag, CheckBox, Alert, MessageOverlay, NotificationOverlay, NavBar, SideNav,
+  Select, Pagination, Avatar, DropdownMenu, Rate, Empty, BorderlessWindow
+  内部均使用 Icon 渲染字形
 - 提供 `@children` 插槽的组件: Badge (被标记内容), Card (卡片主体), Dialog
-  (自定义主体), Drawer (面板主体), NavBar (右侧操作区), BorderlessWindow (窗口内容)
+  (自定义主体), Drawer (面板主体), NavBar (右侧操作区), Empty (操作区),
+  TooltipArea (触发内容), BorderlessWindow (窗口内容)
 
-私有组件 (未导出, 仅供实现参考): `InputFrame` (input.slint), `NavRow`
-(side-nav.slint), `WindowButton` (borderless-window.slint), `PageBtn` (pagination.slint)。
+私有组件 (仅供实现参考, 不经聚合器导出): `InputFrame` (input.slint, 已对库内
+导出供 InputNumber 复用), `NavRow` (side-nav.slint), `WindowButton`
+(borderless-window.slint), `PageBtn` (pagination.slint)。
 
 ---
 
@@ -252,6 +256,28 @@ TextArea `changed(string)`。
 
 相关枚举: `InputStatus { default, success, warning, error }`。
 
+### InputNumber
+
+数字输入框。左右减/加步进按钮夹住居中的文本框 (TDesign 行内布局); 键入实时
+钳制到 [min, max] 并同步 value, 回车或失焦后按两位小数规范化显示; 初始值越界
+时自动收敛到区间内; 文本框内可用 Up/Down 方向键步进; 到达边界时对应按钮
+禁用。暴露 spinbox 无障碍语义 (值/上下限/步长与增减动作)。
+
+继承: `InputFrame` (私有)。内部组合 Icon (Minus/Plus)。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| value | `float` (in-out) | `0` | 当前值, 交互时组件内部自写, 请用双向绑定 (`value <=> v`) |
+| min | `float` | `0` | 下限, 到达时减号禁用 |
+| max | `float` | `100` | 上限, 到达时加号禁用 |
+| step | `float` | `1` | 步进量 |
+| editable | `bool` | `true` | 文本框是否允许键入 (InputType.decimal, 仅数字与小数点), false 时仅按钮步进 |
+| size | `Size` | `Size.medium` | 高度与字号 |
+| disabled | `bool` | `false` | 禁用态 (来自 InputFrame) |
+
+回调: `changed(float)` — 键入, 回车或步进后的新值。外部写入 value 时, 文本框
+在未聚焦状态下自动同步显示。
+
 ### Select
 
 下拉选择。弹层锚定在触发器下方, 宽度随触发器 (至少 120px), 最多显示 6 项;
@@ -351,6 +377,24 @@ RadioGroup 参数:
 
 公开函数: `set-value(float)` — 钳制到区间并按 step 取整后写入。
 
+### Rate
+
+星级评分。整数步进; 悬停预览目标分, 点击当前分清零。
+
+继承: `Rectangle`。内部组合 Icon (StarFill 填充星)。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| max | `int` | `5` | 星星总数 |
+| value | `float` (in-out) | `0` | 当前分, 交互时组件内部自写, 请用双向绑定 |
+| read-only | `bool` | `false` | 只读 (正常配色, 不可交互) |
+| disabled | `bool` | `false` | 禁用 (整体灰化) |
+| allow-clear | `bool` | `true` | 点击当前分值清零 |
+| theme | `Theme` | `Theme.warning` | 选中星颜色 |
+| size | `Size` | `Size.medium` | 星星 16/20/24px |
+
+回调: `changed(float)` — 点击后的新分值。
+
 ### Progress
 
 进度条。线性或圆环, value 变化带缓动动画。
@@ -401,6 +445,20 @@ RadioGroup 参数:
 | show-zero | `bool` | `false` | count 为 0 时仍然显示 |
 
 插槽: 默认子元素 (`@children`) 为被标记的内容。
+
+### Empty
+
+空状态占位: 大图标 + 描述文字 + 操作区, 整体在容器内居中。
+
+继承: `Rectangle`。内部组合 Icon。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| icon | `TIconData` | `TIconSet.Inbox` | 占位图标 |
+| description | `string` | `"暂无数据"` | 为空字符串时隐藏 |
+| icon-size | `length` (in-out) | `48px` | 图标边长 |
+
+插槽: 默认子元素为描述下方的操作区, 在一行内居中排布, 通常放按钮。
 
 ### Card
 
@@ -477,6 +535,104 @@ RadioGroup 参数:
 
 插槽: 默认子元素为标题下方的面板主体。
 
+### Tooltip
+
+悬停提示气泡。渲染在窗口级 (参考 sleek-ui 的实现): 触发物通过 `TelaTooltip`
+全局上报几何, 窗口根部的 `TooltipOverlay` 统一绘制气泡 — 不会被卡片或
+ScrollView 裁剪, 也没有包裹组件的尺寸问题。气泡延迟 250ms 出现 (可配),
+移开立即消失, 反色底配菱形箭头, 文本超宽自动换行。
+
+静态触发物用 `TooltipArea` (自动充满父容器并接管悬停):
+
+```slint
+// 窗口根部放置一次:
+TooltipOverlay { }
+
+TooltipArea {
+    width: 120px; height: 32px;
+    text: "提示"; placement: TooltipPlacement.top;
+    Text { text: "目标"; }
+}
+```
+
+交互式触发物 (Button) 自行上报:
+
+```slint
+ta := TouchArea {
+    changed has-hover => {
+        TelaTooltip.show("提示", TooltipPlacement.top,
+                         self.has-hover, self.absolute-position,
+                         self.width, self.height);
+    }
+}
+```
+
+`TelaTooltip` 全局函数: `show(text, placement, hovering, coords, width, height)`
+— coords 传触发物的 `absolute-position` (窗口坐标), hovering 为 false 时仅
+驱动隐藏, 不覆盖状态。
+
+`TooltipArea` 参数:
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| text | `string` | `""` | 气泡文字 |
+| placement | `TooltipPlacement` | `TooltipPlacement.top` | 弹出方向 |
+
+插槽: 默认子元素为触发内容 (悬停层在其之上, 静态内容适用)。
+
+`TooltipOverlay` 参数 (应用级配置):
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| delay | `duration` (in-out) | `250ms` | 显示延迟 |
+| wrap-width | `length` (in-out) | `240px` | 换行阈值 |
+| show-arrow | `bool` (in-out) | `true` | 菱形箭头 |
+
+相关枚举: `TooltipPlacement { top, bottom, left, right }`。
+
+### DropdownMenu
+
+下拉动作菜单。锚定触发内容的 PopupWindow 弹层; `auto-open` (默认开) 在触发
+内容之上叠加点击层, 适合静态触发物 (图标/文本/头像); Button 触发请设
+`auto-open: false` 并在 `clicked` 中调用 `toggle()`。点击外部或选中后关闭;
+暂无键盘导航, 超宽条目省略显示, 超过 max-visible-items 后弹层内滚动。
+
+继承: `Rectangle`。内部组合 Icon。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| items | `[DropdownMenuItem]` | `[]` | 菜单项 |
+| placement | `PopupPlacement` | `PopupPlacement.bottom-start` | 弹出锚点 |
+| auto-open | `bool` | `true` | 内置点击层开合; 交互式触发器关掉它 |
+| item-height | `length` | `32px` | 单项高度 (分隔线行 9px) |
+| max-visible-items | `int` | `6` | 弹层内直接可见的行数, 超出后滚动 |
+
+回调: `selected(int, string)` — (下标, value)。公开函数: `show()`, `close()`,
+`toggle()`。只读输出: `open` (`bool`, 弹层是否展开)。
+
+相关结构/枚举: `DropdownMenuItem { label, value, icon, disabled, danger,
+divider }` (icon 为 `TIconData` 默认空; divider 为 true 时渲染分隔线并忽略
+其余字段); `PopupPlacement { bottom-start, bottom-end, top-start, top-end }`
+与 Popconfirm 共用。
+
+### Popconfirm
+
+气泡确认。锚定与触发方式同 DropdownMenu (共用 `PopupPlacement`); 面板内为
+描述文字与右对齐的取消/确定按钮, 点击任一按钮或点击外部后关闭。
+
+继承: `Rectangle`。内部组合 Button x2。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| text | `string` | `""` | 确认描述, 超宽换行 |
+| confirm-text | `string` | `"确定"` | 确认按钮文字 (主色) |
+| cancel-text | `string` | `"取消"` | 取消按钮文字 (描边) |
+| placement | `PopupPlacement` | `PopupPlacement.top-start` | 弹出锚点 |
+| auto-open | `bool` | `true` | 同 DropdownMenu |
+
+回调: `confirm()`, `cancel()` (仅点击对应按钮时触发)。公开函数: `show()`,
+`close()`, `toggle()`。只读输出: `open` (`bool`)。
+
 ### Message (TelaMessage + MessageOverlay)
 
 全局消息。任何代码 (Slint 或 Rust) 调用 `TelaMessage` 的函数弹消息, 窗口根部放
@@ -498,6 +654,31 @@ RadioGroup 参数:
 
 相关枚举: `MessageTheme { info, success, warning, error }`,
 `MessagePlacement { top-left, top-center, top-right, bottom-left, bottom-center, bottom-right }`。
+
+### Notification (TelaNotification + NotificationOverlay)
+
+全局通知。任何代码 (Slint 或 Rust) 调用 `TelaNotification` 的函数弹通知,
+窗口根部放一个 `NotificationOverlay` 负责渲染; 右上角堆叠, 最多 4 条, 满员时
+挤掉最旧一条; 每条 4.5 秒后自动消失, 也可点击关闭; 无 TouchArea, 不拦截输入。
+内容文字按列宽自动换行。
+
+`TelaNotification` 全局属性:
+
+| 属性 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| items | `[NotificationData]` (in-out) | 4 个隐藏槽位 | 固定容量, 下标 0 最旧; Slint 模型无 push/remove, 以槽位原地赋值实现堆叠 |
+| placement | `NotificationPlacement` (in-out) | `NotificationPlacement.top-right` | 贴靠的窗口角落 |
+
+`TelaNotification` 函数: `info(string, string)`, `success(…)`, `warning(…)`,
+`error(…)` (参数为 标题, 内容), 底层 `show(string, string, NotificationTheme)`,
+以及 `close(int)` (按下标关闭) 与 `clear()`。
+
+`NotificationOverlay` 组件无参数, 放置即可。
+
+相关枚举/结构: `NotificationTheme { info, success, warning, error }`,
+`NotificationPlacement { top-left, top-right, bottom-left, bottom-right }`,
+`NotificationData { title, content, theme, visible }` (visible 为槽位占用
+标记, 仅 Overlay 内部使用)。
 
 ### Tabs
 
@@ -731,6 +912,10 @@ PanelLeftClose, PanelLeftOpen, FlaskConical。
 | AvatarSize / AvatarShape | Avatar | small, medium, large, extra-large / circle, square |
 | DrawerPlacement | Drawer | top, right, bottom, left |
 | MessageTheme / MessagePlacement | Message | info, success, warning, error / 六向贴靠 |
+| NotificationTheme / NotificationPlacement / NotificationData | Notification | info, success, warning, error / 四角贴靠 / title, content, theme, visible |
+| TooltipPlacement | Tooltip | top, bottom, left, right |
+| DropdownMenuItem | DropdownMenu | label, value, icon, disabled, danger, divider |
+| PopupPlacement | DropdownMenu, Popconfirm | bottom-start, bottom-end, top-start, top-end |
 | NavItem | NavBar | label, value |
 | SideNavMode / SideNavTogglePosition | SideNav | icon-text, text, icon / top, bottom |
 | SideNavItem | SideNav | label, value, icon, disabled |

@@ -1,0 +1,72 @@
+// Tela UI — Rate
+//
+// Star rating. Integer steps (half stars are a possible future extension);
+// hover previews the target score, clicking the current score clears it when
+// `allow-clear` is set. `value` self-assigns on click — bind it two-way
+// (`value <=> v`) like Input's text.
+
+import { TelaTheme, Theme, Size } from "../theme.slint";
+import { Icon } from "../base/icon/icon.slint";
+import { TIconSet } from "../base/icon/data.slint";
+
+export component Rate inherits Rectangle {
+    in property <int> max: 5;
+    in-out property <float> value: 0;
+    in property <bool> read-only: false;
+    in property <bool> disabled: false;
+    // Clicking the current score resets to 0.
+    in property <bool> allow-clear: true;
+    in property <Theme> theme: Theme.warning;
+    in property <Size> size: Size.medium;
+
+    callback changed(float);
+
+    // Component-specific px table (TDesign star sizes).
+    private property <length> star-size:
+        size == Size.small ? 16px
+        : size == Size.large ? 24px
+        : 20px;
+    private property <length> gap: TelaTheme.spacing-2;
+
+    // Rest colors, overridden for the disabled state below.
+    private property <color> fill-c: TelaTheme.theme-color(theme);
+    private property <color> empty-c: TelaTheme.text-color-disabled;
+
+    states [
+        disabled when root.disabled: {
+            fill-c: TelaTheme.theme-color-disabled(theme);
+            empty-c: TelaTheme.text-color-disabled;
+        }
+    ]
+
+    // 1..max while hovering, 0 when the pointer is elsewhere.
+    private property <int> hover-idx: ta.has-hover ?
+        Math.max(1, Math.min(root.max, Math.floor(ta.mouse-x / (star-size + gap)) + 1)) : 0;
+    // The score the stars display: hover preview wins over the value.
+    private property <float> display-value: ta.has-hover && !root.read-only && !root.disabled ? hover-idx : value;
+
+    width: max * star-size + (max - 1) * gap;
+    height: star-size;
+
+    for i in root.max: Icon {
+        x: i * (root.star-size + root.gap);
+        y: 0;
+        icon: TIconSet.StarFill;
+        size: root.star-size;
+        icon-color: i + 1 <= root.display-value ? fill-c : empty-c;
+        animate icon-color { duration: TelaTheme.duration-fast; }
+    }
+
+    ta := TouchArea {
+        enabled: !root.disabled && !root.read-only;
+        mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;
+        clicked => {
+            if (hover-idx == root.value && root.allow-clear) {
+                root.value = 0;
+            } else {
+                root.value = hover-idx;
+            }
+            root.changed(root.value);
+        }
+    }
+}

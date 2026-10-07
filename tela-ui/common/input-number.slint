@@ -1,0 +1,204 @@
+// Tela UI — InputNumber
+//
+// Numeric input with flanking minus/plus steppers (TDesign row layout).
+// Typing updates `value` live (clamped to [min, max]); Enter or leaving the
+// field reformats the text; Up/Down arrows step while the field is focused.
+// Steppers are disabled at the bounds. `value` self-assigns on interaction —
+// bind it two-way (`value <=> v`).
+
+import { TelaTheme, Size } from "../theme.slint";
+import { InputFrame } from "input.slint";
+import { Icon } from "../base/icon/icon.slint";
+import { TIconSet } from "../base/icon/data.slint";
+
+export component InputNumber inherits InputFrame {
+    in property <Size> size: Size.medium;
+    in-out property <float> value: 0;
+    in property <float> min: 0;
+    in property <float> max: 100;
+    in property <float> step: 1;
+    // Whether the text field accepts typing; steppers stay usable.
+    in property <bool> editable: true;
+
+    callback changed(float);
+
+    private property <length> h: TelaTheme.size-height(size);
+    private property <length> fs: TelaTheme.size-font(size);
+    private property <bool> at-min: root.value <= root.min;
+    private property <bool> at-max: root.value >= root.max;
+
+    // Trim float noise to two decimals for display.
+    public pure function format(v: float) -> string {
+        return "\{Math.round(v * 100) / 100}";
+    }
+
+    public pure function clamp-v(v: float) -> float {
+        return Math.max(root.min, Math.min(root.max, v));
+    }
+
+    height: h;
+    forward-focus: ti;
+    focused: ti.has-focus;
+    focus-request => { ti.focus(); }
+
+    init => {
+        // An out-of-range initial value snaps into bounds.
+        root.value = root.clamp-v(root.value);
+        ti.text = root.format(root.value);
+    }
+
+    // Resync the text when `value` changes from outside while not editing;
+    // while editing the user's buffer wins (steppers resync explicitly).
+    changed value => {
+        if (!ti.has-focus) {
+            ti.text = root.format(root.value);
+        }
+    }
+
+    // Accessibility: the frame speaks for the inner TextInput.
+    accessible-role: AccessibleRole.spinbox;
+    accessible-value: root.format(root.value);
+    accessible-value-minimum: root.min;
+    accessible-value-maximum: root.max;
+    accessible-value-step: root.step;
+    accessible-action-decrement => {
+        btn-minus.clicked();
+    }
+    accessible-action-increment => {
+        btn-plus.clicked();
+    }
+    accessible-action-default => {
+        root.focus-request();
+    }
+
+    HorizontalLayout {
+        x: 0;
+        y: 0;
+        width: parent.width;
+        height: parent.height;
+
+        // Minus stepper
+        Rectangle {
+            width: root.h;
+            height: parent.height;
+            background: transparent;
+            animate background { duration: TelaTheme.duration-fast; }
+
+            states [
+                hovered when btn-minus.has-hover && !root.disabled && !root.at-min: {
+                    background: TelaTheme.bg-color-secondarycontainer-hover;
+                }
+            ]
+
+            Icon {
+                x: (parent.width - self.width) / 2;
+                y: (parent.height - self.height) / 2;
+                icon: TIconSet.Minus;
+                size: root.fs;
+                icon-color: root.disabled || root.at-min ? TelaTheme.text-color-disabled : TelaTheme.text-color-secondary;
+                animate icon-color { duration: TelaTheme.duration-fast; }
+            }
+
+            btn-minus := TouchArea {
+                enabled: !root.disabled && !root.at-min;
+                mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;
+                clicked => {
+                    root.value = root.clamp-v(root.value - root.step);
+                    ti.text = root.format(root.value);
+                    root.changed(root.value);
+                }
+            }
+        }
+
+        // Divider
+        Rectangle {
+            width: 1px;
+            height: parent.height;
+            background: root.disabled ? TelaTheme.border-level-1-color : TelaTheme.component-border;
+        }
+
+        ti := TextInput {
+            horizontal-alignment: center;
+            vertical-alignment: center;
+            single-line: true;
+            // Decimal restricts typing to digits and the decimal mark.
+            input-type: InputType.decimal;
+            color: root.disabled ? TelaTheme.text-color-disabled : TelaTheme.text-color-primary;
+            font-size: root.fs;
+            font-family: TelaTheme.font-family;
+            selection-background-color: TelaTheme.brand-color-light;
+            selection-foreground-color: TelaTheme.text-color-primary;
+            enabled: !root.disabled && root.editable;
+            horizontal-stretch: 1;
+            // The frame provides the accessibility surface.
+            accessible-role: none;
+
+            // Leaving the field reformats the buffer from the clamped value.
+            changed has-focus => {
+                if (!self.has-focus) {
+                    self.text = root.format(root.value);
+                }
+            }
+
+            edited => {
+                root.value = root.clamp-v(self.text.to-float());
+                root.changed(root.value);
+            }
+            accepted => {
+                root.value = root.clamp-v(self.text.to-float());
+                self.text = root.format(root.value);
+                root.changed(root.value);
+            }
+            key-pressed(event) => {
+                if (event.text == Key.UpArrow) {
+                    btn-plus.clicked();
+                    return accept;
+                } else if (event.text == Key.DownArrow) {
+                    btn-minus.clicked();
+                    return accept;
+                }
+                reject
+            }
+        }
+
+        // Divider
+        Rectangle {
+            width: 1px;
+            height: parent.height;
+            background: root.disabled ? TelaTheme.border-level-1-color : TelaTheme.component-border;
+        }
+
+        // Plus stepper
+        Rectangle {
+            width: root.h;
+            height: parent.height;
+            background: transparent;
+            animate background { duration: TelaTheme.duration-fast; }
+
+            states [
+                hovered when btn-plus.has-hover && !root.disabled && !root.at-max: {
+                    background: TelaTheme.bg-color-secondarycontainer-hover;
+                }
+            ]
+
+            Icon {
+                x: (parent.width - self.width) / 2;
+                y: (parent.height - self.height) / 2;
+                icon: TIconSet.Plus;
+                size: root.fs;
+                icon-color: root.disabled || root.at-max ? TelaTheme.text-color-disabled : TelaTheme.text-color-secondary;
+                animate icon-color { duration: TelaTheme.duration-fast; }
+            }
+
+            btn-plus := TouchArea {
+                enabled: !root.disabled && !root.at-max;
+                mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;
+                clicked => {
+                    root.value = root.clamp-v(root.value + root.step);
+                    ti.text = root.format(root.value);
+                    root.changed(root.value);
+                }
+            }
+        }
+    }
+}

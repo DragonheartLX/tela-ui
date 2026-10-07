@@ -1,0 +1,204 @@
+// Tela UI — Notification
+//
+// Stacked corner notifications. Any code (Slint or Rust) calls TelaNotification:
+//   TelaNotification.info("标题", "内容");
+//   TelaNotification.success(...) / warning(...) / error(...)
+// then place ONE `NotificationOverlay` near the top of the window. Up to 4
+// notifications stack in a column (oldest drops off when full); each card
+// auto-dismisses after 4.5 s and can be closed manually.
+
+import { TelaTheme } from "../theme.slint";
+import { Icon } from "../base/icon/icon.slint";
+import { TIconSet } from "../base/icon/data.slint";
+
+export enum NotificationTheme {
+    info,
+    success,
+    warning,
+    error,
+}
+
+// Which window corner the overlay pins the stack to.
+export enum NotificationPlacement {
+    top-left,
+    top-right,
+    bottom-left,
+    bottom-right,
+}
+
+export struct NotificationData {
+    title: string,
+    content: string,
+    theme: NotificationTheme,
+    // Slot occupancy: slots are pre-allocated, hidden ones are empty.
+    visible: bool,
+}
+
+export global TelaNotification {
+    // Fixed capacity in declaration order: index 0 is the oldest. Struct
+    // fields are assigned in place (Slint models have no push/remove).
+    in-out property <[NotificationData]> items: [
+        { title: "", content: "", theme: NotificationTheme.info, visible: false },
+        { title: "", content: "", theme: NotificationTheme.info, visible: false },
+        { title: "", content: "", theme: NotificationTheme.info, visible: false },
+        { title: "", content: "", theme: NotificationTheme.info, visible: false },
+    ];
+    in-out property <NotificationPlacement> placement: NotificationPlacement.top-right;
+
+    public function show(title: string, content: string, th: NotificationTheme) {
+        if (!items[0].visible) {
+            items[0] = { title: title, content: content, theme: th, visible: true };
+        } else if (!items[1].visible) {
+            items[1] = { title: title, content: content, theme: th, visible: true };
+        } else if (!items[2].visible) {
+            items[2] = { title: title, content: content, theme: th, visible: true };
+        } else {
+            // Full: drop the oldest, shift the rest.
+            items[0] = items[1];
+            items[1] = items[2];
+            items[2] = items[3];
+            items[3] = { title: title, content: content, theme: th, visible: true };
+        }
+    }
+
+    public function info(title: string, content: string) {
+        root.show(title, content, NotificationTheme.info);
+    }
+
+    public function success(title: string, content: string) {
+        root.show(title, content, NotificationTheme.success);
+    }
+
+    public function warning(title: string, content: string) {
+        root.show(title, content, NotificationTheme.warning);
+    }
+
+    public function error(title: string, content: string) {
+        root.show(title, content, NotificationTheme.error);
+    }
+
+    public function close(i: int) {
+        items[i].visible = false;
+    }
+
+    public function clear() {
+        items[0].visible = false;
+        items[1].visible = false;
+        items[2].visible = false;
+        items[3].visible = false;
+    }
+}
+
+export component NotificationOverlay inherits Rectangle {
+    // A passive full-window overlay: no TouchArea, so it never blocks input.
+    private property <bool> to-left:
+        TelaNotification.placement == NotificationPlacement.top-left
+        || TelaNotification.placement == NotificationPlacement.bottom-left;
+    private property <bool> to-bottom:
+        TelaNotification.placement == NotificationPlacement.bottom-left
+        || TelaNotification.placement == NotificationPlacement.bottom-right;
+
+    column := VerticalLayout {
+        width: 320px;
+        x: root.to-left ? 24px : parent.width - self.width - 24px;
+        y: root.to-bottom ? parent.height - self.preferred-height - 12px : 12px;
+        // Slot spacing is baked into each wrapper's height so hidden slots
+        // collapse to zero without leaving layout gaps behind.
+        spacing: 0px;
+
+        for it[i] in TelaNotification.items: Rectangle {
+            private property <length> card-h: row.preferred-height + TelaTheme.padding-lr-m * 2;
+            height: it.visible ? card-h + TelaTheme.spacing-5 : 0px;
+            clip: true;
+
+            card := Rectangle {
+                y: 0;
+                width: parent.width;
+                height: max(0px, parent.height - TelaTheme.spacing-5);
+                background: TelaTheme.bg-color-container;
+                border-width: 1px;
+                border-color: TelaTheme.component-stroke;
+                border-radius: TelaTheme.radius-medium;
+                drop-shadow-blur: TelaTheme.shadow-2-blur;
+                drop-shadow-offset-y: TelaTheme.shadow-2-offset-y;
+                drop-shadow-color: TelaTheme.shadow-2-color;
+                clip: true;
+
+                row := HorizontalLayout {
+                    width: parent.width;
+                    height: parent.height;
+                    padding: TelaTheme.padding-lr-m;
+                    spacing: TelaTheme.spacing-4;
+
+                    Icon {
+                        y: (parent.height - self.height) / 2;
+                        icon: it.theme == NotificationTheme.success ? TIconSet.CircleCheck
+                            : it.theme == NotificationTheme.warning ? TIconSet.CircleAlert
+                            : it.theme == NotificationTheme.error ? TIconSet.CircleX
+                            : TIconSet.Info;
+                        size: 20px;
+                        icon-color: it.theme == NotificationTheme.success ? TelaTheme.success-color
+                            : it.theme == NotificationTheme.warning ? TelaTheme.warning-color
+                            : it.theme == NotificationTheme.error ? TelaTheme.error-color
+                            : TelaTheme.brand-color;
+                    }
+
+                    VerticalLayout {
+                        width: 228px;
+                        spacing: TelaTheme.spacing-2;
+
+                        Text {
+                            text: it.title;
+                            font-size: TelaTheme.font-size-m;
+                            font-family: TelaTheme.font-family;
+                            font-weight: TelaTheme.font-weight-medium;
+                            color: TelaTheme.text-color-primary;
+                            overflow: elide;
+                        }
+
+                        Text {
+                            // Wraps to the fixed 228px column; the card
+                            // height follows the wrapped line count.
+                            text: it.content;
+                            font-size: TelaTheme.font-size-s;
+                            font-family: TelaTheme.font-family;
+                            color: TelaTheme.text-color-secondary;
+                            wrap: word-wrap;
+                        }
+                    }
+
+                    Rectangle {
+                        width: 16px;
+                        height: 16px;
+                        y: (parent.height - self.height) / 2;
+
+                        Icon {
+                            x: 1px;
+                            y: 1px;
+                            icon: TIconSet.X;
+                            size: 14px;
+                            icon-color: close-ta.has-hover ? TelaTheme.text-color-secondary : TelaTheme.text-color-placeholder;
+                            animate icon-color { duration: TelaTheme.duration-fast; }
+                        }
+                        close-ta := TouchArea {
+                            mouse-cursor: MouseCursor.pointer;
+                            clicked => {
+                                TelaNotification.close(i);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Per-slot auto-dismiss; the Timer remounts whenever the slot is
+            // refilled, so the 4.5 s window restarts from the refill.
+            timer := Timer {
+                interval: 4.5s;
+                running: it.visible;
+                triggered => {
+                    TelaNotification.close(i);
+                }
+            }
+        }
+    }
+}

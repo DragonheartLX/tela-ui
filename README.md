@@ -97,7 +97,7 @@ Switch {
 
 - 图标几何数据来自 [Lucide](https://lucide.dev) (ISC 许可), 按 [lucide-slint](https://github.com/cnlancehu/lucide-slint) (MIT OR Apache-2.0)的数据化结构打包。
 - 设计令牌遵循 TDesign 规范 (https://tdesign.tencent.com)。
-- 已知限制: 按钮无虚线变体 (Slint 边框仅支持实线), Select 暂无键盘导航, TextArea 暂无 maxLength 字数统计。
+- 已知限制: 按钮无虚线变体 (Slint 边框仅支持实线), Select 与 DropdownMenu 暂无键盘导航, TextArea 暂无 maxLength 字数统计。
 
 ## 许可证
 

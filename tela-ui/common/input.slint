@@ -15,10 +15,12 @@ export enum InputStatus {
     error,
 }
 
-// Shared frame for Input / TextArea: background and border follow the
-// status, hover / focus / disabled override it, and clicking the frame
-// focuses the text input (subclasses wire `focus-request` to theirs).
-component InputFrame inherits Rectangle {
+// Shared frame for Input / TextArea / InputNumber: background and border
+// follow the status, hover / focus / disabled override it, and clicking the
+// frame focuses the text input (subclasses wire `focus-request` to theirs).
+// Exported for reuse inside the library only — it is NOT part of the
+// common.slint aggregator surface.
+export component InputFrame inherits Rectangle {
     in property <InputStatus> status: InputStatus.default;
     in property <bool> disabled;
     // Whether the subclass TextInput holds keyboard focus.

@@ -1,0 +1,137 @@
+// Tela UI — Popconfirm
+//
+// Confirmation bubble anchored to a trigger. Same anchoring as DropdownMenu:
+// `auto-open` (default) layers a TouchArea over the trigger content and
+// toggles on click — for non-interactive triggers; Button triggers set
+// `auto-open: false` and call `toggle()` from `clicked`. Fires `confirm` /
+// `cancel` and closes on either button or on outside clicks.
+
+import { TelaTheme, Theme, Size } from "../theme.slint";
+import { Button, ButtonVariant } from "../base/button.slint";
+import { PopupPlacement } from "dropdown-menu.slint";
+
+export component Popconfirm inherits Rectangle {
+    in property <string> text;
+    in property <string> confirm-text: "确定";
+    in property <string> cancel-text: "取消";
+    in property <PopupPlacement> placement: PopupPlacement.top-start;
+    in property <bool> auto-open: true;
+
+    callback confirm();
+    callback cancel();
+
+    out property <bool> open: popup.is-open;
+
+    public function show() {
+        popup.show();
+    }
+
+    public function close() {
+        popup.close();
+    }
+
+    public function toggle() {
+        if (popup.is-open) {
+            popup.close();
+        } else {
+            popup.show();
+        }
+    }
+
+    private property <bool> to-end:
+        placement == PopupPlacement.bottom-end || placement == PopupPlacement.top-end;
+    private property <bool> to-top:
+        placement == PopupPlacement.top-start || placement == PopupPlacement.top-end;
+
+    // Trigger content hosted in a layout so the wrapper hugs it in parent
+    // layouts (a bare child would not feed the preferred size).
+    row := HorizontalLayout {
+        @children
+    }
+
+    // Layered OVER the trigger content (declared after the row) so static
+    // triggers click through to it; interactive triggers set
+    // `auto-open: false`, which removes the area entirely.
+    if root.auto-open: TouchArea {
+        mouse-cursor: MouseCursor.pointer;
+        clicked => {
+            root.toggle();
+        }
+    }
+
+    // Zero-clamped host: keeps the popup out of the wrapper's preferred
+    // size computation (a PopupWindow would inflate it) while pinning the
+    // popup coordinate system to the wrapper origin.
+    Rectangle {
+        x: 0;
+        y: 0;
+        max-width: 0px;
+        max-height: 0px;
+
+        popup := PopupWindow {
+            x: root.to-end ? root.width - self.width : 0;
+            y: root.to-top ? -self.height - 6px : root.height + 6px;
+            width: max(180px, content.preferred-width);
+            height: content.preferred-height;
+            close-policy: close-on-click-outside;
+
+            content := Rectangle {
+                max-width: 280px;
+                background: TelaTheme.bg-color-container;
+                border-width: 1px;
+                border-color: TelaTheme.component-stroke;
+                border-radius: TelaTheme.radius-medium;
+                drop-shadow-blur: TelaTheme.shadow-2-blur;
+                drop-shadow-offset-y: TelaTheme.shadow-2-offset-y;
+                drop-shadow-color: TelaTheme.shadow-2-color;
+                clip: true;
+
+                VerticalLayout {
+                    padding: TelaTheme.padding-lr-l;
+                    padding-top: TelaTheme.padding-lr-m;
+                    padding-bottom: TelaTheme.padding-lr-m;
+                    spacing: TelaTheme.spacing-4;
+
+                    Text {
+                        text: root.text;
+                        font-size: TelaTheme.font-size-m;
+                        font-family: TelaTheme.font-family;
+                        color: TelaTheme.text-color-primary;
+                        wrap: word-wrap;
+                        width: min(self.preferred-width, 232px);
+                    }
+
+                    HorizontalLayout {
+                        spacing: TelaTheme.spacing-2;
+
+                        // Absorbs the leftover row space so the buttons stay
+                        // right-packed.
+                        Rectangle { }
+
+                        Button {
+                            size: Size.small;
+                            variant: ButtonVariant.outline;
+                            text: root.cancel-text;
+                            clicked => {
+                                root.cancel();
+                                popup.close();
+                            }
+                        }
+
+                        Button {
+                            size: Size.small;
+                            theme: Theme.primary;
+                            text: root.confirm-text;
+                            clicked => {
+                                root.confirm();
+                                popup.close();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    accessible-role: AccessibleRole.button;
+}

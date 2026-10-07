@@ -14,9 +14,9 @@
 // TIconSet properties (PascalCase): X, Check, Minus, Plus, Search,
 // ChevronDown/Up/Left/Right, Menu, Info, CircleCheck, CircleX, CircleAlert,
 // TriangleAlert, Eye, Calendar, User, LoaderCircle, Sun, Moon, Bell, House,
-// Lock, Mail, Star, Heart, Trash2, Pencil, Settings, Download, Upload,
-// RefreshCw, Image, Ellipsis, LayoutDashboard, PanelLeftClose/PanelLeftOpen,
-// FlaskConical.
+// Lock, Mail, Star, StarFill, Heart, Trash2, Pencil, Settings, Download,
+// Upload, RefreshCw, Image, Ellipsis, Inbox, LayoutDashboard,
+// PanelLeftClose/PanelLeftOpen, FlaskConical.
 
 export struct TIconPath {
     command: string,
@@ -249,6 +249,14 @@ export global TIconSet {
             }
         ],
     };
+    out property <TIconData> StarFill: {
+        paths: [
+            {
+                command: "M 11.525 2.295 C 11.614394 2.1143918 11.798479 2.0001063 12 2.0001063 C 12.201521 2.0001063 12.385606 2.1143918 12.475 2.295 L 14.785 6.974 C 15.093496 7.5994844 15.689894 8.033229 16.38 8.134 L 21.546 8.89 C 21.745682 8.918931 21.911617 9.058732 21.974018 9.250607 C 22.03642 9.442482 21.984465 9.653145 21.84 9.794 L 18.104 13.432 C 17.604 13.919 17.375 14.622 17.493 15.31 L 18.375 20.45 C 18.410254 20.649622 18.328556 20.85187 18.164543 20.970997 C 18.00053 21.090124 17.782932 21.105265 17.604 21.01 L 12.986 18.582 C 12.368405 18.25732 11.630594 18.25732 11.013 18.582 L 6.396 21.01 C 6.2171383 21.104689 5.9999666 21.089252 5.836295 20.970219 C 5.672624 20.851185 5.5910273 20.649334 5.626 20.45 L 6.507 15.311 C 6.6254973 14.622244 6.3969307 13.919335 5.896 13.432 L 2.16 9.795 C 2.0143125 9.654288 1.9615613 9.442847 2.0240788 9.250191 C 2.0865963 9.057535 2.2534492 8.9173565 2.454 8.889 L 7.619 8.134 C 8.309 8.034 8.907 7.6 9.216 6.974 Z",
+                has_fill: true,
+            }
+        ],
+    };
     out property <TIconData> Heart: {
         paths: [
             {
@@ -382,6 +390,17 @@ export global TIconSet {
                 has_fill: false,
             },{
                 command: "M 8.5 2 L 15.5 2",
+                has_fill: false,
+            }
+        ],
+    };
+    out property <TIconData> Inbox: {
+        paths: [
+            {
+                command: "M 22 12 L 16 12 L 14 15 L 10 15 L 8 12 L 2 12",
+                has_fill: false,
+            },{
+                command: "M 5 4 L 19 4 L 22 12 L 22 18 L 2 18 L 2 12 Z",
                 has_fill: false,
             }
         ],

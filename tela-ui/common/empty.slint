@@ -1,0 +1,52 @@
+// Tela UI — Empty
+//
+// Empty-state placeholder: large glyph, description and an action area fed
+// by the children slot (buttons etc., rendered in a centered row).
+
+import { TelaTheme } from "../theme.slint";
+import { Icon } from "../base/icon/icon.slint";
+import { TIconData, TIconSet } from "../base/icon/data.slint";
+
+export component Empty inherits Rectangle {
+    in property <TIconData> icon: TIconSet.Inbox;
+    in property <string> description: "暂无数据";
+    in-out property <length> icon-size: 48px;
+
+    // Vertical metrics: glyph → gap → description → gap → actions.
+    private property <length> gap: TelaTheme.spacing-4;
+    private property <length> desc-h: root.description != "" ? TelaTheme.line-height-s : 0px;
+    private property <length> block-h: icon-size + gap + desc-h + gap + actions.preferred-height;
+    private property <length> y0: (self.height - block-h) / 2;
+
+    Icon {
+        x: (parent.width - root.icon-size) / 2;
+        y: root.y0;
+        icon: root.icon;
+        size: root.icon-size;
+        // Thinner relative stroke at display sizes.
+        stroke-width: 1.5;
+        icon-color: TelaTheme.text-color-placeholder;
+    }
+
+    if root.description != "": Text {
+        y: root.y0 + root.icon-size + root.gap;
+        height: root.desc-h;
+        width: parent.width;
+        horizontal-alignment: center;
+        vertical-alignment: center;
+        text: root.description;
+        font-size: TelaTheme.font-size-s;
+        font-family: TelaTheme.font-family;
+        color: TelaTheme.text-color-secondary;
+    }
+
+    actions := HorizontalLayout {
+        y: root.y0 + root.icon-size + root.gap + root.desc-h + root.gap;
+        x: (parent.width - self.preferred-width) / 2;
+        width: self.preferred-width;
+        height: self.preferred-height;
+        spacing: TelaTheme.spacing-3;
+
+        @children
+    }
+}

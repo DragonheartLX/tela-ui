@@ -1,0 +1,176 @@
+// Tela UI — Tooltip
+//
+// Hover hint bubble, rendered at window level (sleek-ui pattern): triggers
+// report their geometry through the `TelaTooltip` global, ONE `TooltipOverlay`
+// near the window root draws the bubble — so it never gets clipped by cards
+// or ScrollViews and no wrapper sizing is involved. The easy way to equip a
+// static trigger is `TooltipArea` (fills its parent and wires the hover):
+//   TooltipArea {
+//       width: 120px; height: 32px;
+//       text: "提示"; placement: TooltipPlacement.top;
+//       Text { text: "目标"; }
+//   }
+// Interactive triggers (Button) wire the global themselves:
+//   ta := TouchArea { changed has-hover => {
+//       TelaTooltip.show("提示", TooltipPlacement.top,
+//                        self.has-hover, self.absolute-position,
+//                        self.width, self.height);
+//   } }
+
+import { TelaTheme } from "../theme.slint";
+
+export enum TooltipPlacement {
+    top,
+    bottom,
+    left,
+    right,
+}
+
+// Trigger-side state: coordinates are window-local (absolute-position).
+export global TelaTooltip {
+    out property <bool> hovering;
+    out property <string> text;
+    out property <TooltipPlacement> placement: TooltipPlacement.top;
+    out property <length> x;
+    out property <length> y;
+    out property <length> width;
+    out property <length> height;
+
+    // `hovering` gates the update: on hover-out the renderer hides
+    // reactively, no state is overwritten.
+    public function show(text: string, placement: TooltipPlacement, hovering: bool, coords: Point, width: length, height: length) {
+        self.hovering = hovering;
+        if (self.hovering) {
+            self.text = text;
+            self.placement = placement;
+            self.x = coords.x;
+            self.y = coords.y;
+            self.width = width;
+            self.height = height;
+        }
+    }
+}
+
+// Place ONE near the window root (after the main content).
+export component TooltipOverlay inherits Rectangle {
+    // App-wide bubble configuration.
+    in-out property <duration> delay: 250ms;
+    in-out property <length> wrap-width: 240px;
+    in-out property <bool> show-arrow: true;
+
+    // Unbound width/height fill the area it is dropped into. A passive
+    // full-window overlay: no TouchArea, never blocks input.
+    z: 100;
+
+    // Geometry probe: hosts (BorderlessWindow) may place this overlay below
+    // a title bar, so trigger coords (window-local) must be converted into
+    // overlay-local by subtracting the probe's absolute-position.
+    probe := TouchArea {
+        enabled: false;
+    }
+
+    // TDesign tooltip: a dark bubble with light text in BOTH modes (dark
+    // mode uses the elevated secondary-container surface, not an inversion).
+    private property <color> bubble-bg: TelaTheme.is-dark ? TelaTheme.bg-color-secondarycontainer : TelaTheme.text-color-primary;
+    private property <color> bubble-fg: TelaTheme.is-dark ? TelaTheme.text-color-primary : TelaTheme.bg-color-container;
+    private property <length> gap: 8px;
+    // Hover latch: the bubble appears after `delay`, hides instantly.
+    private property <bool> has-waited: false;
+    private property <bool> hovering: TelaTooltip.hovering;
+    changed hovering => {
+        if (!self.hovering && self.has-waited) {
+            self.has-waited = false;
+        }
+    }
+
+    private property <bool> to-top: TelaTooltip.placement == TooltipPlacement.top;
+    private property <bool> to-bottom: TelaTooltip.placement == TooltipPlacement.bottom;
+    private property <bool> to-left: TelaTooltip.placement == TooltipPlacement.left;
+
+    bubble := Rectangle {
+        x: compute-x();
+        y: compute-y();
+        width: content.width + TelaTheme.spacing-4 * 2;
+        height: content.preferred-height + TelaTheme.spacing-3 * 2;
+        border-radius: TelaTheme.radius-medium;
+        background: bubble-bg;
+        drop-shadow-blur: TelaTheme.shadow-2-blur;
+        drop-shadow-offset-y: TelaTheme.shadow-2-offset-y;
+        drop-shadow-color: TelaTheme.shadow-2-color;
+        opacity: root.has-waited ? 1 : 0;
+        animate opacity { duration: TelaTheme.duration-fast; }
+
+        content := Text {
+            x: TelaTheme.spacing-4;
+            y: (parent.height - self.preferred-height) / 2;
+            width: min(self.preferred-width, root.wrap-width);
+            text: TelaTooltip.text;
+            wrap: word-wrap;
+            font-size: TelaTheme.font-size-s;
+            font-family: TelaTheme.font-family;
+            color: bubble-fg;
+        }
+
+        // Diamond arrow: an 8px square rotated 45° centered on the bubble
+        // edge facing the trigger, half inside the bubble.
+        if root.show-arrow: Rectangle {
+            width: 8px;
+            height: 8px;
+            x: root.to-left ? parent.width - self.width / 2
+                : root.to-top || root.to-bottom ? (parent.width - self.width) / 2
+                : -self.width / 2;
+            y: root.to-top ? parent.height - self.height / 2
+                : root.to-bottom ? -self.height / 2
+                : (parent.height - self.height) / 2;
+            background: bubble-bg;
+            transform-rotation: 45deg;
+            transform-origin: { x: self.width / 2, y: self.height / 2 };
+        }
+    }
+
+    Timer {
+        // Timer defaults to running: bind explicitly (re-arms on each hover).
+        running: root.hovering;
+        interval: root.delay;
+        triggered => {
+            root.has-waited = true;
+        }
+    }
+
+    // Anchoring math against the stored trigger geometry, converted from
+    // window coords into overlay coords.
+    public pure function compute-x() -> length {
+        if (TelaTooltip.placement == TooltipPlacement.left) {
+            return TelaTooltip.x - probe.absolute-position.x - bubble.width - root.gap;
+        } else if (TelaTooltip.placement == TooltipPlacement.right) {
+            return TelaTooltip.x - probe.absolute-position.x + TelaTooltip.width + root.gap;
+        }
+        return TelaTooltip.x - probe.absolute-position.x + (TelaTooltip.width - bubble.width) / 2;
+    }
+
+    public pure function compute-y() -> length {
+        if (TelaTooltip.placement == TooltipPlacement.top) {
+            return TelaTooltip.y - probe.absolute-position.y - bubble.height - root.gap;
+        } else if (TelaTooltip.placement == TooltipPlacement.bottom) {
+            return TelaTooltip.y - probe.absolute-position.y + TelaTooltip.height + root.gap;
+        }
+        return TelaTooltip.y - probe.absolute-position.y + (TelaTooltip.height - bubble.height) / 2;
+    }
+}
+
+// Convenience wrapper for STATIC trigger content: fills its parent, layers
+// the hover area over `@children` and reports to `TelaTooltip`. Style the
+// component itself (background, radius, …) and put the visuals inside.
+export component TooltipArea inherits Rectangle {
+    in property <string> text;
+    in property <TooltipPlacement> placement: TooltipPlacement.top;
+
+    @children
+
+    ta := TouchArea {
+        mouse-cursor: MouseCursor.pointer;
+        changed has-hover => {
+            TelaTooltip.show(root.text, root.placement, self.has-hover, self.absolute-position, self.width, self.height);
+        }
+    }
+}
