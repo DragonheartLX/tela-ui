@@ -30,7 +30,10 @@ export component BackTop inherits Rectangle {
     drop-shadow-blur: TelaTheme.shadow-2-blur;
     drop-shadow-offset-y: TelaTheme.shadow-2-offset-y;
     drop-shadow-color: TelaTheme.shadow-2-color;
-    visible: root.content-y > root.threshold;
+    // Flickable semantics: `content-y` is 0 at the top and goes negative
+    // while scrolling down, so the button shows once the view is scrolled
+    // past `threshold`.
+    visible: root.content-y <= -root.threshold;
 
     states [
         hovered when ta.has-hover: {

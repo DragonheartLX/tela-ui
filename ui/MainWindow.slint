@@ -6,7 +6,7 @@
 
 import { TelaTheme, TelaThemePreference } from "@tela-ui/theme.slint";
 import { BorderlessWindow, TIconSet, Paragraph, Button, ButtonVariant } from "@tela-ui/base.slint";
-import { SideNav, SideNavItem, SideNavTogglePosition, Dialog, Drawer, DrawerPlacement, MessageOverlay, TelaMessage, NotificationOverlay, TooltipOverlay } from "@tela-ui/common.slint";
+import { SideNav, SideNavItem, SideNavTogglePosition, Dialog, Drawer, DrawerPlacement, MessageOverlay, TelaMessage, NotificationOverlay, TooltipOverlay, BackTop } from "@tela-ui/common.slint";
 import { ScrollView } from "std-widgets.slint";
 
 import { BasicsSection } from "pages/basics.slint";
@@ -71,7 +71,7 @@ export component MainWindow inherits BorderlessWindow {
             Rectangle {
                 vertical-stretch: 1;
 
-                ScrollView {
+                page-scroll := ScrollView {
                     VerticalLayout {
                         padding: 32px;
                         spacing: 28px;
@@ -93,6 +93,14 @@ export component MainWindow inherits BorderlessWindow {
                         // viewport is taller than the content.
                         Rectangle { vertical-stretch: 1; }
                     }
+                }
+
+                // Page-level back-to-top: appears once the gallery page is
+                // scrolled past the threshold.
+                BackTop {
+                    x: parent.width - self.width - 24px;
+                    y: parent.height - self.height - 24px;
+                    content-y <=> page-scroll.content-y;
                 }
             }
         }

@@ -307,7 +307,7 @@ export component NavigationSection inherits VerticalLayout {
                         padding: TelaTheme.padding-lr-l;
                         spacing: TelaTheme.spacing-3;
 
-                        for i in 12: Paragraph { text: "滚动内容第 \{i + 1} 行,滚动超过阈值后右下角出现回到顶部按钮。"; }
+                        for i in 24: Paragraph { text: "滚动内容第 \{i + 1} 行,滚动超过阈值后右下角出现回到顶部按钮。"; }
                     }
                 }
 
@@ -315,11 +315,13 @@ export component NavigationSection inherits VerticalLayout {
                     x: parent.width - self.width - 16px;
                     y: parent.height - self.height - 16px;
                     content-y <=> sv.content-y;
+                    // 演示区内容不长, 阈值调小才能看到按钮出现.
+                    threshold: 40px;
                 }
             }
         }
 
-        CodeBlock { code: "import { BackTop } from \"@tela-ui/common.slint\";\n\nRectangle {\n    sv := ScrollView { … }\n    BackTop {\n        x: …; y: …;\n        content-y <=> sv.content-y; // 超过阈值显示, 点击回顶\n    }\n}"; }
+        CodeBlock { code: "import { BackTop } from \"@tela-ui/common.slint\";\n\nRectangle {\n    sv := ScrollView { … }\n    BackTop {\n        x: …; y: …;\n        content-y <=> sv.content-y; // 超过阈值显示, 点击回顶\n        threshold: 40px; // 默认 200px, 内容短时调小\n    }\n}"; }
     }
 
 }
