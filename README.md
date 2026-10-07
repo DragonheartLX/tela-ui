@@ -4,8 +4,7 @@
 
 TDesign 风格的 [Slint](https://slint.dev) 第三方组件库
 
-![亮色主题](docs/screenshot-light.png)
-![暗色主题](docs/screenshot-dark.png)
+![screenshot](docs/screenshot.png)
 
 ## 快速开始
 
@@ -52,8 +51,7 @@ TELA_THEME=dark cargo run     # 强制暗色
 
 ## 主题
 
-所有令牌都在 `TelaTheme` 全局 (`theme.slint`) 上。当前生效的配置是一个
-`TAppThemeConfig` 结构体; `light` / `dark` 是两个 `in-out` 预设。
+所有令牌都在 `TelaTheme` 全局 (`theme.slint`) 上。当前生效的配置是一个`TAppThemeConfig` 结构体; `light` / `dark` 是两个 `in-out` 预设。
 
 ```slint
 // 读取令牌
@@ -62,8 +60,7 @@ Rectangle { background: TelaTheme.bg-color-container; }
 // 覆盖某个预设的单个令牌
 TelaTheme.dark.bg-page = #101010;
 
-// 整体替换预设 (省略的字段必须补齐 — 请基于 TLightColors / TDarkColors
-// 派生, 以保留原色阶)
+// 整体替换预设 (省略的字段必须补齐 — 请基于 TLightColors / TDarkColors 派生, 以保留原色阶)
 import { TDarkColors } from "@tela-ui/colors.slint";
 TelaTheme.dark = {
     animation-duration: 200ms,
