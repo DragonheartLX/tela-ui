@@ -115,7 +115,7 @@ export component FeedbackSection inherits VerticalLayout {
             }
         }
 
-        TCodeBlock { code: "import { TMessage, TMessagePlacement } from \"@tela-ui/common.slint\";\n\nTTelaMessage.success(\"保存成功\");\nTTelaMessage.placement = TMessagePlacement.bottom-right;"; }
+        TCodeBlock { code: "import { TMessage, TMessagePlacement } from \"@tela-ui/common.slint\";\n\nTMessage.success(\"保存成功\");\nTMessage.placement = TMessagePlacement.bottom-right;"; }
     }
 
     // ======================= Notification ==================
@@ -144,7 +144,7 @@ export component FeedbackSection inherits VerticalLayout {
             }
         }
 
-        TCodeBlock { code: "import { TNotification, TNotificationOverlay } from \"@tela-ui/common.slint\";\n\n// 窗口根部放置一次:\nTNotificationOverlay { }\n\n// 任意代码调用:\nTTelaNotification.info(\"提示\", \"这是一条信息通知\");\nTTelaNotification.success(\"操作成功\", \"数据已保存\");"; }
+        TCodeBlock { code: "import { TNotification, TNotificationOverlay } from \"@tela-ui/common.slint\";\n\n// 窗口根部放置一次:\nTNotificationOverlay { }\n\n// 任意代码调用:\nTNotification.info(\"提示\", \"这是一条信息通知\");\nTNotification.success(\"操作成功\", \"数据已保存\");"; }
     }
 
     // ======================== TDialog =======================

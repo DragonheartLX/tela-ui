@@ -46,7 +46,7 @@ export component SettingsSection inherits VerticalLayout {
         }
     }
 
-    TCodeBlock { code: "import { TTheme, TThemePreference } from \"@tela-ui/theme.slint\";\n\nTTelaTheme.preference = TThemePreference.dark;\n// TTheme.is-dark 是实际生效的模式 (system 已按系统解析)"; }
+    TCodeBlock { code: "import { TTheme, TThemePreference } from \"@tela-ui/theme.slint\";\n\nTTheme.preference = TThemePreference.dark;\n// TTheme.is-dark 是实际生效的模式 (system 已按系统解析)"; }
 
     TCard {
         title: "关于 About";
