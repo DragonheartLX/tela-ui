@@ -1,22 +1,22 @@
-// Tela UI — Skeleton (experimental)
+// Tela UI — TSkeleton (experimental)
 //
 // Animated placeholder block shown while content loads. Compose several to
 // build skeletons: text lines (height 12-14px), a circle (equal width and
 // height, border-radius 50%) or card blocks.
 //
-//   import { Skeleton } from "@tela-ui/experimental.slint";
-//   Skeleton { width: 240px; height: 14px; }
-//   Skeleton { width: 48px; height: 48px; circle: true; }
+//   import { TSkeleton } from "@tela-ui/experimental.slint";
+//   TSkeleton { width: 240px; height: 14px; }
+//   TSkeleton { width: 48px; height: 48px; circle: true; }
 
-import { TelaTheme } from "../theme.slint";
+import { TTheme } from "../theme.slint";
 
-export component Skeleton inherits Rectangle {
+export component TSkeleton inherits Rectangle {
     // Pulse the opacity while `animated` is on.
     in property <bool> animated: true;
     // Render as a circle (e.g. an avatar placeholder).
     in property <bool> circle: false;
 
-    background: TelaTheme.bg-color-secondarycontainer;
-    border-radius: circle ? self.width / 2 : TelaTheme.radius-default;
+    background: TTheme.bg-color-secondarycontainer;
+    border-radius: circle ? self.width / 2 : TTheme.radius-default;
     opacity: animated ? 0.45 + 0.55 * abs(sin(360deg * animation-tick() / 1.6s)) : 1;
 }

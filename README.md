@@ -25,18 +25,18 @@ fn main() {
 ```
 
 ```slint
-import { TelaTheme, Theme } from "@tela-ui/theme.slint";
+import { TTheme,  TThemeRole } from "@tela-ui/theme.slint";
 // 分类聚合导出 — 也可以直接从 "@tela-ui/base/button.slint" 等文件导入
-import { Button, ButtonVariant, Icon, Tag } from "@tela-ui/base.slint";
-import { Input, Select, Card, TelaMessage, MessageOverlay } from "@tela-ui/common.slint";
-import { Skeleton } from "@tela-ui/experimental.slint";
+import { TButton, TButtonVariant, TIcon, TTag } from "@tela-ui/base.slint";
+import { TInput, TSelect, TCard, TMessage, TMessageOverlay } from "@tela-ui/common.slint";
+import { TSkeleton } from "@tela-ui/experimental.slint";
 
 export component MainWindow inherits Window {
-    background: TelaTheme.bg-color-page;
+    background: TTheme.bg-color-page;
 
-    Button {
-        theme: Theme.primary;
-        variant: ButtonVariant.outline;
+    TButton {
+        theme: TThemeRole.primary;
+        variant: TButtonVariant.outline;
         text: "主要按钮";
     }
 }
@@ -51,18 +51,18 @@ TELA_THEME=dark cargo run     # 强制暗色
 
 ## 主题
 
-所有令牌都在 `TelaTheme` 全局 (`theme.slint`) 上。当前生效的配置是一个`TAppThemeConfig` 结构体; `light` / `dark` 是两个 `in-out` 预设。
+所有令牌都在 `TTheme` 全局 (`theme.slint`) 上。当前生效的配置是一个`TAppThemeConfig` 结构体; `light` / `dark` 是两个 `in-out` 预设。
 
 ```slint
 // 读取令牌
-Rectangle { background: TelaTheme.bg-color-container; }
+Rectangle { background: TTheme.bg-color-container; }
 
 // 覆盖某个预设的单个令牌
-TelaTheme.dark.bg-page = #101010;
+TTheme.dark.bg-page = #101010;
 
 // 整体替换预设 (省略的字段必须补齐 — 请基于 TLightColors / TDarkColors 派生, 以保留原色阶)
 import { TDarkColors } from "@tela-ui/colors.slint";
-TelaTheme.dark = {
+TTheme.dark = {
     animation-duration: 200ms,
     duration-fast: 150ms,
     duration-slow: 300ms,
@@ -72,17 +72,17 @@ TelaTheme.dark = {
 ```
 
 ```rust
-// 从 Rust 侧操作 (TelaTheme/TelaThemePreference 由 ui/MainWindow.slint 再导出)
-use tela_lib::{TelaTheme, TelaThemePreference};
-TelaTheme::get(&ui).set_preference(TelaThemePreference::Dark);
+// 从 Rust 侧操作 (TTheme/TThemePreference 由 ui/MainWindow.slint 再导出)
+use tela_lib::{TTheme, TThemePreference};
+TTheme::get(&ui).set_preference(TThemePreference::Dark);
 ```
 
-`preference` 默认为 `system`, 实时跟随 `Palette.color-scheme`; 组件通过各自的 `states` 自动换肤。亮暗开关应绑定 `TelaTheme.is-dark` (而非 `preference`), 以反映解析后的真实模式。
+`preference` 默认为 `system`, 实时跟随 `Palette.color-scheme`; 组件通过各自的 `states` 自动换肤。亮暗开关应绑定 `TTheme.is-dark` (而非 `preference`), 以反映解析后的真实模式。
 
 ```slint
-Switch {
-    checked: TelaTheme.is-dark;      // OS 为暗色且 preference 为 system 时为 true
-    changed(c) => { TelaTheme.preference = c ? TelaThemePreference.dark : TelaThemePreference.light; }
+TSwitch {
+    checked: TTheme.is-dark;      // OS 为暗色且 preference 为 system 时为 true
+    changed(c) => { TTheme.preference = c ? TThemePreference.dark : TThemePreference.light; }
 }
 ```
 
@@ -92,7 +92,7 @@ Switch {
 
 - 图标几何数据来自 [Lucide](https://lucide.dev) (ISC 许可), 按 [lucide-slint](https://github.com/cnlancehu/lucide-slint) (MIT OR Apache-2.0)的数据化结构打包。
 - 设计令牌遵循 [TDesign 规范](https://tdesign.tencent.com)。
-- 已知限制: 按钮无虚线变体 (Slint 边框仅支持实线), Select 与 DropdownMenu 暂无键盘导航, TextArea 暂无 maxLength 字数统计。
+- 已知限制: 按钮无虚线变体 (Slint 边框仅支持实线), TSelect 与 TDropdownMenu 暂无键盘导航, TTextArea 暂无 maxLength 字数统计。
 
 ## 许可证
 

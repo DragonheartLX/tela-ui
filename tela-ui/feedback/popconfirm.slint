@@ -1,20 +1,20 @@
-// Tela UI — Popconfirm
+// Tela UI — TPopconfirm
 //
-// Confirmation bubble anchored to a trigger. Same anchoring as DropdownMenu:
+// Confirmation bubble anchored to a trigger. Same anchoring as TDropdownMenu:
 // `auto-open` (default) layers a TouchArea over the trigger content and
-// toggles on click — for non-interactive triggers; Button triggers set
+// toggles on click — for non-interactive triggers; TButton triggers set
 // `auto-open: false` and call `toggle()` from `clicked`. Fires `confirm` /
 // `cancel` and closes on either button or on outside clicks.
 
-import { TelaTheme, Theme, Size } from "../theme.slint";
-import { Button, ButtonVariant } from "../base/button.slint";
-import { PopupPlacement } from "../structs/enums.slint";
+import { TTheme,  TThemeRole,  TSize } from "../theme.slint";
+import { TButton, TButtonVariant } from "../base/button.slint";
+import { TPopupPlacement } from "../structs/enums.slint";
 
-export component Popconfirm inherits Rectangle {
+export component TPopconfirm inherits Rectangle {
     in property <string> text;
     in property <string> confirm-text: "确定";
     in property <string> cancel-text: "取消";
-    in property <PopupPlacement> placement: PopupPlacement.top-start;
+    in property <TPopupPlacement> placement: TPopupPlacement.top-start;
     in property <bool> auto-open: true;
 
     callback confirm();
@@ -39,9 +39,9 @@ export component Popconfirm inherits Rectangle {
     }
 
     private property <bool> to-end:
-        placement == PopupPlacement.bottom-end || placement == PopupPlacement.top-end;
+        placement == TPopupPlacement.bottom-end || placement == TPopupPlacement.top-end;
     private property <bool> to-top:
-        placement == PopupPlacement.top-start || placement == PopupPlacement.top-end;
+        placement == TPopupPlacement.top-start || placement == TPopupPlacement.top-end;
 
     // Trigger content hosted in a layout so the wrapper hugs it in parent
     // layouts (a bare child would not feed the preferred size).
@@ -77,40 +77,40 @@ export component Popconfirm inherits Rectangle {
 
             content := Rectangle {
                 max-width: 280px;
-                background: TelaTheme.bg-color-container;
+                background: TTheme.bg-color-container;
                 border-width: 1px;
-                border-color: TelaTheme.component-stroke;
-                border-radius: TelaTheme.radius-medium;
-                drop-shadow-blur: TelaTheme.shadow-2-blur;
-                drop-shadow-offset-y: TelaTheme.shadow-2-offset-y;
-                drop-shadow-color: TelaTheme.shadow-2-color;
+                border-color: TTheme.component-stroke;
+                border-radius: TTheme.radius-medium;
+                drop-shadow-blur: TTheme.shadow-2-blur;
+                drop-shadow-offset-y: TTheme.shadow-2-offset-y;
+                drop-shadow-color: TTheme.shadow-2-color;
                 clip: true;
 
                 VerticalLayout {
-                    padding: TelaTheme.padding-lr-l;
-                    padding-top: TelaTheme.padding-lr-m;
-                    padding-bottom: TelaTheme.padding-lr-m;
-                    spacing: TelaTheme.spacing-4;
+                    padding: TTheme.padding-lr-l;
+                    padding-top: TTheme.padding-lr-m;
+                    padding-bottom: TTheme.padding-lr-m;
+                    spacing: TTheme.spacing-4;
 
                     Text {
                         text: root.text;
-                        font-size: TelaTheme.font-size-m;
-                        font-family: TelaTheme.font-family;
-                        color: TelaTheme.text-color-primary;
+                        font-size: TTheme.font-size-m;
+                        font-family: TTheme.font-family;
+                        color: TTheme.text-color-primary;
                         wrap: word-wrap;
                         width: min(self.preferred-width, 232px);
                     }
 
                     HorizontalLayout {
-                        spacing: TelaTheme.spacing-2;
+                        spacing: TTheme.spacing-2;
 
                         // Absorbs the leftover row space so the buttons stay
                         // right-packed.
                         Rectangle { }
 
-                        Button {
-                            size: Size.small;
-                            variant: ButtonVariant.outline;
+                        TButton {
+                            size: TSize.small;
+                            variant: TButtonVariant.outline;
                             text: root.cancel-text;
                             clicked => {
                                 root.cancel();
@@ -118,9 +118,9 @@ export component Popconfirm inherits Rectangle {
                             }
                         }
 
-                        Button {
-                            size: Size.small;
-                            theme: Theme.primary;
+                        TButton {
+                            size: TSize.small;
+                            theme: TThemeRole.primary;
                             text: root.confirm-text;
                             clicked => {
                                 root.confirm();

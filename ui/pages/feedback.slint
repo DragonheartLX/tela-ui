@@ -1,11 +1,11 @@
-// Demo section: 反馈 (Alert / Message / Dialog / Drawer / Notification /
-// Popconfirm / Progress / Result), 一个组件一张卡. The dialog and drawer
+// Demo section: 反馈 (TAlert / Message / TDialog / TDrawer / Notification /
+// TPopconfirm / TProgress / TResult), 一个组件一张卡. The dialog and drawer
 // overlays live at window level in MainWindow; this section only hosts the
 // trigger buttons via two-way bound properties.
 
-import { TelaTheme, Theme } from "@tela-ui/theme.slint";
-import { Button, ButtonVariant, Caption } from "@tela-ui/base.slint";
-import { Alert, Select, SelectItem, TelaMessage, MessagePlacement, DrawerPlacement, TelaNotification, Popconfirm, PopupPlacement, Result, ResultStatus, Progress, ProgressVariant, Slider, Card, CodeBlock } from "@tela-ui/common.slint";
+import { TTheme,  TThemeRole } from "@tela-ui/theme.slint";
+import { TButton, TButtonVariant, TCaption } from "@tela-ui/base.slint";
+import { TAlert, TSelect, TSelectItem, TMessage, TMessagePlacement, TDrawerPlacement, TNotification, TPopconfirm, TPopupPlacement, TResult, TResultStatus, TProgress, TProgressVariant, TSlider, TCard, TCodeBlock } from "@tela-ui/common.slint";
 
 export component FeedbackSection inherits VerticalLayout {
     spacing: 28px;
@@ -13,25 +13,25 @@ export component FeedbackSection inherits VerticalLayout {
     // Overlays owned by MainWindow.
     in-out property <bool> dialog-open: false;
     in-out property <bool> drawer-open: false;
-    in-out property <DrawerPlacement> drawer-placement: DrawerPlacement.right;
+    in-out property <TDrawerPlacement> drawer-placement: TDrawerPlacement.right;
     in-out property <float> progress-value: 40;
 
-    in property <[SelectItem]> drawer-side-items: [
+    in property <[TSelectItem]> drawer-side-items: [
         { label: "右侧", value: "right", disabled: false },
         { label: "左侧", value: "left", disabled: false },
         { label: "顶部", value: "top", disabled: false },
         { label: "底部", value: "bottom", disabled: false },
     ];
     in-out property <int> drawer-side-index: 0;
-    // Same order as `drawer-side-items`, so the Select index picks directly.
-    in property <[DrawerPlacement]> drawer-placements: [
-        DrawerPlacement.right,
-        DrawerPlacement.left,
-        DrawerPlacement.top,
-        DrawerPlacement.bottom,
+    // Same order as `drawer-side-items`, so the TSelect index picks directly.
+    in property <[TDrawerPlacement]> drawer-placements: [
+        TDrawerPlacement.right,
+        TDrawerPlacement.left,
+        TDrawerPlacement.top,
+        TDrawerPlacement.bottom,
     ];
 
-    in property <[SelectItem]> placement-items: [
+    in property <[TSelectItem]> placement-items: [
         { label: "顶部居中", value: "top-center", disabled: false },
         { label: "顶部居左", value: "top-left", disabled: false },
         { label: "顶部居右", value: "top-right", disabled: false },
@@ -41,40 +41,40 @@ export component FeedbackSection inherits VerticalLayout {
     ];
     in-out property <int> placement-index: 0;
     // Same order as `placement-items`.
-    in property <[MessagePlacement]> message-placements: [
-        MessagePlacement.top-center,
-        MessagePlacement.top-left,
-        MessagePlacement.top-right,
-        MessagePlacement.bottom-center,
-        MessagePlacement.bottom-left,
-        MessagePlacement.bottom-right,
+    in property <[TMessagePlacement]> message-placements: [
+        TMessagePlacement.top-center,
+        TMessagePlacement.top-left,
+        TMessagePlacement.top-right,
+        TMessagePlacement.bottom-center,
+        TMessagePlacement.bottom-left,
+        TMessagePlacement.bottom-right,
     ];
 
-    // ======================== Alert ========================
+    // ======================== TAlert ========================
     VerticalLayout {
         spacing: 8px;
 
-        Card {
-            title: "警告提示 Alert";
+        TCard {
+            title: "警告提示 TAlert";
 
             VerticalLayout {
                 spacing: 12px;
 
-                Alert { theme: Theme.default; title: "信息提示"; description: "这是一条普通的信息提示,用于展示需要用户关注的内容。"; closable: true; }
-                Alert { theme: Theme.success; title: "操作成功"; description: "表单已成功提交。"; closable: true; }
-                Alert { theme: Theme.warning; title: "警告提示"; description: "磁盘剩余空间不足 10%,请及时清理。"; closable: true; }
-                Alert { theme: Theme.error; title: "错误提示"; description: "网络连接失败,请检查网络后重试。"; closable: true; }
+                TAlert { theme: TThemeRole.default; title: "信息提示"; description: "这是一条普通的信息提示,用于展示需要用户关注的内容。"; closable: true; }
+                TAlert { theme: TThemeRole.success; title: "操作成功"; description: "表单已成功提交。"; closable: true; }
+                TAlert { theme: TThemeRole.warning; title: "警告提示"; description: "磁盘剩余空间不足 10%,请及时清理。"; closable: true; }
+                TAlert { theme: TThemeRole.error; title: "错误提示"; description: "网络连接失败,请检查网络后重试。"; closable: true; }
             }
         }
 
-        CodeBlock { code: "import { Alert } from \"@tela-ui/common.slint\";\n\nAlert { theme: Theme.success; title: \"操作成功\"; description: \"表单已成功提交。\"; closable: true; }"; }
+        TCodeBlock { code: "import { TAlert } from \"@tela-ui/common.slint\";\n\nTAlert { theme: TThemeRole.success; title: \"操作成功\"; description: \"表单已成功提交。\"; closable: true; }"; }
     }
 
     // ======================== Message ======================
     VerticalLayout {
         spacing: 8px;
 
-        Card {
+        TCard {
             title: "全局消息 Message";
 
             VerticalLayout {
@@ -85,17 +85,17 @@ export component FeedbackSection inherits VerticalLayout {
 
                     Text {
                         text: "消息位置";
-                        font-size: TelaTheme.font-size-m;
-                        color: TelaTheme.text-color-secondary;
+                        font-size: TTheme.font-size-m;
+                        color: TTheme.text-color-secondary;
                         vertical-alignment: center;
                     }
 
-                    Select {
+                    TSelect {
                         width: 160px;
                         items: root.placement-items;
                         current-index <=> root.placement-index;
                         selected(i, v) => {
-                            TelaMessage.placement = root.message-placements[i];
+                            TMessage.placement = root.message-placements[i];
                         }
                     }
 
@@ -106,23 +106,23 @@ export component FeedbackSection inherits VerticalLayout {
                 HorizontalLayout {
                     spacing: 12px;
 
-                    Button { text: "信息"; clicked => { TelaMessage.info("这是一条信息消息"); } }
-                    Button { theme: Theme.success; text: "成功"; clicked => { TelaMessage.success("保存成功"); } }
-                    Button { theme: Theme.warning; text: "警告"; clicked => { TelaMessage.warning("请注意潜在风险"); } }
-                    Button { theme: Theme.error; text: "错误"; clicked => { TelaMessage.error("操作失败,请重试"); } }
+                    TButton { text: "信息"; clicked => { TMessage.info("这是一条信息消息"); } }
+                    TButton { theme: TThemeRole.success; text: "成功"; clicked => { TMessage.success("保存成功"); } }
+                    TButton { theme: TThemeRole.warning; text: "警告"; clicked => { TMessage.warning("请注意潜在风险"); } }
+                    TButton { theme: TThemeRole.error; text: "错误"; clicked => { TMessage.error("操作失败,请重试"); } }
                     Rectangle { }
                 }
             }
         }
 
-        CodeBlock { code: "import { TelaMessage, MessagePlacement } from \"@tela-ui/common.slint\";\n\nTelaMessage.success(\"保存成功\");\nTelaMessage.placement = MessagePlacement.bottom-right;"; }
+        TCodeBlock { code: "import { TMessage, TMessagePlacement } from \"@tela-ui/common.slint\";\n\nTTelaMessage.success(\"保存成功\");\nTTelaMessage.placement = TMessagePlacement.bottom-right;"; }
     }
 
     // ======================= Notification ==================
     VerticalLayout {
         spacing: 8px;
 
-        Card {
+        TCard {
             title: "通知 Notification";
 
             VerticalLayout {
@@ -131,51 +131,51 @@ export component FeedbackSection inherits VerticalLayout {
                 HorizontalLayout {
                     spacing: 12px;
 
-                    Button { text: "信息通知"; clicked => { TelaNotification.info("提示", "这是一条信息通知,右上角堆叠展示"); } }
-                    Button { theme: Theme.success; text: "成功通知"; clicked => { TelaNotification.success("操作成功", "数据已保存"); } }
-                    Button { theme: Theme.warning; text: "警告通知"; clicked => { TelaNotification.warning("空间不足", "磁盘剩余空间不足 10%,请及时清理,或考虑升级更大容量的磁盘以获得更好的使用体验。"); } }
-                    Button { theme: Theme.error; text: "错误通知"; clicked => { TelaNotification.error("操作失败", "网络连接失败,请重试"); } }
+                    TButton { text: "信息通知"; clicked => { TNotification.info("提示", "这是一条信息通知,右上角堆叠展示"); } }
+                    TButton { theme: TThemeRole.success; text: "成功通知"; clicked => { TNotification.success("操作成功", "数据已保存"); } }
+                    TButton { theme: TThemeRole.warning; text: "警告通知"; clicked => { TNotification.warning("空间不足", "磁盘剩余空间不足 10%,请及时清理,或考虑升级更大容量的磁盘以获得更好的使用体验。"); } }
+                    TButton { theme: TThemeRole.error; text: "错误通知"; clicked => { TNotification.error("操作失败", "网络连接失败,请重试"); } }
 
                     // Absorbs the leftover row space.
                     Rectangle { }
                 }
 
-                Caption { text: "通知显示在窗口右上角, 多条自动堆叠 (最多 4 条, 满员时挤掉最旧一条), 4.5 秒后自动消失, 也可点击关闭。窗口根部需要一个 NotificationOverlay。"; wrap: word-wrap; }
+                TCaption { text: "通知显示在窗口右上角, 多条自动堆叠 (最多 4 条, 满员时挤掉最旧一条), 4.5 秒后自动消失, 也可点击关闭。窗口根部需要一个 TNotificationOverlay。"; wrap: word-wrap; }
             }
         }
 
-        CodeBlock { code: "import { TelaNotification, NotificationOverlay } from \"@tela-ui/common.slint\";\n\n// 窗口根部放置一次:\nNotificationOverlay { }\n\n// 任意代码调用:\nTelaNotification.info(\"提示\", \"这是一条信息通知\");\nTelaNotification.success(\"操作成功\", \"数据已保存\");"; }
+        TCodeBlock { code: "import { TNotification, TNotificationOverlay } from \"@tela-ui/common.slint\";\n\n// 窗口根部放置一次:\nTNotificationOverlay { }\n\n// 任意代码调用:\nTTelaNotification.info(\"提示\", \"这是一条信息通知\");\nTTelaNotification.success(\"操作成功\", \"数据已保存\");"; }
     }
 
-    // ======================== Dialog =======================
+    // ======================== TDialog =======================
     VerticalLayout {
         spacing: 8px;
 
-        Card {
-            title: "对话框 Dialog";
+        TCard {
+            title: "对话框 TDialog";
 
             HorizontalLayout {
                 spacing: 12px;
 
-                Button { variant: ButtonVariant.outline; theme: Theme.primary; text: "打开对话框"; clicked => { root.dialog-open = true; } }
-                Caption { text: "对话框本体挂载在窗口根部 (MainWindow), 点击遮罩或按钮关闭。"; vertical-alignment: center; wrap: word-wrap; horizontal-stretch: 1; }
+                TButton { variant: TButtonVariant.outline; theme: TThemeRole.primary; text: "打开对话框"; clicked => { root.dialog-open = true; } }
+                TCaption { text: "对话框本体挂载在窗口根部 (MainWindow), 点击遮罩或按钮关闭。"; vertical-alignment: center; wrap: word-wrap; horizontal-stretch: 1; }
             }
         }
 
-        CodeBlock { code: "import { Dialog } from \"@tela-ui/common.slint\";\n\n// 窗口根部:\nDialog {\n    open <=> open;\n    title: \"对话框标题\";\n    content: \"这是内容\";\n    accepted => { … }\n    canceled => { … }\n}"; }
+        TCodeBlock { code: "import { TDialog } from \"@tela-ui/common.slint\";\n\n// 窗口根部:\nTDialog {\n    open <=> open;\n    title: \"对话框标题\";\n    content: \"这是内容\";\n    accepted => { … }\n    canceled => { … }\n}"; }
     }
 
-    // ======================== Drawer =======================
+    // ======================== TDrawer =======================
     VerticalLayout {
         spacing: 8px;
 
-        Card {
-            title: "抽屉 Drawer";
+        TCard {
+            title: "抽屉 TDrawer";
 
             HorizontalLayout {
                 spacing: 12px;
 
-                Select {
+                TSelect {
                     width: 120px;
                     items: root.drawer-side-items;
                     current-index <=> root.drawer-side-index;
@@ -184,55 +184,55 @@ export component FeedbackSection inherits VerticalLayout {
                     }
                 }
 
-                Button { variant: ButtonVariant.outline; theme: Theme.primary; text: "打开抽屉"; clicked => { root.drawer-open = true; } }
-                Caption { text: "抽屉本体挂载在窗口根部, 从指定边缘滑出。"; vertical-alignment: center; wrap: word-wrap; horizontal-stretch: 1; }
+                TButton { variant: TButtonVariant.outline; theme: TThemeRole.primary; text: "打开抽屉"; clicked => { root.drawer-open = true; } }
+                TCaption { text: "抽屉本体挂载在窗口根部, 从指定边缘滑出。"; vertical-alignment: center; wrap: word-wrap; horizontal-stretch: 1; }
             }
         }
 
-        CodeBlock { code: "import { Drawer } from \"@tela-ui/common.slint\";\n\n// 窗口根部:\nDrawer {\n    open <=> open;\n    placement: DrawerPlacement.right;\n    title: \"抽屉标题\";\n    Paragraph { text: \"面板主体由子元素提供\"; }\n}"; }
+        TCodeBlock { code: "import { TDrawer } from \"@tela-ui/common.slint\";\n\n// 窗口根部:\nTDrawer {\n    open <=> open;\n    placement: TDrawerPlacement.right;\n    title: \"抽屉标题\";\n    TParagraph { text: \"面板主体由子元素提供\"; }\n}"; }
     }
 
-    // ======================= Popconfirm ====================
+    // ======================= TPopconfirm ====================
     VerticalLayout {
         spacing: 8px;
 
-        Card {
-            title: "气泡确认 Popconfirm";
+        TCard {
+            title: "气泡确认 TPopconfirm";
 
             HorizontalLayout {
                 spacing: 24px;
 
-                // Popconfirm on a Button trigger: auto-open off, toggle from
+                // TPopconfirm on a TButton trigger: auto-open off, toggle from
                 // the button's clicked handler.
-                pc := Popconfirm {
+                pc := TPopconfirm {
                     auto-open: false;
                     text: "确定删除这条数据吗?";
-                    confirm => { TelaMessage.success("已删除"); }
-                    cancel => { TelaMessage.info("已取消"); }
+                    confirm => { TMessage.success("已删除"); }
+                    cancel => { TMessage.info("已取消"); }
 
-                    Button {
-                        theme: Theme.error;
-                        variant: ButtonVariant.outline;
+                    TButton {
+                        theme: TThemeRole.error;
+                        variant: TButtonVariant.outline;
                         text: "删除";
                         clicked => { pc.toggle(); }
                     }
                 }
 
-                // Popconfirm on a static trigger: auto-open handles it.
-                Popconfirm {
+                // TPopconfirm on a static trigger: auto-open handles it.
+                TPopconfirm {
                     text: "确认提交表单吗?";
-                    placement: PopupPlacement.bottom-start;
+                    placement: TPopupPlacement.bottom-start;
 
                     Rectangle {
                         width: 120px;
-                        height: TelaTheme.height-m;
-                        background: TelaTheme.bg-color-secondarycontainer;
-                        border-radius: TelaTheme.radius-default;
+                        height: TTheme.height-m;
+                        background: TTheme.bg-color-secondarycontainer;
+                        border-radius: TTheme.radius-default;
 
                         Text {
                             text: "点击确认";
-                            font-size: TelaTheme.font-size-m;
-                            color: TelaTheme.text-color-secondary;
+                            font-size: TTheme.font-size-m;
+                            color: TTheme.text-color-secondary;
                             horizontal-alignment: center;
                             vertical-alignment: center;
                         }
@@ -243,15 +243,15 @@ export component FeedbackSection inherits VerticalLayout {
             }
         }
 
-        CodeBlock { code: "import { Popconfirm } from \"@tela-ui/common.slint\";\n\nPopconfirm {\n    text: \"确定删除吗?\";\n    confirm => { … }\n    Button { text: \"删除\"; clicked => pc.toggle(); } // auto-open: false\n}"; }
+        TCodeBlock { code: "import { TPopconfirm } from \"@tela-ui/common.slint\";\n\nTPopconfirm {\n    text: \"确定删除吗?\";\n    confirm => { … }\n    TButton { text: \"删除\"; clicked => pc.toggle(); } // auto-open: false\n}"; }
     }
 
-    // ======================== Progress =====================
+    // ======================== TProgress =====================
     VerticalLayout {
         spacing: 8px;
 
-        Card {
-            title: "进度 Progress(拖动滑块实时变化)";
+        TCard {
+            title: "进度 TProgress(拖动滑块实时变化)";
 
             VerticalLayout {
                 spacing: 16px;
@@ -259,37 +259,37 @@ export component FeedbackSection inherits VerticalLayout {
                 HorizontalLayout {
                     spacing: 32px;
 
-                    Progress { value: root.progress-value; theme: Theme.primary; horizontal-stretch: 1; }
-                    Progress { value: 66; theme: Theme.success; horizontal-stretch: 1; }
-                    Progress { value: 30; theme: Theme.warning; horizontal-stretch: 1; }
-                    Progress { value: 90; theme: Theme.error; horizontal-stretch: 1; show-label: false; }
+                    TProgress { value: root.progress-value; theme: TThemeRole.primary; horizontal-stretch: 1; }
+                    TProgress { value: 66; theme: TThemeRole.success; horizontal-stretch: 1; }
+                    TProgress { value: 30; theme: TThemeRole.warning; horizontal-stretch: 1; }
+                    TProgress { value: 90; theme: TThemeRole.error; horizontal-stretch: 1; show-label: false; }
                 }
 
                 HorizontalLayout {
                     spacing: 32px;
-                    Progress { variant: ProgressVariant.circle; value: root.progress-value; theme: Theme.primary; }
-                    Progress { variant: ProgressVariant.circle; value: 66; theme: Theme.success; }
-                    Progress { variant: ProgressVariant.circle; value: 30; theme: Theme.warning; }
-                    Progress { variant: ProgressVariant.circle; value: 100; theme: Theme.error; }
+                    TProgress { variant: TProgressVariant.circle; value: root.progress-value; theme: TThemeRole.primary; }
+                    TProgress { variant: TProgressVariant.circle; value: 66; theme: TThemeRole.success; }
+                    TProgress { variant: TProgressVariant.circle; value: 30; theme: TThemeRole.warning; }
+                    TProgress { variant: TProgressVariant.circle; value: 100; theme: TThemeRole.error; }
                     // Absorbs the leftover row space.
                     Rectangle { }
                 }
 
-                Slider {
+                TSlider {
                     value <=> root.progress-value;
                 }
             }
         }
 
-        CodeBlock { code: "import { Progress } from \"@tela-ui/common.slint\";\n\nProgress { value: 40; theme: Theme.primary; }\nProgress { value: 66; theme: Theme.success; variant: ProgressVariant.circle; }\nProgress { value: 90; theme: Theme.error; show-label: false; }"; }
+        TCodeBlock { code: "import { TProgress } from \"@tela-ui/common.slint\";\n\nTProgress { value: 40; theme: TThemeRole.primary; }\nTProgress { value: 66; theme: TThemeRole.success; variant: TProgressVariant.circle; }\nTProgress { value: 90; theme: TThemeRole.error; show-label: false; }"; }
     }
 
-    // ========================= Result ======================
+    // ========================= TResult ======================
     VerticalLayout {
         spacing: 8px;
 
-        Card {
-            title: "结果页 Result";
+        TCard {
+            title: "结果页 TResult";
 
             HorizontalLayout {
                 spacing: 24px;
@@ -298,13 +298,13 @@ export component FeedbackSection inherits VerticalLayout {
                     width: 380px;
                     height: 260px;
 
-                    Result {
-                        status: ResultStatus.success;
+                    TResult {
+                        status: TResultStatus.success;
                         title: "提交成功";
                         description: "表单已提交,审核结果将以消息通知。";
 
-                        Button { text: "继续填写"; }
-                        Button { theme: Theme.primary; text: "查看详情"; }
+                        TButton { text: "继续填写"; }
+                        TButton { theme: TThemeRole.primary; text: "查看详情"; }
                     }
                 }
 
@@ -312,13 +312,13 @@ export component FeedbackSection inherits VerticalLayout {
                     width: 380px;
                     height: 260px;
 
-                    Result {
-                        status: ResultStatus.error;
+                    TResult {
+                        status: TResultStatus.error;
                         title: "提交失败";
                         description: "网络连接失败,请检查网络后重试。";
 
-                        Button { variant: ButtonVariant.outline; text: "返回修改"; }
-                        Button { theme: Theme.error; text: "重新提交"; }
+                        TButton { variant: TButtonVariant.outline; text: "返回修改"; }
+                        TButton { theme: TThemeRole.error; text: "重新提交"; }
                     }
                 }
 
@@ -326,6 +326,6 @@ export component FeedbackSection inherits VerticalLayout {
             }
         }
 
-        CodeBlock { code: "import { Result } from \"@tela-ui/common.slint\";\n\nResult {\n    status: ResultStatus.success;\n    title: \"提交成功\";\n    description: \"表单已提交。\";\n    Button { text: \"查看详情\"; } // 子元素作为操作区\n}"; }
+        TCodeBlock { code: "import { TResult } from \"@tela-ui/common.slint\";\n\nTResult {\n    status: TResultStatus.success;\n    title: \"提交成功\";\n    description: \"表单已提交。\";\n    TButton { text: \"查看详情\"; } // 子元素作为操作区\n}"; }
     }
 }

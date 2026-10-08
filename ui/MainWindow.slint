@@ -1,12 +1,12 @@
 // Tela UI component gallery — showcases the whole tela-ui library.
-// The gallery itself runs on BorderlessWindow: its branded title bar
+// The gallery itself runs on TBorderlessWindow: its branded title bar
 // (logo + title at the top-left, min/max/close at the right) owns the top
-// edge; the collapsible SideNav below switches pages and carries the
+// edge; the collapsible TSideNav below switches pages and carries the
 // dark-mode toggle at its bottom edge.
 
-import { TelaTheme, TelaThemePreference } from "@tela-ui/theme.slint";
-import { BorderlessWindow, TIconSet, Paragraph, Button, ButtonVariant } from "@tela-ui/base.slint";
-import { SideNav, SideNavItem, SideNavTogglePosition, Dialog, Drawer, DrawerPlacement, MessageOverlay, TelaMessage, NotificationOverlay, TooltipOverlay, BackTop } from "@tela-ui/common.slint";
+import { TTheme,  TThemePreference } from "@tela-ui/theme.slint";
+import { TBorderlessWindow, TIconSet, TParagraph, TButton, TButtonVariant } from "@tela-ui/base.slint";
+import { TSideNav, TSideNavItem, TSideNavTogglePosition, TDialog, TDrawer, TDrawerPlacement, TMessageOverlay, TMessage, TNotificationOverlay, TTooltipOverlay, TBackTop } from "@tela-ui/common.slint";
 import { ScrollView } from "std-widgets.slint";
 
 import { BasicsSection } from "pages/basics.slint";
@@ -17,7 +17,7 @@ import { NavigationSection } from "pages/navigation.slint";
 import { ExperimentalSection } from "pages/experimental.slint";
 import { SettingsSection } from "pages/settings.slint";
 
-export component MainWindow inherits BorderlessWindow {
+export component MainWindow inherits TBorderlessWindow {
     title: "Tela UI";
     // OS-level window icon (taskbar etc.): the exported LayoutDashboard logo.
     icon: @image-url("assets/logo.svg");
@@ -25,12 +25,12 @@ export component MainWindow inherits BorderlessWindow {
     header-height: 40px;
     preferred-width: 1200px;
     preferred-height: 800px;
-    window-background: TelaTheme.bg-color-page;
+    window-background: TTheme.bg-color-page;
 
     // ------------------------------------------------------------------
     // Demo state
     // ------------------------------------------------------------------
-    in property <[SideNavItem]> group-items: [
+    in property <[TSideNavItem]> group-items: [
         { label: "基础组件", value: "basics", icon: TIconSet.LayoutDashboard },
         { label: "数据展示", value: "display", icon: TIconSet.Image },
         { label: "数据录入", value: "form", icon: TIconSet.Pencil },
@@ -41,7 +41,7 @@ export component MainWindow inherits BorderlessWindow {
     in-out property <string> group-value: "basics";
     in-out property <bool> dialog-open: false;
     in-out property <bool> drawer-open: false;
-    in-out property <DrawerPlacement> drawer-placement: DrawerPlacement.right;
+    in-out property <TDrawerPlacement> drawer-placement: TDrawerPlacement.right;
 
     VerticalLayout {
         HorizontalLayout {
@@ -49,19 +49,19 @@ export component MainWindow inherits BorderlessWindow {
             // dark-mode switch above the settings entry, with TDesign's fold
             // button at the very bottom; the switch's label names the mode
             // clicking moves to (moon → dark, sun → light).
-            SideNav {
-                toggle-position: SideNavTogglePosition.bottom;
+            TSideNav {
+                toggle-position: TSideNavTogglePosition.bottom;
                 footer-items: [
                     {
-                        icon: TelaTheme.is-dark ? TIconSet.Sun : TIconSet.Moon,
-                        label: TelaTheme.is-dark ? "浅色模式" : "深色模式",
+                        icon: TTheme.is-dark ? TIconSet.Sun : TIconSet.Moon,
+                        label: TTheme.is-dark ? "浅色模式" : "深色模式",
                     },
                     { icon: TIconSet.Settings, label: "设置", value: "settings" },
                 ];
                 footer-clicked(item) => {
-                    TelaTheme.preference = TelaTheme.is-dark
-                        ? TelaThemePreference.light
-                        : TelaThemePreference.dark;
+                    TTheme.preference = TTheme.is-dark
+                        ? TThemePreference.light
+                        : TThemePreference.dark;
                 }
                 items: root.group-items;
                 current-value <=> root.group-value;
@@ -97,7 +97,7 @@ export component MainWindow inherits BorderlessWindow {
 
                 // Page-level back-to-top: appears once the gallery page is
                 // scrolled past the threshold.
-                BackTop {
+                TBackTop {
                     x: parent.width - self.width - 24px;
                     y: parent.height - self.height - 24px;
                     content-y <=> page-scroll.content-y;
@@ -106,34 +106,34 @@ export component MainWindow inherits BorderlessWindow {
         }
     }
 
-    Dialog {
+    TDialog {
         open <=> root.dialog-open;
         title: "对话框标题";
         content: "这是 Tela UI 的对话框组件,用于确认操作或展示重要信息。点击遮罩层可关闭。";
-        accepted => { TelaMessage.success("已确认操作"); }
-        canceled => { TelaMessage.info("已取消操作"); }
+        accepted => { TMessage.success("已确认操作"); }
+        canceled => { TMessage.info("已取消操作"); }
     }
 
-    Drawer {
+    TDrawer {
         open <=> root.drawer-open;
         placement <=> root.drawer-placement;
         title: "抽屉标题";
 
-        Paragraph { text: "这是 Tela UI 的抽屉组件,从窗口边缘滑出,适合放置表单、详情等较大面积的临时内容。"; }
-        Button {
-            variant: ButtonVariant.outline;
+        TParagraph { text: "这是 Tela UI 的抽屉组件,从窗口边缘滑出,适合放置表单、详情等较大面积的临时内容。"; }
+        TButton {
+            variant: TButtonVariant.outline;
             text: "关闭抽屉";
             clicked => { root.drawer-open = false; }
         }
     }
 
-    MessageOverlay { }
+    TMessageOverlay { }
 
-    NotificationOverlay { }
+    TNotificationOverlay { }
 
-    TooltipOverlay { }
+    TTooltipOverlay { }
 }
 
 // Re-export the theme global so hosts can control it from Rust:
-//   TelaTheme::get(ui).set_preference(TelaThemePreference::Dark);
-export { TelaTheme, TelaThemePreference }
+//   TTheme::get(ui).set_preference(TThemePreference::Dark);
+export { TTheme, TThemePreference }

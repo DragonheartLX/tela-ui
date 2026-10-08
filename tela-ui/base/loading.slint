@@ -1,13 +1,13 @@
-// Tela UI — Loading
+// Tela UI — TLoading
 //
-// Spinning arc loader (indeterminate). Used by Button and as a standalone
+// Spinning arc loader (indeterminate). Used by TButton and as a standalone
 // indicator. Sizes: 16px default; use 24px/32px for standalone spinners.
 
-import { TelaTheme } from "../theme.slint";
-import { Theme } from "../structs/enums.slint";
+import { TTheme } from "../theme.slint";
+import { TThemeRole } from "../structs/enums.slint";
 
-export component LoadingSpinner inherits Rectangle {
-    in property <brush> spinner-color: TelaTheme.brand-color;
+export component TLoadingSpinner inherits Rectangle {
+    in property <brush> spinner-color: TTheme.brand-color;
     in-out property <length> size: 16px;
     // Stroke width in 24-grid units, scaled to `size` unless absolute.
     in-out property <float> stroke-width: 2.0;
@@ -60,36 +60,36 @@ export component LoadingSpinner inherits Rectangle {
     }
 }
 
-// Loading indicator with an optional label beside the spinner. The root is
-// a HorizontalLayout (like RadioGroup) so its preferred size — spinner plus
+// TLoading indicator with an optional label beside the spinner. The root is
+// a HorizontalLayout (like TRadioGroup) so its preferred size — spinner plus
 // label — propagates to surrounding layouts correctly; a Rectangle root's
 // inner row reported a zero preferred width and siblings overlapped. The
 // spinner sits in a height-free Rectangle (stretching with the row) and is
 // centered inside it, so ring and label keep one center line even when a
 // taller row stretches the layout.
-export component Loading inherits HorizontalLayout {
+export component TLoading inherits HorizontalLayout {
     in property <string> text;
-    in property <Theme> theme: Theme.primary;
+    in property <TThemeRole> theme: TThemeRole.primary;
     in-out property <length> size: 24px;
 
-    spacing: TelaTheme.spacing-2;
+    spacing: TTheme.spacing-2;
 
     Rectangle {
         // Hugs the circle on the main axis so the label gap is exactly
         // `spacing`; stretches on the cross axis to center the ring.
         width: root.size;
 
-        LoadingSpinner {
+        TLoadingSpinner {
             y: (parent.height - self.height) / 2;
-            spinner-color: TelaTheme.theme-color(root.theme);
+            spinner-color: TTheme.theme-color(root.theme);
             size: root.size;
         }
     }
 
     if root.text != "": Text {
         text: root.text;
-        font-size: TelaTheme.font-size-m;
-        color: TelaTheme.text-color-secondary;
+        font-size: TTheme.font-size-m;
+        color: TTheme.text-color-secondary;
         vertical-alignment: center;
     }
 }

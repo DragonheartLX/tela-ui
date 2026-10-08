@@ -1,35 +1,35 @@
-// Tela UI — Button
+// Tela UI — TButton
 //
 // TDesign button: theme × variant × size, optional icon, loading and
 // disabled states, square (icon button) / round shapes, block width.
 //
-//   theme   : Theme (default/primary/success/warning/error)
-//   variant : ButtonVariant (base solid / outline / text)
-//   size    : Size (small / medium / large)
-//   shape   : ButtonShape (rectangle / square icon button / round)
+//   theme   : TTheme (default/primary/success/warning/error)
+//   variant : TButtonVariant (base solid / outline / text)
+//   size    : TSize (small / medium / large)
+//   shape   : TButtonShape (rectangle / square icon button / round)
 
-import { TelaTheme } from "../theme.slint";
-import { Icon } from "icon/icon.slint";
-import { LoadingSpinner } from "loading.slint";
+import { TTheme } from "../theme.slint";
+import { TIcon } from "icon/icon.slint";
+import { TLoadingSpinner } from "loading.slint";
 import { TIconData } from "icon/data.slint";
-import { Theme, Size } from "../structs/enums.slint";
-export enum ButtonVariant {
+import { TThemeRole,  TSize } from "../structs/enums.slint";
+export enum TButtonVariant {
     base,
     outline,
     text,
 }
 
-export enum ButtonShape {
+export enum TButtonShape {
     rectangle,
     square,
     round,
 }
 
-export component Button inherits Rectangle {
-    in property <Theme> theme: Theme.default;
-    in property <ButtonVariant> variant: ButtonVariant.base;
-    in property <Size> size: Size.medium;
-    in property <ButtonShape> shape: ButtonShape.rectangle;
+export component TButton inherits Rectangle {
+    in property <TThemeRole> theme: TThemeRole.default;
+    in property <TButtonVariant> variant: TButtonVariant.base;
+    in property <TSize> size: TSize.medium;
+    in property <TButtonShape> shape: TButtonShape.rectangle;
     in property <bool> block: false;
     in property <string> text;
     in property <TIconData> icon;
@@ -38,75 +38,75 @@ export component Button inherits Rectangle {
 
     callback clicked();
 
-    // Size metrics (one dispatch, shared with Select / Link).
-    private property <length> h: TelaTheme.size-height(size);
-    private property <length> fs: TelaTheme.size-font(size);
-    private property <length> pad-lr: TelaTheme.size-padding(size);
+    // TSize metrics (one dispatch, shared with TSelect / TLink).
+    private property <length> h: TTheme.size-height(size);
+    private property <length> fs: TTheme.size-font(size);
+    private property <length> pad-lr: TTheme.size-padding(size);
 
     // Per-role colors for the current theme: the default theme renders
     // neutral grays, any other theme uses its color ramp. Keeping each
     // dispatch here lets the rest binding and `states` below stay flat.
-    private property <color> fill: theme == Theme.default ? TelaTheme.bg-color-component : TelaTheme.theme-color(theme);
-    private property <color> fill-hover: theme == Theme.default ? TelaTheme.bg-color-component-hover : TelaTheme.theme-color-hover(theme);
-    private property <color> fill-active: theme == Theme.default ? TelaTheme.bg-color-component-active : TelaTheme.theme-color-active(theme);
-    private property <color> fill-disabled: theme == Theme.default ? TelaTheme.bg-color-component-disabled : TelaTheme.theme-color-disabled(theme);
-    private property <color> on-fill: theme == Theme.default ? TelaTheme.text-color-primary : TelaTheme.text-color-anti;
-    private property <color> on-fill-disabled: theme == Theme.default ? TelaTheme.text-color-disabled : TelaTheme.text-color-anti;
+    private property <color> fill: theme == TThemeRole.default ? TTheme.bg-color-component : TTheme.theme-color(theme);
+    private property <color> fill-hover: theme == TThemeRole.default ? TTheme.bg-color-component-hover : TTheme.theme-color-hover(theme);
+    private property <color> fill-active: theme == TThemeRole.default ? TTheme.bg-color-component-active : TTheme.theme-color-active(theme);
+    private property <color> fill-disabled: theme == TThemeRole.default ? TTheme.bg-color-component-disabled : TTheme.theme-color-disabled(theme);
+    private property <color> on-fill: theme == TThemeRole.default ? TTheme.text-color-primary : TTheme.text-color-anti;
+    private property <color> on-fill-disabled: theme == TThemeRole.default ? TTheme.text-color-disabled : TTheme.text-color-anti;
 
     // Subtle tinted fills for the outline / text variants.
-    private property <color> tint-hover: theme == Theme.default ? transparent : TelaTheme.theme-color-light-hover(theme);
-    private property <color> tint-pressed: theme == Theme.default ? transparent : TelaTheme.theme-color-light(theme);
-    private property <color> text-fill-hover: theme == Theme.default ? TelaTheme.bg-color-component : TelaTheme.theme-color-light-hover(theme);
+    private property <color> tint-hover: theme == TThemeRole.default ? transparent : TTheme.theme-color-light-hover(theme);
+    private property <color> tint-pressed: theme == TThemeRole.default ? transparent : TTheme.theme-color-light(theme);
+    private property <color> text-fill-hover: theme == TThemeRole.default ? TTheme.bg-color-component : TTheme.theme-color-light-hover(theme);
 
     // Label and border colors for the outline / text variants.
-    private property <color> text-rest: theme == Theme.default ? TelaTheme.text-color-primary : TelaTheme.theme-color(theme);
-    private property <color> text-hover: theme == Theme.default ? TelaTheme.brand-color : TelaTheme.theme-color-hover(theme);
-    private property <color> text-pressed: theme == Theme.default ? TelaTheme.brand-color-active : TelaTheme.theme-color-active(theme);
-    private property <color> text-disabled: theme == Theme.default ? TelaTheme.text-color-disabled : TelaTheme.theme-color-disabled(theme);
-    private property <color> border-rest: theme == Theme.default ? TelaTheme.component-border : TelaTheme.theme-color(theme);
-    private property <color> border-hover: theme == Theme.default ? TelaTheme.brand-color : TelaTheme.theme-color-hover(theme);
-    private property <color> border-pressed: theme == Theme.default ? TelaTheme.brand-color-active : TelaTheme.theme-color-active(theme);
-    private property <color> border-disabled: theme == Theme.default ? TelaTheme.border-level-2-color : TelaTheme.theme-color-disabled(theme);
+    private property <color> text-rest: theme == TThemeRole.default ? TTheme.text-color-primary : TTheme.theme-color(theme);
+    private property <color> text-hover: theme == TThemeRole.default ? TTheme.brand-color : TTheme.theme-color-hover(theme);
+    private property <color> text-pressed: theme == TThemeRole.default ? TTheme.brand-color-active : TTheme.theme-color-active(theme);
+    private property <color> text-disabled: theme == TThemeRole.default ? TTheme.text-color-disabled : TTheme.theme-color-disabled(theme);
+    private property <color> border-rest: theme == TThemeRole.default ? TTheme.component-border : TTheme.theme-color(theme);
+    private property <color> border-hover: theme == TThemeRole.default ? TTheme.brand-color : TTheme.theme-color-hover(theme);
+    private property <color> border-pressed: theme == TThemeRole.default ? TTheme.brand-color-active : TTheme.theme-color-active(theme);
+    private property <color> border-disabled: theme == TThemeRole.default ? TTheme.border-level-2-color : TTheme.theme-color-disabled(theme);
 
     // Rest state; overridden by the `states` below.
-    private property <brush> bg: variant == ButtonVariant.base ? root.fill : transparent;
-    private property <brush> content-color: variant == ButtonVariant.base ? root.on-fill : root.text-rest;
-    private property <brush> border-brush: variant == ButtonVariant.outline ? root.border-rest : transparent;
+    private property <brush> bg: variant == TButtonVariant.base ? root.fill : transparent;
+    private property <brush> content-color: variant == TButtonVariant.base ? root.on-fill : root.text-rest;
+    private property <brush> border-brush: variant == TButtonVariant.outline ? root.border-rest : transparent;
 
     background: bg;
-    border-width: variant == ButtonVariant.outline ? 1px : 0;
+    border-width: variant == TButtonVariant.outline ? 1px : 0;
     border-color: border-brush;
-    border-radius: shape == ButtonShape.round ? TelaTheme.radius-round : TelaTheme.radius-default;
+    border-radius: shape == TButtonShape.round ? TTheme.radius-round : TTheme.radius-default;
     height: h;
-    width: shape == ButtonShape.square ? h : max(h, content.preferred-width + pad-lr * 2);
+    width: shape == TButtonShape.square ? h : max(h, content.preferred-width + pad-lr * 2);
     // Block buttons absorb the extra space of the surrounding layout.
     horizontal-stretch: block ? 1 : 0;
-    animate bg { duration: TelaTheme.duration-fast; }
-    animate content-color { duration: TelaTheme.duration-fast; }
-    animate border-brush { duration: TelaTheme.duration-fast; }
+    animate bg { duration: TTheme.duration-fast; }
+    animate content-color { duration: TTheme.duration-fast; }
+    animate border-brush { duration: TTheme.duration-fast; }
 
     // Later states win over earlier ones.
     states [
         hovered when touch.has-hover: {
-            bg: variant == ButtonVariant.base ? root.fill-hover
-                : variant == ButtonVariant.outline ? root.tint-hover
+            bg: variant == TButtonVariant.base ? root.fill-hover
+                : variant == TButtonVariant.outline ? root.tint-hover
                 : root.text-fill-hover;
-            content-color: variant == ButtonVariant.base ? root.on-fill : root.text-hover;
-            border-brush: variant == ButtonVariant.outline ? root.border-hover : transparent;
+            content-color: variant == TButtonVariant.base ? root.on-fill : root.text-hover;
+            border-brush: variant == TButtonVariant.outline ? root.border-hover : transparent;
         }
 
         pressed when touch.pressed: {
-            bg: variant == ButtonVariant.base ? root.fill-active
-                : variant == ButtonVariant.outline ? transparent
+            bg: variant == TButtonVariant.base ? root.fill-active
+                : variant == TButtonVariant.outline ? transparent
                 : root.tint-pressed;
-            content-color: variant == ButtonVariant.base ? root.on-fill : root.text-pressed;
-            border-brush: variant == ButtonVariant.outline ? root.border-pressed : transparent;
+            content-color: variant == TButtonVariant.base ? root.on-fill : root.text-pressed;
+            border-brush: variant == TButtonVariant.outline ? root.border-pressed : transparent;
         }
 
         disabled when root.disabled: {
-            bg: variant == ButtonVariant.base ? root.fill-disabled : transparent;
-            content-color: variant == ButtonVariant.base ? root.on-fill-disabled : root.text-disabled;
-            border-brush: variant == ButtonVariant.outline ? root.border-disabled : transparent;
+            bg: variant == TButtonVariant.base ? root.fill-disabled : transparent;
+            content-color: variant == TButtonVariant.base ? root.on-fill-disabled : root.text-disabled;
+            border-brush: variant == TButtonVariant.outline ? root.border-disabled : transparent;
         }
     ]
 
@@ -123,15 +123,15 @@ export component Button inherits Rectangle {
         y: (parent.height - self.height) / 2;
         width: self.preferred-width;
         height: self.preferred-height;
-        spacing: TelaTheme.spacing-2;
+        spacing: TTheme.spacing-2;
 
-        if root.loading: LoadingSpinner {
+        if root.loading: TLoadingSpinner {
             y: (parent.height - self.height) / 2;
             size: root.fs + 2px;
             spinner-color: root.content-color;
         }
 
-        if !root.loading && root.icon.paths.length > 0: Icon {
+        if !root.loading && root.icon.paths.length > 0: TIcon {
             y: (parent.height - self.height) / 2;
             icon: root.icon;
             size: root.fs + 2px;
@@ -141,7 +141,7 @@ export component Button inherits Rectangle {
         if root.text != "": Text {
             text: root.text;
             font-size: root.fs;
-            font-weight: TelaTheme.font-weight-regular;
+            font-weight: TTheme.font-weight-regular;
             color: root.content-color;
             vertical-alignment: center;
         }

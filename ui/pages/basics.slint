@@ -1,70 +1,70 @@
-// Demo section: 基础组件 (Button / Icon / Link / Typography / Divider /
-// Loading / Kbd), 一个组件一张卡.
+// Demo section: 基础组件 (TButton / TIcon / TLink / Typography / TDivider /
+// TLoading / TKbd), 一个组件一张卡.
 
-import { TelaTheme, Theme, Size } from "@tela-ui/theme.slint";
-import { Button, ButtonVariant, ButtonShape, Link, Icon, TIconSet, Heading, Paragraph, Caption, Kbd, Divider, DividerAlign, Loading } from "@tela-ui/base.slint";
-import { Card , CodeBlock} from "@tela-ui/common.slint";
+import { TTheme,  TThemeRole,  TSize } from "@tela-ui/theme.slint";
+import { TButton, TButtonVariant, TButtonShape, TLink, TIcon, TIconSet, THeading, TParagraph, TCaption, TKbd, TDivider, TDividerAlign, TLoading } from "@tela-ui/base.slint";
+import { TCard , TCodeBlock} from "@tela-ui/common.slint";
 
 export component BasicsSection inherits VerticalLayout {
     spacing: 28px;
 
-    // ======================= Button =======================
+    // ======================= TButton =======================
     VerticalLayout {
         spacing: 8px;
 
-        Card {
-            title: "按钮 Button";
+        TCard {
+            title: "按钮 TButton";
 
             VerticalLayout {
                 spacing: 16px;
 
                 HorizontalLayout {
                     spacing: 12px;
-                    Button { text: "默认按钮"; }
-                    Button { theme: Theme.primary; text: "主要按钮"; }
-                    Button { theme: Theme.success; text: "成功按钮"; }
-                    Button { theme: Theme.warning; text: "警告按钮"; }
-                    Button { theme: Theme.error; text: "危险按钮"; }
+                    TButton { text: "默认按钮"; }
+                    TButton { theme: TThemeRole.primary; text: "主要按钮"; }
+                    TButton { theme: TThemeRole.success; text: "成功按钮"; }
+                    TButton { theme: TThemeRole.warning; text: "警告按钮"; }
+                    TButton { theme: TThemeRole.error; text: "危险按钮"; }
                     // Absorbs the leftover row space.
                     Rectangle { }
                 }
 
                 HorizontalLayout {
                     spacing: 12px;
-                    Button { variant: ButtonVariant.outline; text: "描边按钮"; }
-                    Button { variant: ButtonVariant.outline; theme: Theme.primary; text: "描边按钮"; }
-                    Button { variant: ButtonVariant.outline; theme: Theme.error; text: "描边按钮"; }
-                    Button { variant: ButtonVariant.text; text: "文字按钮"; }
-                    Button { variant: ButtonVariant.text; theme: Theme.primary; text: "文字按钮"; }
-                    Button { variant: ButtonVariant.text; theme: Theme.error; text: "文字按钮"; }
+                    TButton { variant: TButtonVariant.outline; text: "描边按钮"; }
+                    TButton { variant: TButtonVariant.outline; theme: TThemeRole.primary; text: "描边按钮"; }
+                    TButton { variant: TButtonVariant.outline; theme: TThemeRole.error; text: "描边按钮"; }
+                    TButton { variant: TButtonVariant.text; text: "文字按钮"; }
+                    TButton { variant: TButtonVariant.text; theme: TThemeRole.primary; text: "文字按钮"; }
+                    TButton { variant: TButtonVariant.text; theme: TThemeRole.error; text: "文字按钮"; }
                     Rectangle { }
                 }
 
                 HorizontalLayout {
                     spacing: 12px;
-                    Button { size: Size.small; theme: Theme.primary; text: "小按钮"; }
-                    Button { size: Size.medium; theme: Theme.primary; text: "中按钮"; }
-                    Button { size: Size.large; theme: Theme.primary; text: "大按钮"; }
-                    Button { shape: ButtonShape.square; theme: Theme.primary; icon: TIconSet.Search; }
-                    Button { shape: ButtonShape.round; theme: Theme.primary; icon: TIconSet.Pencil; text: "圆形"; }
-                    Button { theme: Theme.primary; icon: TIconSet.Download; text: "下载"; }
-                    Button { theme: Theme.primary; text: "加载中"; loading: true; }
-                    Button { theme: Theme.primary; text: "禁用状态"; disabled: true; }
-                    Button { variant: ButtonVariant.outline; text: "禁用状态"; disabled: true; }
+                    TButton { size: TSize.small; theme: TThemeRole.primary; text: "小按钮"; }
+                    TButton { size: TSize.medium; theme: TThemeRole.primary; text: "中按钮"; }
+                    TButton { size: TSize.large; theme: TThemeRole.primary; text: "大按钮"; }
+                    TButton { shape: TButtonShape.square; theme: TThemeRole.primary; icon: TIconSet.Search; }
+                    TButton { shape: TButtonShape.round; theme: TThemeRole.primary; icon: TIconSet.Pencil; text: "圆形"; }
+                    TButton { theme: TThemeRole.primary; icon: TIconSet.Download; text: "下载"; }
+                    TButton { theme: TThemeRole.primary; text: "加载中"; loading: true; }
+                    TButton { theme: TThemeRole.primary; text: "禁用状态"; disabled: true; }
+                    TButton { variant: TButtonVariant.outline; text: "禁用状态"; disabled: true; }
                     Rectangle { }
                 }
             }
         }
 
-        CodeBlock { code: "import { Button } from \"@tela-ui/base.slint\";\n\nButton { text: \"主要按钮\"; theme: Theme.primary; }\nButton { text: \"描边按钮\"; variant: ButtonVariant.outline; }\nButton { text: \"下载\"; theme: Theme.primary; icon: TIconSet.Download; }\nButton { text: \"加载中\"; theme: Theme.primary; loading: true; }"; }
+        TCodeBlock { code: "import { TButton } from \"@tela-ui/base.slint\";\n\nTButton { text: \"主要按钮\"; theme: TThemeRole.primary; }\nTButton { text: \"描边按钮\"; variant: TButtonVariant.outline; }\nTButton { text: \"下载\"; theme: TThemeRole.primary; icon: TIconSet.Download; }\nTButton { text: \"加载中\"; theme: TThemeRole.primary; loading: true; }"; }
     }
 
-    // ======================== Icon ========================
+    // ======================== TIcon ========================
     VerticalLayout {
         spacing: 8px;
 
-        Card {
-            title: "图标 Icon";
+        TCard {
+            title: "图标 TIcon";
 
             FlexboxLayout {
                 spacing: 20px;
@@ -81,113 +81,113 @@ export component BasicsSection inherits VerticalLayout {
                     TIconSet.Image, TIconSet.House, TIconSet.Lock,
                     TIconSet.Mail, TIconSet.Ellipsis, TIconSet.Moon,
                     TIconSet.Sun, TIconSet.StarFill, TIconSet.Inbox,
-                ]: Icon {
+                ]: TIcon {
                     icon: ic;
                     size: 20px;
-                    icon-color: TelaTheme.text-color-primary;
+                    icon-color: TTheme.text-color-primary;
                 }
             }
         }
 
-        CodeBlock { code: "import { Icon, TIconSet } from \"@tela-ui/base.slint\";\n\nIcon { icon: TIconSet.Search; size: 20px; }\n// 图标是数据 (TIconData): 传 TIconSet 的内置字形或自构 TIconData。"; }
+        TCodeBlock { code: "import { TIcon, TIconSet } from \"@tela-ui/base.slint\";\n\nTIcon { icon: TIconSet.Search; size: 20px; }\n// 图标是数据 (TIconData): 传 TIconSet 的内置字形或自构 TIconData。"; }
     }
 
-    // ========================= Link =======================
+    // ========================= TLink =======================
     VerticalLayout {
         spacing: 8px;
 
-        Card {
-            title: "链接 Link";
+        TCard {
+            title: "链接 TLink";
 
             HorizontalLayout {
                 spacing: 24px;
-                Link { text: "默认链接"; }
-                Link { theme: Theme.success; text: "成功链接"; underline: true; }
-                Link { theme: Theme.warning; text: "警告链接"; }
-                Link { theme: Theme.error; text: "危险链接"; }
-                Link { text: "禁用链接"; disabled: true; }
+                TLink { text: "默认链接"; }
+                TLink { theme: TThemeRole.success; text: "成功链接"; underline: true; }
+                TLink { theme: TThemeRole.warning; text: "警告链接"; }
+                TLink { theme: TThemeRole.error; text: "危险链接"; }
+                TLink { text: "禁用链接"; disabled: true; }
                 // Absorbs the leftover row space.
                 Rectangle { }
             }
         }
 
-        CodeBlock { code: "import { Link } from \"@tela-ui/base.slint\";\n\nLink { text: \"默认链接\"; }\nLink { text: \"成功链接\"; theme: Theme.success; underline: true; }"; }
+        TCodeBlock { code: "import { TLink } from \"@tela-ui/base.slint\";\n\nTLink { text: \"默认链接\"; }\nTLink { text: \"成功链接\"; theme: TThemeRole.success; underline: true; }"; }
     }
 
     // ==================== Typography ======================
     VerticalLayout {
         spacing: 8px;
 
-        Card {
+        TCard {
             title: "排版 Typography";
 
             VerticalLayout {
                 spacing: 8px;
 
-                Heading { level: 1; text: "一级标题 Heading 1"; }
-                Heading { level: 2; text: "二级标题 Heading 2"; }
-                Heading { level: 3; text: "三级标题 Heading 3"; }
-                Heading { level: 4; text: "四级标题 Heading 4"; }
-                Heading { level: 5; text: "五级标题 Heading 5"; }
-                Paragraph {
+                THeading { level: 1; text: "一级标题 THeading 1"; }
+                THeading { level: 2; text: "二级标题 THeading 2"; }
+                THeading { level: 3; text: "三级标题 THeading 3"; }
+                THeading { level: 4; text: "四级标题 THeading 4"; }
+                THeading { level: 5; text: "五级标题 THeading 5"; }
+                TParagraph {
                     width: 640px;
                     text: "Tela UI 是一套参考 TDesign 设计规范的 Slint 第三方组件库,提供主题令牌、基础组件与常用组件,支持亮暗双主题实时切换。";
                 }
-                Caption { text: "这是辅助说明文字(Caption)。"; }
+                TCaption { text: "这是辅助说明文字(TCaption)。"; }
             }
         }
 
-        CodeBlock { code: "import { Heading, Paragraph, Caption } from \"@tela-ui/base.slint\";\n\nHeading { level: 1; text: \"一级标题\"; }\nParagraph { text: \"正文内容,wrap: word-wrap 自动换行。\"; }\nCaption { text: \"辅助说明文字\"; }"; }
+        TCodeBlock { code: "import { THeading, TParagraph, TCaption } from \"@tela-ui/base.slint\";\n\nTHeading { level: 1; text: \"一级标题\"; }\nTParagraph { text: \"正文内容,wrap: word-wrap 自动换行。\"; }\nTCaption { text: \"辅助说明文字\"; }"; }
     }
 
-    // ======================= Divider ======================
+    // ======================= TDivider ======================
     VerticalLayout {
         spacing: 8px;
 
-        Card {
-            title: "分割线 Divider";
+        TCard {
+            title: "分割线 TDivider";
 
             VerticalLayout {
                 spacing: 4px;
 
-                Divider { text: "居中文字"; }
-                Divider { text: "左方文字"; align: DividerAlign.left; }
-                Divider { text: "右方文字"; align: DividerAlign.right; }
-                Divider { }
+                TDivider { text: "居中文字"; }
+                TDivider { text: "左方文字"; align: TDividerAlign.left; }
+                TDivider { text: "右方文字"; align: TDividerAlign.right; }
+                TDivider { }
             }
         }
 
-        CodeBlock { code: "import { Divider } from \"@tela-ui/base.slint\";\n\nDivider { text: \"居中文字\"; }\nDivider { text: \"左方文字\"; align: DividerAlign.left; }\nDivider { orientation: Orientation.vertical; }"; }
+        TCodeBlock { code: "import { TDivider } from \"@tela-ui/base.slint\";\n\nTDivider { text: \"居中文字\"; }\nTDivider { text: \"左方文字\"; align: TDividerAlign.left; }\nTDivider { orientation: Orientation.vertical; }"; }
     }
 
-    // ======================= Loading ======================
+    // ======================= TLoading ======================
     VerticalLayout {
         spacing: 8px;
 
-        Card {
-            title: "加载 Loading";
+        TCard {
+            title: "加载 TLoading";
 
             HorizontalLayout {
                 spacing: 28px;
                 // stretch: 0 — the label's Text leaves the layout's max
                 // width unbounded, so the row would otherwise stretch them.
-                Loading { size: 16px; horizontal-stretch: 0; }
-                Loading { size: 24px; text: "加载中…"; horizontal-stretch: 0; }
-                Loading { size: 32px; theme: Theme.success; text: "上传中…"; horizontal-stretch: 0; }
+                TLoading { size: 16px; horizontal-stretch: 0; }
+                TLoading { size: 24px; text: "加载中…"; horizontal-stretch: 0; }
+                TLoading { size: 32px; theme: TThemeRole.success; text: "上传中…"; horizontal-stretch: 0; }
                 // Absorbs the leftover row space.
                 Rectangle { }
             }
         }
 
-        CodeBlock { code: "import { Loading } from \"@tela-ui/base.slint\";\n\nLoading { size: 24px; text: \"加载中…\"; }\nLoading { size: 32px; theme: Theme.success; }"; }
+        TCodeBlock { code: "import { TLoading } from \"@tela-ui/base.slint\";\n\nTLoading { size: 24px; text: \"加载中…\"; }\nTLoading { size: 32px; theme: TThemeRole.success; }"; }
     }
 
-    // ========================= Kbd ========================
+    // ========================= TKbd ========================
     VerticalLayout {
         spacing: 8px;
 
-        Card {
-            title: "键位 Kbd";
+        TCard {
+            title: "键位 TKbd";
 
             VerticalLayout {
                 spacing: 8px;
@@ -195,35 +195,35 @@ export component BasicsSection inherits VerticalLayout {
                 HorizontalLayout {
                     spacing: 8px;
 
-                    Text { text: "单键"; font-size: TelaTheme.font-size-m; color: TelaTheme.text-color-secondary; vertical-alignment: center; }
-                    Kbd { text: "Esc"; }
-                    Kbd { text: "Tab"; }
-                    Kbd { text: "Enter"; }
+                    Text { text: "单键"; font-size: TTheme.font-size-m; color: TTheme.text-color-secondary; vertical-alignment: center; }
+                    TKbd { text: "Esc"; }
+                    TKbd { text: "Tab"; }
+                    TKbd { text: "Enter"; }
                     Rectangle { }
                 }
 
                 HorizontalLayout {
                     spacing: 8px;
 
-                    Text { text: "组合"; font-size: TelaTheme.font-size-m; color: TelaTheme.text-color-secondary; vertical-alignment: center; }
-                    Kbd { keys: ["Ctrl", "C"]; }
-                    Text { text: "复制"; font-size: TelaTheme.font-size-m; color: TelaTheme.text-color-secondary; vertical-alignment: center; }
-                    Kbd { keys: ["Ctrl", "Shift", "V"]; }
-                    Text { text: "粘贴为纯文本"; font-size: TelaTheme.font-size-m; color: TelaTheme.text-color-secondary; vertical-alignment: center; }
+                    Text { text: "组合"; font-size: TTheme.font-size-m; color: TTheme.text-color-secondary; vertical-alignment: center; }
+                    TKbd { keys: ["Ctrl", "C"]; }
+                    Text { text: "复制"; font-size: TTheme.font-size-m; color: TTheme.text-color-secondary; vertical-alignment: center; }
+                    TKbd { keys: ["Ctrl", "Shift", "V"]; }
+                    Text { text: "粘贴为纯文本"; font-size: TTheme.font-size-m; color: TTheme.text-color-secondary; vertical-alignment: center; }
                     Rectangle { }
                 }
 
                 HorizontalLayout {
                     spacing: 8px;
 
-                    Kbd { text: "S"; size: Size.small; }
-                    Kbd { text: "M"; size: Size.medium; }
-                    Kbd { text: "L"; size: Size.large; }
+                    TKbd { text: "S"; size: TSize.small; }
+                    TKbd { text: "M"; size: TSize.medium; }
+                    TKbd { text: "L"; size: TSize.large; }
                     Rectangle { }
                 }
             }
         }
 
-        CodeBlock { code: "import { Kbd } from \"@tela-ui/base.slint\";\n\nKbd { text: \"Esc\"; }\nKbd { keys: [\"Ctrl\", \"Shift\", \"V\"]; }\nKbd { text: \"Enter\"; size: Size.large; }"; }
+        TCodeBlock { code: "import { TKbd } from \"@tela-ui/base.slint\";\n\nTKbd { text: \"Esc\"; }\nTKbd { keys: [\"Ctrl\", \"Shift\", \"V\"]; }\nTKbd { text: \"Enter\"; size: TSize.large; }"; }
     }
 }

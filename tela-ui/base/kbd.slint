@@ -1,29 +1,29 @@
-// Tela UI — Kbd
+// Tela UI — TKbd
 //
 // Keyboard-key chip (e.g. Ctrl + C): small bordered chip with system-font
 // feel. Render a single key with `text`, or a combination with `keys` —
-// the chips are then joined by "+" automatically. size: Size
+// the chips are then joined by "+" automatically. size: TSize
 // (small/medium/large).
 
-import { TelaTheme } from "../theme.slint";
-import { Size } from "../structs/enums.slint";
+import { TTheme } from "../theme.slint";
+import { TSize } from "../structs/enums.slint";
 
-export component Kbd inherits Rectangle {
+export component TKbd inherits Rectangle {
     in property <string> text;
     in property <[string]> keys;
-    in property <Size> size: Size.medium;
+    in property <TSize> size: TSize.medium;
 
     private property <length> h:
-        size == Size.small ? 20px
-        : size == Size.large ? 28px
+        size == TSize.small ? 20px
+        : size == TSize.large ? 28px
         : 24px;
     private property <length> fs:
-        size == Size.small ? TelaTheme.font-size-s
-        : size == Size.large ? TelaTheme.font-size-m
-        : TelaTheme.font-size-s;
+        size == TSize.small ? TTheme.font-size-s
+        : size == TSize.large ? TTheme.font-size-m
+        : TTheme.font-size-s;
     private property <length> pad-lr:
-        size == Size.small ? 5px
-        : size == Size.large ? 9px
+        size == TSize.small ? 5px
+        : size == TSize.large ? 9px
         : 7px;
     // A combination wins over the single `text`.
     private property <[string]> items:
@@ -34,19 +34,19 @@ export component Kbd inherits Rectangle {
     horizontal-stretch: 0;
 
     body := HorizontalLayout {
-        spacing: TelaTheme.spacing-2;
+        spacing: TTheme.spacing-2;
 
         // Same spacing as `body` so the "+" sits centered between chips —
         // the outer spacing only applies between iterations.
         for k[i] in root.items: HorizontalLayout {
-            spacing: TelaTheme.spacing-2;
+            spacing: TTheme.spacing-2;
             if k != "": Rectangle {
                 height: root.h;
                 width: cap-label.preferred-width + root.pad-lr * 2;
-                background: TelaTheme.bg-color-secondarycontainer;
+                background: TTheme.bg-color-secondarycontainer;
                 border-width: 1px;
-                border-color: TelaTheme.component-border;
-                border-radius: TelaTheme.radius-small;
+                border-color: TTheme.component-border;
+                border-radius: TTheme.radius-small;
 
                 cap-label := Text {
                     x: root.pad-lr;
@@ -54,8 +54,8 @@ export component Kbd inherits Rectangle {
                     height: parent.height;
                     text: k;
                     font-size: root.fs;
-                    font-family: TelaTheme.font-family;
-                    color: TelaTheme.text-color-secondary;
+                    font-family: TTheme.font-family;
+                    color: TTheme.text-color-secondary;
                     vertical-alignment: center;
                     horizontal-alignment: center;
                 }
@@ -68,8 +68,8 @@ export component Kbd inherits Rectangle {
                 height: root.h;
                 text: "+";
                 font-size: root.fs;
-                font-family: TelaTheme.font-family;
-                color: TelaTheme.text-color-secondary;
+                font-family: TTheme.font-family;
+                color: TTheme.text-color-secondary;
                 vertical-alignment: center;
             }
         }

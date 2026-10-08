@@ -1,19 +1,19 @@
-// Tela UI — Steps
+// Tela UI — TSteps
 //
-// Horizontal step indicator with equal-width columns. Steps before
+// Horizontal step indicator with equal-width columns. TSteps before
 // `current` render as done (check mark), `current` as the active step,
 // later ones as pending.
 
-import { TelaTheme } from "../theme.slint";
-import { Icon } from "../base/icon/icon.slint";
+import { TTheme } from "../theme.slint";
+import { TIcon } from "../base/icon/icon.slint";
 import { TIconSet } from "../base/icon/data.slint";
 
-export component Steps inherits Rectangle {
+export component TSteps inherits Rectangle {
     in property <[string]> items;
     // Index of the current step; earlier steps count as done.
     in property <int> current: 0;
 
-    height: TelaTheme.height-l;
+    height: TTheme.height-l;
 
     HorizontalLayout {
         width: parent.width;
@@ -29,48 +29,48 @@ export component Steps inherits Rectangle {
                 width: 24px;
                 height: 24px;
                 border-radius: self.width / 2;
-                background: i <= root.current ? TelaTheme.brand-color : TelaTheme.bg-color-component;
-                animate background { duration: TelaTheme.duration-base; }
+                background: i <= root.current ? TTheme.brand-color : TTheme.bg-color-component;
+                animate background { duration: TTheme.duration-base; }
 
-                if i < root.current: Icon {
+                if i < root.current: TIcon {
                     x: (parent.width - self.width) / 2;
                     y: (parent.height - self.height) / 2;
                     icon: TIconSet.Check;
                     size: 14px;
-                    icon-color: TelaTheme.text-color-anti;
+                    icon-color: TTheme.text-color-anti;
                 }
 
                 if i >= root.current: Text {
                     width: 100%;
                     height: 100%;
                     text: "\{i + 1}";
-                    font-size: TelaTheme.font-size-s;
-                    font-weight: TelaTheme.font-weight-medium;
-                    color: i == root.current ? TelaTheme.text-color-anti : TelaTheme.text-color-secondary;
+                    font-size: TTheme.font-size-s;
+                    font-weight: TTheme.font-weight-medium;
+                    color: i == root.current ? TTheme.text-color-anti : TTheme.text-color-secondary;
                     horizontal-alignment: center;
                     vertical-alignment: center;
                 }
             }
 
             step-text := Text {
-                x: step-icon.x + step-icon.width + TelaTheme.spacing-2;
+                x: step-icon.x + step-icon.width + TTheme.spacing-2;
                 y: 0;
                 height: parent.height;
                 text: step;
-                font-size: TelaTheme.font-size-m;
-                color: i <= root.current ? TelaTheme.text-color-primary : TelaTheme.text-color-secondary;
+                font-size: TTheme.font-size-m;
+                color: i <= root.current ? TTheme.text-color-primary : TTheme.text-color-secondary;
                 vertical-alignment: center;
             }
 
             // Connector to the next step.
             Rectangle {
-                x: step-text.x + step-text.preferred-width + TelaTheme.spacing-2;
+                x: step-text.x + step-text.preferred-width + TTheme.spacing-2;
                 y: (parent.height - self.height) / 2;
                 width: max(0px, parent.width - self.x);
                 height: 1px;
-                background: i < root.current ? TelaTheme.brand-color : TelaTheme.component-stroke;
+                background: i < root.current ? TTheme.brand-color : TTheme.component-stroke;
                 visible: i < root.items.length - 1;
-                animate background { duration: TelaTheme.duration-base; }
+                animate background { duration: TTheme.duration-base; }
             }
         }
     }

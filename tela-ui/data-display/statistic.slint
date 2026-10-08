@@ -1,63 +1,63 @@
-// Tela UI — Statistic
+// Tela UI — TStatistic
 //
 // Stat block: title, big value with optional prefix/suffix and a semantic
 // value color. `loading` swaps the value for a spinner.
 
-import { TelaTheme, Theme } from "../theme.slint";
-import { LoadingSpinner } from "../base/loading.slint";
+import { TTheme,  TThemeRole } from "../theme.slint";
+import { TLoadingSpinner } from "../base/loading.slint";
 
-export component Statistic inherits VerticalLayout {
+export component TStatistic inherits VerticalLayout {
     in property <string> title;
     in property <string> value;
     in property <string> prefix;
     in property <string> suffix;
-    in property <Theme> theme: Theme.default;
+    in property <TThemeRole> theme: TThemeRole.default;
     in property <bool> loading: false;
 
-    spacing: TelaTheme.spacing-2;
+    spacing: TTheme.spacing-2;
 
     if root.title != "": Text {
         text: root.title;
-        font-size: TelaTheme.font-size-m;
-        font-family: TelaTheme.font-family;
-        color: TelaTheme.text-color-secondary;
+        font-size: TTheme.font-size-m;
+        font-family: TTheme.font-family;
+        color: TTheme.text-color-secondary;
     }
 
     HorizontalLayout {
-        spacing: TelaTheme.spacing-2;
+        spacing: TTheme.spacing-2;
 
         if root.prefix != "": Text {
             text: root.prefix;
-            font-size: TelaTheme.font-size-title-m;
-            font-family: TelaTheme.font-family;
-            color: TelaTheme.text-color-secondary;
+            font-size: TTheme.font-size-title-m;
+            font-family: TTheme.font-family;
+            color: TTheme.text-color-secondary;
             vertical-alignment: center;
         }
 
         if root.loading: Rectangle {
             width: 20px;
 
-            LoadingSpinner {
+            TLoadingSpinner {
                 y: (parent.height - self.height) / 2;
                 size: 20px;
-                spinner-color: TelaTheme.theme-color(root.theme);
+                spinner-color: TTheme.theme-color(root.theme);
             }
         }
 
         if !root.loading: Text {
             text: root.value;
-            font-size: TelaTheme.font-size-headline-s;
-            font-family: TelaTheme.font-family;
-            font-weight: TelaTheme.font-weight-semibold;
-            color: TelaTheme.theme-color(root.theme);
+            font-size: TTheme.font-size-headline-s;
+            font-family: TTheme.font-family;
+            font-weight: TTheme.font-weight-semibold;
+            color: TTheme.theme-color(root.theme);
             vertical-alignment: center;
         }
 
         if root.suffix != "": Text {
             text: root.suffix;
-            font-size: TelaTheme.font-size-title-m;
-            font-family: TelaTheme.font-family;
-            color: TelaTheme.text-color-secondary;
+            font-size: TTheme.font-size-title-m;
+            font-family: TTheme.font-family;
+            color: TTheme.text-color-secondary;
             vertical-alignment: center;
         }
     }

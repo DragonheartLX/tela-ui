@@ -1,4 +1,4 @@
-// Tela UI — BackTop
+// Tela UI — TBackTop
 //
 // Round "back to top" button. Two-way bind `content-y` to a ScrollView's
 // `content-y`: visibility then follows the `threshold` and clicking scrolls
@@ -6,14 +6,14 @@
 // container:
 //   Rectangle {
 //       sv := ScrollView { … }
-//       BackTop { x: …; y: …; content-y <=> sv.content-y; }
+//       TBackTop { x: …; y: …; content-y <=> sv.content-y; }
 //   }
 
-import { TelaTheme } from "../theme.slint";
-import { Icon } from "../base/icon/icon.slint";
+import { TTheme } from "../theme.slint";
+import { TIcon } from "../base/icon/icon.slint";
 import { TIconSet } from "../base/icon/data.slint";
 
-export component BackTop inherits Rectangle {
+export component TBackTop inherits Rectangle {
     // Two-way bind to the target ScrollView's content-y.
     in-out property <length> content-y;
     // The button appears once the view is scrolled past this offset.
@@ -23,13 +23,13 @@ export component BackTop inherits Rectangle {
 
     width: 44px;
     height: 44px;
-    border-radius: TelaTheme.radius-round;
-    background: TelaTheme.bg-color-container;
+    border-radius: TTheme.radius-round;
+    background: TTheme.bg-color-container;
     border-width: 1px;
-    border-color: TelaTheme.component-stroke;
-    drop-shadow-blur: TelaTheme.shadow-2-blur;
-    drop-shadow-offset-y: TelaTheme.shadow-2-offset-y;
-    drop-shadow-color: TelaTheme.shadow-2-color;
+    border-color: TTheme.component-stroke;
+    drop-shadow-blur: TTheme.shadow-2-blur;
+    drop-shadow-offset-y: TTheme.shadow-2-offset-y;
+    drop-shadow-color: TTheme.shadow-2-color;
     // Flickable semantics: `content-y` is 0 at the top and goes negative
     // while scrolling down, so the button shows once the view is scrolled
     // past `threshold`.
@@ -37,18 +37,18 @@ export component BackTop inherits Rectangle {
 
     states [
         hovered when ta.has-hover: {
-            border-color: TelaTheme.brand-color;
-            background: TelaTheme.bg-color-container-hover;
+            border-color: TTheme.brand-color;
+            background: TTheme.bg-color-container-hover;
         }
     ]
 
-    Icon {
+    TIcon {
         x: (parent.width - self.width) / 2;
         y: (parent.height - self.height) / 2;
         icon: TIconSet.ChevronUp;
         size: 20px;
-        icon-color: ta.has-hover ? TelaTheme.brand-color : TelaTheme.text-color-secondary;
-        animate icon-color { duration: TelaTheme.duration-fast; }
+        icon-color: ta.has-hover ? TTheme.brand-color : TTheme.text-color-secondary;
+        animate icon-color { duration: TTheme.duration-fast; }
     }
 
     ta := TouchArea {

@@ -1,25 +1,25 @@
-// Tela UI — Tag
+// Tela UI — TTag
 //
-// Small status descriptor. theme: Theme (default/primary/success/warning/
-// error); variant: TagVariant (dark filled / light / outline); size: Size.
+// Small status descriptor. theme: TTheme (default/primary/success/warning/
+// error); variant: TTagVariant (dark filled / light / outline); size: TSize.
 // Closable tags emit `closed`; tags emit `clicked` when `clickable`
 // styling is desired.
 
-import { TelaTheme } from "../theme.slint";
-import { Icon } from "../base/icon/icon.slint";
+import { TTheme } from "../theme.slint";
+import { TIcon } from "../base/icon/icon.slint";
 import { TIconSet, TIconData } from "../base/icon/data.slint";
-import { Theme, Size } from "../structs/enums.slint";
-export enum TagVariant {
+import { TThemeRole,  TSize } from "../structs/enums.slint";
+export enum TTagVariant {
     dark,
     light,
     outline,
 }
 import { TIconSet, TIconData } from "../base/icon/data.slint";
 
-export component Tag inherits Rectangle {
-    in property <Theme> theme: Theme.default;
-    in property <TagVariant> variant: TagVariant.dark;
-    in property <Size> size: Size.medium;
+export component TTag inherits Rectangle {
+    in property <TThemeRole> theme: TThemeRole.default;
+    in property <TTagVariant> variant: TTagVariant.dark;
+    in property <TSize> size: TSize.medium;
     in property <string> text;
     in property <TIconData> icon;
     in property <bool> closable;
@@ -30,61 +30,61 @@ export component Tag inherits Rectangle {
     callback clicked();
 
     private property <length> h:
-        size == Size.small ? 20px
-        : size == Size.large ? 28px
+        size == TSize.small ? 20px
+        : size == TSize.large ? 28px
         : 24px;
-    private property <length> fs: TelaTheme.font-size-s;
+    private property <length> fs: TTheme.font-size-s;
     private property <length> pad-lr:
-        size == Size.small ? 6px
-        : size == Size.large ? 12px
+        size == TSize.small ? 6px
+        : size == TSize.large ? 12px
         : 8px;
 
     // Per-role colors for the current theme (default renders neutral grays,
     // other themes use their color ramp) so the rest binding and `states`
     // below stay flat.
-    private property <color> fill: theme == Theme.default ? TelaTheme.bg-color-component : TelaTheme.theme-color(theme);
-    private property <color> fill-hover: theme == Theme.default ? TelaTheme.bg-color-component-hover : TelaTheme.theme-color-hover(theme);
-    private property <color> tint: theme == Theme.default ? TelaTheme.bg-color-secondarycontainer : TelaTheme.theme-color-light(theme);
-    private property <color> tint-hover: theme == Theme.default ? TelaTheme.bg-color-secondarycontainer-hover : TelaTheme.theme-color-light-hover(theme);
-    private property <color> text-dark: theme == Theme.default ? TelaTheme.text-color-primary : TelaTheme.text-color-anti;
-    private property <color> text-tonal: theme == Theme.default ? TelaTheme.text-color-primary : TelaTheme.theme-color(theme);
-    private property <color> text-outline: theme == Theme.default ? TelaTheme.text-color-secondary : TelaTheme.theme-color(theme);
-    private property <color> border-rest: theme == Theme.default ? TelaTheme.component-border : TelaTheme.theme-color(theme);
+    private property <color> fill: theme == TThemeRole.default ? TTheme.bg-color-component : TTheme.theme-color(theme);
+    private property <color> fill-hover: theme == TThemeRole.default ? TTheme.bg-color-component-hover : TTheme.theme-color-hover(theme);
+    private property <color> tint: theme == TThemeRole.default ? TTheme.bg-color-secondarycontainer : TTheme.theme-color-light(theme);
+    private property <color> tint-hover: theme == TThemeRole.default ? TTheme.bg-color-secondarycontainer-hover : TTheme.theme-color-light-hover(theme);
+    private property <color> text-dark: theme == TThemeRole.default ? TTheme.text-color-primary : TTheme.text-color-anti;
+    private property <color> text-tonal: theme == TThemeRole.default ? TTheme.text-color-primary : TTheme.theme-color(theme);
+    private property <color> text-outline: theme == TThemeRole.default ? TTheme.text-color-secondary : TTheme.theme-color(theme);
+    private property <color> border-rest: theme == TThemeRole.default ? TTheme.component-border : TTheme.theme-color(theme);
 
     // Rest state; overridden by the `states` below.
     private property <brush> bg:
-        variant == TagVariant.dark ? root.fill
-        : variant == TagVariant.light ? root.tint
+        variant == TTagVariant.dark ? root.fill
+        : variant == TTagVariant.light ? root.tint
         : transparent;
     private property <brush> content-color:
-        variant == TagVariant.dark ? root.text-dark
-        : variant == TagVariant.light ? root.text-tonal
+        variant == TTagVariant.dark ? root.text-dark
+        : variant == TTagVariant.light ? root.text-tonal
         : root.text-outline;
     private property <brush> border-brush:
-        variant == TagVariant.outline ? root.border-rest
+        variant == TTagVariant.outline ? root.border-rest
         : transparent;
 
     background: bg;
-    border-width: variant == TagVariant.outline ? 1px : 0;
+    border-width: variant == TTagVariant.outline ? 1px : 0;
     border-color: border-brush;
-    border-radius: TelaTheme.radius-default;
+    border-radius: TTheme.radius-default;
     height: h;
     width: max(h, content.preferred-width + pad-lr * 2 + (closable ? 16px : 0));
-    animate bg { duration: TelaTheme.duration-fast; }
-    animate content-color { duration: TelaTheme.duration-fast; }
-    animate border-brush { duration: TelaTheme.duration-fast; }
+    animate bg { duration: TTheme.duration-fast; }
+    animate content-color { duration: TTheme.duration-fast; }
+    animate border-brush { duration: TTheme.duration-fast; }
 
     // Later states win over earlier ones.
     states [
         hovered when touch.has-hover && root.clickable && !root.disabled: {
-            bg: variant == TagVariant.dark ? root.fill-hover
-                : variant == TagVariant.light ? root.tint-hover
+            bg: variant == TTagVariant.dark ? root.fill-hover
+                : variant == TTagVariant.light ? root.tint-hover
                 : transparent;
         }
         disabled when root.disabled: {
-            bg: variant == TagVariant.dark ? TelaTheme.bg-color-component-disabled : transparent;
-            content-color: TelaTheme.text-color-disabled;
-            border-brush: variant == TagVariant.outline ? TelaTheme.border-level-1-color : transparent;
+            bg: variant == TTagVariant.dark ? TTheme.bg-color-component-disabled : transparent;
+            content-color: TTheme.text-color-disabled;
+            border-brush: variant == TTagVariant.outline ? TTheme.border-level-1-color : transparent;
         }
     ]
 
@@ -101,9 +101,9 @@ export component Tag inherits Rectangle {
         y: (parent.height - self.height) / 2;
         width: self.preferred-width;
         height: self.preferred-height;
-        spacing: TelaTheme.spacing-1;
+        spacing: TTheme.spacing-1;
 
-        if root.icon.paths.length > 0: Icon {
+        if root.icon.paths.length > 0: TIcon {
             y: (parent.height - self.height) / 2;
             icon: root.icon;
             size: 12px;
@@ -122,13 +122,13 @@ export component Tag inherits Rectangle {
             height: 16px;
             y: (parent.height - self.height) / 2;
 
-            Icon {
+            TIcon {
                 x: 2px;
                 y: 2px;
                 icon: TIconSet.X;
                 size: 12px;
-                icon-color: close-ta.has-hover ? root.content-color : TelaTheme.text-color-secondary;
-                animate icon-color { duration: TelaTheme.duration-fast; }
+                icon-color: close-ta.has-hover ? root.content-color : TTheme.text-color-secondary;
+                animate icon-color { duration: TTheme.duration-fast; }
             }
             close-ta := TouchArea {
                 enabled: !root.disabled;

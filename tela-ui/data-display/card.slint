@@ -1,61 +1,61 @@
-// Tela UI — Card
+// Tela UI — TCard
 //
 // Bordered content container with optional title/subtitle header and
 // footer strip. Children of the component form the card body.
 
-import { TelaTheme } from "../theme.slint";
+import { TTheme } from "../theme.slint";
 
-export component Card inherits Rectangle {
+export component TCard inherits Rectangle {
     in property <string> title;
     in property <string> subtitle;
     in property <string> footer;
     in property <bool> bordered: true;
     in property <bool> shadowed: false;
-    in property <length> card-padding: TelaTheme.margin-l;
+    in property <length> card-padding: TTheme.margin-l;
 
-    background: TelaTheme.bg-color-container;
+    background: TTheme.bg-color-container;
     border-width: bordered ? 1px : 0;
-    border-color: TelaTheme.component-stroke;
-    border-radius: TelaTheme.radius-large;
-    drop-shadow-blur: shadowed ? TelaTheme.shadow-1-blur : 0px;
-    drop-shadow-offset-y: shadowed ? TelaTheme.shadow-1-offset-y : 0px;
-    drop-shadow-color: TelaTheme.shadow-1-color;
+    border-color: TTheme.component-stroke;
+    border-radius: TTheme.radius-large;
+    drop-shadow-blur: shadowed ? TTheme.shadow-1-blur : 0px;
+    drop-shadow-offset-y: shadowed ? TTheme.shadow-1-offset-y : 0px;
+    drop-shadow-color: TTheme.shadow-1-color;
 
     VerticalLayout {
         padding: root.card-padding;
-        spacing: TelaTheme.margin-m;
+        spacing: TTheme.margin-m;
 
         if root.title != "" || root.subtitle != "": VerticalLayout {
-            spacing: TelaTheme.spacing-2;
+            spacing: TTheme.spacing-2;
 
             if root.title != "": Text {
                 text: root.title;
-                font-size: TelaTheme.font-size-title-m;
-                font-weight: TelaTheme.font-weight-semibold;
-                color: TelaTheme.text-color-primary;
+                font-size: TTheme.font-size-title-m;
+                font-weight: TTheme.font-weight-semibold;
+                color: TTheme.text-color-primary;
             }
 
             if root.subtitle != "": Text {
                 text: root.subtitle;
-                font-size: TelaTheme.font-size-s;
-                color: TelaTheme.text-color-secondary;
+                font-size: TTheme.font-size-s;
+                color: TTheme.text-color-secondary;
             }
         }
 
         @children
 
         if root.footer != "": VerticalLayout {
-            spacing: TelaTheme.margin-m;
+            spacing: TTheme.margin-m;
 
             Rectangle {
                 height: 1px;
-                background: TelaTheme.component-stroke;
+                background: TTheme.component-stroke;
             }
 
             Text {
                 text: root.footer;
-                font-size: TelaTheme.font-size-m;
-                color: TelaTheme.text-color-secondary;
+                font-size: TTheme.font-size-m;
+                color: TTheme.text-color-secondary;
             }
         }
     }

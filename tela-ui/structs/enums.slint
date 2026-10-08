@@ -2,12 +2,12 @@
 //
 // Semantic vocabularies shared by several components. Import from
 // "@tela-ui/theme.slint" (re-exported there) or relatively like the theme
-// structs. Component-specific enums (ButtonVariant, TagVariant, …) live in
+// structs. Component-specific enums (TButtonVariant, TTagVariant, …) live in
 // their component files and are re-exported by the matching aggregator.
 
 // Semantic color roles, following the TDesign `theme` axis. Components map
 // these onto brand/success/warning/error ramps; `default` renders neutrally.
-export enum Theme {
+export enum TThemeRole {
     default,
     primary,
     success,
@@ -16,15 +16,15 @@ export enum Theme {
 }
 
 // Standard control size (heights and paddings scale with it).
-export enum Size {
+export enum TSize {
     small,
     medium,
     large,
 }
 
-// Anchoring of trigger-attached popups (DropdownMenu, Popconfirm). Shared
+// Anchoring of trigger-attached popups (TDropdownMenu, TPopconfirm). Shared
 // by two components, so it lives with the shared enums.
-export enum PopupPlacement {
+export enum TPopupPlacement {
     bottom-start,
     bottom-end,
     top-start,

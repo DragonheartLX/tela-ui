@@ -3,38 +3,38 @@
 // All design tokens follow the TDesign specification (https://tdesign.tencent.com).
 //
 // Customization:
-//   * Swap the whole active config:      TelaTheme.theme = { ... };
-//   * Override one mode preset:          TelaTheme.dark = { ... };
-//   * Patch a single token of a preset:  TelaTheme.dark.bg-page = #101010;
-//   * From Rust:                         TelaTheme::get(ui).set_preference(TelaThemePreference::Dark);
+//   * Swap the whole active config:      TTheme.theme = { ... };
+//   * Override one mode preset:          TTheme.dark = { ... };
+//   * Patch a single token of a preset:  TTheme.dark.bg-page = #101010;
+//   * From Rust:                         TTheme::get(ui).set_preference(TThemePreference::Dark);
 //
 // When `preference` is `system` the theme follows the OS color scheme and
 // updates live.
 
 import { Palette } from "std-widgets.slint";
 import { TPrimaryColor, TAppThemeConfig } from "structs/theme.slint";
-import { Theme, Size } from "structs/enums.slint";
+import { TThemeRole,  TSize } from "structs/enums.slint";
 
 // Shared semantic enums ride along with the tokens, so one import covers
-// both: import { TelaTheme, Theme, Size } from "@tela-ui/theme.slint";
-export { Theme, Size, PopupPlacement } from "structs/enums.slint";
+// both: import { TTheme,  TThemeRole,  TSize } from "@tela-ui/theme.slint";
+export { TThemeRole,  TSize,  TPopupPlacement } from "structs/enums.slint";
 import { TLightColors, TDarkColors } from "colors.slint";
 
-export enum TelaThemePreference {
+export enum TThemePreference {
     system,
     light,
     dark,
 }
 
-export global TelaTheme {
+export global TTheme {
     // User intent; defaults to following the OS color scheme.
-    in-out property <TelaThemePreference> preference: TelaThemePreference.system;
+    in-out property <TThemePreference> preference: TThemePreference.system;
 
     // The mode actually in effect: `system` resolved against the OS scheme.
     // Bind toggles to this, not to `preference`, so they reflect the real mode.
     out property <bool> is-dark:
-        preference == TelaThemePreference.dark
-        || (preference == TelaThemePreference.system && Palette.color-scheme == ColorScheme.dark);
+        preference == TThemePreference.dark
+        || (preference == TThemePreference.system && Palette.color-scheme == ColorScheme.dark);
 
     // The active configuration. Assign to it directly to take full control.
     in-out property <TAppThemeConfig> theme: root.is-dark ? root.dark : root.light;
@@ -449,59 +449,59 @@ export global TelaTheme {
     out property <duration> duration-slow: root.theme.duration-slow;
 
     // ------------------------------------------------------------------
-    // Helpers for components keyed by the `Theme` semantic role.
+    // Helpers for components keyed by the `TTheme` semantic role.
     // ------------------------------------------------------------------
 
-    // The color ramp of a semantic role. Theme.default has no ramp of its
+    // The color ramp of a semantic role. TThemeRole.default has no ramp of its
     // own and resolves to the brand ramp here; helpers that must keep the
-    // default theme gray check for `Theme.default` before calling this.
-    public pure function theme-scheme(t: Theme) -> TPrimaryColor {
-        t == Theme.success ? root.theme.success
-        : t == Theme.warning ? root.theme.warning
-        : t == Theme.error ? root.theme.error
+    // default theme gray check for `TThemeRole.default` before calling this.
+    public pure function theme-scheme(t: TThemeRole) -> TPrimaryColor {
+        t == TThemeRole.success ? root.theme.success
+        : t == TThemeRole.warning ? root.theme.warning
+        : t == TThemeRole.error ? root.theme.error
         : root.theme.primary;
     }
 
-    public pure function theme-color(t: Theme) -> color {
-        t == Theme.default ? root.theme.text-primary : root.theme-scheme(t).color;
+    public pure function theme-color(t: TThemeRole) -> color {
+        t == TThemeRole.default ? root.theme.text-primary : root.theme-scheme(t).color;
     }
 
-    public pure function theme-color-hover(t: Theme) -> color {
-        t == Theme.default ? root.theme.text-primary : root.theme-scheme(t).hover;
+    public pure function theme-color-hover(t: TThemeRole) -> color {
+        t == TThemeRole.default ? root.theme.text-primary : root.theme-scheme(t).hover;
     }
 
-    public pure function theme-color-active(t: Theme) -> color {
-        t == Theme.default ? root.theme.text-primary : root.theme-scheme(t).active;
+    public pure function theme-color-active(t: TThemeRole) -> color {
+        t == TThemeRole.default ? root.theme.text-primary : root.theme-scheme(t).active;
     }
 
-    public pure function theme-color-light(t: Theme) -> color {
-        t == Theme.default ? root.theme.bg-secondarycontainer : root.theme-scheme(t).light;
+    public pure function theme-color-light(t: TThemeRole) -> color {
+        t == TThemeRole.default ? root.theme.bg-secondarycontainer : root.theme-scheme(t).light;
     }
 
-    public pure function theme-color-light-hover(t: Theme) -> color {
-        t == Theme.default ? root.theme.bg-secondarycontainer-hover : root.theme-scheme(t).light-hover;
+    public pure function theme-color-light-hover(t: TThemeRole) -> color {
+        t == TThemeRole.default ? root.theme.bg-secondarycontainer-hover : root.theme-scheme(t).light-hover;
     }
 
-    public pure function theme-color-disabled(t: Theme) -> color {
-        t == Theme.default ? root.theme.text-disabled : root.theme-scheme(t).disabled;
+    public pure function theme-color-disabled(t: TThemeRole) -> color {
+        t == TThemeRole.default ? root.theme.text-disabled : root.theme-scheme(t).disabled;
     }
 
-    // Control metrics by `Size`, shared by Button / Select / Link / ...
-    public pure function size-height(s: Size) -> length {
-        s == Size.small ? root.theme.height-s
-        : s == Size.large ? root.theme.height-l
+    // Control metrics by `TSize`, shared by TButton / TSelect / TLink / ...
+    public pure function size-height(s: TSize) -> length {
+        s == TSize.small ? root.theme.height-s
+        : s == TSize.large ? root.theme.height-l
         : root.theme.height-m;
     }
 
-    public pure function size-font(s: Size) -> length {
-        s == Size.small ? root.theme.font-size-s
-        : s == Size.large ? root.theme.font-size-l
+    public pure function size-font(s: TSize) -> length {
+        s == TSize.small ? root.theme.font-size-s
+        : s == TSize.large ? root.theme.font-size-l
         : root.theme.font-size-m;
     }
 
-    public pure function size-padding(s: Size) -> length {
-        s == Size.small ? root.theme.padding-lr-s
-        : s == Size.large ? root.theme.padding-lr-l
+    public pure function size-padding(s: TSize) -> length {
+        s == TSize.small ? root.theme.padding-lr-s
+        : s == TSize.large ? root.theme.padding-lr-l
         : root.theme.padding-lr-m;
     }
 }

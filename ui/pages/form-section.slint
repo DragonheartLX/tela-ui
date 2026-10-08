@@ -1,9 +1,9 @@
-// Demo section: 数据录入 (Input / Select / TextArea / CheckBox / Radio /
-// Switch / Slider / InputNumber / Rate), 一个组件一张卡.
+// Demo section: 数据录入 (TInput / TSelect / TTextArea / TCheckBox / TRadio /
+// TSwitch / TSlider / TInputNumber / TRate), 一个组件一张卡.
 
-import { TelaTheme, Theme, Size } from "@tela-ui/theme.slint";
-import { TIconSet, Caption } from "@tela-ui/base.slint";
-import { Input, TextArea, Select, SelectItem, CheckBox, RadioGroup, RadioItem, Switch, Slider, InputNumber, Rate, Segmented, Card , CodeBlock} from "@tela-ui/common.slint";
+import { TTheme,  TThemeRole,  TSize } from "@tela-ui/theme.slint";
+import { TIconSet, TCaption } from "@tela-ui/base.slint";
+import { TInput, TTextArea, TSelect, TSelectItem, TCheckBox, TRadioGroup, TRadioItem, TSwitch, TSlider, TInputNumber, TRate, TSegmented, TCard , TCodeBlock} from "@tela-ui/common.slint";
 
 export component FormSection inherits VerticalLayout {
     spacing: 28px;
@@ -11,7 +11,7 @@ export component FormSection inherits VerticalLayout {
     in-out property <string> input-text: "";
     in-out property <string> textarea-text: "";
     in-out property <string> city-value: "sh";
-    in property <[SelectItem]> city-items: [
+    in property <[TSelectItem]> city-items: [
         { label: "北京", value: "bj", disabled: false },
         { label: "上海", value: "sh", disabled: false },
         { label: "广州", value: "gz", disabled: false },
@@ -22,7 +22,7 @@ export component FormSection inherits VerticalLayout {
     in-out property <bool> check-a: true;
     in-out property <bool> check-b: false;
     in-out property <string> radio-value: "bj";
-    in property <[RadioItem]> radio-items: [
+    in property <[TRadioItem]> radio-items: [
         { text: "北京", value: "bj" },
         { text: "上海", value: "sh" },
         { text: "广州", value: "gz" },
@@ -33,17 +33,17 @@ export component FormSection inherits VerticalLayout {
     in-out property <float> rate-value: 3;
     in-out property <int> seg-index: 1;
 
-    // ======================== Input ========================
+    // ======================== TInput ========================
     VerticalLayout {
         spacing: 8px;
 
-        Card {
-            title: "输入框 Input";
+        TCard {
+            title: "输入框 TInput";
 
             VerticalLayout {
                 spacing: 16px;
 
-                Input {
+                TInput {
                     placeholder-text: "请输入内容";
                     clearable: true;
                     prefix-icon: TIconSet.Search;
@@ -53,80 +53,80 @@ export component FormSection inherits VerticalLayout {
                 HorizontalLayout {
                     spacing: 24px;
 
-                    Input {
+                    TInput {
                         width: 240px;
                         placeholder-text: "密码";
                         input-type: password;
                         clearable: false;
                     }
-                    Input { width: 240px; placeholder-text: "禁用状态"; disabled: true; }
-                    Input { width: 240px; text: "只读状态"; read-only: true; }
+                    TInput { width: 240px; placeholder-text: "禁用状态"; disabled: true; }
+                    TInput { width: 240px; text: "只读状态"; read-only: true; }
                     Rectangle { }
                 }
             }
         }
 
-        CodeBlock { code: "import { Input } from \"@tela-ui/common.slint\";\n\nInput { placeholder-text: \"请输入内容\"; clearable: true; prefix-icon: TIconSet.Search; text <=> v; }\nInput { placeholder-text: \"密码\"; input-type: password; }"; }
+        TCodeBlock { code: "import { TInput } from \"@tela-ui/common.slint\";\n\nTInput { placeholder-text: \"请输入内容\"; clearable: true; prefix-icon: TIconSet.Search; text <=> v; }\nTInput { placeholder-text: \"密码\"; input-type: password; }"; }
     }
 
-    // ======================== Select =======================
+    // ======================== TSelect =======================
     VerticalLayout {
         spacing: 8px;
 
-        Card {
-            title: "选择器 Select";
+        TCard {
+            title: "选择器 TSelect";
 
             HorizontalLayout {
                 spacing: 24px;
 
-                Select {
+                TSelect {
                     width: 240px;
                     placeholder-text: "请选择城市";
                     items: root.city-items;
                     current-value <=> root.city-value;
                 }
 
-                Caption { text: "选中: \{root.city-value}"; vertical-alignment: center; }
+                TCaption { text: "选中: \{root.city-value}"; vertical-alignment: center; }
                 Rectangle { }
             }
         }
 
-        CodeBlock { code: "import { Select } from \"@tela-ui/common.slint\";\n\nSelect {\n    items: [{ label: \"北京\", value: \"bj\" }, …];\n    placeholder-text: \"请选择城市\";\n    current-value <=> city;\n}"; }
+        TCodeBlock { code: "import { TSelect } from \"@tela-ui/common.slint\";\n\nTSelect {\n    items: [{ label: \"北京\", value: \"bj\" }, …];\n    placeholder-text: \"请选择城市\";\n    current-value <=> city;\n}"; }
     }
 
-    // ======================= TextArea ======================
+    // ======================= TTextArea ======================
     VerticalLayout {
         spacing: 8px;
 
-        Card {
-            title: "多行输入 TextArea";
+        TCard {
+            title: "多行输入 TTextArea";
 
-            TextArea {
+            TTextArea {
                 rows: 3;
                 placeholder-text: "请输入描述…";
                 text <=> root.textarea-text;
             }
         }
 
-        CodeBlock { code: "import { TextArea } from \"@tela-ui/common.slint\";\n\nTextArea { rows: 3; placeholder-text: \"请输入描述…\"; text <=> v; }"; }
+        TCodeBlock { code: "import { TTextArea } from \"@tela-ui/common.slint\";\n\nTTextArea { rows: 3; placeholder-text: \"请输入描述…\"; text <=> v; }"; }
     }
 
-    // ======================= CheckBox ======================
+    // ======================= TCheckBox ======================
     VerticalLayout {
         spacing: 8px;
 
-        Card {
-            title: "复选框 CheckBox";
+        TCard {
+            title: "复选框 TCheckBox";
 
             HorizontalLayout {
                 spacing: 24px;
 
-                CheckBox { text: "全选"; indeterminate: root.check-a != root.check-b; checked: root.check-a && root.check-b;
+                TCheckBox { text: "全选"; indeterminate: root.check-a != root.check-b; checked: root.check-a && root.check-b;
                     changed(c) => { root.check-a = c; root.check-b = c; } }
-                CheckBox { text: "选项 A"; checked <=> root.check-a; }
-                CheckBox { text: "选项 B"; checked <=> root.check-b; }
-                CheckBox { text: "禁用"; disabled: true; }
-                CheckBox { text: "选中禁用"; checked: true; disabled: true; }
+                TCheckBox { text: "选项 A"; checked <=> root.check-a; }
+                TCheckBox { text: "选项 B"; checked <=> root.check-b; }
+                TCheckBox { text: "禁用"; disabled: true; }
+                TCheckBox { text: "选中禁用"; checked: true; disabled: true; }
                 // Absorbs the leftover row space: with only fixed-width
                 // children the layout spreads the slack between the items
                 // and shoves the row against the card edge.
@@ -134,115 +134,115 @@ export component FormSection inherits VerticalLayout {
             }
         }
 
-        CodeBlock { code: "import { CheckBox } from \"@tela-ui/common.slint\";\n\nCheckBox { text: \"选项 A\"; checked <=> a; }\nCheckBox { text: \"全选\"; indeterminate: a != b; }"; }
+        TCodeBlock { code: "import { TCheckBox } from \"@tela-ui/common.slint\";\n\nTCheckBox { text: \"选项 A\"; checked <=> a; }\nTCheckBox { text: \"全选\"; indeterminate: a != b; }"; }
     }
 
-    // ======================== Radio ========================
+    // ======================== TRadio ========================
     VerticalLayout {
         spacing: 8px;
 
-        Card {
-            title: "单选框 Radio";
+        TCard {
+            title: "单选框 TRadio";
 
-            RadioGroup {
+            TRadioGroup {
                 items: root.radio-items;
                 value <=> root.radio-value;
             }
         }
 
-        CodeBlock { code: "import { RadioGroup } from \"@tela-ui/common.slint\";\n\nRadioGroup {\n    items: [{ text: \"北京\", value: \"bj\" }, …];\n    value <=> city;\n}"; }
+        TCodeBlock { code: "import { TRadioGroup } from \"@tela-ui/common.slint\";\n\nTRadioGroup {\n    items: [{ text: \"北京\", value: \"bj\" }, …];\n    value <=> city;\n}"; }
     }
 
-    // ======================== Switch =======================
+    // ======================== TSwitch =======================
     VerticalLayout {
         spacing: 8px;
 
-        Card {
-            title: "开关 Switch";
+        TCard {
+            title: "开关 TSwitch";
 
             HorizontalLayout {
                 spacing: 24px;
 
-                Switch { checked <=> root.switch-on; }
-                Switch { checked: false; }
-                Switch { checked: true; disabled: true; }
-                Switch { checked: false; disabled: true; }
-                Switch { size: Size.small; checked: true; }
-                Switch { size: Size.large; checked: false; }
+                TSwitch { checked <=> root.switch-on; }
+                TSwitch { checked: false; }
+                TSwitch { checked: true; disabled: true; }
+                TSwitch { checked: false; disabled: true; }
+                TSwitch { size: TSize.small; checked: true; }
+                TSwitch { size: TSize.large; checked: false; }
                 Rectangle { }
             }
         }
 
-        CodeBlock { code: "import { Switch } from \"@tela-ui/common.slint\";\n\nSwitch { checked <=> on; }\nSwitch { size: Size.small; checked: true; }\nSwitch { disabled: true; }"; }
+        TCodeBlock { code: "import { TSwitch } from \"@tela-ui/common.slint\";\n\nTSwitch { checked <=> on; }\nTSwitch { size: TSize.small; checked: true; }\nTSwitch { disabled: true; }"; }
     }
 
-    // ======================== Slider =======================
+    // ======================== TSlider =======================
     VerticalLayout {
         spacing: 8px;
 
-        Card {
-            title: "滑块 Slider";
+        TCard {
+            title: "滑块 TSlider";
 
-            Slider {
+            TSlider {
                 value <=> root.slider-value;
             }
         }
 
-        CodeBlock { code: "import { Slider } from \"@tela-ui/common.slint\";\n\nSlider { value <=> v; }"; }
+        TCodeBlock { code: "import { TSlider } from \"@tela-ui/common.slint\";\n\nTSlider { value <=> v; }"; }
     }
 
-    // ====================== InputNumber ====================
+    // ====================== TInputNumber ====================
     VerticalLayout {
         spacing: 8px;
 
-        Card {
-            title: "数字输入框 InputNumber";
+        TCard {
+            title: "数字输入框 TInputNumber";
 
             HorizontalLayout {
                 spacing: 24px;
 
-                InputNumber {
+                TInputNumber {
                     width: 160px;
                     min: 0;
                     max: 10;
                     value <=> root.num-value;
                 }
-                InputNumber { width: 160px; value: 3.5; min: 0; max: 10; step: 0.5; editable: false; }
-                InputNumber { width: 160px; value: 2; disabled: true; }
-                Caption { text: "当前值: \{root.num-value}"; vertical-alignment: center; }
+                TInputNumber { width: 160px; value: 3.5; min: 0; max: 10; step: 0.5; editable: false; }
+                TInputNumber { width: 160px; value: 2; disabled: true; }
+                TCaption { text: "当前值: \{root.num-value}"; vertical-alignment: center; }
                 Rectangle { }
             }
         }
 
-        CodeBlock { code: "import { InputNumber } from \"@tela-ui/common.slint\";\n\nInputNumber { min: 0; max: 10; step: 1; value <=> n; }\n// 文本框内 Up/Down 方向键也可步进; 到达边界时对应按钮禁用。"; }
+        TCodeBlock { code: "import { TInputNumber } from \"@tela-ui/common.slint\";\n\nTInputNumber { min: 0; max: 10; step: 1; value <=> n; }\n// 文本框内 Up/Down 方向键也可步进; 到达边界时对应按钮禁用。"; }
     }
 
-    // ========================= Rate ========================
+    // ========================= TRate ========================
     VerticalLayout {
         spacing: 8px;
 
-        Card {
-            title: "评分 Rate";
+        TCard {
+            title: "评分 TRate";
 
             HorizontalLayout {
                 spacing: 24px;
 
-                Rate { value <=> root.rate-value; }
-                Rate { value: 2; read-only: true; }
-                Rate { size: Size.small; theme: Theme.primary; value: 4; }
-                Rate { value: 3; disabled: true; }
+                TRate { value <=> root.rate-value; }
+                TRate { value: 2; read-only: true; }
+                TRate { size: TSize.small; theme: TThemeRole.primary; value: 4; }
+                TRate { value: 3; disabled: true; }
                 Rectangle { }
             }
         }
 
-        CodeBlock { code: "import { Rate } from \"@tela-ui/common.slint\";\n\nRate { value <=> score; }\nRate { value: 2; read-only: true; }\nRate { theme: Theme.primary; size: Size.small; }"; }
+        TCodeBlock { code: "import { TRate } from \"@tela-ui/common.slint\";\n\nTRate { value <=> score; }\nTRate { value: 2; read-only: true; }\nTRate { theme: TThemeRole.primary; size: TSize.small; }"; }
     }
-    // ====================== Segmented =====================
+    // ====================== TSegmented =====================
     VerticalLayout {
         spacing: 8px;
 
-        Card {
-            title: "分段控制器 Segmented";
+        TCard {
+            title: "分段控制器 TSegmented";
 
             VerticalLayout {
                 spacing: 12px;
@@ -250,17 +250,17 @@ export component FormSection inherits VerticalLayout {
                 Rectangle {
                     width: 480px;
 
-                    Segmented {
+                    TSegmented {
                         items: ["日", "周", "月", "年"];
                         current-index <=> root.seg-index;
                     }
                 }
 
-                Caption { text: "当前选中下标: \{root.seg-index}"; }
+                TCaption { text: "当前选中下标: \{root.seg-index}"; }
             }
         }
 
-        CodeBlock { code: "import { Segmented } from \"@tela-ui/common.slint\";\n\nRectangle {\n    width: 480px;\n    Segmented { items: [\"日\", \"周\", \"月\", \"年\"]; current-index <=> i; }\n}"; }
+        TCodeBlock { code: "import { TSegmented } from \"@tela-ui/common.slint\";\n\nRectangle {\n    width: 480px;\n    TSegmented { items: [\"日\", \"周\", \"月\", \"年\"]; current-index <=> i; }\n}"; }
     }
 
 }

@@ -1,19 +1,19 @@
-// Tela UI — DropdownMenu
+// Tela UI — TDropdownMenu
 //
 // Action menu anchored to arbitrary trigger content. With `auto-open` (the
 // default) a TouchArea layered over the trigger toggles the popup — this
 // requires non-interactive trigger content (icon, text, avatar …), because
-// the area swallows their clicks. For Button triggers set `auto-open: false`
+// the area swallows their clicks. For TButton triggers set `auto-open: false`
 // and call `toggle()` from `clicked` instead. The menu closes on outside
 // clicks and after selecting an entry.
 
-import { TelaTheme } from "../theme.slint";
-import { PopupPlacement } from "../structs/enums.slint";
-import { Icon } from "../base/icon/icon.slint";
+import { TTheme } from "../theme.slint";
+import { TPopupPlacement } from "../structs/enums.slint";
+import { TIcon } from "../base/icon/icon.slint";
 import { TIconData } from "../base/icon/data.slint";
 import { ScrollView } from "std-widgets.slint";
 
-export struct DropdownMenuItem {
+export struct TDropdownMenuItem {
     label: string,
     value: string,
     icon: TIconData = { paths: [] },
@@ -23,9 +23,9 @@ export struct DropdownMenuItem {
     divider: bool,
 }
 
-export component DropdownMenu inherits Rectangle {
-    in property <[DropdownMenuItem]> items;
-    in property <PopupPlacement> placement: PopupPlacement.bottom-start;
+export component TDropdownMenu inherits Rectangle {
+    in property <[TDropdownMenuItem]> items;
+    in property <TPopupPlacement> placement: TPopupPlacement.bottom-start;
     // Click-toggle TouchArea over the trigger content (non-interactive
     // triggers only).
     in property <bool> auto-open: true;
@@ -54,9 +54,9 @@ export component DropdownMenu inherits Rectangle {
     }
 
     private property <bool> to-end:
-        placement == PopupPlacement.bottom-end || placement == PopupPlacement.top-end;
+        placement == TPopupPlacement.bottom-end || placement == TPopupPlacement.top-end;
     private property <bool> to-top:
-        placement == PopupPlacement.top-start || placement == PopupPlacement.top-end;
+        placement == TPopupPlacement.top-start || placement == TPopupPlacement.top-end;
 
     // Trigger content hosted in a layout so the wrapper hugs it in parent
     // layouts (a bare child would not feed the preferred size).
@@ -93,13 +93,13 @@ export component DropdownMenu inherits Rectangle {
 
             content := Rectangle {
                 max-width: 280px;
-                background: TelaTheme.bg-color-container;
+                background: TTheme.bg-color-container;
                 border-width: 1px;
-                border-color: TelaTheme.component-stroke;
-                border-radius: TelaTheme.radius-medium;
-                drop-shadow-blur: TelaTheme.shadow-2-blur;
-                drop-shadow-offset-y: TelaTheme.shadow-2-offset-y;
-                drop-shadow-color: TelaTheme.shadow-2-color;
+                border-color: TTheme.component-stroke;
+                border-radius: TTheme.radius-medium;
+                drop-shadow-blur: TTheme.shadow-2-blur;
+                drop-shadow-offset-y: TTheme.shadow-2-offset-y;
+                drop-shadow-color: TTheme.shadow-2-color;
                 clip: true;
 
                 ScrollView {
@@ -108,42 +108,42 @@ export component DropdownMenu inherits Rectangle {
 
                     for it[i] in root.items: Rectangle {
                         height: it.divider ? 9px : root.item-height;
-                        border-radius: TelaTheme.radius-default;
+                        border-radius: TTheme.radius-default;
                         background: transparent;
-                        animate background { duration: TelaTheme.duration-fast; }
+                        animate background { duration: TTheme.duration-fast; }
 
                         // Per-entry label color: danger red beats the neutral
                         // primary, disabled grays out both.
                         private property <color> label-c:
-                            it.disabled ? TelaTheme.text-color-disabled
-                            : it.danger ? TelaTheme.error-color
-                            : TelaTheme.text-color-primary;
+                            it.disabled ? TTheme.text-color-disabled
+                            : it.danger ? TTheme.error-color
+                            : TTheme.text-color-primary;
 
                         states [
                             hovered when row-ta.has-hover && !it.disabled && !it.divider && !it.danger: {
-                                background: TelaTheme.bg-color-container-hover;
+                                background: TTheme.bg-color-container-hover;
                             }
                             hovered-danger when row-ta.has-hover && !it.disabled && !it.divider && it.danger: {
-                                background: TelaTheme.error-color-light;
+                                background: TTheme.error-color-light;
                             }
                         ]
 
                         if !it.divider: HorizontalLayout {
-                            padding-left: TelaTheme.spacing-2;
-                            padding-right: TelaTheme.spacing-2;
-                            spacing: TelaTheme.spacing-2;
+                            padding-left: TTheme.spacing-2;
+                            padding-right: TTheme.spacing-2;
+                            spacing: TTheme.spacing-2;
 
-                            if it.icon.paths.length > 0: Icon {
+                            if it.icon.paths.length > 0: TIcon {
                                 y: (parent.height - self.height) / 2;
                                 icon: it.icon;
-                                size: TelaTheme.font-size-m;
+                                size: TTheme.font-size-m;
                                 icon-color: label-c;
                             }
 
                             Text {
                                 text: it.label;
-                                font-size: TelaTheme.font-size-m;
-                                font-family: TelaTheme.font-family;
+                                font-size: TTheme.font-size-m;
+                                font-family: TTheme.font-family;
                                 color: label-c;
                                 vertical-alignment: center;
                                 horizontal-stretch: 1;
@@ -154,7 +154,7 @@ export component DropdownMenu inherits Rectangle {
                         if it.divider: Rectangle {
                             y: 4px;
                             height: 1px;
-                            background: TelaTheme.border-level-1-color;
+                            background: TTheme.border-level-1-color;
                         }
 
                         row-ta := TouchArea {

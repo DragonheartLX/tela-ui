@@ -1,12 +1,12 @@
-// Tela UI — CheckBox
+// Tela UI — TCheckBox
 //
 // Checkbox with label, indeterminate state and disabled state.
 
-import { TelaTheme } from "../theme.slint";
-import { Icon } from "../base/icon/icon.slint";
+import { TTheme } from "../theme.slint";
+import { TIcon } from "../base/icon/icon.slint";
 import { TIconSet } from "../base/icon/data.slint";
 
-export component CheckBox inherits Rectangle {
+export component TCheckBox inherits Rectangle {
     in property <string> text;
     in-out property <bool> checked;
     in property <bool> indeterminate;
@@ -17,26 +17,26 @@ export component CheckBox inherits Rectangle {
     private property <bool> on: checked || indeterminate;
 
     // Rest state; overridden by the `states` below.
-    private property <brush> box-bg: TelaTheme.bg-color-specialcomponent;
-    private property <brush> box-border: TelaTheme.component-border;
+    private property <brush> box-bg: TTheme.bg-color-specialcomponent;
+    private property <brush> box-border: TTheme.component-border;
 
-    height: TelaTheme.height-m;
+    height: TTheme.height-m;
     width: content.preferred-width;
-    animate box-bg { duration: TelaTheme.duration-fast; }
-    animate box-border { duration: TelaTheme.duration-fast; }
+    animate box-bg { duration: TTheme.duration-fast; }
+    animate box-border { duration: TTheme.duration-fast; }
 
     // Later states win over earlier ones.
     states [
         hovered when touch.has-hover && !root.disabled: {
-            box-border: TelaTheme.brand-color;
+            box-border: TTheme.brand-color;
         }
         on when root.on && !root.disabled: {
-            box-bg: TelaTheme.brand-color;
-            box-border: TelaTheme.brand-color;
+            box-bg: TTheme.brand-color;
+            box-border: TTheme.brand-color;
         }
         disabled when root.disabled: {
-            box-bg: root.on ? TelaTheme.brand-color-disabled : TelaTheme.bg-color-component-disabled;
-            box-border: TelaTheme.border-level-1-color;
+            box-bg: root.on ? TTheme.brand-color-disabled : TTheme.bg-color-component-disabled;
+            box-border: TTheme.border-level-1-color;
         }
     ]
 
@@ -54,7 +54,7 @@ export component CheckBox inherits Rectangle {
         y: 0;
         width: self.preferred-width;
         height: parent.height;
-        spacing: TelaTheme.spacing-2;
+        spacing: TTheme.spacing-2;
 
         Rectangle {
             width: 16px;
@@ -63,31 +63,31 @@ export component CheckBox inherits Rectangle {
             background: root.box-bg;
             border-width: 1px;
             border-color: root.box-border;
-            border-radius: TelaTheme.radius-default;
+            border-radius: TTheme.radius-default;
 
-            if root.indeterminate: Icon {
+            if root.indeterminate: TIcon {
                 x: 2px;
                 y: 2px;
                 icon: TIconSet.Minus;
                 size: 12px;
-                icon-color: TelaTheme.text-color-anti;
+                icon-color: TTheme.text-color-anti;
                 stroke-width: 2.4;
             }
 
-            if root.checked && !root.indeterminate: Icon {
+            if root.checked && !root.indeterminate: TIcon {
                 x: 2px;
                 y: 2px;
                 icon: TIconSet.Check;
                 size: 12px;
-                icon-color: TelaTheme.text-color-anti;
+                icon-color: TTheme.text-color-anti;
                 stroke-width: 2.4;
             }
         }
 
         if root.text != "": Text {
             text: root.text;
-            font-size: TelaTheme.font-size-m;
-            color: root.disabled ? TelaTheme.text-color-disabled : TelaTheme.text-color-primary;
+            font-size: TTheme.font-size-m;
+            color: root.disabled ? TTheme.text-color-disabled : TTheme.text-color-primary;
             vertical-alignment: center;
         }
     }

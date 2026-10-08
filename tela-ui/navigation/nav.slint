@@ -1,34 +1,34 @@
-// Tela UI — NavBar
+// Tela UI — TNavBar
 //
 // Top navigation bar: brand (logo + title) on the left, menu items with an
 // active underline in the middle, and a trailing action slot (the default
 // children) on the right.
 
-import { TelaTheme } from "../theme.slint";
-import { Icon } from "../base/icon/icon.slint";
+import { TTheme } from "../theme.slint";
+import { TIcon } from "../base/icon/icon.slint";
 import { TIconData } from "../base/icon/data.slint";
 
-export struct NavItem {
+export struct TNavItem {
     label: string,
     value: string,
 }
 
-export component NavBar inherits Rectangle {
+export component TNavBar inherits Rectangle {
     in property <string> title;
     in property <TIconData> logo;
-    in property <[NavItem]> items;
+    in property <[TNavItem]> items;
     in-out property <string> current-value;
     in property <bool> bordered: true;
 
     callback changed(string);
 
     height: 56px;
-    background: TelaTheme.bg-color-container;
+    background: TTheme.bg-color-container;
 
     HorizontalLayout {
-        padding-left: TelaTheme.margin-xl;
-        padding-right: TelaTheme.margin-xl;
-        spacing: TelaTheme.margin-l;
+        padding-left: TTheme.margin-xl;
+        padding-right: TTheme.margin-xl;
+        spacing: TTheme.margin-l;
 
         // Brand -----------------------------------------------------------
         if root.title != "" || root.logo.paths.length > 0: VerticalLayout {
@@ -37,20 +37,20 @@ export component NavBar inherits Rectangle {
             horizontal-stretch: 0;
 
             HorizontalLayout {
-                spacing: TelaTheme.spacing-2;
+                spacing: TTheme.spacing-2;
 
-                if root.logo.paths.length > 0: Icon {
+                if root.logo.paths.length > 0: TIcon {
                     y: (parent.height - self.height) / 2;
                     icon: root.logo;
                     size: 24px;
-                    icon-color: TelaTheme.brand-color;
+                    icon-color: TTheme.brand-color;
                 }
 
                 if root.title != "": Text {
                     text: root.title;
-                    font-size: TelaTheme.font-size-title-m;
-                    font-weight: TelaTheme.font-weight-semibold;
-                    color: TelaTheme.text-color-primary;
+                    font-size: TTheme.font-size-title-m;
+                    font-weight: TTheme.font-weight-semibold;
+                    color: TTheme.text-color-primary;
                     vertical-alignment: center;
                 }
             }
@@ -58,26 +58,26 @@ export component NavBar inherits Rectangle {
 
         // Menu ------------------------------------------------------------
         for it[i] in root.items: Rectangle {
-            width: nav-text.preferred-width + TelaTheme.padding-lr-m * 2;
+            width: nav-text.preferred-width + TTheme.padding-lr-m * 2;
             height: parent.height;
 
             nav-text := Text {
                 width: 100%;
                 height: 100%;
                 text: it.label;
-                font-size: TelaTheme.font-size-m;
+                font-size: TTheme.font-size-m;
                 horizontal-alignment: center;
                 vertical-alignment: center;
-                color: TelaTheme.text-color-primary;
-                animate color { duration: TelaTheme.duration-fast; }
+                color: TTheme.text-color-primary;
+                animate color { duration: TTheme.duration-fast; }
 
                 // Later states win over earlier ones.
                 states [
                     hovered when item-ta.has-hover && it.value != root.current-value: {
-                        color: TelaTheme.brand-color-hover;
+                        color: TTheme.brand-color-hover;
                     }
                     active when it.value == root.current-value: {
-                        color: TelaTheme.brand-color;
+                        color: TTheme.brand-color;
                     }
                 ]
             }
@@ -88,7 +88,7 @@ export component NavBar inherits Rectangle {
                 width: nav-text.preferred-width;
                 height: 3px;
                 border-radius: 2px;
-                background: TelaTheme.brand-color;
+                background: TTheme.brand-color;
             }
 
             item-ta := TouchArea {
@@ -111,7 +111,7 @@ export component NavBar inherits Rectangle {
             horizontal-stretch: 0;
 
             HorizontalLayout {
-                spacing: TelaTheme.margin-s;
+                spacing: TTheme.margin-s;
                 @children
             }
         }
@@ -121,6 +121,6 @@ export component NavBar inherits Rectangle {
         y: parent.height - self.height;
         width: 100%;
         height: 1px;
-        background: TelaTheme.component-stroke;
+        background: TTheme.component-stroke;
     }
 }

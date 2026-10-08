@@ -1,27 +1,27 @@
-// Tela UI — CodeBlock
+// Tela UI — TCodeBlock
 //
 // Monospace code panel: themed surface (secondary container + primary text,
 // so it adapts to light/dark) with a fixed Consolas face. Non-wrapping —
 // wide lines require a wide container.
 
-import { TelaTheme } from "../theme.slint";
+import { TTheme } from "../theme.slint";
 
-export component CodeBlock inherits Rectangle {
+export component TCodeBlock inherits Rectangle {
     in property <string> code;
 
-    background: TelaTheme.bg-color-secondarycontainer;
-    border-radius: TelaTheme.radius-medium;
+    background: TTheme.bg-color-secondarycontainer;
+    border-radius: TTheme.radius-medium;
     clip: true;
-    height: code-text.preferred-height + TelaTheme.spacing-4 * 2;
+    height: code-text.preferred-height + TTheme.spacing-4 * 2;
 
     code-text := Text {
-        x: TelaTheme.spacing-4;
-        y: TelaTheme.spacing-4;
+        x: TTheme.spacing-4;
+        y: TTheme.spacing-4;
         width: parent.width - self.x * 2;
         text: root.code;
         font-family: "Consolas";
-        font-size: TelaTheme.font-size-s;
-        color: TelaTheme.text-color-primary;
+        font-size: TTheme.font-size-s;
+        color: TTheme.text-color-primary;
         wrap: no-wrap;
     }
 }

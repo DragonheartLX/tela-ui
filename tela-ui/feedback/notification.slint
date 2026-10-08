@@ -1,17 +1,17 @@
 // Tela UI — Notification
 //
-// Stacked corner notifications. Any code (Slint or Rust) calls TelaNotification:
-//   TelaNotification.info("标题", "内容");
-//   TelaNotification.success(...) / warning(...) / error(...)
-// then place ONE `NotificationOverlay` near the top of the window. Up to 4
+// Stacked corner notifications. Any code (Slint or Rust) calls TNotification:
+//   TNotification.info("标题", "内容");
+//   TNotification.success(...) / warning(...) / error(...)
+// then place ONE `TNotificationOverlay` near the top of the window. Up to 4
 // notifications stack in a column (oldest drops off when full); each card
 // auto-dismisses after 4.5 s and can be closed manually.
 
-import { TelaTheme } from "../theme.slint";
-import { Icon } from "../base/icon/icon.slint";
+import { TTheme } from "../theme.slint";
+import { TIcon } from "../base/icon/icon.slint";
 import { TIconSet } from "../base/icon/data.slint";
 
-export enum NotificationTheme {
+export enum TNotificationTheme {
     info,
     success,
     warning,
@@ -19,33 +19,33 @@ export enum NotificationTheme {
 }
 
 // Which window corner the overlay pins the stack to.
-export enum NotificationPlacement {
+export enum TNotificationPlacement {
     top-left,
     top-right,
     bottom-left,
     bottom-right,
 }
 
-export struct NotificationData {
+export struct TNotificationData {
     title: string,
     content: string,
-    theme: NotificationTheme,
+    theme: TNotificationTheme,
     // Slot occupancy: slots are pre-allocated, hidden ones are empty.
     visible: bool,
 }
 
-export global TelaNotification {
+export global TNotification {
     // Fixed capacity in declaration order: index 0 is the oldest. Struct
     // fields are assigned in place (Slint models have no push/remove).
-    in-out property <[NotificationData]> items: [
-        { title: "", content: "", theme: NotificationTheme.info, visible: false },
-        { title: "", content: "", theme: NotificationTheme.info, visible: false },
-        { title: "", content: "", theme: NotificationTheme.info, visible: false },
-        { title: "", content: "", theme: NotificationTheme.info, visible: false },
+    in-out property <[TNotificationData]> items: [
+        { title: "", content: "", theme: TNotificationTheme.info, visible: false },
+        { title: "", content: "", theme: TNotificationTheme.info, visible: false },
+        { title: "", content: "", theme: TNotificationTheme.info, visible: false },
+        { title: "", content: "", theme: TNotificationTheme.info, visible: false },
     ];
-    in-out property <NotificationPlacement> placement: NotificationPlacement.top-right;
+    in-out property <TNotificationPlacement> placement: TNotificationPlacement.top-right;
 
-    public function show(title: string, content: string, th: NotificationTheme) {
+    public function show(title: string, content: string, th: TNotificationTheme) {
         if (!items[0].visible) {
             items[0] = { title: title, content: content, theme: th, visible: true };
         } else if (!items[1].visible) {
@@ -62,19 +62,19 @@ export global TelaNotification {
     }
 
     public function info(title: string, content: string) {
-        root.show(title, content, NotificationTheme.info);
+        root.show(title, content, TNotificationTheme.info);
     }
 
     public function success(title: string, content: string) {
-        root.show(title, content, NotificationTheme.success);
+        root.show(title, content, TNotificationTheme.success);
     }
 
     public function warning(title: string, content: string) {
-        root.show(title, content, NotificationTheme.warning);
+        root.show(title, content, TNotificationTheme.warning);
     }
 
     public function error(title: string, content: string) {
-        root.show(title, content, NotificationTheme.error);
+        root.show(title, content, TNotificationTheme.error);
     }
 
     public function close(i: int) {
@@ -89,14 +89,14 @@ export global TelaNotification {
     }
 }
 
-export component NotificationOverlay inherits Rectangle {
+export component TNotificationOverlay inherits Rectangle {
     // A passive full-window overlay: no TouchArea, so it never blocks input.
     private property <bool> to-left:
-        TelaNotification.placement == NotificationPlacement.top-left
-        || TelaNotification.placement == NotificationPlacement.bottom-left;
+        TNotification.placement == TNotificationPlacement.top-left
+        || TNotification.placement == TNotificationPlacement.bottom-left;
     private property <bool> to-bottom:
-        TelaNotification.placement == NotificationPlacement.bottom-left
-        || TelaNotification.placement == NotificationPlacement.bottom-right;
+        TNotification.placement == TNotificationPlacement.bottom-left
+        || TNotification.placement == TNotificationPlacement.bottom-right;
 
     column := VerticalLayout {
         width: 320px;
@@ -106,53 +106,53 @@ export component NotificationOverlay inherits Rectangle {
         // collapse to zero without leaving layout gaps behind.
         spacing: 0px;
 
-        for it[i] in TelaNotification.items: Rectangle {
-            private property <length> card-h: row.preferred-height + TelaTheme.padding-lr-m * 2;
-            height: it.visible ? card-h + TelaTheme.spacing-5 : 0px;
+        for it[i] in TNotification.items: Rectangle {
+            private property <length> card-h: row.preferred-height + TTheme.padding-lr-m * 2;
+            height: it.visible ? card-h + TTheme.spacing-5 : 0px;
             clip: true;
 
             card := Rectangle {
                 y: 0;
                 width: parent.width;
-                height: max(0px, parent.height - TelaTheme.spacing-5);
-                background: TelaTheme.bg-color-container;
+                height: max(0px, parent.height - TTheme.spacing-5);
+                background: TTheme.bg-color-container;
                 border-width: 1px;
-                border-color: TelaTheme.component-stroke;
-                border-radius: TelaTheme.radius-medium;
-                drop-shadow-blur: TelaTheme.shadow-2-blur;
-                drop-shadow-offset-y: TelaTheme.shadow-2-offset-y;
-                drop-shadow-color: TelaTheme.shadow-2-color;
+                border-color: TTheme.component-stroke;
+                border-radius: TTheme.radius-medium;
+                drop-shadow-blur: TTheme.shadow-2-blur;
+                drop-shadow-offset-y: TTheme.shadow-2-offset-y;
+                drop-shadow-color: TTheme.shadow-2-color;
                 clip: true;
 
                 row := HorizontalLayout {
                     width: parent.width;
                     height: parent.height;
-                    padding: TelaTheme.padding-lr-m;
-                    spacing: TelaTheme.spacing-4;
+                    padding: TTheme.padding-lr-m;
+                    spacing: TTheme.spacing-4;
 
-                    Icon {
+                    TIcon {
                         y: (parent.height - self.height) / 2;
-                        icon: it.theme == NotificationTheme.success ? TIconSet.CircleCheck
-                            : it.theme == NotificationTheme.warning ? TIconSet.CircleAlert
-                            : it.theme == NotificationTheme.error ? TIconSet.CircleX
+                        icon: it.theme == TNotificationTheme.success ? TIconSet.CircleCheck
+                            : it.theme == TNotificationTheme.warning ? TIconSet.CircleAlert
+                            : it.theme == TNotificationTheme.error ? TIconSet.CircleX
                             : TIconSet.Info;
                         size: 20px;
-                        icon-color: it.theme == NotificationTheme.success ? TelaTheme.success-color
-                            : it.theme == NotificationTheme.warning ? TelaTheme.warning-color
-                            : it.theme == NotificationTheme.error ? TelaTheme.error-color
-                            : TelaTheme.brand-color;
+                        icon-color: it.theme == TNotificationTheme.success ? TTheme.success-color
+                            : it.theme == TNotificationTheme.warning ? TTheme.warning-color
+                            : it.theme == TNotificationTheme.error ? TTheme.error-color
+                            : TTheme.brand-color;
                     }
 
                     VerticalLayout {
                         width: 228px;
-                        spacing: TelaTheme.spacing-2;
+                        spacing: TTheme.spacing-2;
 
                         Text {
                             text: it.title;
-                            font-size: TelaTheme.font-size-m;
-                            font-family: TelaTheme.font-family;
-                            font-weight: TelaTheme.font-weight-medium;
-                            color: TelaTheme.text-color-primary;
+                            font-size: TTheme.font-size-m;
+                            font-family: TTheme.font-family;
+                            font-weight: TTheme.font-weight-medium;
+                            color: TTheme.text-color-primary;
                             overflow: elide;
                         }
 
@@ -160,9 +160,9 @@ export component NotificationOverlay inherits Rectangle {
                             // Wraps to the fixed 228px column; the card
                             // height follows the wrapped line count.
                             text: it.content;
-                            font-size: TelaTheme.font-size-s;
-                            font-family: TelaTheme.font-family;
-                            color: TelaTheme.text-color-secondary;
+                            font-size: TTheme.font-size-s;
+                            font-family: TTheme.font-family;
+                            color: TTheme.text-color-secondary;
                             wrap: word-wrap;
                         }
                     }
@@ -172,18 +172,18 @@ export component NotificationOverlay inherits Rectangle {
                         height: 16px;
                         y: (parent.height - self.height) / 2;
 
-                        Icon {
+                        TIcon {
                             x: 1px;
                             y: 1px;
                             icon: TIconSet.X;
                             size: 14px;
-                            icon-color: close-ta.has-hover ? TelaTheme.text-color-secondary : TelaTheme.text-color-placeholder;
-                            animate icon-color { duration: TelaTheme.duration-fast; }
+                            icon-color: close-ta.has-hover ? TTheme.text-color-secondary : TTheme.text-color-placeholder;
+                            animate icon-color { duration: TTheme.duration-fast; }
                         }
                         close-ta := TouchArea {
                             mouse-cursor: MouseCursor.pointer;
                             clicked => {
-                                TelaNotification.close(i);
+                                TNotification.close(i);
                             }
                         }
                     }
@@ -196,7 +196,7 @@ export component NotificationOverlay inherits Rectangle {
                 interval: 4.5s;
                 running: it.visible;
                 triggered => {
-                    TelaNotification.close(i);
+                    TNotification.close(i);
                 }
             }
         }

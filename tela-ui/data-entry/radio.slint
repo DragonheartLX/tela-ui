@@ -1,16 +1,16 @@
-// Tela UI — Radio & RadioGroup
+// Tela UI — TRadio & TRadioGroup
 //
-// RadioGroup lays out a set of options and owns the selected `value`.
-// Standalone Radio buttons can be composed the same way via `checked`.
+// TRadioGroup lays out a set of options and owns the selected `value`.
+// Standalone TRadio buttons can be composed the same way via `checked`.
 
-import { TelaTheme } from "../theme.slint";
+import { TTheme } from "../theme.slint";
 
-export struct RadioItem {
+export struct TRadioItem {
     text: string,
     value: string,
 }
 
-export component Radio inherits Rectangle {
+export component TRadio inherits Rectangle {
     in property <string> text;
     in property <bool> selected;
     in property <bool> disabled;
@@ -18,25 +18,25 @@ export component Radio inherits Rectangle {
     callback clicked();
 
     // Rest state; overridden by the `states` below.
-    private property <brush> ring: TelaTheme.component-border;
-    private property <brush> dot: TelaTheme.brand-color;
+    private property <brush> ring: TTheme.component-border;
+    private property <brush> dot: TTheme.brand-color;
 
-    height: TelaTheme.height-m;
+    height: TTheme.height-m;
     width: content.preferred-width;
-    animate ring { duration: TelaTheme.duration-fast; }
-    animate dot { duration: TelaTheme.duration-fast; }
+    animate ring { duration: TTheme.duration-fast; }
+    animate dot { duration: TTheme.duration-fast; }
 
     // Later states win over earlier ones.
     states [
         hovered when touch.has-hover: {
-            ring: TelaTheme.brand-color;
+            ring: TTheme.brand-color;
         }
         selected when root.selected: {
-            ring: TelaTheme.brand-color;
+            ring: TTheme.brand-color;
         }
         disabled when root.disabled: {
-            ring: TelaTheme.border-level-1-color;
-            dot: TelaTheme.brand-color-disabled;
+            ring: TTheme.border-level-1-color;
+            dot: TTheme.brand-color-disabled;
         }
     ]
 
@@ -53,7 +53,7 @@ export component Radio inherits Rectangle {
         y: 0;
         width: self.preferred-width;
         height: parent.height;
-        spacing: TelaTheme.spacing-2;
+        spacing: TTheme.spacing-2;
 
         Rectangle {
             width: 16px;
@@ -62,7 +62,7 @@ export component Radio inherits Rectangle {
             border-width: 1px;
             border-color: root.ring;
             border-radius: self.width / 2;
-            background: TelaTheme.bg-color-specialcomponent;
+            background: TTheme.bg-color-specialcomponent;
 
             if root.selected: Rectangle {
                 width: 6px;
@@ -76,8 +76,8 @@ export component Radio inherits Rectangle {
 
         if root.text != "": Text {
             text: root.text;
-            font-size: TelaTheme.font-size-m;
-            color: root.disabled ? TelaTheme.text-color-disabled : TelaTheme.text-color-primary;
+            font-size: TTheme.font-size-m;
+            color: root.disabled ? TTheme.text-color-disabled : TTheme.text-color-primary;
             vertical-alignment: center;
         }
     }
@@ -88,18 +88,18 @@ export component Radio inherits Rectangle {
     accessible-action-default => { root.clicked(); }
 }
 
-export component RadioGroup inherits HorizontalLayout {
-    in property <[RadioItem]> items;
+export component TRadioGroup inherits HorizontalLayout {
+    in property <[TRadioItem]> items;
     in-out property <string> value;
     in property <bool> disabled;
 
     callback changed(string);
 
-    spacing: TelaTheme.margin-l;
+    spacing: TTheme.margin-l;
 
     // Absorber: keeps radios left-packed when the group stretches wider
     // than its content (else the layout spreads the slack as extra gaps).
-    for it[i] in items: Radio {
+    for it[i] in items: TRadio {
         text: it.text;
         selected: it.value == root.value;
         disabled: root.disabled;

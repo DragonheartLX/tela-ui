@@ -1,53 +1,53 @@
-// Tela UI — Progress
+// Tela UI — TProgress
 //
 // Linear or circular progress. value: 0..100.
-// variant: ProgressVariant (line / circle); theme: Theme; size: Size.
+// variant: TProgressVariant (line / circle); theme: TThemeRole; size: TSize.
 
-import { TelaTheme } from "../theme.slint";
-import { Theme, Size } from "../structs/enums.slint";
+import { TTheme } from "../theme.slint";
+import { TThemeRole,  TSize } from "../structs/enums.slint";
 
-export enum ProgressVariant {
+export enum TProgressVariant {
     line,
     circle,
 }
-import { TelaTheme } from "../theme.slint";
+import { TTheme } from "../theme.slint";
 
-export component Progress inherits Rectangle {
-    in property <ProgressVariant> variant: ProgressVariant.line;
+export component TProgress inherits Rectangle {
+    in property <TProgressVariant> variant: TProgressVariant.line;
     in property <float> value: 0;
-    in property <Theme> theme: Theme.primary;
-    in property <Size> size: Size.medium;
+    in property <TThemeRole> theme: TThemeRole.primary;
+    in property <TSize> size: TSize.medium;
     in property <bool> show-label: true;
 
     private property <float> p: max(0, min(100, value)) / 100;
     // One animated source drives both the linear fill width and the
     // circular arc, so value changes ease in both variants.
-    animate p { duration: TelaTheme.duration-base; }
+    animate p { duration: TTheme.duration-base; }
     private property <length> th:
-        size == Size.small ? 4px
-        : size == Size.large ? 10px
+        size == TSize.small ? 4px
+        : size == TSize.large ? 10px
         : 6px;
     private property <length> d:
-        size == Size.small ? 64px
-        : size == Size.large ? 96px
+        size == TSize.small ? 64px
+        : size == TSize.large ? 96px
         : 80px;
     private property <brush> bar-color:
-        theme == Theme.default ? TelaTheme.brand-color : TelaTheme.theme-color(theme);
+        theme == TThemeRole.default ? TTheme.brand-color : TTheme.theme-color(theme);
 
-    height: variant == ProgressVariant.line ? TelaTheme.height-m : d;
+    height: variant == TProgressVariant.line ? TTheme.height-m : d;
     width: d;
     // Line variant shares the surrounding layout's space; circle is fixed.
-    horizontal-stretch: variant == ProgressVariant.line ? 1 : 0;
+    horizontal-stretch: variant == TProgressVariant.line ? 1 : 0;
 
-    if variant == ProgressVariant.line: HorizontalLayout {
-        spacing: TelaTheme.spacing-2;
+    if variant == TProgressVariant.line: HorizontalLayout {
+        spacing: TTheme.spacing-2;
 
         Rectangle {
             y: (parent.height - root.th) / 2;
             height: root.th;
             horizontal-stretch: 1;
             border-radius: root.th / 2;
-            background: TelaTheme.bg-color-component;
+            background: TTheme.bg-color-component;
 
             Rectangle {
                 x: 0;
@@ -62,13 +62,13 @@ export component Progress inherits Rectangle {
         if root.show-label: Text {
             text: "\{Math.round(root.p * 100)}%";
             width: 40px;
-            font-size: TelaTheme.font-size-s;
-            color: TelaTheme.text-color-secondary;
+            font-size: TTheme.font-size-s;
+            color: TTheme.text-color-secondary;
             vertical-alignment: center;
         }
     }
 
-    if variant == ProgressVariant.circle: Rectangle {
+    if variant == TProgressVariant.circle: Rectangle {
         width: root.d;
         height: root.d;
 
@@ -82,7 +82,7 @@ export component Progress inherits Rectangle {
             width: 100%;
             height: 100%;
 
-            stroke: TelaTheme.bg-color-component;
+            stroke: TTheme.bg-color-component;
             stroke-width: sw * 1px;
 
             MoveTo { x: 12; y: 12 - parent.r; }
@@ -128,8 +128,8 @@ export component Progress inherits Rectangle {
             y: (parent.height - self.preferred-height) / 2;
             text: Math.round(root.p * 100) + "%";
             font-size: root.d / 5;
-            font-weight: TelaTheme.font-weight-semibold;
-            color: TelaTheme.text-color-primary;
+            font-weight: TTheme.font-weight-semibold;
+            color: TTheme.text-color-primary;
             horizontal-alignment: center;
         }
     }

@@ -1,44 +1,44 @@
-// Tela UI — Result
+// Tela UI — TResult
 //
 // Full-result page block: big status icon, title, description and an action
 // area fed by the children slot (buttons etc., centered below).
 
-import { TelaTheme } from "../theme.slint";
-import { Icon } from "../base/icon/icon.slint";
+import { TTheme } from "../theme.slint";
+import { TIcon } from "../base/icon/icon.slint";
 import { TIconData, TIconSet } from "../base/icon/data.slint";
 
-export enum ResultStatus {
+export enum TResultStatus {
     info,
     success,
     warning,
     error,
 }
 
-export component Result inherits Rectangle {
-    in property <ResultStatus> status: ResultStatus.info;
+export component TResult inherits Rectangle {
+    in property <TResultStatus> status: TResultStatus.info;
     in property <string> title;
     in property <string> description;
 
     // Status icon / color dispatch (flat chains, no nesting).
-    private property <TIconData> icon: status == ResultStatus.success ? TIconSet.CircleCheck
-        : status == ResultStatus.warning ? TIconSet.CircleAlert
-        : status == ResultStatus.error ? TIconSet.CircleX
+    private property <TIconData> icon: status == TResultStatus.success ? TIconSet.CircleCheck
+        : status == TResultStatus.warning ? TIconSet.CircleAlert
+        : status == TResultStatus.error ? TIconSet.CircleX
         : TIconSet.Info;
-    private property <color> icon-color: status == ResultStatus.success ? TelaTheme.success-color
-        : status == ResultStatus.warning ? TelaTheme.warning-color
-        : status == ResultStatus.error ? TelaTheme.error-color
-        : TelaTheme.brand-color;
+    private property <color> icon-color: status == TResultStatus.success ? TTheme.success-color
+        : status == TResultStatus.warning ? TTheme.warning-color
+        : status == TResultStatus.error ? TTheme.error-color
+        : TTheme.brand-color;
 
     // Vertical metrics: icon → gap → title → gap → description → gap → actions.
-    private property <length> gap-1: TelaTheme.spacing-6;
-    private property <length> gap-2: TelaTheme.spacing-4;
-    private property <length> gap-3: TelaTheme.spacing-8;
-    private property <length> desc-h: root.description != "" ? TelaTheme.line-height-m : 0px;
-    private property <length> block-h: icon-size + gap-1 + TelaTheme.line-height-title + gap-2 + desc-h + gap-3 + actions.preferred-height;
+    private property <length> gap-1: TTheme.spacing-6;
+    private property <length> gap-2: TTheme.spacing-4;
+    private property <length> gap-3: TTheme.spacing-8;
+    private property <length> desc-h: root.description != "" ? TTheme.line-height-m : 0px;
+    private property <length> block-h: icon-size + gap-1 + TTheme.line-height-title + gap-2 + desc-h + gap-3 + actions.preferred-height;
     private property <length> y0: (self.height - block-h) / 2;
     private property <length> icon-size: 48px;
 
-    Icon {
+    TIcon {
         x: (parent.width - root.icon-size) / 2;
         y: root.y0;
         icon: root.icon;
@@ -49,36 +49,36 @@ export component Result inherits Rectangle {
 
     if root.title != "": Text {
         y: root.y0 + root.icon-size + root.gap-1;
-        height: TelaTheme.line-height-title;
+        height: TTheme.line-height-title;
         width: parent.width;
         horizontal-alignment: center;
         vertical-alignment: center;
         text: root.title;
-        font-size: TelaTheme.font-size-title-l;
-        font-family: TelaTheme.font-family;
-        font-weight: TelaTheme.font-weight-medium;
-        color: TelaTheme.text-color-primary;
+        font-size: TTheme.font-size-title-l;
+        font-family: TTheme.font-family;
+        font-weight: TTheme.font-weight-medium;
+        color: TTheme.text-color-primary;
     }
 
     if root.description != "": Text {
-        y: root.y0 + root.icon-size + root.gap-1 + TelaTheme.line-height-title + root.gap-2;
+        y: root.y0 + root.icon-size + root.gap-1 + TTheme.line-height-title + root.gap-2;
         height: root.desc-h;
         width: parent.width;
         horizontal-alignment: center;
         vertical-alignment: center;
         text: root.description;
-        font-size: TelaTheme.font-size-m;
-        font-family: TelaTheme.font-family;
-        color: TelaTheme.text-color-secondary;
+        font-size: TTheme.font-size-m;
+        font-family: TTheme.font-family;
+        color: TTheme.text-color-secondary;
         overflow: elide;
     }
 
     actions := HorizontalLayout {
-        y: root.y0 + root.icon-size + root.gap-1 + TelaTheme.line-height-title + root.gap-2 + root.desc-h + root.gap-3;
+        y: root.y0 + root.icon-size + root.gap-1 + TTheme.line-height-title + root.gap-2 + root.desc-h + root.gap-3;
         x: (parent.width - self.preferred-width) / 2;
         width: self.preferred-width;
         height: self.preferred-height;
-        spacing: TelaTheme.spacing-3;
+        spacing: TTheme.spacing-3;
 
         @children
     }

@@ -1,28 +1,28 @@
-// Tela UI — Divider
+// Tela UI — TDivider
 //
-// Horizontal separator with optional label (DividerAlign) or a vertical
+// Horizontal separator with optional label (TDividerAlign) or a vertical
 // rule (orientation: Orientation.vertical).
 
-import { TelaTheme } from "../theme.slint";
+import { TTheme } from "../theme.slint";
 
-export enum DividerAlign {
+export enum TDividerAlign {
     left,
     center,
     right,
 }
 
-export component Divider inherits Rectangle {
+export component TDivider inherits Rectangle {
     in property <Orientation> orientation: Orientation.horizontal;
     in property <string> text;
-    in property <DividerAlign> align: DividerAlign.center;
-    in property <color> line-color: TelaTheme.border-level-1-color;
-    in property <color> text-color: TelaTheme.text-color-secondary;
-    in property <length> content-gap: TelaTheme.margin-l;
+    in property <TDividerAlign> align: TDividerAlign.center;
+    in property <color> line-color: TTheme.border-level-1-color;
+    in property <color> text-color: TTheme.text-color-secondary;
+    in property <length> content-gap: TTheme.margin-l;
     // Distance from the container edges (horizontal mode only).
     in property <length> inset: 0px;
 
     height: text != "" || orientation == Orientation.vertical
-        ? TelaTheme.line-height-m : 1px;
+        ? TTheme.line-height-m : 1px;
     // Vertical rule: clamp the filled width to 1px (avoids state-set sizes).
     max-width: orientation == Orientation.vertical ? 1px : 999999px;
 
@@ -43,7 +43,7 @@ export component Divider inherits Rectangle {
         padding-left: root.inset;
         padding-right: root.inset;
 
-        if root.align != DividerAlign.left: Rectangle {
+        if root.align != TDividerAlign.left: Rectangle {
             background: root.line-color;
             height: 1px;
             y: (parent.height - self.height) / 2;
@@ -52,12 +52,12 @@ export component Divider inherits Rectangle {
 
         Text {
             text: root.text;
-            font-size: TelaTheme.font-size-m;
+            font-size: TTheme.font-size-m;
             color: root.text-color;
             vertical-alignment: center;
         }
 
-        if root.align != DividerAlign.right: Rectangle {
+        if root.align != TDividerAlign.right: Rectangle {
             background: root.line-color;
             height: 1px;
             y: (parent.height - self.height) / 2;

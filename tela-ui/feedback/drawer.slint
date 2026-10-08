@@ -1,4 +1,4 @@
-// Tela UI — Drawer
+// Tela UI — TDrawer
 //
 // Side panel over a dimmed backdrop. `placement` picks the edge the panel
 // slides in from (right/bottom sized by width & height, left/top mirrored);
@@ -7,21 +7,21 @@
 // `close-on-overlay` is set. Children of the component form the body below
 // the title.
 
-import { TelaTheme } from "../theme.slint";
-import { Icon } from "../base/icon/icon.slint";
+import { TTheme } from "../theme.slint";
+import { TIcon } from "../base/icon/icon.slint";
 import { TIconSet } from "../base/icon/data.slint";
 
-export enum DrawerPlacement {
+export enum TDrawerPlacement {
     top,
     right,
     bottom,
     left,
 }
 
-export component Drawer inherits Rectangle {
+export component TDrawer inherits Rectangle {
     in-out property <bool> open: false;
     in property <string> title;
-    in property <DrawerPlacement> placement: DrawerPlacement.right;
+    in property <TDrawerPlacement> placement: TDrawerPlacement.right;
     // Width for left/right drawers, height for top/bottom drawers.
     in property <length> drawer-width: 320px;
     in property <length> drawer-height: 280px;
@@ -30,16 +30,16 @@ export component Drawer inherits Rectangle {
     callback closed();
 
     private property <bool> horizontal:
-        root.placement == DrawerPlacement.left || root.placement == DrawerPlacement.right;
+        root.placement == TDrawerPlacement.left || root.placement == TDrawerPlacement.right;
 
     // Stays mounted and fades via animated opacity so the panel's slide-out
     // is actually visible; binding `visible: open` would drop the whole
     // subtree the instant `open` flips and no close animation would show.
-    // Input stays safe: the backdrop TouchArea is only enabled while open,
+    // TInput stays safe: the backdrop TouchArea is only enabled while open,
     // and the panel rests fully off-window when closed.
     opacity: root.open ? 1 : 0;
-    animate opacity { duration: TelaTheme.duration-base; easing: ease-out; }
-    background: TelaTheme.mask-active;
+    animate opacity { duration: TTheme.duration-base; easing: ease-out; }
+    background: TTheme.mask-active;
 
     public function close() {
         open = false;
@@ -63,28 +63,28 @@ export component Drawer inherits Rectangle {
         property <length> top-y: root.open ? 0px : -self.height;
         property <length> bottom-y: root.open ? parent.height - self.height : parent.height;
         x: !root.horizontal ? 0
-            : root.placement == DrawerPlacement.left ? self.left-x : self.right-x;
+            : root.placement == TDrawerPlacement.left ? self.left-x : self.right-x;
         y: root.horizontal ? 0
-            : root.placement == DrawerPlacement.top ? self.top-y : self.bottom-y;
-        background: TelaTheme.bg-color-container;
-        drop-shadow-blur: TelaTheme.shadow-3-blur;
-        drop-shadow-offset-y: TelaTheme.shadow-3-offset-y;
-        drop-shadow-color: TelaTheme.shadow-3-color;
-        animate x { duration: TelaTheme.duration-base; easing: ease-out; }
-        animate y { duration: TelaTheme.duration-base; easing: ease-out; }
+            : root.placement == TDrawerPlacement.top ? self.top-y : self.bottom-y;
+        background: TTheme.bg-color-container;
+        drop-shadow-blur: TTheme.shadow-3-blur;
+        drop-shadow-offset-y: TTheme.shadow-3-offset-y;
+        drop-shadow-color: TTheme.shadow-3-color;
+        animate x { duration: TTheme.duration-base; easing: ease-out; }
+        animate y { duration: TTheme.duration-base; easing: ease-out; }
 
         VerticalLayout {
-            padding: TelaTheme.margin-l;
-            spacing: TelaTheme.margin-m;
+            padding: TTheme.margin-l;
+            spacing: TTheme.margin-m;
 
             HorizontalLayout {
-                spacing: TelaTheme.margin-s;
+                spacing: TTheme.margin-s;
 
                 Text {
                     text: root.title;
-                    font-size: TelaTheme.font-size-title-m;
-                    font-weight: TelaTheme.font-weight-semibold;
-                    color: TelaTheme.text-color-primary;
+                    font-size: TTheme.font-size-title-m;
+                    font-weight: TTheme.font-weight-semibold;
+                    color: TTheme.text-color-primary;
                     vertical-alignment: center;
                     horizontal-stretch: 1;
                 }
@@ -93,13 +93,13 @@ export component Drawer inherits Rectangle {
                     width: 24px;
                     height: 24px;
 
-                    Icon {
+                    TIcon {
                         x: 5px;
                         y: 5px;
                         icon: TIconSet.X;
                         size: 14px;
-                        icon-color: close-ta.has-hover ? TelaTheme.text-color-primary : TelaTheme.text-color-secondary;
-                        animate icon-color { duration: TelaTheme.duration-fast; }
+                        icon-color: close-ta.has-hover ? TTheme.text-color-primary : TTheme.text-color-secondary;
+                        animate icon-color { duration: TTheme.duration-fast; }
                     }
                     close-ta := TouchArea {
                         mouse-cursor: MouseCursor.pointer;

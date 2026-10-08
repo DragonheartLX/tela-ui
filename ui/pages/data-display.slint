@@ -1,62 +1,62 @@
-// Demo section: 数据展示 (Tag / Badge / Avatar / Empty / Timeline /
-// Descriptions / Statistic / Collapse / Tooltip / Carousel), 一个组件一张卡.
+// Demo section: 数据展示 (TTag / TBadge / TAvatar / TEmpty / TTimeline /
+// TDescriptions / TStatistic / TCollapse / Tooltip / TCarousel), 一个组件一张卡.
 
-import { TelaTheme, Theme, Size } from "@tela-ui/theme.slint";
-import { Icon, TIconSet, Button, Caption } from "@tela-ui/base.slint";
-import { Tag, TagVariant, Badge, Avatar, AvatarSize, AvatarShape, Card, Empty, Timeline, Descriptions, Statistic, Collapse, Carousel, CodeBlock } from "@tela-ui/common.slint";
-import { TooltipArea, TooltipPlacement } from "@tela-ui/data-display.slint";
+import { TTheme,  TThemeRole,  TSize } from "@tela-ui/theme.slint";
+import { TIcon, TIconSet, TButton, TCaption } from "@tela-ui/base.slint";
+import { TTag, TTagVariant, TBadge, TAvatar, TAvatarSize, TAvatarShape, TCard, TEmpty, TTimeline, TDescriptions, TStatistic, TCollapse, TCarousel, TCodeBlock } from "@tela-ui/common.slint";
+import { TTooltipArea, TTooltipPlacement } from "@tela-ui/data-display.slint";
 
 export component DataDisplaySection inherits VerticalLayout {
     spacing: 28px;
 
-    // ========================= Tag =========================
+    // ========================= TTag =========================
     VerticalLayout {
         spacing: 8px;
 
-        Card {
-            title: "标签 Tag";
+        TCard {
+            title: "标签 TTag";
 
             HorizontalLayout {
                 spacing: 8px;
-                Tag { text: "默认"; }
-                Tag { theme: Theme.primary; text: "主要"; }
-                Tag { theme: Theme.success; text: "成功"; }
-                Tag { theme: Theme.warning; text: "警告"; }
-                Tag { theme: Theme.error; text: "危险"; }
-                Tag { theme: Theme.primary; variant: TagVariant.dark; text: "深色"; }
-                Tag { theme: Theme.primary; variant: TagVariant.outline; text: "描边"; }
-                Tag { theme: Theme.primary; text: "可关闭"; closable: true; }
-                Tag { theme: Theme.primary; size: Size.small; text: "小"; }
-                Tag { theme: Theme.primary; size: Size.large; text: "大"; }
+                TTag { text: "默认"; }
+                TTag { theme: TThemeRole.primary; text: "主要"; }
+                TTag { theme: TThemeRole.success; text: "成功"; }
+                TTag { theme: TThemeRole.warning; text: "警告"; }
+                TTag { theme: TThemeRole.error; text: "危险"; }
+                TTag { theme: TThemeRole.primary; variant: TTagVariant.dark; text: "深色"; }
+                TTag { theme: TThemeRole.primary; variant: TTagVariant.outline; text: "描边"; }
+                TTag { theme: TThemeRole.primary; text: "可关闭"; closable: true; }
+                TTag { theme: TThemeRole.primary; size: TSize.small; text: "小"; }
+                TTag { theme: TThemeRole.primary; size: TSize.large; text: "大"; }
                 // Absorbs the leftover row space.
                 Rectangle { }
             }
         }
 
-        CodeBlock { code: "import { Tag } from \"@tela-ui/common.slint\";\n\nTag { text: \"主要\"; theme: Theme.primary; }\nTag { text: \"可关闭\"; theme: Theme.primary; closable: true; }\nTag { text: \"描边\"; variant: TagVariant.outline; }"; }
+        TCodeBlock { code: "import { TTag } from \"@tela-ui/common.slint\";\n\nTTag { text: \"主要\"; theme: TThemeRole.primary; }\nTTag { text: \"可关闭\"; theme: TThemeRole.primary; closable: true; }\nTTag { text: \"描边\"; variant: TTagVariant.outline; }"; }
     }
 
-    // ======================== Badge ========================
+    // ======================== TBadge ========================
     VerticalLayout {
         spacing: 8px;
 
-        Card {
-            title: "徽标 Badge";
+        TCard {
+            title: "徽标 TBadge";
 
             HorizontalLayout {
                 spacing: 28px;
 
-                Badge {
+                TBadge {
                     count: 6;
-                    Icon { icon: TIconSet.Bell; size: 24px; icon-color: TelaTheme.text-color-primary; }
+                    TIcon { icon: TIconSet.Bell; size: 24px; icon-color: TTheme.text-color-primary; }
                 }
-                Badge {
+                TBadge {
                     count: 128;
-                    Icon { icon: TIconSet.Mail; size: 24px; icon-color: TelaTheme.text-color-primary; }
+                    TIcon { icon: TIconSet.Mail; size: 24px; icon-color: TTheme.text-color-primary; }
                 }
-                Badge {
+                TBadge {
                     dot: true;
-                    Icon { icon: TIconSet.Settings; size: 24px; icon-color: TelaTheme.text-color-primary; }
+                    TIcon { icon: TIconSet.Settings; size: 24px; icon-color: TTheme.text-color-primary; }
                 }
 
                 // Absorbs the leftover row space.
@@ -64,38 +64,38 @@ export component DataDisplaySection inherits VerticalLayout {
             }
         }
 
-        CodeBlock { code: "import { Badge } from \"@tela-ui/common.slint\";\nimport { Icon, TIconSet } from \"@tela-ui/base.slint\";\n\nBadge { count: 6; Icon { icon: TIconSet.Bell; } }\nBadge { dot: true; Icon { icon: TIconSet.Settings; } }"; }
+        TCodeBlock { code: "import { TBadge } from \"@tela-ui/common.slint\";\nimport { TIcon, TIconSet } from \"@tela-ui/base.slint\";\n\nTBadge { count: 6; TIcon { icon: TIconSet.Bell; } }\nTBadge { dot: true; TIcon { icon: TIconSet.Settings; } }"; }
     }
 
-    // ======================== Avatar =======================
+    // ======================== TAvatar =======================
     VerticalLayout {
         spacing: 8px;
 
-        Card {
-            title: "头像 Avatar";
+        TCard {
+            title: "头像 TAvatar";
 
             HorizontalLayout {
                 spacing: 24px;
 
-                Avatar { text: "T"; }
-                Avatar { size: AvatarSize.small; text: "TD"; }
-                Avatar { size: AvatarSize.large; text: "龙"; }
-                Avatar { size: AvatarSize.extra-large; shape: AvatarShape.square; text: ""; }
+                TAvatar { text: "T"; }
+                TAvatar { size: TAvatarSize.small; text: "TD"; }
+                TAvatar { size: TAvatarSize.large; text: "龙"; }
+                TAvatar { size: TAvatarSize.extra-large; shape: TAvatarShape.square; text: ""; }
 
                 // Absorbs the leftover row space.
                 Rectangle { }
             }
         }
 
-        CodeBlock { code: "import { Avatar } from \"@tela-ui/common.slint\";\n\nAvatar { text: \"T\"; }\nAvatar { size: AvatarSize.large; shape: AvatarShape.square; text: \"\"; }"; }
+        TCodeBlock { code: "import { TAvatar } from \"@tela-ui/common.slint\";\n\nTAvatar { text: \"T\"; }\nTAvatar { size: TAvatarSize.large; shape: TAvatarShape.square; text: \"\"; }"; }
     }
 
-    // ======================== Empty ========================
+    // ======================== TEmpty ========================
     VerticalLayout {
         spacing: 8px;
 
-        Card {
-            title: "空状态 Empty";
+        TCard {
+            title: "空状态 TEmpty";
 
             HorizontalLayout {
                 spacing: 24px;
@@ -103,17 +103,17 @@ export component DataDisplaySection inherits VerticalLayout {
                 Rectangle {
                     width: 240px;
                     height: 180px;
-                    Empty { }
+                    TEmpty { }
                 }
 
                 Rectangle {
                     width: 240px;
                     height: 180px;
-                    Empty {
+                    TEmpty {
                         description: "暂无订单数据";
 
-                        Button {
-                            size: Size.small;
+                        TButton {
+                            size: TSize.small;
                             text: "立即创建";
                         }
                     }
@@ -122,7 +122,7 @@ export component DataDisplaySection inherits VerticalLayout {
                 Rectangle {
                     width: 240px;
                     height: 180px;
-                    Empty {
+                    TEmpty {
                         icon: TIconSet.Search;
                         description: "未找到相关结果";
                     }
@@ -133,40 +133,40 @@ export component DataDisplaySection inherits VerticalLayout {
             }
         }
 
-        CodeBlock { code: "import { Empty } from \"@tela-ui/common.slint\";\n\nEmpty { description: \"暂无数据\"; }\n\nEmpty {\n    icon: TIconSet.Search;\n    description: \"未找到相关结果\";\n    Button { text: \"立即创建\"; } // 子元素作为操作区\n}"; }
+        TCodeBlock { code: "import { TEmpty } from \"@tela-ui/common.slint\";\n\nTEmpty { description: \"暂无数据\"; }\n\nTEmpty {\n    icon: TIconSet.Search;\n    description: \"未找到相关结果\";\n    TButton { text: \"立即创建\"; } // 子元素作为操作区\n}"; }
     }
 
-    // ======================= Timeline ======================
+    // ======================= TTimeline ======================
     VerticalLayout {
         spacing: 8px;
 
-        Card {
-            title: "时间线 Timeline";
+        TCard {
+            title: "时间线 TTimeline";
 
-            Timeline {
+            TTimeline {
                 items: [
-                    { label: "创建订单", content: "用户提交了订单,等待支付。", theme: Theme.primary },
-                    { label: "支付完成", content: "微信支付 ¥199.00,交易号 202610070001。", theme: Theme.success },
-                    { label: "商品出库", content: "包裹已从杭州仓发出,预计明日送达。", theme: Theme.default },
-                    { label: "确认收货", content: "", theme: Theme.default },
+                    { label: "创建订单", content: "用户提交了订单,等待支付。", theme: TThemeRole.primary },
+                    { label: "支付完成", content: "微信支付 ¥199.00,交易号 202610070001。", theme: TThemeRole.success },
+                    { label: "商品出库", content: "包裹已从杭州仓发出,预计明日送达。", theme: TThemeRole.default },
+                    { label: "确认收货", content: "", theme: TThemeRole.default },
                 ];
             }
         }
 
-        CodeBlock { code: "import { Timeline } from \"@tela-ui/common.slint\";\n\nTimeline {\n    items: [\n        { label: \"创建订单\", content: \"…\", theme: Theme.primary },\n        { label: \"支付完成\", content: \"…\", theme: Theme.success },\n    ];\n}"; }
+        TCodeBlock { code: "import { TTimeline } from \"@tela-ui/common.slint\";\n\nTTimeline {\n    items: [\n        { label: \"创建订单\", content: \"…\", theme: TThemeRole.primary },\n        { label: \"支付完成\", content: \"…\", theme: TThemeRole.success },\n    ];\n}"; }
     }
 
-    // ===================== Descriptions ====================
+    // ===================== TDescriptions ====================
     VerticalLayout {
         spacing: 8px;
 
-        Card {
-            title: "描述列表 Descriptions";
+        TCard {
+            title: "描述列表 TDescriptions";
 
             VerticalLayout {
                 spacing: 16px;
 
-                Descriptions {
+                TDescriptions {
                     bordered: true;
                     items: [
                         { label: "订单编号", value: "TD202610070001" },
@@ -178,7 +178,7 @@ export component DataDisplaySection inherits VerticalLayout {
                     ];
                 }
 
-                Descriptions {
+                TDescriptions {
                     columns: 1;
                     items: [
                         { label: "订单编号", value: "TD202610070001" },
@@ -188,50 +188,50 @@ export component DataDisplaySection inherits VerticalLayout {
             }
         }
 
-        CodeBlock { code: "import { Descriptions } from \"@tela-ui/common.slint\";\n\nDescriptions {\n    bordered: true;\n    columns: 2;\n    items: [{ label: \"订单编号\", value: \"TD202610070001\" }, …];\n}"; }
+        TCodeBlock { code: "import { TDescriptions } from \"@tela-ui/common.slint\";\n\nTDescriptions {\n    bordered: true;\n    columns: 2;\n    items: [{ label: \"订单编号\", value: \"TD202610070001\" }, …];\n}"; }
     }
 
-    // ======================= Statistic =====================
+    // ======================= TStatistic =====================
     VerticalLayout {
         spacing: 8px;
 
-        Card {
-            title: "数值统计 Statistic";
+        TCard {
+            title: "数值统计 TStatistic";
 
             HorizontalLayout {
                 spacing: 48px;
 
-                Statistic { title: "总销售额"; value: "¥ 286,860"; horizontal-stretch: 0; }
-                Statistic { title: "下载量"; value: "12,930"; suffix: "次"; theme: Theme.success; horizontal-stretch: 0; }
-                Statistic { title: "在线人数"; loading: true; horizontal-stretch: 0; }
+                TStatistic { title: "总销售额"; value: "¥ 286,860"; horizontal-stretch: 0; }
+                TStatistic { title: "下载量"; value: "12,930"; suffix: "次"; theme: TThemeRole.success; horizontal-stretch: 0; }
+                TStatistic { title: "在线人数"; loading: true; horizontal-stretch: 0; }
                 Rectangle { }
             }
         }
 
-        CodeBlock { code: "import { Statistic } from \"@tela-ui/common.slint\";\n\nStatistic { title: \"总销售额\"; value: \"¥ 286,860\"; }\nStatistic { title: \"在线人数\"; loading: true; }"; }
+        TCodeBlock { code: "import { TStatistic } from \"@tela-ui/common.slint\";\n\nTStatistic { title: \"总销售额\"; value: \"¥ 286,860\"; }\nTStatistic { title: \"在线人数\"; loading: true; }"; }
     }
 
-    // ======================== Collapse =====================
+    // ======================== TCollapse =====================
     VerticalLayout {
         spacing: 8px;
 
-        Card {
-            title: "折叠面板 Collapse";
+        TCard {
+            title: "折叠面板 TCollapse";
 
             HorizontalLayout {
                 spacing: 24px;
 
-                Collapse {
+                TCollapse {
                     horizontal-stretch: 1;
                     accordion: true;
                     items: [
                         { label: "什么是 Tela UI?", content: "TDesign 风格的 Slint 第三方组件库,提供主题令牌、基础与常用组件,支持亮暗双主题。" },
-                        { label: "如何自定义主题?", content: "通过 TelaTheme.light / TelaTheme.dark 预设逐项修改,或整体替换 theme 配置。" },
+                        { label: "如何自定义主题?", content: "通过 TTheme.light / TTheme.dark 预设逐项修改,或整体替换 theme 配置。" },
                         { label: "是否支持暗色模式?", content: "支持,preference 设为 dark 或直接跟随系统。" },
                     ];
                 }
 
-                Collapse {
+                TCollapse {
                     horizontal-stretch: 1;
                     items: [
                         { label: "面板一", content: "非手风琴模式下多个面板可同时展开。" },
@@ -242,70 +242,70 @@ export component DataDisplaySection inherits VerticalLayout {
             }
         }
 
-        CodeBlock { code: "import { Collapse } from \"@tela-ui/common.slint\";\n\n// 手风琴: accordion: true, current-index 记录展开项\nCollapse { accordion: true; items: [{ label: \"面板一\", content: \"…\" }, …]; }"; }
+        TCodeBlock { code: "import { TCollapse } from \"@tela-ui/common.slint\";\n\n// 手风琴: accordion: true, current-index 记录展开项\nTCollapse { accordion: true; items: [{ label: \"面板一\", content: \"…\" }, …]; }"; }
     }
 
     // ======================== Tooltip ======================
     VerticalLayout {
         spacing: 8px;
 
-        Card {
+        TCard {
             title: "气泡提示 Tooltip";
 
             HorizontalLayout {
                 spacing: 24px;
 
-                // TooltipArea fills its parent, wires the hover and reports
+                // TTooltipArea fills its parent, wires the hover and reports
                 // to the window-level overlay — no clipping worries.
-                TooltipArea {
+                TTooltipArea {
                     width: 120px;
-                    height: TelaTheme.height-m;
-                    background: TelaTheme.bg-color-secondarycontainer;
-                    border-radius: TelaTheme.radius-default;
+                    height: TTheme.height-m;
+                    background: TTheme.bg-color-secondarycontainer;
+                    border-radius: TTheme.radius-default;
                     text: "我是 Tooltip, 鼠标移开即消失, 250ms 延迟出现";
-                    placement: TooltipPlacement.top;
+                    placement: TTooltipPlacement.top;
 
                     Text {
                         text: "上方提示";
-                        font-size: TelaTheme.font-size-m;
-                        color: TelaTheme.text-color-secondary;
+                        font-size: TTheme.font-size-m;
+                        color: TTheme.text-color-secondary;
                         horizontal-alignment: center;
                         vertical-alignment: center;
                     }
                 }
 
-                TooltipArea {
+                TTooltipArea {
                     width: 120px;
-                    height: TelaTheme.height-m;
-                    background: TelaTheme.bg-color-secondarycontainer;
-                    border-radius: TelaTheme.radius-default;
-                    text: "placement: TooltipPlacement.bottom";
-                    placement: TooltipPlacement.bottom;
+                    height: TTheme.height-m;
+                    background: TTheme.bg-color-secondarycontainer;
+                    border-radius: TTheme.radius-default;
+                    text: "placement: TTooltipPlacement.bottom";
+                    placement: TTooltipPlacement.bottom;
 
                     Text {
                         text: "下方提示";
-                        font-size: TelaTheme.font-size-m;
-                        color: TelaTheme.text-color-secondary;
+                        font-size: TTheme.font-size-m;
+                        color: TTheme.text-color-secondary;
                         horizontal-alignment: center;
                         vertical-alignment: center;
                     }
                 }
 
-                Caption { text: "渲染在窗口级 (TooltipOverlay), 不受卡片或滚动容器裁剪; 亮暗均为深色气泡。"; vertical-alignment: center; wrap: word-wrap; horizontal-stretch: 1; }
+                TCaption { text: "渲染在窗口级 (TTooltipOverlay), 不受卡片或滚动容器裁剪; 亮暗均为深色气泡。"; vertical-alignment: center; wrap: word-wrap; horizontal-stretch: 1; }
             }
         }
 
-        CodeBlock { code: "import { TooltipArea, TooltipOverlay } from \"@tela-ui/common.slint\";\n\n// 窗口根部放置一次:\nTooltipOverlay { }\n\nTooltipArea {\n    text: \"提示\"; placement: TooltipPlacement.top;\n    Text { text: \"目标\"; }\n}"; }
+        TCodeBlock { code: "import { TTooltipArea, TTooltipOverlay } from \"@tela-ui/common.slint\";\n\n// 窗口根部放置一次:\nTTooltipOverlay { }\n\nTTooltipArea {\n    text: \"提示\"; placement: TTooltipPlacement.top;\n    Text { text: \"目标\"; }\n}"; }
     }
 
-    // ======================== Carousel =====================
+    // ======================== TCarousel =====================
     VerticalLayout {
         spacing: 8px;
 
-        Card {
-            title: "走马灯 Carousel";
+        TCard {
+            title: "走马灯 TCarousel";
 
-            Carousel {
+            TCarousel {
                 height: 240px;
                 autoplay: true;
                 interval: 3s;
@@ -317,6 +317,6 @@ export component DataDisplaySection inherits VerticalLayout {
             }
         }
 
-        CodeBlock { code: "import { Carousel } from \"@tela-ui/common.slint\";\n\nCarousel {\n    height: 240px;\n    autoplay: true;\n    items: [{ image: @image-url(\"slide-1.svg\") }, …];\n}"; }
+        TCodeBlock { code: "import { TCarousel } from \"@tela-ui/common.slint\";\n\nTCarousel {\n    height: 240px;\n    autoplay: true;\n    items: [{ image: @image-url(\"slide-1.svg\") }, …];\n}"; }
     }
 }

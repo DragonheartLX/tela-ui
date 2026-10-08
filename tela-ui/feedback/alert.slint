@@ -1,17 +1,17 @@
-// Tela UI — Alert
+// Tela UI — TAlert
 //
-// Inline feedback banner. theme: Theme (default/primary/success/warning/
+// Inline feedback banner. theme: TTheme (default/primary/success/warning/
 // error). Title is styled in the theme color, description in primary
 // text; optionally closable (sets `open = false`).
 
-import { TelaTheme } from "../theme.slint";
-import { Icon } from "../base/icon/icon.slint";
+import { TTheme } from "../theme.slint";
+import { TIcon } from "../base/icon/icon.slint";
 import { TIconSet } from "../base/icon/data.slint";
-import { Theme } from "../structs/enums.slint";
+import { TThemeRole } from "../structs/enums.slint";
 import { TIconSet } from "../base/icon/data.slint";
 
-export component Alert inherits Rectangle {
-    in property <Theme> theme: Theme.default;
+export component TAlert inherits Rectangle {
+    in property <TThemeRole> theme: TThemeRole.default;
     in property <string> title;
     in property <string> description;
     in property <bool> closable: false;
@@ -19,43 +19,43 @@ export component Alert inherits Rectangle {
 
     callback closed();
 
-    background: TelaTheme.theme-color-light(theme);
-    border-radius: TelaTheme.radius-medium;
+    background: TTheme.theme-color-light(theme);
+    border-radius: TTheme.radius-medium;
     visible: open;
 
     HorizontalLayout {
-        padding-left: TelaTheme.margin-l;
-        padding-right: TelaTheme.margin-s;
-        padding-top: TelaTheme.margin-m;
-        padding-bottom: TelaTheme.margin-m;
-        spacing: TelaTheme.margin-s;
+        padding-left: TTheme.margin-l;
+        padding-right: TTheme.margin-s;
+        padding-top: TTheme.margin-m;
+        padding-bottom: TTheme.margin-m;
+        spacing: TTheme.margin-s;
 
-        Icon {
+        TIcon {
             y: root.description == "" ? (parent.height - self.height) / 2 : 3px;
-            icon: root.theme == Theme.success ? TIconSet.CircleCheck
-                : root.theme == Theme.warning ? TIconSet.CircleAlert
-                : root.theme == Theme.error ? TIconSet.CircleX
+            icon: root.theme == TThemeRole.success ? TIconSet.CircleCheck
+                : root.theme == TThemeRole.warning ? TIconSet.CircleAlert
+                : root.theme == TThemeRole.error ? TIconSet.CircleX
                 : TIconSet.Info;
             size: 20px;
-            icon-color: TelaTheme.theme-color(root.theme);
+            icon-color: TTheme.theme-color(root.theme);
         }
 
         VerticalLayout {
-            spacing: TelaTheme.spacing-1;
+            spacing: TTheme.spacing-1;
             horizontal-stretch: 1;
 
             Text {
                 text: root.title;
-                font-size: TelaTheme.font-size-m;
-                font-weight: TelaTheme.font-weight-semibold;
-                color: TelaTheme.theme-color(root.theme);
+                font-size: TTheme.font-size-m;
+                font-weight: TTheme.font-weight-semibold;
+                color: TTheme.theme-color(root.theme);
                 wrap: word-wrap;
             }
 
             if root.description != "": Text {
                 text: root.description;
-                font-size: TelaTheme.font-size-m;
-                color: TelaTheme.text-color-primary;
+                font-size: TTheme.font-size-m;
+                color: TTheme.text-color-primary;
                 wrap: word-wrap;
             }
         }
@@ -65,13 +65,13 @@ export component Alert inherits Rectangle {
             height: 24px;
             y: root.description == "" ? (parent.height - self.height) / 2 : 0px;
 
-            Icon {
+            TIcon {
                 x: 5px;
                 y: 5px;
                 icon: TIconSet.X;
                 size: 14px;
-                icon-color: close-ta.has-hover ? TelaTheme.theme-color(root.theme) : TelaTheme.text-color-secondary;
-                animate icon-color { duration: TelaTheme.duration-fast; }
+                icon-color: close-ta.has-hover ? TTheme.theme-color(root.theme) : TTheme.text-color-secondary;
+                animate icon-color { duration: TTheme.duration-fast; }
             }
             close-ta := TouchArea {
                 mouse-cursor: MouseCursor.pointer;

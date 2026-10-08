@@ -1,18 +1,18 @@
-// Tela UI — Descriptions
+// Tela UI — TDescriptions
 //
 // Key/value description list in `columns` equal columns. `bordered` renders
 // a TDesign-style grid (tinted label cells, hairline borders); otherwise a
 // plain label/value stack. Cells are single-line and elide.
 
-import { TelaTheme } from "../theme.slint";
+import { TTheme } from "../theme.slint";
 
-export struct DescriptionItem {
+export struct TDescriptionItem {
     label: string,
     value: string,
 }
 
-export component Descriptions inherits Rectangle {
-    in property <[DescriptionItem]> items;
+export component TDescriptions inherits Rectangle {
+    in property <[TDescriptionItem]> items;
     in property <bool> bordered: false;
     in property <int> columns: 2;
 
@@ -28,7 +28,7 @@ export component Descriptions inherits Rectangle {
 
     height: Math.ceil(root.items.length / (self.cols * 1.0)) * row-h;
     border-width: root.bordered ? 1px : 0;
-    border-color: TelaTheme.component-border;
+    border-color: TTheme.component-border;
 
     for it[i] in root.items: Rectangle {
         x: root.col-of(i) * (parent.width / root.cols);
@@ -40,21 +40,21 @@ export component Descriptions inherits Rectangle {
             // Label cell
             Rectangle {
                 width: 96px;
-                background: root.bordered ? TelaTheme.bg-color-secondarycontainer : transparent;
+                background: root.bordered ? TTheme.bg-color-secondarycontainer : transparent;
                 border-width: root.bordered ? 1px : 0;
                 // Only right/bottom hairlines: the container border closes
                 // the grid without doubled lines.
-                border-color: TelaTheme.component-border;
+                border-color: TTheme.component-border;
 
                 Text {
-                    x: TelaTheme.padding-lr-m;
+                    x: TTheme.padding-lr-m;
                     y: (parent.height - self.preferred-height) / 2;
                     text: it.label;
-                    font-size: TelaTheme.font-size-m;
-                    font-family: TelaTheme.font-family;
-                    color: TelaTheme.text-color-secondary;
+                    font-size: TTheme.font-size-m;
+                    font-family: TTheme.font-family;
+                    color: TTheme.text-color-secondary;
                     overflow: elide;
-                    width: parent.width - TelaTheme.padding-lr-m * 2;
+                    width: parent.width - TTheme.padding-lr-m * 2;
                 }
             }
 
@@ -63,16 +63,16 @@ export component Descriptions inherits Rectangle {
                 horizontal-stretch: 1;
                 background: transparent;
                 border-width: root.bordered ? 1px : 0;
-                border-color: TelaTheme.component-border;
+                border-color: TTheme.component-border;
 
                 Text {
-                    x: TelaTheme.padding-lr-m;
+                    x: TTheme.padding-lr-m;
                     y: (parent.height - self.preferred-height) / 2;
-                    width: parent.width - TelaTheme.padding-lr-m * 2;
+                    width: parent.width - TTheme.padding-lr-m * 2;
                     text: it.value;
-                    font-size: TelaTheme.font-size-m;
-                    font-family: TelaTheme.font-family;
-                    color: TelaTheme.text-color-primary;
+                    font-size: TTheme.font-size-m;
+                    font-family: TTheme.font-family;
+                    color: TTheme.text-color-primary;
                     overflow: elide;
                 }
             }

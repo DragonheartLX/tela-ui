@@ -1,35 +1,35 @@
-// Tela UI — Link
+// Tela UI — TLink
 //
 // Hyperlink text: theme-colored, underlines on hover (or always with
-// `underline`). theme: Theme (default/primary/success/warning/error).
+// `underline`). theme: TTheme (default/primary/success/warning/error).
 
-import { TelaTheme } from "../theme.slint";
-import { Icon } from "icon/icon.slint";
+import { TTheme } from "../theme.slint";
+import { TIcon } from "icon/icon.slint";
 import { TIconData } from "icon/data.slint";
-import { Theme, Size } from "../structs/enums.slint";
+import { TThemeRole,  TSize } from "../structs/enums.slint";
 
-export component Link inherits Rectangle {
-    in property <Theme> theme: Theme.default;
+export component TLink inherits Rectangle {
+    in property <TThemeRole> theme: TThemeRole.default;
     in property <string> text;
     in property <TIconData> icon;
     in property <bool> disabled;
     in property <bool> underline: false;
-    in property <Size> size: Size.medium;
+    in property <TSize> size: TSize.medium;
 
     callback clicked();
 
-    private property <length> fs: TelaTheme.size-font(size);
+    private property <length> fs: TTheme.size-font(size);
 
     // Per-state colors for the current theme (default uses the link/brand
     // tokens, other themes their color ramp) so the `states` stay flat.
-    private property <color> content-rest: theme == Theme.default ? TelaTheme.text-color-link : TelaTheme.theme-color(theme);
-    private property <color> content-hover: theme == Theme.default ? TelaTheme.brand-color-hover : TelaTheme.theme-color-hover(theme);
-    private property <color> content-pressed: theme == Theme.default ? TelaTheme.brand-color-active : TelaTheme.theme-color-active(theme);
+    private property <color> content-rest: theme == TThemeRole.default ? TTheme.text-color-link : TTheme.theme-color(theme);
+    private property <color> content-hover: theme == TThemeRole.default ? TTheme.brand-color-hover : TTheme.theme-color-hover(theme);
+    private property <color> content-pressed: theme == TThemeRole.default ? TTheme.brand-color-active : TTheme.theme-color-active(theme);
 
     // Rest state; overridden by the `states` below.
     private property <brush> content-color: root.content-rest;
 
-    animate content-color { duration: TelaTheme.duration-fast; }
+    animate content-color { duration: TTheme.duration-fast; }
 
     // Later states win over earlier ones.
     states [
@@ -40,7 +40,7 @@ export component Link inherits Rectangle {
             content-color: root.content-pressed;
         }
         disabled when root.disabled: {
-            content-color: TelaTheme.text-color-disabled;
+            content-color: TTheme.text-color-disabled;
         }
     ]
 
@@ -60,9 +60,9 @@ export component Link inherits Rectangle {
         y: 0;
         width: self.preferred-width;
         height: self.preferred-height;
-        spacing: TelaTheme.spacing-2;
+        spacing: TTheme.spacing-2;
 
-        if root.icon.paths.length > 0: Icon {
+        if root.icon.paths.length > 0: TIcon {
             y: (parent.height - self.height) / 2;
             icon: root.icon;
             size: root.fs + 2px;
@@ -85,7 +85,7 @@ export component Link inherits Rectangle {
         background: root.content-color;
         visible: !root.disabled;
         opacity: root.underline || (touch.has-hover && !touch.pressed) ? 1 : 0;
-        animate opacity { duration: TelaTheme.duration-fast; }
+        animate opacity { duration: TTheme.duration-fast; }
     }
 
     accessible-role: AccessibleRole.text;

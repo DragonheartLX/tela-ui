@@ -1,24 +1,24 @@
-// Tela UI — Segmented
+// Tela UI — TSegmented
 //
 // Pill-style exclusive picker (iOS segmented control). Fills the container
 // width; segments split it equally. Wrap it in a width-constrained container
 // when fewer/shorter options are wanted.
 
-import { TelaTheme, Size } from "../theme.slint";
+import { TTheme,  TSize } from "../theme.slint";
 
-export component Segmented inherits Rectangle {
+export component TSegmented inherits Rectangle {
     in property <[string]> items;
     in-out property <int> current-index: 0;
-    in property <Size> size: Size.medium;
+    in property <TSize> size: TSize.medium;
     in property <bool> disabled: false;
 
     callback changed(int);
 
-    private property <length> fs: TelaTheme.size-font(size);
+    private property <length> fs: TTheme.size-font(size);
 
-    height: TelaTheme.size-height(size);
-    background: TelaTheme.bg-color-secondarycontainer;
-    border-radius: TelaTheme.radius-medium;
+    height: TTheme.size-height(size);
+    background: TTheme.bg-color-secondarycontainer;
+    border-radius: TTheme.radius-medium;
 
     HorizontalLayout {
         padding: 3px;
@@ -26,15 +26,15 @@ export component Segmented inherits Rectangle {
 
         for it[i] in root.items: Rectangle {
             horizontal-stretch: 1;
-            border-radius: TelaTheme.radius-medium;
-            background: i == root.current-index ? TelaTheme.bg-color-container : transparent;
-            animate background { duration: TelaTheme.duration-fast; }
+            border-radius: TTheme.radius-medium;
+            background: i == root.current-index ? TTheme.bg-color-container : transparent;
+            animate background { duration: TTheme.duration-fast; }
 
             states [
                 elevated when i == root.current-index: {
-                    drop-shadow-blur: TelaTheme.shadow-1-blur;
-                    drop-shadow-offset-y: TelaTheme.shadow-1-offset-y;
-                    drop-shadow-color: TelaTheme.shadow-1-color;
+                    drop-shadow-blur: TTheme.shadow-1-blur;
+                    drop-shadow-offset-y: TTheme.shadow-1-offset-y;
+                    drop-shadow-color: TTheme.shadow-1-color;
                 }
             ]
 
@@ -52,18 +52,18 @@ export component Segmented inherits Rectangle {
             Text {
                 text: it;
                 font-size: root.fs;
-                font-family: TelaTheme.font-family;
+                font-family: TTheme.font-family;
                 vertical-alignment: center;
                 horizontal-alignment: center;
-                color: i == root.current-index ? TelaTheme.text-color-primary : TelaTheme.text-color-secondary;
-                animate color { duration: TelaTheme.duration-fast; }
+                color: i == root.current-index ? TTheme.text-color-primary : TTheme.text-color-secondary;
+                animate color { duration: TTheme.duration-fast; }
 
                 states [
                     hovered when ta.has-hover && !root.disabled && i != root.current-index: {
-                        color: TelaTheme.text-color-primary;
+                        color: TTheme.text-color-primary;
                     }
                     disabled when root.disabled: {
-                        color: TelaTheme.text-color-disabled;
+                        color: TTheme.text-color-disabled;
                     }
                 ]
             }

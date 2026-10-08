@@ -1,4 +1,4 @@
-// Tela UI — SideNav
+// Tela UI — TSideNav
 //
 // Collapsible side navigation: brand header, a vertical menu and a footer
 // cluster pinned to the bottom edge (menu-style entries above the collapse
@@ -10,25 +10,25 @@
 // (`bottom`), labeled "收起" like any menu row while expanded. `mode`:
 // icon-text (collapsible, default), text, or icon (always 64px wide).
 
-import { TelaTheme } from "../theme.slint";
-import { Icon } from "../base/icon/icon.slint";
+import { TTheme } from "../theme.slint";
+import { TIcon } from "../base/icon/icon.slint";
 import { TIconData, TIconSet } from "../base/icon/data.slint";
 
-export enum SideNavMode {
+export enum TSideNavMode {
     icon-text,
     text,
     icon,
 }
 
 // Where the collapse toggle lives.
-export enum SideNavTogglePosition {
+export enum TSideNavTogglePosition {
     // Header row, right edge while expanded, centered once collapsed.
     top,
     // Footer row, sharing it with the footer action when one is set.
     bottom,
 }
 
-export struct SideNavItem {
+export struct TSideNavItem {
     label: string,
     value: string,
     // Optional glyph from TIconSet; items without one fall back to text.
@@ -41,7 +41,7 @@ export struct SideNavItem {
 // behave like a menu row — it highlights with `current-value` and fires
 // `changed` — while an empty one acts as a plain button firing
 // `footer-clicked`.
-export struct SideNavFooterItem {
+export struct TSideNavFooterItem {
     label: string = "",
     icon: TIconData = { paths: [] },
     value: string = "",
@@ -51,7 +51,7 @@ export struct SideNavFooterItem {
 // collapsed center, the label fades with the fold, hover/active/disabled
 // recolor. Selection behavior lives in the `clicked` handlers of the
 // callers (menu rows select, footer rows may fire `footer-clicked`).
-component NavRow inherits Rectangle {
+component TNavRow inherits Rectangle {
     in property <string> label;
     in property <TIconData> icon;
     in property <string> value;
@@ -62,66 +62,66 @@ component NavRow inherits Rectangle {
     callback clicked();
 
     height: 40px;
-    border-radius: TelaTheme.radius-medium;
+    border-radius: TTheme.radius-medium;
     clip: true;
     background: transparent;
-    animate background { duration: TelaTheme.duration-fast; }
+    animate background { duration: TTheme.duration-fast; }
 
     states [
         hovered when row-ta.has-hover && !root.disabled: {
-            background: TelaTheme.bg-color-component-hover;
+            background: TTheme.bg-color-component-hover;
         }
         active when root.value != "" && root.value == root.current-value && !root.disabled: {
-            background: TelaTheme.brand-color-light;
+            background: TTheme.brand-color-light;
         }
     ]
 
-    if root.show-icon && root.icon.paths.length > 0: Icon {
+    if root.show-icon && root.icon.paths.length > 0: TIcon {
         // Slides between the expanded left slot and the collapsed center;
         // stays mounted so the fold animates instead of pop.
-        x: root.show-text ? TelaTheme.padding-lr-m
+        x: root.show-text ? TTheme.padding-lr-m
             : (parent.width - self.width) / 2;
         y: (parent.height - self.height) / 2;
         icon: root.icon;
         size: 20px;
-        icon-color: TelaTheme.text-color-secondary;
-        animate x { duration: TelaTheme.duration-base; easing: ease-out; }
-        animate icon-color { duration: TelaTheme.duration-fast; }
+        icon-color: TTheme.text-color-secondary;
+        animate x { duration: TTheme.duration-base; easing: ease-out; }
+        animate icon-color { duration: TTheme.duration-fast; }
 
         states [
             hovered when row-ta.has-hover && !root.disabled: {
-                icon-color: TelaTheme.text-color-primary;
+                icon-color: TTheme.text-color-primary;
             }
             active when root.value != "" && root.value == root.current-value && !root.disabled: {
-                icon-color: TelaTheme.brand-color;
+                icon-color: TTheme.brand-color;
             }
             disabled when root.disabled: {
-                icon-color: TelaTheme.text-color-disabled;
+                icon-color: TTheme.text-color-disabled;
             }
         ]
     }
 
     if root.label != "": Text {
-        x: root.icon.paths.length > 0 && root.show-icon ? 44px : TelaTheme.padding-lr-m;
+        x: root.icon.paths.length > 0 && root.show-icon ? 44px : TTheme.padding-lr-m;
         y: (parent.height - self.preferred-height) / 2;
         height: self.preferred-height;
         text: root.label;
-        font-size: TelaTheme.font-size-m;
-        color: TelaTheme.text-color-primary;
+        font-size: TTheme.font-size-m;
+        color: TTheme.text-color-primary;
         vertical-alignment: center;
         opacity: root.show-text ? 1 : 0;
-        animate opacity { duration: TelaTheme.duration-base; }
-        animate color { duration: TelaTheme.duration-fast; }
+        animate opacity { duration: TTheme.duration-base; }
+        animate color { duration: TTheme.duration-fast; }
 
         states [
             hovered when row-ta.has-hover && !root.disabled: {
-                color: TelaTheme.text-color-primary;
+                color: TTheme.text-color-primary;
             }
             active when root.value != "" && root.value == root.current-value && !root.disabled: {
-                color: TelaTheme.brand-color;
+                color: TTheme.brand-color;
             }
             disabled when root.disabled: {
-                color: TelaTheme.text-color-disabled;
+                color: TTheme.text-color-disabled;
             }
         ]
     }
@@ -133,37 +133,37 @@ component NavRow inherits Rectangle {
     }
 }
 
-export component SideNav inherits Rectangle {
+export component TSideNav inherits Rectangle {
     in property <string> title;
     in property <TIconData> logo;
-    in property <[SideNavItem]> items;
+    in property <[TSideNavItem]> items;
     in-out property <string> current-value;
     in-out property <bool> collapsed: false;
-    in property <SideNavMode> mode: SideNavMode.icon-text;
-    in property <SideNavTogglePosition> toggle-position: SideNavTogglePosition.top;
+    in property <TSideNavMode> mode: TSideNavMode.icon-text;
+    in property <TSideNavTogglePosition> toggle-position: TSideNavTogglePosition.top;
     in property <bool> bordered: true;
     // Entries pinned to the sidebar's bottom edge, above the collapse
     // toggle; styled like menu rows — icon plus label while expanded,
     // centered icons once collapsed.
-    in property <[SideNavFooterItem]> footer-items;
+    in property <[TSideNavFooterItem]> footer-items;
 
     callback changed(string);
     // Fired by footer entries without a `value` (plain actions).
-    callback footer-clicked(SideNavFooterItem);
+    callback footer-clicked(TSideNavFooterItem);
 
-    private property <bool> show-text: (root.mode == SideNavMode.icon-text && !root.collapsed) || root.mode == SideNavMode.text;
-    private property <bool> show-icon: root.mode != SideNavMode.text;
-    private property <bool> collapsible: root.mode == SideNavMode.icon-text;
+    private property <bool> show-text: (root.mode == TSideNavMode.icon-text && !root.collapsed) || root.mode == TSideNavMode.text;
+    private property <bool> show-icon: root.mode != TSideNavMode.text;
+    private property <bool> collapsible: root.mode == TSideNavMode.icon-text;
     // The header carries the brand and the top collapse toggle; a sidebar
     // with neither folds it away so the menu starts right at the top.
     private property <bool> has-header:
         root.title != "" || root.logo.paths.length > 0
-        || (root.collapsible && root.toggle-position == SideNavTogglePosition.top);
-    private property <bool> footer-chevron: root.collapsible && root.toggle-position == SideNavTogglePosition.bottom;
+        || (root.collapsible && root.toggle-position == TSideNavTogglePosition.top);
+    private property <bool> footer-chevron: root.collapsible && root.toggle-position == TSideNavTogglePosition.bottom;
 
     width: self.show-text ? 232px : 64px;
-    animate width { duration: TelaTheme.duration-base; easing: ease-out; }
-    background: TelaTheme.bg-color-container;
+    animate width { duration: TTheme.duration-base; easing: ease-out; }
+    background: TTheme.bg-color-container;
 
     VerticalLayout {
         // Header ----------------------------------------------------------
@@ -174,31 +174,31 @@ export component SideNav inherits Rectangle {
             clip: true;
 
             HorizontalLayout {
-                x: TelaTheme.padding-lr-m;
+                x: TTheme.padding-lr-m;
                 y: (parent.height - self.preferred-height) / 2;
                 height: self.preferred-height;
                 width: self.preferred-width;
                 opacity: root.show-text ? 1 : 0;
-                animate opacity { duration: TelaTheme.duration-base; }
-                spacing: TelaTheme.spacing-2;
+                animate opacity { duration: TTheme.duration-base; }
+                spacing: TTheme.spacing-2;
 
-                if root.logo.paths.length > 0: Icon {
+                if root.logo.paths.length > 0: TIcon {
                     y: (parent.height - self.height) / 2;
                     icon: root.logo;
                     size: 22px;
-                    icon-color: TelaTheme.brand-color;
+                    icon-color: TTheme.brand-color;
                 }
 
                 if root.title != "": Text {
                     text: root.title;
-                    font-size: TelaTheme.font-size-title-m;
-                    font-weight: TelaTheme.font-weight-semibold;
-                    color: TelaTheme.text-color-primary;
+                    font-size: TTheme.font-size-title-m;
+                    font-weight: TTheme.font-weight-semibold;
+                    color: TTheme.text-color-primary;
                     vertical-alignment: center;
                 }
             }
 
-            if root.collapsible && root.toggle-position == SideNavTogglePosition.top: Rectangle {
+            if root.collapsible && root.toggle-position == TSideNavTogglePosition.top: Rectangle {
                 width: 28px;
                 height: 28px;
                 // Expanded: the header's right edge. Collapsed: centered —
@@ -208,26 +208,26 @@ export component SideNav inherits Rectangle {
                 x: !root.show-text ? (parent.width - self.width) / 2
                     : parent.width - self.width - 6px;
                 y: (parent.height - self.height) / 2;
-                border-radius: TelaTheme.radius-small;
+                border-radius: TTheme.radius-small;
                 background: transparent;
-                animate background { duration: TelaTheme.duration-fast; }
+                animate background { duration: TTheme.duration-fast; }
 
                 states [
                     hovered when toggle-ta.has-hover: {
-                        background: TelaTheme.bg-color-component-hover;
+                        background: TTheme.bg-color-component-hover;
                     }
                 ]
 
-                Icon {
+                TIcon {
                     x: (parent.width - self.width) / 2;
                     y: (parent.height - self.height) / 2;
                     icon: TIconSet.ChevronLeft;
                     size: 16px;
                     // The 180° flip doubles as the collapsed-direction cue.
                     transform-rotation: root.show-text ? 0deg : 180deg;
-                    animate transform-rotation { duration: TelaTheme.duration-base; easing: ease-out; }
-                    icon-color: toggle-ta.has-hover ? TelaTheme.brand-color : TelaTheme.text-color-secondary;
-                    animate icon-color { duration: TelaTheme.duration-fast; }
+                    animate transform-rotation { duration: TTheme.duration-base; easing: ease-out; }
+                    icon-color: toggle-ta.has-hover ? TTheme.brand-color : TTheme.text-color-secondary;
+                    animate icon-color { duration: TTheme.duration-fast; }
                 }
 
                 toggle-ta := TouchArea {
@@ -240,7 +240,7 @@ export component SideNav inherits Rectangle {
         }
 
         // Menu ------------------------------------------------------------
-        for it in root.items: NavRow {
+        for it in root.items: TNavRow {
             label: it.label;
             icon: it.icon;
             value: it.value;
@@ -260,7 +260,7 @@ export component SideNav inherits Rectangle {
 
         // Footer entries ---------------------------------------------------
         // Pinned to the bottom edge above the collapse toggle.
-        for it in root.footer-items: NavRow {
+        for it in root.footer-items: TNavRow {
             label: it.label;
             icon: it.icon;
             value: it.value;
@@ -277,12 +277,12 @@ export component SideNav inherits Rectangle {
             }
         }
 
-        // Collapse toggle, bottom variant: a quiet nav row like the footer
+        // TCollapse toggle, bottom variant: a quiet nav row like the footer
         // entries — panel-fold glyph (arrow pointing at the divider while
         // expanded, outward once collapsed) plus a "收起" label that fades
         // with the fold, left-aligned with the menu while expanded, centered
         // after folding.
-        if root.footer-chevron: NavRow {
+        if root.footer-chevron: TNavRow {
             label: "收起";
             icon: root.show-text ? TIconSet.PanelLeftClose : TIconSet.PanelLeftOpen;
             show-text: root.show-text;
@@ -298,6 +298,6 @@ export component SideNav inherits Rectangle {
         x: parent.width - self.width;
         width: 1px;
         height: 100%;
-        background: TelaTheme.component-stroke;
+        background: TTheme.component-stroke;
     }
 }

@@ -1,12 +1,12 @@
-// Tela UI — Slider
+// Tela UI — TSlider
 //
 // Draggable single-value slider with keyboard support (arrow keys,
 // Home/End) once focused. Emits `changed` while dragging and `released`
 // on pointer up / key release.
 
-import { TelaTheme } from "../theme.slint";
+import { TTheme } from "../theme.slint";
 
-export component Slider inherits Rectangle {
+export component TSlider inherits Rectangle {
     in property <float> minimum: 0;
     in property <float> maximum: 100;
     in property <float> step: 1;
@@ -20,7 +20,7 @@ export component Slider inherits Rectangle {
     private property <length> handle-d: 16px;
     private property <float> t: (value - minimum) / max(0.0001, maximum - minimum);
 
-    height: TelaTheme.height-m;
+    height: TTheme.height-m;
 
     forward-focus: focus-scope;
 
@@ -61,7 +61,7 @@ export component Slider inherits Rectangle {
         width: parent.width;
         height: root.track-h;
         border-radius: root.track-h / 2;
-        background: root.disabled ? TelaTheme.bg-color-component-disabled : TelaTheme.bg-color-component;
+        background: root.disabled ? TTheme.bg-color-component-disabled : TTheme.bg-color-component;
     }
 
     // Filled portion: ends at the handle center (t * width), so 0% shows no
@@ -73,7 +73,7 @@ export component Slider inherits Rectangle {
         width: root.t * parent.width;
         height: root.track-h;
         border-radius: root.track-h / 2;
-        background: root.disabled ? TelaTheme.brand-color-disabled : TelaTheme.brand-color;
+        background: root.disabled ? TTheme.brand-color-disabled : TTheme.brand-color;
     }
 
     // Handle: center travels from the track start (0%) to its end (100%).
@@ -83,14 +83,14 @@ export component Slider inherits Rectangle {
         width: root.handle-d;
         height: root.handle-d;
         border-radius: self.width / 2;
-        background: TelaTheme.text-color-anti;
+        background: TTheme.text-color-anti;
         border-width: 1px;
-        border-color: TelaTheme.brand-color;
-        animate border-color { duration: TelaTheme.duration-fast; }
-        animate border-width { duration: TelaTheme.duration-fast; }
+        border-color: TTheme.brand-color;
+        animate border-color { duration: TTheme.duration-fast; }
+        animate border-width { duration: TTheme.duration-fast; }
         drop-shadow-blur: 4px;
         drop-shadow-offset-y: 1px;
-        drop-shadow-color: TelaTheme.shadow-1-color;
+        drop-shadow-color: TTheme.shadow-1-color;
 
         // Later states win over earlier ones.
         states [
@@ -99,10 +99,10 @@ export component Slider inherits Rectangle {
             }
             pressed when touch.pressed: {
                 border-width: 2px;
-                border-color: TelaTheme.brand-color-active;
+                border-color: TTheme.brand-color-active;
             }
             disabled when root.disabled: {
-                border-color: TelaTheme.border-level-1-color;
+                border-color: TTheme.border-level-1-color;
             }
         ]
     }

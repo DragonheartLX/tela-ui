@@ -9,10 +9,10 @@ fn ui() -> MainWindow {
 fn apply_theme_env(ui: &MainWindow) {
     match std::env::var("TELA_THEME").as_deref() {
         Ok("dark") => {
-            TelaTheme::get(ui).set_preference(TelaThemePreference::Dark);
+            TTheme::get(ui).set_preference(TThemePreference::Dark);
         }
         Ok("light") => {
-            TelaTheme::get(ui).set_preference(TelaThemePreference::Light);
+            TTheme::get(ui).set_preference(TThemePreference::Light);
         }
         _ => {}
     }

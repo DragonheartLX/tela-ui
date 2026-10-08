@@ -1,16 +1,16 @@
-// Tela UI — Carousel
+// Tela UI — TCarousel
 //
 // Sliding slideshow: one image per slide, dots indicator, optional autoplay.
 // Slides keep the component's own size — set width/height on the instance.
 
-import { TelaTheme } from "../theme.slint";
+import { TTheme } from "../theme.slint";
 
-export struct CarouselSlide {
+export struct TCarouselSlide {
     image: image,
 }
 
-export component Carousel inherits Rectangle {
-    in property <[CarouselSlide]> items;
+export component TCarousel inherits Rectangle {
+    in property <[TCarouselSlide]> items;
     in-out property <int> current: 0;
     in property <bool> autoplay: false;
     in property <duration> interval: 3s;
@@ -22,7 +22,7 @@ export component Carousel inherits Rectangle {
         y: 0;
         width: parent.width;
         height: parent.height;
-        animate x { duration: TelaTheme.duration-slow; }
+        animate x { duration: TTheme.duration-slow; }
 
         for it[i] in root.items: Image {
             x: i * root.width;
@@ -39,16 +39,16 @@ export component Carousel inherits Rectangle {
         x: (parent.width - self.preferred-width) / 2;
         y: parent.height - self.preferred-height - 12px;
         height: self.preferred-height;
-        spacing: TelaTheme.spacing-3;
+        spacing: TTheme.spacing-3;
 
         for it[i] in root.items: Rectangle {
             width: i == root.current ? 16px : 6px;
             height: 6px;
             y: (parent.height - self.height) / 2;
-            border-radius: TelaTheme.radius-round;
-            background: i == root.current ? TelaTheme.text-color-anti : TelaTheme.text-color-anti.with-alpha(0.4);
-            animate width { duration: TelaTheme.duration-fast; }
-            animate background { duration: TelaTheme.duration-fast; }
+            border-radius: TTheme.radius-round;
+            background: i == root.current ? TTheme.text-color-anti : TTheme.text-color-anti.with-alpha(0.4);
+            animate width { duration: TTheme.duration-fast; }
+            animate background { duration: TTheme.duration-fast; }
 
             dot-ta := TouchArea {
                 mouse-cursor: MouseCursor.pointer;

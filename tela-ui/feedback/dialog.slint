@@ -1,15 +1,15 @@
-// Tela UI — Dialog
+// Tela UI — TDialog
 //
 // Modal dialog. Place it anywhere in an overlay layer covering the window;
 // it renders a dimmed backdrop and a centered card. `open` toggles it,
 // overlay clicks close it when `close-on-overlay` is set. Children of the
 // component are rendered below the content text as custom body content.
 
-import { TelaTheme } from "../theme.slint";
-import { Theme } from "../structs/enums.slint";
-import { Button, ButtonVariant } from "../base/button.slint";
+import { TTheme } from "../theme.slint";
+import { TThemeRole } from "../structs/enums.slint";
+import { TButton, TButtonVariant } from "../base/button.slint";
 
-export component Dialog inherits Rectangle {
+export component TDialog inherits Rectangle {
     in-out property <bool> open: false;
     in property <string> title;
     in property <string> content;
@@ -23,7 +23,7 @@ export component Dialog inherits Rectangle {
     callback closed();
 
     visible: open;
-    background: TelaTheme.mask-active;
+    background: TTheme.mask-active;
     clip: false;
 
     public function close() {
@@ -43,54 +43,54 @@ export component Dialog inherits Rectangle {
         y: (parent.height - self.height) / 2 + (root.open ? 0px : 12px);
         width: min(root.dialog-width, parent.width - 48px);
         height: card.preferred-height;
-        border-radius: TelaTheme.radius-large;
-        background: TelaTheme.bg-color-container;
+        border-radius: TTheme.radius-large;
+        background: TTheme.bg-color-container;
         opacity: root.open ? 1 : 0;
-        drop-shadow-blur: TelaTheme.shadow-3-blur;
-        drop-shadow-offset-y: TelaTheme.shadow-3-offset-y;
-        drop-shadow-color: TelaTheme.shadow-3-color;
-        animate opacity { duration: TelaTheme.duration-base; }
-        animate y { duration: TelaTheme.duration-base; }
+        drop-shadow-blur: TTheme.shadow-3-blur;
+        drop-shadow-offset-y: TTheme.shadow-3-offset-y;
+        drop-shadow-color: TTheme.shadow-3-color;
+        animate opacity { duration: TTheme.duration-base; }
+        animate y { duration: TTheme.duration-base; }
 
         card := VerticalLayout {
-            padding: TelaTheme.margin-xxl;
-            spacing: TelaTheme.margin-m;
+            padding: TTheme.margin-xxl;
+            spacing: TTheme.margin-m;
 
             if root.title != "": Text {
                 text: root.title;
-                font-size: TelaTheme.font-size-title-xl;
-                font-weight: TelaTheme.font-weight-semibold;
-                color: TelaTheme.text-color-primary;
+                font-size: TTheme.font-size-title-xl;
+                font-weight: TTheme.font-weight-semibold;
+                color: TTheme.text-color-primary;
             }
 
             if root.content != "": Text {
                 text: root.content;
-                font-size: TelaTheme.font-size-m;
-                color: TelaTheme.text-color-secondary;
+                font-size: TTheme.font-size-m;
+                color: TTheme.text-color-secondary;
                 wrap: word-wrap;
             }
 
             @children
 
             HorizontalLayout {
-                spacing: TelaTheme.margin-s;
+                spacing: TTheme.margin-s;
 
                 Rectangle {
                     horizontal-stretch: 1;
                 }
 
-                Button {
+                TButton {
                     text: root.cancel-text;
-                    variant: ButtonVariant.outline;
+                    variant: TButtonVariant.outline;
                     clicked => {
                         root.canceled();
                         root.close();
                     }
                 }
 
-                Button {
+                TButton {
                     text: root.confirm-text;
-                    theme: Theme.primary;
+                    theme: TThemeRole.primary;
                     clicked => {
                         root.accepted();
                         root.close();

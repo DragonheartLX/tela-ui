@@ -1,21 +1,21 @@
-// Tela UI — Collapse
+// Tela UI — TCollapse
 //
 // Foldable panels. `accordion: true` keeps a single open panel tracked in
 // `current-index` (-1 = none); with `accordion: false` each panel toggles
 // independently (its open state is local, no external preset).
 
-import { TelaTheme } from "../theme.slint";
-import { Icon } from "../base/icon/icon.slint";
+import { TTheme } from "../theme.slint";
+import { TIcon } from "../base/icon/icon.slint";
 import { TIconSet } from "../base/icon/data.slint";
 
-export struct CollapseItem {
+export struct TCollapseItem {
     label: string,
     content: string,
     disabled: bool,
 }
 
-export component Collapse inherits VerticalLayout {
-    in property <[CollapseItem]> items;
+export component TCollapse inherits VerticalLayout {
+    in property <[TCollapseItem]> items;
     in property <bool> accordion: false;
     // Accordion mode only: index of the open panel, -1 = all closed.
     in-out property <int> current-index: -1;
@@ -33,36 +33,36 @@ export component Collapse inherits VerticalLayout {
             height: 44px;
 
             HorizontalLayout {
-                padding-left: TelaTheme.padding-lr-l;
-                padding-right: TelaTheme.padding-lr-l;
-                spacing: TelaTheme.spacing-4;
+                padding-left: TTheme.padding-lr-l;
+                padding-right: TTheme.padding-lr-l;
+                spacing: TTheme.spacing-4;
 
                 Text {
                     horizontal-stretch: 1;
                     text: it.label;
-                    font-size: TelaTheme.font-size-m;
-                    font-family: TelaTheme.font-family;
-                    font-weight: TelaTheme.font-weight-medium;
-                    color: open ? TelaTheme.brand-color : TelaTheme.text-color-primary;
+                    font-size: TTheme.font-size-m;
+                    font-family: TTheme.font-family;
+                    font-weight: TTheme.font-weight-medium;
+                    color: open ? TTheme.brand-color : TTheme.text-color-primary;
                     vertical-alignment: center;
                     overflow: elide;
 
                     states [
                         disabled when it.disabled: {
-                            color: TelaTheme.text-color-disabled;
+                            color: TTheme.text-color-disabled;
                         }
                     ]
                 }
 
-                Icon {
+                TIcon {
                     width: 16px;
                     y: (parent.height - self.height) / 2;
                     icon: TIconSet.ChevronDown;
                     size: 16px;
-                    icon-color: it.disabled ? TelaTheme.text-color-disabled : TelaTheme.text-color-secondary;
+                    icon-color: it.disabled ? TTheme.text-color-disabled : TTheme.text-color-secondary;
                     transform-rotation: open ? 180deg : 0deg;
                     transform-origin: { x: self.width / 2, y: self.height / 2 };
-                    animate transform-rotation { duration: TelaTheme.duration-fast; }
+                    animate transform-rotation { duration: TTheme.duration-fast; }
                 }
             }
 
@@ -83,18 +83,18 @@ export component Collapse inherits VerticalLayout {
 
         // Content folds by height (animated) instead of mount/unmount.
         content-wrap := Rectangle {
-            height: open ? content.preferred-height + TelaTheme.padding-lr-l : 0px;
+            height: open ? content.preferred-height + TTheme.padding-lr-l : 0px;
             clip: true;
-            animate height { duration: TelaTheme.duration-base; }
+            animate height { duration: TTheme.duration-base; }
 
             content := Text {
-                x: TelaTheme.padding-lr-l;
-                y: TelaTheme.spacing-4;
-                width: parent.width - TelaTheme.padding-lr-l * 2;
+                x: TTheme.padding-lr-l;
+                y: TTheme.spacing-4;
+                width: parent.width - TTheme.padding-lr-l * 2;
                 text: it.content;
-                font-size: TelaTheme.font-size-m;
-                font-family: TelaTheme.font-family;
-                color: TelaTheme.text-color-secondary;
+                font-size: TTheme.font-size-m;
+                font-family: TTheme.font-family;
+                color: TTheme.text-color-secondary;
                 wrap: word-wrap;
             }
         }
@@ -102,7 +102,7 @@ export component Collapse inherits VerticalLayout {
         // Hairline under every panel closes the stack visually.
         Rectangle {
             height: 1px;
-            background: TelaTheme.border-level-1-color;
+            background: TTheme.border-level-1-color;
         }
     }
 }

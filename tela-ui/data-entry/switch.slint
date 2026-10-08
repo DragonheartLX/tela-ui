@@ -1,25 +1,25 @@
-// Tela UI — Switch
+// Tela UI — TSwitch
 //
-// Toggle switch. size: Size (small 36×18 / medium 40×22 / large 48×24).
+// Toggle switch. size: TSize (small 36×18 / medium 40×22 / large 48×24).
 
-import { TelaTheme } from "../theme.slint";
-import { Size } from "../structs/enums.slint";
-import { TelaTheme } from "../theme.slint";
+import { TTheme } from "../theme.slint";
+import { TSize } from "../structs/enums.slint";
+import { TTheme } from "../theme.slint";
 
-export component Switch inherits Rectangle {
+export component TSwitch inherits Rectangle {
     in-out property <bool> checked;
     in property <bool> disabled;
-    in property <Size> size: Size.medium;
+    in property <TSize> size: TSize.medium;
 
     callback changed(bool);
 
     private property <length> w:
-        size == Size.small ? 36px
-        : size == Size.large ? 48px
+        size == TSize.small ? 36px
+        : size == TSize.large ? 48px
         : 40px;
     private property <length> h:
-        size == Size.small ? 18px
-        : size == Size.large ? 24px
+        size == TSize.small ? 18px
+        : size == TSize.large ? 24px
         : 22px;
     private property <length> thumb: h - 6px;
     private property <length> inset: 3px;
@@ -27,22 +27,22 @@ export component Switch inherits Rectangle {
     width: w;
     height: h;
     border-radius: self.height / 2;
-    background: checked ? TelaTheme.brand-color : TelaTheme.bg-color-component;
-    animate background { duration: TelaTheme.duration-fast; }
+    background: checked ? TTheme.brand-color : TTheme.bg-color-component;
+    animate background { duration: TTheme.duration-fast; }
 
     // Later states win over earlier ones.
     states [
         on-hovered when checked && touch.has-hover: {
-            background: TelaTheme.brand-color-hover;
+            background: TTheme.brand-color-hover;
         }
         on-pressed when checked && touch.pressed: {
-            background: TelaTheme.brand-color-active;
+            background: TTheme.brand-color-active;
         }
         off-hovered when !checked && touch.has-hover: {
-            background: TelaTheme.bg-color-component-hover;
+            background: TTheme.bg-color-component-hover;
         }
         disabled when root.disabled: {
-            background: checked ? TelaTheme.brand-color-disabled : TelaTheme.bg-color-component-disabled;
+            background: checked ? TTheme.brand-color-disabled : TTheme.bg-color-component-disabled;
         }
     ]
 
@@ -61,11 +61,11 @@ export component Switch inherits Rectangle {
         width: root.thumb;
         height: root.thumb;
         border-radius: self.width / 2;
-        background: root.disabled ? TelaTheme.text-color-disabled : TelaTheme.text-color-anti;
+        background: root.disabled ? TTheme.text-color-disabled : TTheme.text-color-anti;
         drop-shadow-blur: 2px;
         drop-shadow-offset-y: 1px;
         drop-shadow-color: rgba(0, 0, 0, 0.2);
-        animate x { duration: TelaTheme.duration-fast; easing: ease-out; }
+        animate x { duration: TTheme.duration-fast; easing: ease-out; }
     }
 
     accessible-role: AccessibleRole.checkbox;
