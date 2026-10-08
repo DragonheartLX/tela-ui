@@ -8,6 +8,7 @@
 import { TTheme } from "../theme.slint";
 import { TThemeRole } from "../structs/enums.slint";
 import { TButton, TButtonVariant } from "../base/button.slint";
+import { TPopupStackLayer } from "../popup-stack.slint";
 
 export component TDialog inherits Rectangle {
     in-out property <bool> open: false;
@@ -17,6 +18,8 @@ export component TDialog inherits Rectangle {
     in property <string> cancel-text: "取消";
     in property <bool> close-on-overlay: true;
     in property <length> dialog-width: 480px;
+    // false hides the cancel button (alert-style single-action dialogs).
+    in property <bool> show-cancel: true;
 
     callback accepted();
     callback canceled();
@@ -25,10 +28,20 @@ export component TDialog inherits Rectangle {
     visible: open;
     background: TTheme.mask-active;
     clip: false;
+    z: TTheme.z-modal;
 
     public function close() {
         open = false;
         root.closed();
+    }
+
+    // Stack bookkeeping + ESC: ESC closes the topmost open layer; a dialog
+    // closed that way is a plain dismissal (closed, not canceled).
+    TPopupStackLayer {
+        active: root.open;
+        close-requested => {
+            root.close();
+        }
     }
 
     TouchArea {
@@ -79,7 +92,7 @@ export component TDialog inherits Rectangle {
                     horizontal-stretch: 1;
                 }
 
-                TButton {
+                if root.show-cancel: TButton {
                     text: root.cancel-text;
                     variant: TButtonVariant.outline;
                     clicked => {

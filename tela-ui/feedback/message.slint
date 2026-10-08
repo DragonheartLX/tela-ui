@@ -70,6 +70,7 @@ export component TMessageOverlay inherits Rectangle {
     // The pill pins to a window edge per TMessage.placement. A former
     // `height: 0px` collapsed this strip to zero and centered it in the
     // window, landing messages mid-screen.
+    z: TTheme.z-message;
 
     private property <bool> to-left:
         TMessage.placement == TMessagePlacement.top-left

@@ -60,7 +60,9 @@ export component TTooltipOverlay inherits Rectangle {
 
     // Unbound width/height fill the area it is dropped into. A passive
     // full-window overlay: no TouchArea, never blocks input.
-    z: 100;
+    // Topmost tier: triggers live inside modal panels, the bubble must
+    // render above their backdrop.
+    z: TTheme.z-message;
 
     // Geometry probe: hosts (TBorderlessWindow) may place this overlay below
     // a title bar, so trigger coords (window-local) must be converted into
@@ -139,7 +141,7 @@ export component TTooltipOverlay inherits Rectangle {
 
     // Anchoring math against the stored trigger geometry, converted from
     // window coords into overlay coords.
-    public pure function compute-x() -> length {
+    pure function compute-x() -> length {
         if (TTooltip.placement == TTooltipPlacement.left) {
             return TTooltip.x - probe.absolute-position.x - bubble.width - root.gap;
         } else if (TTooltip.placement == TTooltipPlacement.right) {
@@ -148,7 +150,7 @@ export component TTooltipOverlay inherits Rectangle {
         return TTooltip.x - probe.absolute-position.x + (TTooltip.width - bubble.width) / 2;
     }
 
-    public pure function compute-y() -> length {
+    pure function compute-y() -> length {
         if (TTooltip.placement == TTooltipPlacement.top) {
             return TTooltip.y - probe.absolute-position.y - bubble.height - root.gap;
         } else if (TTooltip.placement == TTooltipPlacement.bottom) {

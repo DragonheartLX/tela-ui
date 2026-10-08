@@ -1,0 +1,98 @@
+// Tela UI — TPopupSurface (internal scaffolding)
+//
+// The TInputFrame role for anchored popups: TDropdownMenu / TPopconfirm /
+// TSelect all wrap their trigger with the same three-part scaffold —
+//   1. a zero-clamp host keeping the PopupWindow out of the wrapper's
+//      preferred-size computation (a popup child would inflate it),
+//   2. placement dispatch (to-end / to-top pinning around the trigger box),
+//   3. show / close / toggle plus the surface skin (container background,
+//      hairline border, radius, shadow-2 trio, clip).
+// Consumers pass the popup BODY as children — it lands inside the skinned
+// `content` rectangle.
+//
+// The consumer must feed `anchor-width` / `anchor-height` (its own trigger
+// box): the surface itself is zero-clamped and cannot measure the consumer.
+//
+// Sizing: Slint forbids reaching into a PopupWindow from the enclosing
+// component, so the content-driven width/height formulas must live ON the
+// popup (as they did in each consumer before this refactor). Consumers that
+// cannot express their size that way (TSelect follows the trigger width,
+// TDropdownMenu clamps to visible rows) pass an explicit `popup-width` /
+// `popup-height` instead; a negative value means "follow the content".
+
+import { TTheme } from "./theme.slint";
+import { TPopupPlacement } from "./structs/enums.slint";
+
+export component TPopupSurface inherits Rectangle {
+    // Trigger box the popup pins around (bind to the consumer's width/height).
+    in property <length> anchor-width;
+    in property <length> anchor-height;
+    in property <TPopupPlacement> placement: TPopupPlacement.bottom-start;
+    // Distance between the trigger edge and the popup.
+    in property <length> gap: 6px;
+
+    // < 0: content-driven — max(popup-min-width, content preferred width).
+    in property <length> popup-min-width: 140px;
+    in property <length> popup-width: -1px;
+    // < 0: content-driven (content preferred height).
+    in property <length> popup-height: -1px;
+    // Caps the skinned content so long elide labels stop at a sane width.
+    in property <length> popup-max-width: 280px;
+
+    out property <bool> is-open: popup.is-open;
+
+    public function show() {
+        popup.show();
+    }
+
+    public function close() {
+        popup.close();
+    }
+
+    public function toggle() {
+        if (popup.is-open) {
+            popup.close();
+        } else {
+            popup.show();
+        }
+    }
+
+    private property <bool> to-end:
+        placement == TPopupPlacement.bottom-end || placement == TPopupPlacement.top-end;
+    private property <bool> to-top:
+        placement == TPopupPlacement.top-start || placement == TPopupPlacement.top-end;
+
+    // The zero-clamp host itself: zero size (see the header comment), so it
+    // neither takes room in layouts nor swallows input; the PopupWindow
+    // child still renders and positions against the consumer's origin.
+    x: 0;
+    y: 0;
+    max-width: 0px;
+    max-height: 0px;
+
+    popup := PopupWindow {
+        x: root.to-end ? root.anchor-width - self.width : 0;
+        y: root.to-top ? -self.height - root.gap : root.anchor-height + root.gap;
+        width: root.popup-width >= 0px
+            ? root.popup-width
+            : max(root.popup-min-width, content.preferred-width);
+        height: root.popup-height >= 0px
+            ? root.popup-height
+            : content.preferred-height;
+        close-policy: close-on-click-outside;
+
+        content := Rectangle {
+            max-width: root.popup-max-width;
+            background: TTheme.bg-color-container;
+            border-width: 1px;
+            border-color: TTheme.component-stroke;
+            border-radius: TTheme.radius-medium;
+            drop-shadow-blur: TTheme.shadow-2-blur;
+            drop-shadow-offset-y: TTheme.shadow-2-offset-y;
+            drop-shadow-color: TTheme.shadow-2-color;
+            clip: true;
+
+            @children
+        }
+    }
+}

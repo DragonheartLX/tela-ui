@@ -1,0 +1,50 @@
+// Tela UI — TLoadingService
+//
+// Global fullscreen loading mask (the TMessage pattern): deep code — or
+// Rust — flips a blocking loading layer without any wiring:
+//   TLoadingService.show("保存中…");
+//   … await the work …
+//   TLoadingService.hide();
+// One `TLoadingServiceOverlay` near the window root renders it.
+//
+// The mask blocks pointer input while visible; it is deliberately NOT a
+// TPopupStack layer — loading is a state, not something ESC dismisses.
+
+import { TTheme } from "../theme.slint";
+import { TLoading } from "../base/loading.slint";
+
+export global TLoadingService {
+    in-out property <bool> visible: false;
+    out property <string> text: "加载中…";
+
+    public function show(text: string) {
+        self.text = text;
+        self.visible = true;
+    }
+
+    public function hide() {
+        self.visible = false;
+    }
+}
+
+// Place ONE near the window root (after the main content). Sits above the
+// modal tier so it also covers open dialogs.
+export component TLoadingServiceOverlay inherits Rectangle {
+    z: TTheme.z-message;
+    background: TTheme.mask-active;
+    opacity: TLoadingService.visible ? 1 : 0;
+    visible: TLoadingService.visible;
+    animate opacity { duration: TTheme.duration-fast; }
+
+    // Swallows clicks while the mask is up.
+    TouchArea {
+        enabled: TLoadingService.visible;
+        mouse-cursor: MouseCursor.wait;
+    }
+
+    loading := TLoading {
+        x: (parent.width - self.preferred-width) / 2;
+        y: (parent.height - self.preferred-height) / 2;
+        text: TLoadingService.text;
+    }
+}

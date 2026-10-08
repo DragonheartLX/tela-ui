@@ -7,11 +7,12 @@ import { TTheme } from "../theme.slint";
 import { TSize } from "../structs/enums.slint";
 import { TIcon } from "../base/icon/icon.slint";
 import { TIconData, TIconSet } from "../base/icon/data.slint";
+import { TPopupSurface } from "../popup-surface.slint";
 
 export struct TSelectItem {
     label: string,
     value: string,
-    disabled: bool,
+    disabled: bool = false,
 }
 
 export component TSelect inherits Rectangle {
@@ -54,7 +55,7 @@ export component TSelect inherits Rectangle {
         enabled: !root.disabled;
         mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;
         clicked => {
-            popup.show();
+            surface.show();
         }
     }
 
@@ -99,89 +100,81 @@ export component TSelect inherits Rectangle {
             icon: TIconSet.ChevronDown;
             size: root.fs;
             icon-color: root.disabled ? TTheme.text-color-disabled : TTheme.text-color-secondary;
-            transform-rotation: popup.is-open ? 180deg : 0deg;
+            transform-rotation: surface.is-open ? 180deg : 0deg;
             transform-origin: { x: self.width / 2, y: self.height / 2 };
             animate transform-rotation { duration: TTheme.duration-fast; }
         }
     }
 
-    popup := PopupWindow {
-        x: 0;
-        y: parent.height + 4px;
-        width: max(root.width, 120px);
-        height: min(root.items.length, 6) * root.item-h + 8px;
-        close-policy: close-on-click-outside;
+    // The popup matches the trigger width (at least 120px) and shows up to
+    // 6 rows before it would need scrolling.
+    surface := TPopupSurface {
+        anchor-width: root.width;
+        anchor-height: root.height;
+        gap: 4px;
+        popup-width: max(root.width, 120px);
+        popup-max-width: max(root.width, 120px);
+        popup-height: min(root.items.length, 6) * root.item-h + 8px;
 
-        Rectangle {
-            background: TTheme.bg-color-container;
-            border-width: 1px;
-            border-color: TTheme.component-stroke;
-            border-radius: TTheme.radius-medium;
-            drop-shadow-blur: TTheme.shadow-2-blur;
-            drop-shadow-offset-y: TTheme.shadow-2-offset-y;
-            drop-shadow-color: TTheme.shadow-2-color;
-            clip: true;
+        VerticalLayout {
+            padding: 4px;
 
-            VerticalLayout {
-                padding: 4px;
+            for it[i] in root.items: Rectangle {
+                height: root.item-h;
+                border-radius: TTheme.radius-default;
+                background: transparent;
+                animate background { duration: TTheme.duration-fast; }
 
-                for it[i] in root.items: Rectangle {
-                    height: root.item-h;
-                    border-radius: TTheme.radius-default;
-                    background: transparent;
-                    animate background { duration: TTheme.duration-fast; }
+                states [
+                    hovered when item-ta.has-hover && !it.disabled: {
+                        background: TTheme.bg-color-container-hover;
+                    }
+                    selected when i == root.current-index: {
+                        background: TTheme.brand-color-light;
+                    }
+                ]
 
-                    states [
-                        hovered when item-ta.has-hover && !it.disabled: {
-                            background: TTheme.bg-color-container-hover;
-                        }
-                        selected when i == root.current-index: {
-                            background: TTheme.brand-color-light;
-                        }
-                    ]
+                HorizontalLayout {
+                    padding-left: TTheme.spacing-2;
+                    padding-right: TTheme.spacing-2;
+                    spacing: TTheme.spacing-2;
 
-                    HorizontalLayout {
-                        padding-left: TTheme.spacing-2;
-                        padding-right: TTheme.spacing-2;
-                        spacing: TTheme.spacing-2;
+                    Text {
+                        text: it.label;
+                        font-size: root.fs;
+                        font-family: TTheme.font-family;
+                        color: TTheme.text-color-primary;
+                        vertical-alignment: center;
+                        horizontal-stretch: 1;
+                        overflow: elide;
 
-                        Text {
-                            text: it.label;
-                            font-size: root.fs;
-                            font-family: TTheme.font-family;
-                            color: TTheme.text-color-primary;
-                            vertical-alignment: center;
-                            horizontal-stretch: 1;
-                            overflow: elide;
-
-                            // Later states win over earlier ones.
-                            states [
-                                active when i == root.current-index: {
-                                    color: TTheme.brand-color;
-                                }
-                                disabled when it.disabled: {
-                                    color: TTheme.text-color-disabled;
-                                }
-                            ]
-                        }
-
-                        if i == root.current-index: TIcon {
-                            y: (parent.height - self.height) / 2;
-                            icon: TIconSet.Check;
-                            size: root.fs;
-                            icon-color: TTheme.brand-color;
-                        }
+                        // Later states win over earlier ones.
+                        states [
+                            active when i == root.current-index: {
+                                color: TTheme.brand-color;
+                            }
+                            disabled when it.disabled: {
+                                color: TTheme.text-color-disabled;
+                            }
+                        ]
                     }
 
-                    item-ta := TouchArea {
-                        enabled: !it.disabled;
-                        mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;
-                        clicked => {
-                            root.current-index = i;
-                            root.current-value = it.value;
-                            root.selected(i, it.value);
-                            popup.close();
-                        }
+                    if i == root.current-index: TIcon {
+                        y: (parent.height - self.height) / 2;
+                        icon: TIconSet.Check;
+                        size: root.fs;
+                        icon-color: TTheme.brand-color;
+                    }
+                }
+
+                item-ta := TouchArea {
+                    enabled: !it.disabled;
+                    mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;
+                    clicked => {
+                        root.current-index = i;
+                        root.current-value = it.value;
+                        root.selected(i, it.value);
+                        surface.close();
                     }
                 }
             }

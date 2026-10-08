@@ -10,6 +10,7 @@
 import { TTheme } from "../theme.slint";
 import { TIcon } from "../base/icon/icon.slint";
 import { TIconSet } from "../base/icon/data.slint";
+import { TPopupStackLayer } from "../popup-stack.slint";
 
 export enum TDrawerPlacement {
     top,
@@ -38,12 +39,21 @@ export component TDrawer inherits Rectangle {
     // TInput stays safe: the backdrop TouchArea is only enabled while open,
     // and the panel rests fully off-window when closed.
     opacity: root.open ? 1 : 0;
+    z: TTheme.z-modal;
     animate opacity { duration: TTheme.duration-base; easing: ease-out; }
     background: TTheme.mask-active;
 
     public function close() {
         open = false;
         root.closed();
+    }
+
+    // Stack bookkeeping + ESC: ESC closes the topmost open layer.
+    TPopupStackLayer {
+        active: root.open;
+        close-requested => {
+            root.close();
+        }
     }
 
     TouchArea {

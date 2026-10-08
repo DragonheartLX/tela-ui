@@ -1,0 +1,79 @@
+// Tela UI — TDialogService
+//
+// Global confirm/alert dialog service (the TMessage pattern for dialogs):
+// deep component code — or Rust — opens a confirmation box with one call,
+// no prop-drilling to the window root:
+//   TDialogService.confirm("删除", "确认删除该项?");
+//   TDialogService.alert("提示", "只有确认按钮");
+// One `TDialogServiceOverlay` near the window root renders it.
+//
+// Outcome reporting: `result-seq` bumps on every close and `accepted`
+// carries the verdict (confirm button = true; cancel / ESC / overlay
+// click = false). Watch it with a mirrored property:
+//   private property <int> r: TDialogService.result-seq;
+//   changed r => { if (TDialogService.accepted) { … } }
+
+import { TDialog } from "dialog.slint";
+
+export global TDialogService {
+    in-out property <bool> visible: false;
+    out property <string> title;
+    out property <string> content;
+    // alert() dialogs have no cancel button.
+    out property <bool> show-cancel: true;
+    out property <int> result-seq: 0;
+    out property <bool> accepted: false;
+
+    public function confirm(title: string, content: string) {
+        self.title = title;
+        self.content = content;
+        self.show-cancel = true;
+        self.visible = true;
+    }
+
+    public function alert(title: string, content: string) {
+        self.title = title;
+        self.content = content;
+        self.show-cancel = false;
+        self.visible = true;
+    }
+
+    // Overlay-internal: records the verdict and closes.
+    public function finish(ok: bool) {
+        self.accepted = ok;
+        self.result-seq += 1;
+        self.visible = false;
+    }
+}
+
+// Place ONE near the window root (after the main content). Renders the
+// service dialog on top of everything via TDialog's z-modal layering and
+// registers with TPopupStack so ESC closes it.
+export component TDialogServiceOverlay inherits Rectangle {
+    // Buttons fire accepted/canceled right before close(); `closed` alone
+    // means ESC or an overlay click dismissed the box — those count as
+    // "not accepted" too, so every close path bumps result-seq exactly once.
+    private property <bool> button-fired: false;
+
+    TDialog {
+        open <=> TDialogService.visible;
+        title: TDialogService.title;
+        content: TDialogService.content;
+        show-cancel: TDialogService.show-cancel;
+
+        accepted => {
+            root.button-fired = true;
+            TDialogService.finish(true);
+        }
+        canceled => {
+            root.button-fired = true;
+            TDialogService.finish(false);
+        }
+        closed => {
+            if (!root.button-fired) {
+                TDialogService.finish(false);
+            }
+            root.button-fired = false;
+        }
+    }
+}

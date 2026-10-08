@@ -9,6 +9,7 @@
 import { TTheme,  TThemeRole,  TSize } from "../theme.slint";
 import { TButton, TButtonVariant } from "../base/button.slint";
 import { TPopupPlacement } from "../structs/enums.slint";
+import { TPopupSurface } from "../popup-surface.slint";
 
 export component TPopconfirm inherits Rectangle {
     in property <string> text;
@@ -20,28 +21,19 @@ export component TPopconfirm inherits Rectangle {
     callback confirm();
     callback cancel();
 
-    out property <bool> open: popup.is-open;
+    out property <bool> open: surface.is-open;
 
     public function show() {
-        popup.show();
+        surface.show();
     }
 
     public function close() {
-        popup.close();
+        surface.close();
     }
 
     public function toggle() {
-        if (popup.is-open) {
-            popup.close();
-        } else {
-            popup.show();
-        }
+        surface.toggle();
     }
-
-    private property <bool> to-end:
-        placement == TPopupPlacement.bottom-end || placement == TPopupPlacement.top-end;
-    private property <bool> to-top:
-        placement == TPopupPlacement.top-start || placement == TPopupPlacement.top-end;
 
     // Trigger content hosted in a layout so the wrapper hugs it in parent
     // layouts (a bare child would not feed the preferred size).
@@ -59,74 +51,51 @@ export component TPopconfirm inherits Rectangle {
         }
     }
 
-    // Zero-clamped host: keeps the popup out of the wrapper's preferred
-    // size computation (a PopupWindow would inflate it) while pinning the
-    // popup coordinate system to the wrapper origin.
-    Rectangle {
-        x: 0;
-        y: 0;
-        max-width: 0px;
-        max-height: 0px;
+    surface := TPopupSurface {
+        anchor-width: root.width;
+        anchor-height: root.height;
+        placement: root.placement;
+        popup-min-width: 180px;
 
-        popup := PopupWindow {
-            x: root.to-end ? root.width - self.width : 0;
-            y: root.to-top ? -self.height - 6px : root.height + 6px;
-            width: max(180px, content.preferred-width);
-            height: content.preferred-height;
-            close-policy: close-on-click-outside;
+        VerticalLayout {
+            padding: TTheme.padding-lr-l;
+            padding-top: TTheme.padding-lr-m;
+            padding-bottom: TTheme.padding-lr-m;
+            spacing: TTheme.spacing-4;
 
-            content := Rectangle {
-                max-width: 280px;
-                background: TTheme.bg-color-container;
-                border-width: 1px;
-                border-color: TTheme.component-stroke;
-                border-radius: TTheme.radius-medium;
-                drop-shadow-blur: TTheme.shadow-2-blur;
-                drop-shadow-offset-y: TTheme.shadow-2-offset-y;
-                drop-shadow-color: TTheme.shadow-2-color;
-                clip: true;
+            Text {
+                text: root.text;
+                font-size: TTheme.font-size-m;
+                font-family: TTheme.font-family;
+                color: TTheme.text-color-primary;
+                wrap: word-wrap;
+                width: min(self.preferred-width, 232px);
+            }
 
-                VerticalLayout {
-                    padding: TTheme.padding-lr-l;
-                    padding-top: TTheme.padding-lr-m;
-                    padding-bottom: TTheme.padding-lr-m;
-                    spacing: TTheme.spacing-4;
+            HorizontalLayout {
+                spacing: TTheme.spacing-2;
 
-                    Text {
-                        text: root.text;
-                        font-size: TTheme.font-size-m;
-                        font-family: TTheme.font-family;
-                        color: TTheme.text-color-primary;
-                        wrap: word-wrap;
-                        width: min(self.preferred-width, 232px);
+                // Absorbs the leftover row space so the buttons stay
+                // right-packed.
+                Rectangle { }
+
+                TButton {
+                    size: TSize.small;
+                    variant: TButtonVariant.outline;
+                    text: root.cancel-text;
+                    clicked => {
+                        root.cancel();
+                        surface.close();
                     }
+                }
 
-                    HorizontalLayout {
-                        spacing: TTheme.spacing-2;
-
-                        // Absorbs the leftover row space so the buttons stay
-                        // right-packed.
-                        Rectangle { }
-
-                        TButton {
-                            size: TSize.small;
-                            variant: TButtonVariant.outline;
-                            text: root.cancel-text;
-                            clicked => {
-                                root.cancel();
-                                popup.close();
-                            }
-                        }
-
-                        TButton {
-                            size: TSize.small;
-                            theme: TThemeRole.primary;
-                            text: root.confirm-text;
-                            clicked => {
-                                root.confirm();
-                                popup.close();
-                            }
-                        }
+                TButton {
+                    size: TSize.small;
+                    theme: TThemeRole.primary;
+                    text: root.confirm-text;
+                    clicked => {
+                        root.confirm();
+                        surface.close();
                     }
                 }
             }

@@ -91,6 +91,7 @@ export global TNotification {
 
 export component TNotificationOverlay inherits Rectangle {
     // A passive full-window overlay: no TouchArea, so it never blocks input.
+    z: TTheme.z-message;
     private property <bool> to-left:
         TNotification.placement == TNotificationPlacement.top-left
         || TNotification.placement == TNotificationPlacement.bottom-left;

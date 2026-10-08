@@ -5,7 +5,7 @@
 
 import { TTheme,  TThemeRole } from "@tela-ui/theme.slint";
 import { TButton, TButtonVariant, TCaption } from "@tela-ui/base.slint";
-import { TAlert, TSelect, TSelectItem, TMessage, TMessagePlacement, TDrawerPlacement, TNotification, TPopconfirm, TPopupPlacement, TResult, TResultStatus, TProgress, TProgressVariant, TSlider, TCard, TCodeBlock } from "@tela-ui/common.slint";
+import { TAlert, TSelect, TSelectItem, TMessage, TMessagePlacement, TDrawerPlacement, TNotification, TPopconfirm, TPopupPlacement, TResult, TResultStatus, TProgress, TProgressVariant, TSlider, TCard, TCodeBlock, TDialogService, TLoadingService } from "@tela-ui/common.slint";
 
 export component FeedbackSection inherits VerticalLayout {
     spacing: 28px;
@@ -49,6 +49,26 @@ export component FeedbackSection inherits VerticalLayout {
         TMessagePlacement.bottom-left,
         TMessagePlacement.bottom-right,
     ];
+
+    // Service dialog outcome → toast, demonstrating result-seq listening.
+    private property <int> svc-dialog-result: TDialogService.result-seq;
+    changed svc-dialog-result => {
+        TMessage.info(TDialogService.accepted ? "服务框: 已确认" : "服务框: 已取消/关闭");
+    }
+
+    // Auto-hide for the loading demo: 2s after show. Wrapped in a zero-size
+    // Rectangle because a Timer cannot sit directly in a layout.
+    Rectangle {
+        width: 0px;
+        height: 0px;
+
+        load-timer := Timer {
+            interval: 2s;
+            triggered => {
+                TLoadingService.hide();
+            }
+        }
+    }
 
     // ======================== TAlert ========================
     VerticalLayout {
@@ -163,6 +183,43 @@ export component FeedbackSection inherits VerticalLayout {
         }
 
         TCodeBlock { code: "import { TDialog } from \"@tela-ui/common.slint\";\n\n// 窗口根部:\nTDialog {\n    open <=> open;\n    title: \"对话框标题\";\n    content: \"这是内容\";\n    accepted => { … }\n    canceled => { … }\n}"; }
+    }
+
+    // ==================== TDialogService ====================
+    VerticalLayout {
+        spacing: 8px;
+
+        TCard {
+            title: "对话框服务 TDialogService";
+
+            HorizontalLayout {
+                spacing: 12px;
+
+                TButton { variant: TButtonVariant.outline; theme: TThemeRole.primary; text: "服务式 confirm"; clicked => { TDialogService.confirm("服务式确认框", "深层组件代码或 Rust 皆可免接线直接调用, 结果经 result-seq 广播。"); } }
+                TButton { variant: TButtonVariant.outline; text: "服务式 alert"; clicked => { TDialogService.alert("服务式警示框", "alert() 只有确认按钮, 适合纯告知场景。"); } }
+                TCaption { text: "ESC / 遮罩 / 按钮三条关闭路径都算一次结果, 右上角 toast 展示结果。"; vertical-alignment: center; wrap: word-wrap; horizontal-stretch: 1; }
+            }
+        }
+
+        TCodeBlock { code: "import { TDialogService, TDialogServiceOverlay } from \"@tela-ui/common.slint\";\n\n// 窗口根部放置一次:\nTDialogServiceOverlay { }\n\n// 任意代码调用:\nTDialogService.confirm(\"删除\", \"确认删除该项?\");\nTDialogService.alert(\"提示\", \"仅确认按钮\");\n\n// 结果监听 (result-seq + accepted):\nprivate property <int> r: TDialogService.result-seq;\nchanged r => { if (TDialogService.accepted) { /* 已确认 */ } }"; }
+    }
+
+    // ==================== TLoadingService ====================
+    VerticalLayout {
+        spacing: 8px;
+
+        TCard {
+            title: "加载服务 TLoadingService";
+
+            HorizontalLayout {
+                spacing: 12px;
+
+                TButton { variant: TButtonVariant.outline; theme: TThemeRole.primary; text: "全屏加载 2 秒"; clicked => { TLoadingService.show("拼命加载中…"); load-timer.restart(); } }
+                TCaption { text: "全屏遮罩阻断指针输入; 是状态而非浮层, ESC 不关闭。"; vertical-alignment: center; wrap: word-wrap; horizontal-stretch: 1; }
+            }
+        }
+
+        TCodeBlock { code: "import { TLoadingService, TLoadingServiceOverlay } from \"@tela-ui/common.slint\";\n\n// 窗口根部放置一次:\nTLoadingServiceOverlay { }\n\n// 任意代码调用:\nTLoadingService.show(\"保存中…\");\nTLoadingService.hide();"; }
     }
 
     // ======================== TDrawer =======================

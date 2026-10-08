@@ -6,7 +6,7 @@
 
 import { TTheme,  TThemePreference } from "@tela-ui/theme.slint";
 import { TBorderlessWindow, TIconSet, TParagraph, TButton, TButtonVariant } from "@tela-ui/base.slint";
-import { TSideNav, TSideNavItem, TSideNavTogglePosition, TDialog, TDrawer, TDrawerPlacement, TMessageOverlay, TMessage, TNotificationOverlay, TTooltipOverlay, TBackTop } from "@tela-ui/common.slint";
+import { TSideNav, TSideNavItem, TSideNavTogglePosition, TDialog, TDialogService, TDialogServiceOverlay, TDrawer, TDrawerPlacement, TMessageOverlay, TMessage, TNotificationOverlay, TTooltipOverlay, TLoadingService, TLoadingServiceOverlay, TBackTop } from "@tela-ui/common.slint";
 import { ScrollView } from "std-widgets.slint";
 
 import { BasicsSection } from "pages/basics.slint";
@@ -126,6 +126,10 @@ export component MainWindow inherits TBorderlessWindow {
             clicked => { root.drawer-open = false; }
         }
     }
+
+    TDialogServiceOverlay { }
+
+    TLoadingServiceOverlay { }
 
     TMessageOverlay { }
 

@@ -1,0 +1,93 @@
+// Tela UI — TPopupStack (internal infrastructure)
+//
+// Window-level overlay bookkeeping: how many layers (dialog / drawer /
+// service overlays / future command palette) are open and which one is on
+// top. ESC is delivered to the focused layer's FocusScope, forwarded here
+// via `press-escape()`, and broadcast back as a `close-top-seq` bump — the
+// TOPMOST layer (depth == open-count - 1) closes itself.
+//
+// PopupWindow-based popups (dropdown / popconfirm / select) are NOT
+// registered: the Slint runtime already closes the top popup on ESC.
+//
+// Depth rebasing keeps slots contiguous: when a middle layer closes,
+// `closed-seq`/`closed-depth` broadcast, and layers above it shift down —
+// so "depth == open-count - 1" keeps naming the real topmost layer.
+
+export global TPopupStack {
+    // Number of currently open layers.
+    out property <int> open-count: 0;
+    // Bumped when ESC should close the topmost layer.
+    out property <int> close-top-seq: 0;
+    // Bumped when any layer closes; `closed-depth` is its slot.
+    out property <int> closed-seq: 0;
+    out property <int> closed-depth: -1;
+
+    // Call AFTER the layer snapshot open-count as its depth.
+    public function layer-opened() {
+        open-count += 1;
+    }
+
+    public function layer-closed(depth: int) {
+        open-count = max(0, open-count - 1);
+        closed-depth = depth;
+        closed-seq += 1;
+    }
+
+    public function press-escape() {
+        if (open-count > 0) {
+            close-top-seq += 1;
+        }
+    }
+}
+
+// Per-layer embed: bind `active` to the host's open state and handle
+// `close-requested` (close the layer however it should close). Registers
+// with TPopupStack on activate, withdraws on deactivate, closes when ESC
+// names it the topmost layer, and grabs keyboard focus while active so the
+// ESC key reaches this scope at all.
+export component TPopupStackLayer {
+    in property <bool> active;
+    callback close-requested();
+
+    // Slot captured at activation: count-before-increment, so the topmost
+    // open layer is always open-count - 1.
+    private property <int> depth: -1;
+
+    private property <int> close-top-mirror: TPopupStack.close-top-seq;
+    changed close-top-mirror => {
+        if (root.active && root.depth == TPopupStack.open-count - 1) {
+            root.close-requested();
+        }
+    }
+
+    private property <int> rebase-mirror: TPopupStack.closed-seq;
+    changed rebase-mirror => {
+        if (root.active && root.depth > TPopupStack.closed-depth) {
+            root.depth -= 1;
+        }
+    }
+
+    changed active => {
+        if (root.active) {
+            root.depth = TPopupStack.open-count;
+            TPopupStack.layer-opened();
+            keys.focus();
+        } else {
+            TPopupStack.layer-closed(root.depth);
+            keys.clear-focus();
+        }
+    }
+
+    keys := FocusScope {
+        // ESC bubbles here from inner focusable content (buttons reject
+        // it); forward to the stack, which closes the topmost layer.
+        key-pressed(event) => {
+            if (event.text == Key.Escape) {
+                TPopupStack.press-escape();
+                accept
+            } else {
+                reject
+            }
+        }
+    }
+}

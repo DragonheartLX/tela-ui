@@ -11,7 +11,7 @@ import { TIconSet } from "../base/icon/data.slint";
 export struct TCollapseItem {
     label: string,
     content: string,
-    disabled: bool,
+    disabled: bool = false,
 }
 
 export component TCollapse inherits VerticalLayout {

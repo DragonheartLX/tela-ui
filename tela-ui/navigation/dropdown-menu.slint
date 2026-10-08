@@ -11,16 +11,17 @@ import { TTheme } from "../theme.slint";
 import { TPopupPlacement } from "../structs/enums.slint";
 import { TIcon } from "../base/icon/icon.slint";
 import { TIconData } from "../base/icon/data.slint";
+import { TPopupSurface } from "../popup-surface.slint";
 import { ScrollView } from "std-widgets.slint";
 
 export struct TDropdownMenuItem {
     label: string,
     value: string,
     icon: TIconData = { paths: [] },
-    disabled: bool,
-    danger: bool,
+    disabled: bool = false,
+    danger: bool = false,
     // Render a hairline separator instead of the entry.
-    divider: bool,
+    divider: bool = false,
 }
 
 export component TDropdownMenu inherits Rectangle {
@@ -35,28 +36,19 @@ export component TDropdownMenu inherits Rectangle {
 
     callback selected(int, string);
 
-    out property <bool> open: popup.is-open;
+    out property <bool> open: surface.is-open;
 
     public function show() {
-        popup.show();
+        surface.show();
     }
 
     public function close() {
-        popup.close();
+        surface.close();
     }
 
     public function toggle() {
-        if (popup.is-open) {
-            popup.close();
-        } else {
-            popup.show();
-        }
+        surface.toggle();
     }
-
-    private property <bool> to-end:
-        placement == TPopupPlacement.bottom-end || placement == TPopupPlacement.top-end;
-    private property <bool> to-top:
-        placement == TPopupPlacement.top-start || placement == TPopupPlacement.top-end;
 
     // Trigger content hosted in a layout so the wrapper hugs it in parent
     // layouts (a bare child would not feed the preferred size).
@@ -75,98 +67,79 @@ export component TDropdownMenu inherits Rectangle {
         }
     }
 
-    // Zero-clamped host: keeps the popup out of the wrapper's preferred
-    // size computation (a PopupWindow would inflate it) while pinning the
-    // popup coordinate system to the wrapper origin.
-    Rectangle {
-        x: 0;
-        y: 0;
-        max-width: 0px;
-        max-height: 0px;
+    surface := TPopupSurface {
+        anchor-width: root.width;
+        anchor-height: root.height;
+        placement: root.placement;
+        // Explicit height: the row list lives inside the popup (inlined via
+        // @children) and cannot be measured from here, so the clamp is
+        // computed from the model — min(items, visible rows) of fixed-height
+        // rows, plus the list layout's 2 × 4px padding.
+        popup-height: min(root.items.length, root.max-visible-items) * root.item-height + 8px;
 
-        popup := PopupWindow {
-            x: root.to-end ? root.width - self.width : 0;
-            y: root.to-top ? -self.height - 6px : root.height + 6px;
-            width: max(140px, content.preferred-width);
-            height: min(rows.preferred-height, root.max-visible-items * root.item-height + 8px);
-            close-policy: close-on-click-outside;
+        ScrollView {
+            rows := VerticalLayout {
+                padding: 4px;
 
-            content := Rectangle {
-                max-width: 280px;
-                background: TTheme.bg-color-container;
-                border-width: 1px;
-                border-color: TTheme.component-stroke;
-                border-radius: TTheme.radius-medium;
-                drop-shadow-blur: TTheme.shadow-2-blur;
-                drop-shadow-offset-y: TTheme.shadow-2-offset-y;
-                drop-shadow-color: TTheme.shadow-2-color;
-                clip: true;
+                for it[i] in root.items: Rectangle {
+                    height: it.divider ? 9px : root.item-height;
+                    border-radius: TTheme.radius-default;
+                    background: transparent;
+                    animate background { duration: TTheme.duration-fast; }
 
-                ScrollView {
-                    rows := VerticalLayout {
-                        padding: 4px;
+                    // Per-entry label color: danger red beats the neutral
+                    // primary, disabled grays out both.
+                    private property <color> label-c:
+                        it.disabled ? TTheme.text-color-disabled
+                        : it.danger ? TTheme.error-color
+                        : TTheme.text-color-primary;
 
-                    for it[i] in root.items: Rectangle {
-                        height: it.divider ? 9px : root.item-height;
-                        border-radius: TTheme.radius-default;
-                        background: transparent;
-                        animate background { duration: TTheme.duration-fast; }
+                    states [
+                        hovered when row-ta.has-hover && !it.disabled && !it.divider && !it.danger: {
+                            background: TTheme.bg-color-component-hover;
+                        }
+                        hovered-danger when row-ta.has-hover && !it.disabled && !it.divider && it.danger: {
+                            background: TTheme.error-color-light;
+                        }
+                    ]
 
-                        // Per-entry label color: danger red beats the neutral
-                        // primary, disabled grays out both.
-                        private property <color> label-c:
-                            it.disabled ? TTheme.text-color-disabled
-                            : it.danger ? TTheme.error-color
-                            : TTheme.text-color-primary;
+                    if !it.divider: HorizontalLayout {
+                        padding-left: TTheme.spacing-2;
+                        padding-right: TTheme.spacing-2;
+                        spacing: TTheme.spacing-2;
 
-                        states [
-                            hovered when row-ta.has-hover && !it.disabled && !it.divider && !it.danger: {
-                                background: TTheme.bg-color-container-hover;
-                            }
-                            hovered-danger when row-ta.has-hover && !it.disabled && !it.divider && it.danger: {
-                                background: TTheme.error-color-light;
-                            }
-                        ]
-
-                        if !it.divider: HorizontalLayout {
-                            padding-left: TTheme.spacing-2;
-                            padding-right: TTheme.spacing-2;
-                            spacing: TTheme.spacing-2;
-
-                            if it.icon.paths.length > 0: TIcon {
-                                y: (parent.height - self.height) / 2;
-                                icon: it.icon;
-                                size: TTheme.font-size-m;
-                                icon-color: label-c;
-                            }
-
-                            Text {
-                                text: it.label;
-                                font-size: TTheme.font-size-m;
-                                font-family: TTheme.font-family;
-                                color: label-c;
-                                vertical-alignment: center;
-                                horizontal-stretch: 1;
-                                overflow: elide;
-                            }
+                        if it.icon.paths.length > 0: TIcon {
+                            y: (parent.height - self.height) / 2;
+                            icon: it.icon;
+                            size: TTheme.font-size-m;
+                            icon-color: label-c;
                         }
 
-                        if it.divider: Rectangle {
-                            y: 4px;
-                            height: 1px;
-                            background: TTheme.border-level-1-color;
-                        }
-
-                        row-ta := TouchArea {
-                            enabled: !it.disabled && !it.divider;
-                            mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;
-                            clicked => {
-                                root.selected(i, it.value);
-                                popup.close();
-                            }
+                        Text {
+                            text: it.label;
+                            font-size: TTheme.font-size-m;
+                            font-family: TTheme.font-family;
+                            color: label-c;
+                            vertical-alignment: center;
+                            horizontal-stretch: 1;
+                            overflow: elide;
                         }
                     }
-                }
+
+                    if it.divider: Rectangle {
+                        y: 4px;
+                        height: 1px;
+                        background: TTheme.border-level-1-color;
+                    }
+
+                    row-ta := TouchArea {
+                        enabled: !it.disabled && !it.divider;
+                        mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;
+                        clicked => {
+                            root.selected(i, it.value);
+                            surface.close();
+                        }
+                    }
                 }
             }
         }
