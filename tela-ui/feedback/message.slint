@@ -35,11 +35,16 @@ export global TMessage {
     in-out property <bool> visible: false;
     // Defaults to centered at the top of the window.
     in-out property <TMessagePlacement> placement: TMessagePlacement.top-center;
+    // Monotonic sequence bumped on every show(): lets the overlay restart
+    // its 3s timer instead of letting a stale timer fire and swallow a
+    // follow-up message.
+    out property <int> seq: 0;
 
     public function show(t: string, th: TMessageTheme) {
         text = t;
         theme = th;
         visible = true;
+        seq += 1;
     }
 
     public function info(t: string) {
@@ -83,6 +88,14 @@ export component TMessageOverlay inherits Rectangle {
         triggered => {
             TMessage.visible = false;
         }
+    }
+
+    // A follow-up show() while the pill is up leaves `visible` unchanged, so
+    // only `seq` moves; restarting on it re-arms the full 3s for the new
+    // text instead of letting the old countdown expire mid-message.
+    private property <int> seq: TMessage.seq;
+    changed seq => {
+        timer.restart();
     }
 
     pill := Rectangle {

@@ -56,7 +56,7 @@ component TWindowButton inherits Rectangle {
         size: root.icon-size;
         stroke-width: root.icon-stroke;
         absolute-stroke-width: root.icon-absolute-stroke;
-        icon-color: ta.has-hover && root.danger ? #ffffff : TTheme.text-color-secondary;
+        icon-color: ta.has-hover && root.danger ? TTheme.text-color-anti : TTheme.text-color-secondary;
         animate icon-color { duration: TTheme.duration-fast; }
     }
 
