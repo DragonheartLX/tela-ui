@@ -1,3 +1,9 @@
+# Rust Build Cache
 /target
+
+# Documents
 /docs/components-plan.md
 /docs/TODO.md
+
+# Agents Cache
+/.review-out
