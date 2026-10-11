@@ -1,14 +1,18 @@
 // Tela UI — TSideNav
 //
-// Collapsible side navigation: brand header, a vertical menu and a footer
-// cluster pinned to the bottom edge (menu-style entries above the collapse
-// toggle). `collapsed` folds icon+label rows down to centered icons and
-// animates the width between 232px and 64px; rows keep their elements
-// mounted and animate position/opacity so the fold plays smoothly instead
-// of popping. The collapse toggle (TDesign's panel-fold button) lives in
-// the header (`toggle-position: top`) or as the footer's last row
-// (`bottom`), labeled "收起" like any menu row while expanded. `mode`:
-// icon-text (collapsible, default), text, or icon (always 64px wide).
+// Collapsible side navigation.
+// It holds a brand header, a vertical menu and a footer cluster pinned to
+// the bottom edge. Footer entries sit above the collapse toggle and are
+// styled like menu rows.
+// `collapsed` folds icon+label rows down to centered icons.
+// It animates the width between 232px and 64px.
+// Rows keep their elements mounted and animate position/opacity, so the
+// fold plays smoothly instead of popping.
+// The collapse toggle is TDesign's panel-fold button.
+// It lives in the header with `toggle-position: top`, or as the footer's
+// last row with `bottom`.
+// While expanded it is labeled "收起" like any menu row.
+// `mode` is icon-text (collapsible, default), text, or icon (always 64px wide).
 
 import { TTheme } from "../theme.slint";
 import { TIcon } from "../base/icon/icon.slint";
@@ -21,36 +25,38 @@ export enum TSideNavMode {
 }
 
 // Where the collapse toggle lives.
+
 export enum TSideNavTogglePosition {
-    // Header row, right edge while expanded, centered once collapsed.
+    // Header row: right edge while expanded, centered once collapsed.
     top,
-    // Footer row, sharing it with the footer action when one is set.
+    // Footer row, shared with the footer action when one is set.
     bottom,
 }
 
 export struct TSideNavItem {
     label: string,
     value: string,
-    // Optional glyph from TIconSet; items without one fall back to text.
+    // Optional glyph from TIconSet. Items without one fall back to text.
     icon: TIconData = { paths: [] },
     disabled: bool = false,
 }
 
-// An entry pinned to the bottom of the sidebar, above the collapse toggle
-// (e.g. a dark-mode switch, a settings link). A non-empty `value` makes it
-// behave like a menu row — it highlights with `current-value` and fires
-// `changed` — while an empty one acts as a plain button firing
-// `footer-clicked`.
+// An entry pinned to the bottom of the sidebar, above the collapse toggle.
+// Examples: a dark-mode switch, a settings link.
+// A non-empty `value` makes it behave like a menu row.
+// It highlights with `current-value` and fires `changed`.
+// An empty one acts as a plain button firing `footer-clicked`.
 export struct TSideNavFooterItem {
     label: string = "",
     icon: TIconData = { paths: [] },
     value: string = "",
 }
 
-// One menu/footer row: icon slides between the expanded left slot and the
-// collapsed center, the label fades with the fold, hover/active/disabled
-// recolor. Selection behavior lives in the `clicked` handlers of the
-// callers (menu rows select, footer rows may fire `footer-clicked`).
+// One menu or footer row.
+// The icon slides between the expanded left slot and the collapsed center.
+// The label fades with the fold. Hover, active and disabled recolor.
+// Selection behavior lives in the `clicked` handlers of the callers.
+// Menu rows select, footer rows may fire `footer-clicked`.
 component TNavRow inherits Rectangle {
     in property <string> label;
     in property <TIconData> icon;
@@ -77,8 +83,8 @@ component TNavRow inherits Rectangle {
     ]
 
     if root.show-icon && root.icon.paths.length > 0: TIcon {
-        // Slides between the expanded left slot and the collapsed center;
-        // stays mounted so the fold animates instead of pop.
+        // Slides between the expanded left slot and the collapsed center.
+        // It stays mounted so the fold animates instead of popping.
         x: root.show-text ? TTheme.padding-lr-m
             : (parent.width - self.width) / 2;
         y: (parent.height - self.height) / 2;
@@ -142,20 +148,20 @@ export component TSideNav inherits Rectangle {
     in property <TSideNavMode> mode: TSideNavMode.icon-text;
     in property <TSideNavTogglePosition> toggle-position: TSideNavTogglePosition.top;
     in property <bool> bordered: true;
-    // Entries pinned to the sidebar's bottom edge, above the collapse
-    // toggle; styled like menu rows — icon plus label while expanded,
+    // Entries pinned to the sidebar's bottom edge, above the collapse toggle.
+    // Styled like menu rows: icon plus label while expanded,
     // centered icons once collapsed.
     in property <[TSideNavFooterItem]> footer-items;
 
     callback changed(string);
-    // Fired by footer entries without a `value` (plain actions).
+    // Fired by footer entries without a `value`. They are plain actions.
     callback footer-clicked(TSideNavFooterItem);
 
     private property <bool> show-text: (root.mode == TSideNavMode.icon-text && !root.collapsed) || root.mode == TSideNavMode.text;
     private property <bool> show-icon: root.mode != TSideNavMode.text;
     private property <bool> collapsible: root.mode == TSideNavMode.icon-text;
-    // The header carries the brand and the top collapse toggle; a sidebar
-    // with neither folds it away so the menu starts right at the top.
+    // The header carries the brand and the top collapse toggle.
+    // A sidebar with neither folds it away, so the menu starts right at the top.
     private property <bool> has-header:
         root.title != "" || root.logo.paths.length > 0
         || (root.collapsible && root.toggle-position == TSideNavTogglePosition.top);
@@ -167,8 +173,8 @@ export component TSideNav inherits Rectangle {
 
     VerticalLayout {
         // Header ----------------------------------------------------------
-        // Brand fades out when folding; the whole header folds away when
-        // there is nothing to show in it.
+        // Brand fades out when folding.
+        // The whole header folds away when there is nothing to show in it.
         Rectangle {
             height: root.has-header ? 48px : 0px;
             clip: true;
@@ -201,7 +207,8 @@ export component TSideNav inherits Rectangle {
             if root.collapsible && root.toggle-position == TSideNavTogglePosition.top: Rectangle {
                 width: 28px;
                 height: 28px;
-                // Expanded: the header's right edge. Collapsed: centered —
+                // Expanded: the header's right edge.
+                // Collapsed: centered.
                 // x is recomputed from the animating width every frame (no
                 // tween of its own), so the button glides in naturally with
                 // the fold instead of tweening across the header.
@@ -277,11 +284,12 @@ export component TSideNav inherits Rectangle {
             }
         }
 
-        // TCollapse toggle, bottom variant: a quiet nav row like the footer
-        // entries — panel-fold glyph (arrow pointing at the divider while
-        // expanded, outward once collapsed) plus a "收起" label that fades
-        // with the fold, left-aligned with the menu while expanded, centered
-        // after folding.
+        // TCollapse toggle, bottom variant.
+        // It is a quiet nav row like the footer entries.
+        // The panel-fold glyph shows an arrow pointing at the divider while
+        // expanded and outward once collapsed.
+        // The "收起" label fades with the fold.
+        // It is left-aligned with the menu while expanded and centered after folding.
         if root.footer-chevron: TNavRow {
             label: "收起";
             icon: root.show-text ? TIconSet.PanelLeftClose : TIconSet.PanelLeftOpen;

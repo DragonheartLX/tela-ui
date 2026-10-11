@@ -10,7 +10,6 @@ export enum TProgressVariant {
     line,
     circle,
 }
-import { TTheme } from "../theme.slint";
 
 export component TProgress inherits Rectangle {
     in property <TProgressVariant> variant: TProgressVariant.line;

@@ -1,9 +1,14 @@
 // Tela UI — TTag
 //
-// Small status descriptor. theme: TTheme (default/primary/success/warning/
-// error); variant: TTagVariant (dark filled / light / outline); size: TSize.
-// Closable tags emit `closed`; tags emit `clicked` when `clickable`
-// styling is desired.
+// Small status descriptor.
+// `theme` is a TTheme role: default, primary, success, warning, error.
+// `variant` is a TTagVariant: dark filled, light, outline.
+// `size` is a TSize.
+// Closable tags emit `closed`.
+// The tag does not hide itself, so a tag held in a model has to be dropped
+// by the host — hiding itself would overwrite whatever `visible` binding the
+// host wrote.
+// Tags emit `clicked` when `clickable` styling is desired.
 
 import { TTheme } from "../theme.slint";
 import { TIcon } from "../base/icon/icon.slint";
@@ -14,7 +19,6 @@ export enum TTagVariant {
     light,
     outline,
 }
-import { TIconSet, TIconData } from "../base/icon/data.slint";
 
 export component TTag inherits Rectangle {
     in property <TThemeRole> theme: TThemeRole.default;
@@ -39,9 +43,9 @@ export component TTag inherits Rectangle {
         : size == TSize.large ? 12px
         : 8px;
 
-    // Per-role colors for the current theme (default renders neutral grays,
-    // other themes use their color ramp) so the rest binding and `states`
-    // below stay flat.
+    // Per-role colors for the current theme.
+    // Default renders neutral grays, other themes use their color ramp.
+    // Named so the rest binding and `states` below stay flat.
     private property <color> fill: theme == TThemeRole.default ? TTheme.bg-color-component : TTheme.theme-color(theme);
     private property <color> fill-hover: theme == TThemeRole.default ? TTheme.bg-color-component-hover : TTheme.theme-color-hover(theme);
     private property <color> tint: theme == TThemeRole.default ? TTheme.bg-color-secondarycontainer : TTheme.theme-color-light(theme);
@@ -134,8 +138,8 @@ export component TTag inherits Rectangle {
                 enabled: !root.disabled;
                 mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;
                 clicked => {
+                    // Fire only: the host drops the tag from its model.
                     root.closed();
-                    root.visible = false;
                 }
             }
         }

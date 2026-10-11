@@ -1,11 +1,12 @@
 // Tela UI — TDrawer
 //
-// Side panel over a dimmed backdrop. `placement` picks the edge the panel
-// slides in from (right/bottom sized by width & height, left/top mirrored);
-// the panel stays mounted and fades via animated opacity so the close
-// animation is actually visible. Overlay clicks close it when
-// `close-on-overlay` is set. Children of the component form the body below
-// the title.
+// Side panel over a dimmed backdrop.
+// `placement` picks the edge the panel slides in from.
+// Right and bottom are sized by width and height, left and top mirror them.
+// The panel stays mounted and fades via animated opacity so the close
+// animation is visible.
+// Overlay clicks close it when `close-on-overlay` is set.
+// Children form the body below the title.
 
 import { TTheme } from "../theme.slint";
 import { TIcon } from "../base/icon/icon.slint";
@@ -33,11 +34,11 @@ export component TDrawer inherits Rectangle {
     private property <bool> horizontal:
         root.placement == TDrawerPlacement.left || root.placement == TDrawerPlacement.right;
 
-    // Stays mounted and fades via animated opacity so the panel's slide-out
-    // is actually visible; binding `visible: open` would drop the whole
-    // subtree the instant `open` flips and no close animation would show.
-    // TInput stays safe: the backdrop TouchArea is only enabled while open,
-    // and the panel rests fully off-window when closed.
+    // Fades instead of `visible: open`, which would drop the subtree the
+    // instant `open` flips and leave no close animation to see.
+    // `TInput` stays safe.
+    // The backdrop TouchArea is only enabled while open.
+    // The panel rests fully off-window when closed.
     opacity: root.open ? 1 : 0;
     z: TTheme.z-modal;
     animate opacity { duration: TTheme.duration-base; easing: ease-out; }
@@ -48,7 +49,8 @@ export component TDrawer inherits Rectangle {
         root.closed();
     }
 
-    // Stack bookkeeping + ESC: ESC closes the topmost open layer.
+    // Stack bookkeeping and ESC.
+    // ESC closes the topmost open layer.
     TPopupStackLayer {
         active: root.open;
         close-requested => {
@@ -66,8 +68,8 @@ export component TDrawer inherits Rectangle {
     panel := Rectangle {
         width: root.horizontal ? min(root.drawer-width, parent.width - 48px) : parent.width;
         height: root.horizontal ? parent.height : min(root.drawer-height, parent.height - 48px);
-        // Slide targets per edge, named so the x/y bindings stay flat:
-        // left/top rest just off-window, right/bottom just past it.
+        // Slide targets per edge, named so the x/y bindings stay flat.
+        // Left and top rest just off-window, right and bottom just past it.
         property <length> left-x: root.open ? 0px : -self.width;
         property <length> right-x: root.open ? parent.width - self.width : parent.width;
         property <length> top-y: root.open ? 0px : -self.height;
@@ -82,6 +84,17 @@ export component TDrawer inherits Rectangle {
         drop-shadow-color: TTheme.shadow-3-color;
         animate x { duration: TTheme.duration-base; easing: ease-out; }
         animate y { duration: TTheme.duration-base; easing: ease-out; }
+
+        // Absorbs clicks on the panel body so they cannot reach the backdrop.
+        // Declared before the layout: traversal is front-to-back and starts
+        // at the last declared sibling, so the close button still gets its.
+        // Disabled while closed — during the slide-out the panel still sweeps
+        // across the window and would eat those clicks.
+        TouchArea {
+            enabled: root.open;
+            width: parent.width;
+            height: parent.height;
+        }
 
         VerticalLayout {
             padding: TTheme.margin-l;

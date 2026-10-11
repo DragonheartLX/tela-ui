@@ -1,33 +1,36 @@
 // Tela UI — TBorderlessWindow
 //
-// Frameless application window (`no-frame`) with a themed custom title bar:
-// drag handle, minimize / maximize / close buttons.
+// Frameless application window (`no-frame`) with a themed custom title bar.
+// The title bar holds a drag handle plus minimize, maximize and close buttons.
 //
-// Dragging is handled by the built-in `WindowMoveArea` under the title-bar
-// buttons — no host wiring needed. `title` (the Window built-in) shows in
-// both the taskbar and the custom header; minimize/maximize/close work
-// purely from .slint via the `minimized` / `maximized` built-ins and
-// `hide()`.
+// Dragging is handled by the built-in `WindowMoveArea` under the title-bar buttons.
+// No host wiring is needed.
+// `title` (the Window built-in) shows in both the taskbar and the custom header.
+// Minimize, maximize and close work purely from .slint.
+// They use the `minimized` / `maximized` built-ins and `hide()`.
 //
-// Edge-resizing: the winit backend reads the Window's `resize-border-width`
-// on cursor moves and starts a native drag-resize near the edges — but that
-// property defaults to 0 (= disabled), so TBorderlessWindow binds it from
-// `resize-border`, collapsing to 0 while maximized.
+// Edge-resizing: the winit backend reads the Window's `resize-border-width` on
+// cursor moves and starts a native drag-resize near the edges.
+// That property defaults to 0, which means disabled.
+// TBorderlessWindow binds it from `resize-border`, collapsing to 0 while maximized.
 //
-// Rounded corners: the Window surface itself stays transparent and all
-// content is clipped to a rounded rectangle, so consumers must set
-// `window-background` (NOT the Window's own `background`, which would paint
-// the corners opaque again). `window-radius` collapses to 0 while maximized.
+// Rounded corners: the Window surface itself stays transparent.
+// All content is clipped to a rounded rectangle.
+// Consumers must set `window-background`, NOT the Window's own `background`.
+// Setting the Window's own `background` would paint the corners opaque again.
+// `window-radius` collapses to 0 while maximized.
 
 import { TTheme } from "../theme.slint";
 import { TIcon } from "icon/icon.slint";
 import { TIconData, TIconSet } from "icon/data.slint";
 
-// One title-bar control: full-height hit target, hover highlight
-// (danger = close-style red hover, white glyph). TCaption glyphs are
-// normalized to Windows' 10px optical box — lucide Minus draws 14/24 and
-// X 12/24 of the icon size, so call sites pass per-glyph sizes with an
-// absolute ~1.1px stroke to match the maximize square's 1px border.
+// One title-bar control.
+// It has a full-height hit target and a hover highlight.
+// Danger mode is the close-style red hover with a white glyph.
+// TCaption glyphs are normalized to Windows' 10px optical box.
+// Lucide Minus draws 14/24 and X 12/24 of the icon size.
+// Call sites pass per-glyph sizes with an absolute ~1.1px stroke.
+// That matches the maximize square's 1px border.
 component TWindowButton inherits Rectangle {
     in property <TIconData> icon;
     in property <length> icon-size: 14px;
@@ -36,8 +39,9 @@ component TWindowButton inherits Rectangle {
     in property <bool> danger: false;
     callback clicked();
 
-    // No height binding: the title-bar layout stretches it (and component
-    // roots cannot reference `parent` anyway).
+    // No height binding.
+    // The title-bar layout stretches it, and component roots cannot
+    // reference `parent` anyway.
     width: 46px;
 
     states [
@@ -68,18 +72,20 @@ component TWindowButton inherits Rectangle {
 
 export component TBorderlessWindow inherits Window {
     no-frame: true;
-    // Must stay transparent — the rounded rectangle below is the window's
-    // visible surface (see the header comment).
+    // Must stay transparent.
+    // The rounded rectangle below is the window's visible surface.
+    // See the header comment.
     background: transparent;
 
     // Visible surface color of the rounded window rectangle.
     in property <brush> window-background: TTheme.bg-color-page;
-    // Window corner radius; 0 while maximized.
+    // Window corner radius. 0 while maximized.
     in property <length> window-radius: 8px;
-    // Edge hit zone (logical px) for frameless resizing. The winit backend
-    // reads the Window's `resize-border-width` (which defaults to 0 =
-    // resizing disabled) and starts a native drag-resize when the cursor
-    // nears an edge; 0 while maximized — a maximized window must not resize.
+    // Edge hit zone for frameless resizing, in logical px.
+    // The winit backend reads the Window's `resize-border-width`.
+    // It defaults to 0, which means resizing is disabled.
+    // It starts a native drag-resize when the cursor nears an edge.
+    // 0 while maximized: a maximized window must not resize.
     in property <length> resize-border: 8px;
     resize-border-width: root.maximized ? 0px : root.resize-border;
 
@@ -93,9 +99,10 @@ export component TBorderlessWindow inherits Window {
     // header text (the `title` still labels the taskbar).
     in property <bool> header-title-visible: true;
 
-    // The window's visible surface: everything is clipped to the rounded
-    // corners; the hairline border replaces the native frame edge that
-    // frameless windows lose.
+    // The window's visible surface.
+    // Everything is clipped to the rounded corners.
+    // The hairline border replaces the native frame edge that frameless
+    // windows lose.
     Rectangle {
         border-radius: root.maximized ? 0 : root.window-radius;
         clip: true;
@@ -109,10 +116,10 @@ export component TBorderlessWindow inherits Window {
                 height: root.header-height;
                 background: root.header-background;
 
-                // Drag handle covers the whole bar; declared first so the
-                // buttons (later siblings) stay on top of it. WindowMoveArea is
-                // a bare hit area (no background) — the header Rectangle behind
-                // it provides the surface.
+                // Drag handle covers the whole bar.
+                // It is declared first so the buttons (later siblings) stay
+                // on top of it. WindowMoveArea is a bare hit area with no
+                // background. The header Rectangle behind it provides the surface.
                 WindowMoveArea { }
 
                 HorizontalLayout {
@@ -140,6 +147,7 @@ export component TBorderlessWindow inherits Window {
                         // 10px optical line + round caps (lucide Minus is 14/24 wide).
                         // Stroke 1.3: the centered line straddles a pixel row at
                         // 1x scale, so it needs extra ink to match the square/X.
+
                         icon-size: 17px;
                         icon-stroke: 1.3;
                         icon-absolute-stroke: true;
@@ -186,9 +194,10 @@ export component TBorderlessWindow inherits Window {
                 }
             }
 
-            // Content: a stretched Rectangle absorbs the leftover height — a
-            // bare @children inside the layout would only get its preferred
+            // Content: a stretched Rectangle absorbs the leftover height.
+            // A bare @children inside the layout would only get its preferred
             // size, since nested layouts don't take part in the distribution.
+
             Rectangle {
                 vertical-stretch: 1;
 

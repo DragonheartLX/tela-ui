@@ -1,11 +1,13 @@
 // Tela UI — TDropdownMenu
 //
-// Action menu anchored to arbitrary trigger content. With `auto-open` (the
-// default) a TouchArea layered over the trigger toggles the popup — this
-// requires non-interactive trigger content (icon, text, avatar …), because
-// the area swallows their clicks. For TButton triggers set `auto-open: false`
-// and call `toggle()` from `clicked` instead. The menu closes on outside
-// clicks and after selecting an entry.
+// Action menu anchored to arbitrary trigger content.
+// With `auto-open` (the default) a TouchArea layered over the trigger toggles
+// the popup.
+// This requires non-interactive trigger content, icon, text, avatar and so on.
+// The area swallows their clicks.
+// For TButton triggers set `auto-open: false` and call `toggle()` from
+// `clicked` instead.
+// The menu closes on outside clicks and after selecting an entry.
 
 import { TTheme } from "../theme.slint";
 import { TPopupPlacement } from "../structs/enums.slint";
@@ -27,8 +29,8 @@ export struct TDropdownMenuItem {
 export component TDropdownMenu inherits Rectangle {
     in property <[TDropdownMenuItem]> items;
     in property <TPopupPlacement> placement: TPopupPlacement.bottom-start;
-    // Click-toggle TouchArea over the trigger content (non-interactive
-    // triggers only).
+    // Click-toggle TouchArea over the trigger content.
+    // Non-interactive triggers only.
     in property <bool> auto-open: true;
     in property <length> item-height: 32px;
     // Visible rows before the popup starts scrolling.
@@ -50,16 +52,17 @@ export component TDropdownMenu inherits Rectangle {
         surface.toggle();
     }
 
-    // Trigger content hosted in a layout so the wrapper hugs it in parent
-    // layouts (a bare child would not feed the preferred size).
+    // Trigger content hosted in a layout.
+    // That makes the wrapper hug it in parent layouts, since a bare child
+    // would not feed the preferred size.
     row := HorizontalLayout {
         @children
     }
 
-    // Layered OVER the trigger content (declared after the row) so static
-    // triggers click through to it. Declaring it before would zero the
-    // wrapper's preferred size in layouts. Interactive triggers set
-    // `auto-open: false`, which removes the area entirely.
+    // Layered over the trigger content.
+    // It is declared after the row, so static triggers click through to it.
+    // Declaring it before would zero the wrapper's preferred size in layouts.
+    // Interactive triggers set `auto-open: false`, which removes the area entirely.
     if root.auto-open: TouchArea {
         mouse-cursor: MouseCursor.pointer;
         clicked => {
@@ -71,10 +74,11 @@ export component TDropdownMenu inherits Rectangle {
         anchor-width: root.width;
         anchor-height: root.height;
         placement: root.placement;
-        // Explicit height: the row list lives inside the popup (inlined via
-        // @children) and cannot be measured from here, so the clamp is
-        // computed from the model — min(items, visible rows) of fixed-height
-        // rows, plus the list layout's 2 × 4px padding.
+        // Explicit height.
+        // The row list lives inside the popup, inlined via @children, and
+        // cannot be measured from here.
+        // The clamp is computed from the model: min(items, visible rows) of
+        // fixed-height rows, plus the list layout's 2 × 4px padding.
         popup-height: min(root.items.length, root.max-visible-items) * root.item-height + 8px;
 
         ScrollView {
@@ -87,8 +91,9 @@ export component TDropdownMenu inherits Rectangle {
                     background: transparent;
                     animate background { duration: TTheme.duration-fast; }
 
-                    // Per-entry label color: danger red beats the neutral
-                    // primary, disabled grays out both.
+                    // Per-entry label color.
+                    // Danger red beats the neutral primary.
+                    // Disabled grays out both.
                     private property <color> label-c:
                         it.disabled ? TTheme.text-color-disabled
                         : it.danger ? TTheme.error-color

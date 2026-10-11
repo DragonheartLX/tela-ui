@@ -1,13 +1,16 @@
 // Tela UI — TSelect
 //
-// Dropdown selector. Anchored popup lists up to 6 items; the popup matches
-// the trigger width (at least 120px). Keyboard support is not included yet.
+// Dropdown selector.
+// The anchored popup lists up to 6 items.
+// The popup matches the trigger width, at least 120px.
+// Keyboard support is not included yet.
 
 import { TTheme } from "../theme.slint";
 import { TSize } from "../structs/enums.slint";
 import { TIcon } from "../base/icon/icon.slint";
 import { TIconData, TIconSet } from "../base/icon/data.slint";
 import { TPopupSurface } from "../popup-surface.slint";
+import { ScrollView } from "std-widgets.slint";
 
 export struct TSelectItem {
     label: string,
@@ -106,8 +109,10 @@ export component TSelect inherits Rectangle {
         }
     }
 
-    // The popup matches the trigger width (at least 120px) and shows up to
-    // 6 rows before it would need scrolling.
+    // The popup matches the trigger width, at least 120px.
+    // At most 6 rows show at once.
+    // Above that the list scrolls inside the popup so every item stays
+    // reachable.
     surface := TPopupSurface {
         anchor-width: root.width;
         anchor-height: root.height;
@@ -116,8 +121,9 @@ export component TSelect inherits Rectangle {
         popup-max-width: max(root.width, 120px);
         popup-height: min(root.items.length, 6) * root.item-h + 8px;
 
-        VerticalLayout {
-            padding: 4px;
+        ScrollView {
+            VerticalLayout {
+                padding: 4px;
 
             for it[i] in root.items: Rectangle {
                 height: root.item-h;
@@ -178,6 +184,7 @@ export component TSelect inherits Rectangle {
                     }
                 }
             }
+        }
         }
     }
 

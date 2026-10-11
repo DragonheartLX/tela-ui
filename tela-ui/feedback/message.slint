@@ -3,10 +3,10 @@
 // Global toast. Any code (Slint or Rust) can call:
 //   TMessage.info("Saved");     TMessage.success("..."),
 //   TMessage.warning("..."),    TMessage.error("...")
-// then place ONE `TMessageOverlay` near the top of the window; it renders
-// the current message and auto-hides after 3 seconds. Set
-// `TMessage.placement` to move it to any window corner (default:
-// centered at the top).
+// Then place one `TMessageOverlay` near the top of the window.
+// It renders the current message and auto-hides after 3 seconds.
+// Set `TMessage.placement` to move it to any window corner.
+// Default: centered at the top.
 
 import { TTheme } from "../theme.slint";
 import { TIcon } from "../base/icon/icon.slint";
@@ -35,9 +35,9 @@ export global TMessage {
     in-out property <bool> visible: false;
     // Defaults to centered at the top of the window.
     in-out property <TMessagePlacement> placement: TMessagePlacement.top-center;
-    // Monotonic sequence bumped on every show(): lets the overlay restart
-    // its 3s timer instead of letting a stale timer fire and swallow a
-    // follow-up message.
+    // Monotonic sequence bumped on every show().
+    // It lets the overlay restart its 3s timer.
+    // Without it a stale timer would fire and swallow a follow-up message.
     out property <int> seq: 0;
 
     public function show(t: string, th: TMessageTheme) {
@@ -65,11 +65,12 @@ export global TMessage {
 }
 
 export component TMessageOverlay inherits Rectangle {
-    // A passive full-window overlay: no explicit size, so it fills the
-    // window it is dropped into (no TouchArea, so it never blocks input).
-    // The pill pins to a window edge per TMessage.placement. A former
-    // `height: 0px` collapsed this strip to zero and centered it in the
-    // window, landing messages mid-screen.
+    // A passive full-window overlay.
+    // No explicit size, so it fills the window it is dropped into.
+    // No TouchArea, so it never blocks input.
+    // The pill pins to a window edge per TMessage.placement.
+    // A former `height: 0px` collapsed this strip to zero and centered it
+    // in the window, landing messages mid-screen.
     z: TTheme.z-message;
 
     private property <bool> to-left:
@@ -91,17 +92,17 @@ export component TMessageOverlay inherits Rectangle {
         }
     }
 
-    // A follow-up show() while the pill is up leaves `visible` unchanged, so
-    // only `seq` moves; restarting on it re-arms the full 3s for the new
-    // text instead of letting the old countdown expire mid-message.
+    // A follow-up show() while the pill is up leaves `visible` unchanged.
+    // Only `seq` moves. Restarting on it re-arms the full 3s for the new
+    // text, instead of letting the old countdown expire mid-message.
     private property <int> seq: TMessage.seq;
     changed seq => {
         timer.restart();
     }
 
     pill := Rectangle {
-        // Gap to the window edge: tucked closer while animating in, resting
-        // gap once visible.
+        // Gap to the window edge.
+        // It tucks closer while animating in and rests further once visible.
         property <length> edge-gap: TMessage.visible ? 24px : 12px;
 
         x: root.to-left ? 24px

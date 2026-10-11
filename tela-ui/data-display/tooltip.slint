@@ -1,10 +1,11 @@
 // Tela UI — Tooltip
 //
-// Hover hint bubble, rendered at window level (sleek-ui pattern): triggers
-// report their geometry through the `TTooltip` global, ONE `TTooltipOverlay`
-// near the window root draws the bubble — so it never gets clipped by cards
-// or ScrollViews and no wrapper sizing is involved. The easy way to equip a
-// static trigger is `TTooltipArea` (fills its parent and wires the hover):
+// Hover hint bubble, rendered at window level (sleek-ui pattern).
+// Triggers report their geometry through the `TTooltip` global.
+// One `TTooltipOverlay` near the window root draws the bubble.
+// It never gets clipped by cards or ScrollViews and no wrapper sizing is involved.
+// The easy way to equip a static trigger is `TTooltipArea`.
+// It fills its parent and wires the hover:
 //   TTooltipArea {
 //       width: 120px; height: 32px;
 //       text: "提示"; placement: TTooltipPlacement.top;
@@ -36,8 +37,8 @@ export global TTooltip {
     out property <length> width;
     out property <length> height;
 
-    // `hovering` gates the update: on hover-out the renderer hides
-    // reactively, no state is overwritten.
+    // `hovering` gates the update.
+    // On hover-out the renderer hides reactively and no state is overwritten.
     public function show(text: string, placement: TTooltipPlacement, hovering: bool, coords: Point, width: length, height: length) {
         self.hovering = hovering;
         if (self.hovering) {
@@ -51,28 +52,29 @@ export global TTooltip {
     }
 }
 
-// Place ONE near the window root (after the main content).
+// Place one near the window root, after the main content.
 export component TTooltipOverlay inherits Rectangle {
     // App-wide bubble configuration.
     in-out property <duration> delay: 250ms;
     in-out property <length> wrap-width: 240px;
     in-out property <bool> show-arrow: true;
 
-    // Unbound width/height fill the area it is dropped into. A passive
-    // full-window overlay: no TouchArea, never blocks input.
-    // Topmost tier: triggers live inside modal panels, the bubble must
+    // Unbound width/height fill the area it is dropped into.
+    // A passive full-window overlay: no TouchArea, never blocks input.
+    // Topmost tier — triggers live inside modal panels, so the bubble must
     // render above their backdrop.
     z: TTheme.z-message;
 
-    // Geometry probe: hosts (TBorderlessWindow) may place this overlay below
-    // a title bar, so trigger coords (window-local) must be converted into
-    // overlay-local by subtracting the probe's absolute-position.
+    // Geometry probe.
+    // Hosts (TBorderlessWindow) may place this overlay below a title bar,
+    // so trigger coords (window-local) must be converted into overlay-local
+    // by subtracting the probe's absolute-position.
     probe := TouchArea {
         enabled: false;
     }
 
-    // TDesign tooltip: a dark bubble with light text in BOTH modes (dark
-    // mode uses the elevated secondary-container surface, not an inversion).
+    // TDesign tooltip: a dark bubble with light text in BOTH modes.
+    // Dark mode uses the elevated secondary-container surface, not an inversion.
     private property <color> bubble-bg: TTheme.is-dark ? TTheme.bg-color-secondarycontainer : TTheme.text-color-primary;
     private property <color> bubble-fg: TTheme.is-dark ? TTheme.text-color-primary : TTheme.bg-color-container;
     private property <length> gap: 8px;
@@ -113,8 +115,8 @@ export component TTooltipOverlay inherits Rectangle {
             color: bubble-fg;
         }
 
-        // Diamond arrow: an 8px square rotated 45° centered on the bubble
-        // edge facing the trigger, half inside the bubble.
+        // Diamond arrow: an 8px square rotated 45°.
+        // Centered on the bubble edge facing the trigger, half inside the bubble.
         if root.show-arrow: Rectangle {
             width: 8px;
             height: 8px;
@@ -131,7 +133,7 @@ export component TTooltipOverlay inherits Rectangle {
     }
 
     Timer {
-        // Timer defaults to running: bind explicitly (re-arms on each hover).
+        // Timer defaults to running. Bind explicitly, it re-arms on each hover.
         running: root.hovering;
         interval: root.delay;
         triggered => {
@@ -139,8 +141,8 @@ export component TTooltipOverlay inherits Rectangle {
         }
     }
 
-    // Anchoring math against the stored trigger geometry, converted from
-    // window coords into overlay coords.
+    // Anchoring math against the stored trigger geometry.
+    // It converts from window coords into overlay coords.
     pure function compute-x() -> length {
         if (TTooltip.placement == TTooltipPlacement.left) {
             return TTooltip.x - probe.absolute-position.x - bubble.width - root.gap;
@@ -160,9 +162,10 @@ export component TTooltipOverlay inherits Rectangle {
     }
 }
 
-// Convenience wrapper for STATIC trigger content: fills its parent, layers
-// the hover area over `@children` and reports to `TTooltip`. Style the
-// component itself (background, radius, …) and put the visuals inside.
+// Convenience wrapper for STATIC trigger content.
+// It fills its parent and layers the hover area over `@children`.
+// It reports to `TTooltip`.
+// Style the component itself (background, radius, …) and put the visuals inside.
 export component TTooltipArea inherits Rectangle {
     in property <string> text;
     in property <TTooltipPlacement> placement: TTooltipPlacement.top;

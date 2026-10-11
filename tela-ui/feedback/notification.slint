@@ -1,11 +1,12 @@
 // Tela UI — Notification
 //
-// Stacked corner notifications. Any code (Slint or Rust) calls TNotification:
+// Stacked corner notifications.
+// Any code — Slint or Rust — calls TNotification:
 //   TNotification.info("标题", "内容");
 //   TNotification.success(...) / warning(...) / error(...)
-// then place ONE `TNotificationOverlay` near the top of the window. Up to 4
-// notifications stack in a column (oldest drops off when full); each card
-// auto-dismisses after 4.5 s and can be closed manually.
+// Then place one `TNotificationOverlay` near the top of the window.
+// Up to 4 notifications stack in a column; the oldest drops off when full.
+// Each card auto-dismisses after 4.5 s and can be closed manually.
 
 import { TTheme } from "../theme.slint";
 import { TIcon } from "../base/icon/icon.slint";
@@ -30,13 +31,18 @@ export struct TNotificationData {
     title: string,
     content: string,
     theme: TNotificationTheme,
-    // Slot occupancy: slots are pre-allocated, hidden ones are empty.
+    // Slot occupancy. Slots are pre-allocated and hidden ones are empty.
     visible: bool,
+    // Monotonic id of the `show()` call that last filled this slot.
+    // The overlay restarts a slot's auto-dismiss timer when its stamp moves,
+    // so a refill never inherits the old slot's timer phase.
+    // Set by TNotification.show(); hosts that fill `items` directly leave it at 0.
+    stamp: int = 0,
 }
 
 export global TNotification {
-    // Fixed capacity in declaration order: index 0 is the oldest. Struct
-    // fields are assigned in place (Slint models have no push/remove).
+    // Fixed capacity in declaration order; index 0 is the oldest.
+    // Struct fields are assigned in place — Slint models have no push/remove.
     in-out property <[TNotificationData]> items: [
         { title: "", content: "", theme: TNotificationTheme.info, visible: false },
         { title: "", content: "", theme: TNotificationTheme.info, visible: false },
@@ -44,20 +50,27 @@ export global TNotification {
         { title: "", content: "", theme: TNotificationTheme.info, visible: false },
     ];
     in-out property <TNotificationPlacement> placement: TNotificationPlacement.top-right;
+    // Bumped once per `show()` and stamped into the refilled slot.
+    // The overlay uses it to tell a refill from a plain visibility flip.
+    out property <int> seq: 0;
 
     public function show(title: string, content: string, th: TNotificationTheme) {
+        seq += 1;
         if (!items[0].visible) {
-            items[0] = { title: title, content: content, theme: th, visible: true };
+            items[0] = { title: title, content: content, theme: th, visible: true, stamp: seq };
         } else if (!items[1].visible) {
-            items[1] = { title: title, content: content, theme: th, visible: true };
+            items[1] = { title: title, content: content, theme: th, visible: true, stamp: seq };
         } else if (!items[2].visible) {
-            items[2] = { title: title, content: content, theme: th, visible: true };
+            items[2] = { title: title, content: content, theme: th, visible: true, stamp: seq };
         } else {
             // Full: drop the oldest, shift the rest.
+            // Shifted slots carry their own stamps, so only the slots whose
+            // data actually moved restart their countdown.
+            // The new slot stamps `seq`.
             items[0] = items[1];
             items[1] = items[2];
             items[2] = items[3];
-            items[3] = { title: title, content: content, theme: th, visible: true };
+            items[3] = { title: title, content: content, theme: th, visible: true, stamp: seq };
         }
     }
 
@@ -90,7 +103,7 @@ export global TNotification {
 }
 
 export component TNotificationOverlay inherits Rectangle {
-    // A passive full-window overlay: no TouchArea, so it never blocks input.
+    // A passive full-window overlay. No TouchArea, so it never blocks input.
     z: TTheme.z-message;
     private property <bool> to-left:
         TNotification.placement == TNotificationPlacement.top-left
@@ -103,8 +116,8 @@ export component TNotificationOverlay inherits Rectangle {
         width: 320px;
         x: root.to-left ? 24px : parent.width - self.width - 24px;
         y: root.to-bottom ? parent.height - self.preferred-height - 12px : 12px;
-        // Slot spacing is baked into each wrapper's height so hidden slots
-        // collapse to zero without leaving layout gaps behind.
+        // Slot spacing is baked into each wrapper's height.
+        // Hidden slots collapse to zero without leaving layout gaps behind.
         spacing: 0px;
 
         for it[i] in TNotification.items: Rectangle {
@@ -158,8 +171,8 @@ export component TNotificationOverlay inherits Rectangle {
                         }
 
                         Text {
-                            // Wraps to the fixed 228px column; the card
-                            // height follows the wrapped line count.
+                            // Wraps to the fixed 228px column.
+                            // The card height follows the wrapped line count.
                             text: it.content;
                             font-size: TTheme.font-size-s;
                             font-family: TTheme.font-family;
@@ -191,13 +204,26 @@ export component TNotificationOverlay inherits Rectangle {
                 }
             }
 
-            // Per-slot auto-dismiss; the Timer remounts whenever the slot is
-            // refilled, so the 4.5 s window restarts from the refill.
+            // Per-slot auto-dismiss.
+            // The slot instance is not remounted on a refill — `items[i] = x`
+            // updates the model in place and the repeater keeps the instance;
+            // only replacing the whole model resets it.
+            // Left alone the timer would keep counting the old slot's phase.
+            // `running` still gates the timer. The stamp below restarts it when
+            // a slot's data actually moves, which is exactly what a full-queue
+            // shift does to the surviving slots.
             timer := Timer {
                 interval: 4.5s;
                 running: it.visible;
                 triggered => {
                     TNotification.close(i);
+                }
+            }
+
+            private property <int> stamp: it.stamp;
+            changed stamp => {
+                if (it.visible) {
+                    timer.restart();
                 }
             }
         }

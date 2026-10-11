@@ -16,7 +16,7 @@ name = "tela"
 [dependencies]
 slint = { version = "1.18.1", default-features = false, features = [
     "accessibility",
-    "compat-1-2",
+    "compat-1-18",
     "backend-winit",
     "renderer-skia",
     "renderer-software",

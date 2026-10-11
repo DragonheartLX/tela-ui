@@ -18,11 +18,11 @@ export global TPopupStack {
     out property <int> open-count: 0;
     // Bumped when ESC should close the topmost layer.
     out property <int> close-top-seq: 0;
-    // Bumped when any layer closes; `closed-depth` is its slot.
+    // Bumped when any layer closes. `closed-depth` is its slot.
     out property <int> closed-seq: 0;
     out property <int> closed-depth: -1;
 
-    // Call AFTER the layer snapshot open-count as its depth.
+    // Call after the layer snapshot its open-count as its depth.
     public function layer-opened() {
         open-count += 1;
     }
@@ -40,17 +40,18 @@ export global TPopupStack {
     }
 }
 
-// Per-layer embed: bind `active` to the host's open state and handle
-// `close-requested` (close the layer however it should close). Registers
-// with TPopupStack on activate, withdraws on deactivate, closes when ESC
-// names it the topmost layer, and grabs keyboard focus while active so the
-// ESC key reaches this scope at all.
+// Per-layer embed. Bind `active` to the host's open state and handle
+// `close-requested` (close the layer however it should close).
+// It registers with TPopupStack on activate and withdraws on deactivate.
+// It closes when ESC names it the topmost layer.
+// It grabs keyboard focus while active so the ESC key reaches this scope at
+// all.
 export component TPopupStackLayer {
     in property <bool> active;
     callback close-requested();
 
-    // Slot captured at activation: count-before-increment, so the topmost
-    // open layer is always open-count - 1.
+    // Slot captured at activation, count before increment.
+    // That keeps the topmost open layer always open-count - 1.
     private property <int> depth: -1;
 
     private property <int> close-top-mirror: TPopupStack.close-top-seq;
@@ -79,8 +80,8 @@ export component TPopupStackLayer {
     }
 
     keys := FocusScope {
-        // ESC bubbles here from inner focusable content (buttons reject
-        // it); forward to the stack, which closes the topmost layer.
+        // ESC bubbles here from inner focusable content.
+        // Buttons reject it; forward to the stack, which closes the topmost layer.
         key-pressed(event) => {
             if (event.text == Key.Escape) {
                 TPopupStack.press-escape();

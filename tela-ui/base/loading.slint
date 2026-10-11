@@ -60,13 +60,15 @@ export component TLoadingSpinner inherits Rectangle {
     }
 }
 
-// TLoading indicator with an optional label beside the spinner. The root is
-// a HorizontalLayout (like TRadioGroup) so its preferred size — spinner plus
-// label — propagates to surrounding layouts correctly; a Rectangle root's
-// inner row reported a zero preferred width and siblings overlapped. The
-// spinner sits in a height-free Rectangle (stretching with the row) and is
-// centered inside it, so ring and label keep one center line even when a
-// taller row stretches the layout.
+// TLoading indicator with an optional label beside the spinner.
+// The root is a HorizontalLayout, like TRadioGroup.
+// That makes its preferred size — spinner plus label — propagate to
+// surrounding layouts correctly.
+// A Rectangle root's inner row reported a zero preferred width and
+// siblings overlapped.
+// The spinner sits in a height-free Rectangle.
+// It stretches with the row and is centered inside it, so ring and label
+// keep one center line even when a taller row stretches the layout.
 export component TLoading inherits HorizontalLayout {
     in property <string> text;
     in property <TThemeRole> theme: TThemeRole.primary;
@@ -75,8 +77,9 @@ export component TLoading inherits HorizontalLayout {
     spacing: TTheme.spacing-2;
 
     Rectangle {
-        // Hugs the circle on the main axis so the label gap is exactly
-        // `spacing`; stretches on the cross axis to center the ring.
+        // Hugs the circle on the main axis, so the label gap is exactly
+        // `spacing`.
+        // It stretches on the cross axis to center the ring.
         width: root.size;
 
         TLoadingSpinner {

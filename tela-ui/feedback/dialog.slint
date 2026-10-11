@@ -1,9 +1,10 @@
 // Tela UI — TDialog
 //
-// Modal dialog. Place it anywhere in an overlay layer covering the window;
-// it renders a dimmed backdrop and a centered card. `open` toggles it,
-// overlay clicks close it when `close-on-overlay` is set. Children of the
-// component are rendered below the content text as custom body content.
+// Modal dialog with a dimmed backdrop and a centered card.
+// Place it in an overlay layer covering the window.
+// `open` toggles it.
+// Overlay clicks close it when `close-on-overlay` is set.
+// Children render below the content text as custom body content.
 
 import { TTheme } from "../theme.slint";
 import { TThemeRole } from "../structs/enums.slint";
@@ -25,18 +26,22 @@ export component TDialog inherits Rectangle {
     callback canceled();
     callback closed();
 
-    visible: open;
+    // Fades instead of `visible: open`, which would drop the subtree the
+    // instant `open` flips and leave the slide-out mid-flight invisible.
+    // The overlay shares this opacity. The card only slides.
+    opacity: root.open ? 1 : 0;
     background: TTheme.mask-active;
-    clip: false;
     z: TTheme.z-modal;
+    animate opacity { duration: TTheme.duration-base; easing: ease-out; }
 
     public function close() {
         open = false;
         root.closed();
     }
 
-    // Stack bookkeeping + ESC: ESC closes the topmost open layer; a dialog
-    // closed that way is a plain dismissal (closed, not canceled).
+    // Stack bookkeeping and ESC.
+    // ESC closes the topmost open layer.
+    // A dialog closed that way is a plain dismissal — `closed`, not `canceled`.
     TPopupStackLayer {
         active: root.open;
         close-requested => {
@@ -53,17 +58,31 @@ export component TDialog inherits Rectangle {
 
     Rectangle {
         x: (parent.width - self.width) / 2;
-        y: (parent.height - self.height) / 2 + (root.open ? 0px : 12px);
+        // When closed the card rests fully off-window below the overlay.
+        // A fading card is invisible but still mounted.
+        // Left centred it would keep its content clickable at the screen
+        // middle — nothing gates a subtree's children on `open`.
+        // The slide doubles as the exit animation.
+        y: (parent.height - self.height) / 2 + (root.open ? 0px : self.height + 24px);
         width: min(root.dialog-width, parent.width - 48px);
         height: card.preferred-height;
         border-radius: TTheme.radius-large;
         background: TTheme.bg-color-container;
-        opacity: root.open ? 1 : 0;
         drop-shadow-blur: TTheme.shadow-3-blur;
         drop-shadow-offset-y: TTheme.shadow-3-offset-y;
         drop-shadow-color: TTheme.shadow-3-color;
-        animate opacity { duration: TTheme.duration-base; }
         animate y { duration: TTheme.duration-base; }
+
+        // Absorbs clicks on the card body so they cannot reach the backdrop.
+        // Declared before the layout: traversal is front-to-back and starts
+        // at the last declared sibling, so the buttons still get theirs.
+        // Disabled while closed — an invisible card would still sit at the
+        // screen centre and eat the clicks underneath it.
+        TouchArea {
+            enabled: root.open;
+            width: parent.width;
+            height: parent.height;
+        }
 
         card := VerticalLayout {
             padding: TTheme.margin-xxl;
