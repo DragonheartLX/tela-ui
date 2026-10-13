@@ -90,5 +90,8 @@ export component TLink inherits Rectangle {
 
     accessible-role: AccessibleRole.text;
     accessible-label: text;
-    accessible-action-default => { root.clicked(); }
+    accessible-enabled: !root.disabled;
+    accessible-action-default => {
+        if (!root.disabled) { root.clicked(); }
+    }
 }

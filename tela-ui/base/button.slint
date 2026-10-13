@@ -149,5 +149,8 @@ export component TButton inherits Rectangle {
 
     accessible-role: AccessibleRole.button;
     accessible-label: text;
-    accessible-action-default => { root.clicked(); }
+    accessible-enabled: !root.disabled && !root.loading;
+    accessible-action-default => {
+        if (!root.disabled && !root.loading) { root.clicked(); }
+    }
 }
