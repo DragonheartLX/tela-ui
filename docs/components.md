@@ -222,7 +222,7 @@ TInput 参数:
 | size | `TSize` | `TSize.medium` | 高度与字号 |
 | placeholder-text | `string` | `""` | 占位文字 |
 | text | `string` (in-out) | `""` | 输入内容, 双向绑定到内部 TextInput |
-| read-only | `bool` (in-out) | `false` | 只读 |
+| read-only | `bool` (in-out) | `false` | 只读 (可聚焦可复制, 不可编辑) |
 | prefix-icon | `TIconData` | 空 | 前缀图标 |
 | suffix-icon | `TIconData` | 空 | 后缀图标 (显示清空钮时被隐藏) |
 | clearable | `bool` | `false` | 悬停且非空时显示清空钮 |
@@ -234,7 +234,7 @@ TTextArea 参数:
 | --- | --- | --- | --- |
 | placeholder-text | `string` | `""` | 占位文字 |
 | text | `string` (in-out) | `""` | 输入内容, 自动换行 |
-| read-only | `bool` (in-out) | `false` | 只读 |
+| read-only | `bool` (in-out) | `false` | 只读 (可聚焦可复制, 不可编辑) |
 | rows | `int` | `4` | 期望可见行数, 高度随之计算 |
 
 继承自 TInputFrame 的参数 (两者通用):
