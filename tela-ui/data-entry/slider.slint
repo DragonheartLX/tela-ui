@@ -19,6 +19,10 @@ export component TSlider inherits Rectangle {
     private property <length> track-h: 6px;
     private property <length> handle-d: 16px;
     private property <float> t: (value - minimum) / max(0.0001, maximum - minimum);
+    // Whether the most recent key-pressed was handled; key-released only
+    // fires `released` for that key, not for every key-up (pointer path is
+    // already correct — pointer-up always means a real release).
+    private property <bool> key-handled: false;
 
     height: TTheme.height-m;
 
@@ -31,24 +35,29 @@ export component TSlider inherits Rectangle {
             }
             if event.text == Key.RightArrow || event.text == Key.UpArrow {
                 root.set-value(root.value + root.step);
+                root.key-handled = true;
                 return accept;
             }
             if event.text == Key.LeftArrow || event.text == Key.DownArrow {
                 root.set-value(root.value - root.step);
+                root.key-handled = true;
                 return accept;
             }
             if event.text == Key.Home {
                 root.set-value(root.minimum);
+                root.key-handled = true;
                 return accept;
             }
             if event.text == Key.End {
                 root.set-value(root.maximum);
+                root.key-handled = true;
                 return accept;
             }
             reject
         }
         key-released(event) => {
-            if !root.disabled {
+            if root.key-handled {
+                root.key-handled = false;
                 root.released(root.value);
             }
             accept

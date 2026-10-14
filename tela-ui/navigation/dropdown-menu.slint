@@ -33,8 +33,12 @@ export component TDropdownMenu inherits Rectangle {
     // Non-interactive triggers only.
     in property <bool> auto-open: true;
     in property <length> item-height: 32px;
-    // Visible rows before the popup starts scrolling.
     in property <int> max-visible-items: 6;
+    // Every row — entry or divider — occupies item-height so the popup
+    // height formula `count * item-height + padding` stays exact. The
+    // divider's hairline centers itself inside the full row; the old 9px
+    // rows broke the formula by item-height - 9px per divider.
+    private property <length> divider-height: root.item-height;
 
     callback selected(int, string);
 
@@ -51,6 +55,7 @@ export component TDropdownMenu inherits Rectangle {
     public function toggle() {
         surface.toggle();
     }
+
 
     // Trigger content hosted in a layout.
     // That makes the wrapper hug it in parent layouts, since a bare child
@@ -86,7 +91,7 @@ export component TDropdownMenu inherits Rectangle {
                 padding: 4px;
 
                 for it[i] in root.items: Rectangle {
-                    height: it.divider ? 9px : root.item-height;
+                    height: root.item-height;
                     border-radius: TTheme.radius-default;
                     background: transparent;
                     animate background { duration: TTheme.duration-fast; }
@@ -132,7 +137,7 @@ export component TDropdownMenu inherits Rectangle {
                     }
 
                     if it.divider: Rectangle {
-                        y: 4px;
+                        y: (parent.height - self.height) / 2;
                         height: 1px;
                         background: TTheme.border-level-1-color;
                     }

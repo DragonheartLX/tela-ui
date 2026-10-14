@@ -46,9 +46,15 @@ export component TLoadingServiceOverlay inherits Rectangle {
         mouse-cursor: MouseCursor.wait;
     }
 
+    // TLoading's root is a HorizontalLayout; without locked width/height
+    // the parent stretch would drag it to the overlay's full bounds, and
+    // the spinner would render at the bottom of the stretched cell.
+    // Locking both to preferred keeps it a compact box we can center.
     loading := TLoading {
-        x: (parent.width - self.preferred-width) / 2;
-        y: (parent.height - self.preferred-height) / 2;
+        width: self.preferred-width;
+        height: self.preferred-height;
+        x: (parent.width - self.width) / 2;
+        y: (parent.height - self.height) / 2;
         text: TLoadingService.text;
     }
 }

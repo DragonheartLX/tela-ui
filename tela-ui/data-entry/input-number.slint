@@ -5,8 +5,13 @@
 // field reformats the text; Up/Down arrows step while the field is focused.
 // Steppers are disabled at the bounds. `value` self-assigns on interaction —
 // bind it two-way (`value <=> v`).
+//
+// An empty buffer (user cleared the field) means "not entered": it does not
+// touch `value`, so clearing and blurring does not silently clamp the number
+// back to `min` or fire a spurious `changed`. Same-valued parses (trailing
+// ".", leading "0") also skip `changed`.
 
-import { TTheme,  TSize } from "../theme.slint";
+import { TTheme, TSize } from "../theme.slint";
 import { TInputFrame } from "input.slint";
 import { TIcon } from "../base/icon/icon.slint";
 import { TIconSet } from "../base/icon/data.slint";
@@ -133,28 +138,42 @@ export component TInputNumber inherits TInputFrame {
             // The frame provides the accessibility surface.
             accessible-role: none;
 
-            // Leaving the field reformats the buffer from the clamped value.
+            // Leaving the field reformats the buffer from the clamped value,
+            // restoring a cleared field to its last committed number.
             changed has-focus => {
                 if (!self.has-focus) {
                     self.text = root.format(root.value);
                 }
             }
 
+            // Empty means "not entered"; a decimal-mark-only buffer (".")
+            // parses to 0 which is the same phantom as the empty case; a
+            // same-valued parse (e.g. a no-op keystroke) is also skipped.
             edited => {
-                root.value = root.clamp-v(self.text.to-float());
-                root.changed(root.value);
+                if self.text != "" && self.text != "." && root.clamp-v(self.text.to-float()) != root.value {
+                    root.value = root.clamp-v(self.text.to-float());
+                    root.changed(root.value);
+                }
             }
+
             accepted => {
-                root.value = root.clamp-v(self.text.to-float());
+                if self.text != "" && root.clamp-v(self.text.to-float()) != root.value {
+                    root.value = root.clamp-v(self.text.to-float());
+                    root.changed(root.value);
+                }
                 self.text = root.format(root.value);
-                root.changed(root.value);
             }
+
             key-pressed(event) => {
-                if (event.text == Key.UpArrow) {
-                    btn-plus.clicked();
+                if event.text == Key.UpArrow {
+                    root.value = root.clamp-v(root.value + root.step);
+                    self.text = root.format(root.value);
+                    root.changed(root.value);
                     return accept;
-                } else if (event.text == Key.DownArrow) {
-                    btn-minus.clicked();
+                } else if event.text == Key.DownArrow {
+                    root.value = root.clamp-v(root.value - root.step);
+                    self.text = root.format(root.value);
+                    root.changed(root.value);
                     return accept;
                 }
                 reject

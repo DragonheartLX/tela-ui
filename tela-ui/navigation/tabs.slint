@@ -9,8 +9,14 @@ export component TTabs inherits Rectangle {
     in property <[string]> items;
     in-out property <int> current-index: 0;
 
-    callback changed(int);
+    // Clamped index every visual reads; an out-of-range host value would
+    // otherwise push the indicator off the bar and leave every tab
+    // unselected. Writing current-index stays unclamped so the host sees
+    // what it set.
+    private property <int> safe-index:
+        Math.max(0, Math.min(current-index, items.length - 1));
 
+    callback changed(int);
     height: 40px;
 
     HorizontalLayout {
@@ -44,7 +50,7 @@ export component TTabs inherits Rectangle {
                     hovered when touch.has-hover: {
                         color: TTheme.brand-color-hover;
                     }
-                    selected when i == root.current-index: {
+                    selected when i == root.safe-index: {
                         color: TTheme.brand-color;
                         font-weight: TTheme.font-weight-semibold;
                     }
@@ -55,7 +61,7 @@ export component TTabs inherits Rectangle {
 
     Rectangle {
         y: parent.height - self.height;
-        x: root.current-index * (parent.width / max(1, root.items.length));
+        x: root.safe-index * (parent.width / max(1, root.items.length));
         width: parent.width / max(1, root.items.length);
         height: 3px;
         border-radius: 2px;

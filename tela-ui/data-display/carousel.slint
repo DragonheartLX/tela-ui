@@ -15,15 +15,20 @@ export component TCarousel inherits Rectangle {
     in property <bool> autoplay: false;
     in property <duration> interval: 3s;
 
+    // Clamped index every visual reads; an out-of-range current would park
+    // the track past the last slide and highlight no dot. Writing current
+    // stays unclamped so the host sees what it set.
+    private property <int> safe-current:
+        Math.max(0, Math.min(current, items.length - 1));
+
     clip: true;
 
     track := Rectangle {
-        x: -root.current * parent.width;
+        x: -root.safe-current * parent.width;
         y: 0;
         width: parent.width;
         height: parent.height;
         animate x { duration: TTheme.duration-slow; }
-
         for it[i] in root.items: Image {
             x: i * root.width;
             y: 0;
@@ -42,11 +47,11 @@ export component TCarousel inherits Rectangle {
         spacing: TTheme.spacing-3;
 
         for it[i] in root.items: Rectangle {
-            width: i == root.current ? 16px : 6px;
+            width: i == root.safe-current ? 16px : 6px;
             height: 6px;
             y: (parent.height - self.height) / 2;
             border-radius: TTheme.radius-round;
-            background: i == root.current ? TTheme.text-color-anti : TTheme.text-color-anti.with-alpha(0.4);
+            background: i == root.safe-current ? TTheme.text-color-anti : TTheme.text-color-anti.with-alpha(0.4);
             animate width { duration: TTheme.duration-fast; }
             animate background { duration: TTheme.duration-fast; }
 

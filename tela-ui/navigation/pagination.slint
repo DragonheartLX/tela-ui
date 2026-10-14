@@ -91,11 +91,15 @@ export component TPagination inherits Rectangle {
     in property <int> total-pages: 1;
     in-out property <int> current: 1;
 
+    // Clamped page every visual reads; writing current stays unclamped so
+    // the host sees what it set.
+    private property <int> safe-current: max(1, min(current, max(1, total-pages)));
+
     callback changed(int);
 
     // Sliding window of up to 7 page numbers.
     private property <int> visible-count: min(7, total-pages);
-    private property <int> start: max(1, min(total-pages - visible-count + 1, current - 3));
+    private property <int> start: max(1, min(max(1, total-pages) - visible-count + 1, safe-current - 3));
 
     height: TTheme.height-m;
     width: row.preferred-width;
@@ -109,16 +113,16 @@ export component TPagination inherits Rectangle {
 
         TPageBtn {
             icon: TIconSet.ChevronLeft;
-            disabled: root.current <= 1;
+            disabled: root.safe-current <= 1;
             clicked => {
-                root.current = root.current - 1;
+                root.current = root.safe-current - 1;
                 root.changed(root.current);
             }
         }
 
         for i in root.visible-count: TPageBtn {
             label: "\{root.start + i}";
-            active: root.start + i == root.current;
+            active: root.start + i == root.safe-current;
             clicked => {
                 root.current = root.start + i;
                 root.changed(root.current);
@@ -127,9 +131,9 @@ export component TPagination inherits Rectangle {
 
         TPageBtn {
             icon: TIconSet.ChevronRight;
-            disabled: root.current >= root.total-pages;
+            disabled: root.safe-current >= root.total-pages;
             clicked => {
-                root.current = root.current + 1;
+                root.current = root.safe-current + 1;
                 root.changed(root.current);
             }
         }

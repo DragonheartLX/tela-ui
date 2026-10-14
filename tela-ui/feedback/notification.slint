@@ -31,47 +31,35 @@ export struct TNotificationData {
     title: string,
     content: string,
     theme: TNotificationTheme,
-    // Slot occupancy. Slots are pre-allocated and hidden ones are empty.
-    visible: bool,
-    // Monotonic id of the `show()` call that last filled this slot.
-    // The overlay restarts a slot's auto-dismiss timer when its stamp moves,
-    // so a refill never inherits the old slot's timer phase.
-    // Set by TNotification.show(); hosts that fill `items` directly leave it at 0.
+    // Monotonic id of the `show()` call that produced this notification.
+    // The overlay's per-item auto-dismiss timer restarts when the item data
+    // changes, so a reused card never inherits the previous message's
+    // countdown phase. Hosts that push directly leave it at 0.
     stamp: int = 0,
 }
 
 export global TNotification {
-    // Fixed capacity in declaration order; index 0 is the oldest.
-    // Struct fields are assigned in place — Slint models have no push/remove.
-    in-out property <[TNotificationData]> items: [
-        { title: "", content: "", theme: TNotificationTheme.info, visible: false },
-        { title: "", content: "", theme: TNotificationTheme.info, visible: false },
-        { title: "", content: "", theme: TNotificationTheme.info, visible: false },
-        { title: "", content: "", theme: TNotificationTheme.info, visible: false },
-    ];
+    // The live queue; index 0 is the oldest. Slint 1.18 array ops
+    // (push/remove) keep this a real queue instead of 4 fixed slots:
+    // no "find first empty" branch can misplace an item, and the
+    // layout collapses naturally when the array is empty.
+    // push/remove map to RepeaterTracker row_added/row_removed, which
+    // splice the instance list instead of resetting it; surviving
+    // instances are marked dirty and rebuilt, so each card's Timer
+    // restarts from a fresh phase — exactly the behavior the old
+    // stamp-restart dance was emulating by hand.
+    in-out property <[TNotificationData]> items: [];
     in-out property <TNotificationPlacement> placement: TNotificationPlacement.top-right;
-    // Bumped once per `show()` and stamped into the refilled slot.
-    // The overlay uses it to tell a refill from a plain visibility flip.
+    // Bumped once per `show()` and stamped into the queued item.
     out property <int> seq: 0;
-
+    // Capacity is 1.18-visible to the overlay; keep it a plain constant.
     public function show(title: string, content: string, th: TNotificationTheme) {
         seq += 1;
-        if (!items[0].visible) {
-            items[0] = { title: title, content: content, theme: th, visible: true, stamp: seq };
-        } else if (!items[1].visible) {
-            items[1] = { title: title, content: content, theme: th, visible: true, stamp: seq };
-        } else if (!items[2].visible) {
-            items[2] = { title: title, content: content, theme: th, visible: true, stamp: seq };
-        } else {
-            // Full: drop the oldest, shift the rest.
-            // Shifted slots carry their own stamps, so only the slots whose
-            // data actually moved restart their countdown.
-            // The new slot stamps `seq`.
-            items[0] = items[1];
-            items[1] = items[2];
-            items[2] = items[3];
-            items[3] = { title: title, content: content, theme: th, visible: true, stamp: seq };
+        // Full queue: the oldest (index 0) drops off the visible stack.
+        if (items.length >= 4) {
+            items.remove(0);
         }
+        items.push({ title: title, content: content, theme: th, stamp: seq });
     }
 
     public function info(title: string, content: string) {
@@ -91,14 +79,11 @@ export global TNotification {
     }
 
     public function close(i: int) {
-        items[i].visible = false;
+        items.remove(i);
     }
 
     public function clear() {
-        items[0].visible = false;
-        items[1].visible = false;
-        items[2].visible = false;
-        items[3].visible = false;
+        items = [];
     }
 }
 
@@ -117,18 +102,17 @@ export component TNotificationOverlay inherits Rectangle {
         x: root.to-left ? 24px : parent.width - self.width - 24px;
         y: root.to-bottom ? parent.height - self.preferred-height - 12px : 12px;
         // Slot spacing is baked into each wrapper's height.
-        // Hidden slots collapse to zero without leaving layout gaps behind.
         spacing: 0px;
 
         for it[i] in TNotification.items: Rectangle {
             private property <length> card-h: row.preferred-height + TTheme.padding-lr-m * 2;
-            height: it.visible ? card-h + TTheme.spacing-5 : 0px;
+            height: card-h + TTheme.spacing-5;
             clip: true;
 
             card := Rectangle {
                 y: 0;
                 width: parent.width;
-                height: max(0px, parent.height - TTheme.spacing-5);
+                height: parent.height - TTheme.spacing-5;
                 background: TTheme.bg-color-container;
                 border-width: 1px;
                 border-color: TTheme.component-stroke;
@@ -204,26 +188,16 @@ export component TNotificationOverlay inherits Rectangle {
                 }
             }
 
-            // Per-slot auto-dismiss.
-            // The slot instance is not remounted on a refill — `items[i] = x`
-            // updates the model in place and the repeater keeps the instance;
-            // only replacing the whole model resets it.
-            // Left alone the timer would keep counting the old slot's phase.
-            // `running` still gates the timer. The stamp below restarts it when
-            // a slot's data actually moves, which is exactly what a full-queue
-            // shift does to the surviving slots.
-            timer := Timer {
+            // Per-item auto-dismiss. `row_added`/`row_removed` splice the
+            // repeater's instance list; surviving instances are marked dirty
+            // and rebuilt, which restarts this timer from a fresh phase
+            // whenever the queue shifts underneath it. That is the exact
+            // semantic the old stamp-restart logic hand-coded for the
+            // fixed-slot design.
+            Timer {
                 interval: 4.5s;
-                running: it.visible;
                 triggered => {
                     TNotification.close(i);
-                }
-            }
-
-            private property <int> stamp: it.stamp;
-            changed stamp => {
-                if (it.visible) {
-                    timer.restart();
                 }
             }
         }

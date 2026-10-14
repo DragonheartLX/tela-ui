@@ -20,8 +20,11 @@ export struct TSelectItem {
 
 export component TSelect inherits Rectangle {
     in property <[TSelectItem]> items;
+    // current-index drives the visuals; current-value is derived from it so
+    // the two can never disagree. Hosts may bind either one two-way.
     in-out property <int> current-index: -1;
-    in-out property <string> current-value;
+    in-out property <string> current-value:
+        current-index >= 0 && current-index < items.length ? items[current-index].value : "";
     in property <string> placeholder-text;
     in property <bool> disabled;
     in property <TIconData> prefix-icon;
@@ -178,7 +181,6 @@ export component TSelect inherits Rectangle {
                     mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;
                     clicked => {
                         root.current-index = i;
-                        root.current-value = it.value;
                         root.selected(i, it.value);
                         surface.close();
                     }

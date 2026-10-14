@@ -15,6 +15,25 @@ export component FeedbackSection inherits VerticalLayout {
     in-out property <bool> drawer-open: false;
     in-out property <TDrawerPlacement> drawer-placement: TDrawerPlacement.right;
     in-out property <float> progress-value: 40;
+    // The two selects store their current value on a surviving location —
+    // TMessage.placement is a global, drawer-placement lives on
+    // MainWindow — while the section itself is rebuilt on every page
+    // switch. So the select indices are derived from those values, not
+    // stored: a rebuilt section reads the same value back into the same
+    // index, and the label can never fall out of sync with the actual
+    // placement.
+    private property <int> drawer-side-index:
+        root.drawer-placement == TDrawerPlacement.right ? 0
+        : root.drawer-placement == TDrawerPlacement.left ? 1
+        : root.drawer-placement == TDrawerPlacement.top ? 2
+        : 3;
+    private property <int> placement-index:
+        TMessage.placement == TMessagePlacement.top-center ? 0
+        : TMessage.placement == TMessagePlacement.top-left ? 1
+        : TMessage.placement == TMessagePlacement.top-right ? 2
+        : TMessage.placement == TMessagePlacement.bottom-center ? 3
+        : TMessage.placement == TMessagePlacement.bottom-left ? 4
+        : 5;
 
     in property <[TSelectItem]> drawer-side-items: [
         { label: "右侧", value: "right", disabled: false },
@@ -22,7 +41,6 @@ export component FeedbackSection inherits VerticalLayout {
         { label: "顶部", value: "top", disabled: false },
         { label: "底部", value: "bottom", disabled: false },
     ];
-    in-out property <int> drawer-side-index: 0;
     // Same order as `drawer-side-items`, so the TSelect index picks directly.
     in property <[TDrawerPlacement]> drawer-placements: [
         TDrawerPlacement.right,
@@ -39,7 +57,6 @@ export component FeedbackSection inherits VerticalLayout {
         { label: "底部居左", value: "bottom-left", disabled: false },
         { label: "底部居右", value: "bottom-right", disabled: false },
     ];
-    in-out property <int> placement-index: 0;
     // Same order as `placement-items`.
     in property <[TMessagePlacement]> message-placements: [
         TMessagePlacement.top-center,
@@ -64,6 +81,10 @@ export component FeedbackSection inherits VerticalLayout {
 
         load-timer := Timer {
             interval: 2s;
+            // Default-running would keep the timer armed forever and burn
+            // cycles; restart() alone only restarts a previously started
+            // timer, so the click handler must start() it explicitly.
+            running: false;
             triggered => {
                 TLoadingService.hide();
             }
@@ -214,7 +235,7 @@ export component FeedbackSection inherits VerticalLayout {
             HorizontalLayout {
                 spacing: 12px;
 
-                TButton { variant: TButtonVariant.outline; theme: TThemeRole.primary; text: "全屏加载 2 秒"; clicked => { TLoadingService.show("拼命加载中…"); load-timer.restart(); } }
+                TButton { variant: TButtonVariant.outline; theme: TThemeRole.primary; text: "全屏加载 2 秒"; clicked => { TLoadingService.show("拼命加载中…"); load-timer.start(); } }
                 TCaption { text: "全屏遮罩阻断指针输入; 是状态而非浮层, ESC 不关闭。"; vertical-alignment: center; wrap: word-wrap; horizontal-stretch: 1; }
             }
         }

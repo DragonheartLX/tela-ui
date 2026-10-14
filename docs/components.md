@@ -285,7 +285,7 @@ TTextArea `changed(string)`。
 | --- | --- | --- | --- |
 | items | `[TSelectItem]` | `[]` | 选项列表 |
 | current-index | `int` (in-out) | `-1` | 选中项下标, -1 为未选择 |
-| current-value | `string` (in-out) | `""` | 选中项 value, 选择时组件内部一并写入 |
+| current-value | `string` (in-out) | 由 current-index 派生 | 选中项 value, 与 current-index 永不失同步; 建议宿主只绑 current-index |
 | placeholder-text | `string` | `""` | 未选择时的占位文字 |
 | disabled | `bool` | `false` | 禁用态 |
 | prefix-icon | `TIconData` | 空 | 前缀图标 |
@@ -758,19 +758,19 @@ import { TAlert, TDialog, TDrawer, TPopconfirm, TMessage, TNotification, TProgre
 
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| items | `[TNotificationData]` (in-out) | 4 个隐藏槽位 | 固定容量, 下标 0 最旧; Slint 模型无 push/remove, 以槽位原地赋值实现堆叠 |
+| items | `[TNotificationData]` (in-out) | `[]` | 变长队列, 下标 0 最旧; 用 Slint 1.18 的 array push/remove 维护, 最多 4 条 |
 | placement | `TNotificationPlacement` (in-out) | `TNotificationPlacement.top-right` | 贴靠的窗口角落 |
 
 `TNotification` 函数: `info(string, string)`, `success(…)`, `warning(…)`,
 `error(…)` (参数为 标题, 内容), 底层 `show(string, string, TNotificationTheme)`,
-以及 `close(int)` (按下标关闭) 与 `clear()`。
+以及 `close(int)` (按下标移除) 与 `clear()` (清空队列)。
 
 `TNotificationOverlay` 组件无参数, 放置即可。
 
 相关枚举/结构: `TNotificationTheme { info, success, warning, error }`,
 `TNotificationPlacement { top-left, top-right, bottom-left, bottom-right }`,
-`TNotificationData { title, content, theme, visible }` (visible 为槽位占用
-标记, 仅 Overlay 内部使用)。
+`TNotificationData { title, content, theme, stamp }` (stamp 为 show() 单调
+序号, 供 Overlay 区分数据替换)。
 
 ### TProgress
 
