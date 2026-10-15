@@ -4,7 +4,8 @@
 
 import { TTheme,  TThemeRole,  TSize } from "@tela-ui/theme.slint";
 import { TIconSet, TCaption, TDivider, TButton, TButtonVariant, TParagraph } from "@tela-ui/base.slint";
-import { TTabs, TPagination, TNavBar, TNavItem, TSideNav, TSideNavItem, TSideNavMode, TSideNavTogglePosition, TBreadcrumb, TCrumbItem, TSteps, TDropdownMenu, TDropdownMenuItem, TPopupPlacement, TBackTop, TMessage, TCard, TCodeBlock} from "@tela-ui/common.slint";
+import { TTabs, TPagination, TNavBar, TNavItem, TSideNav, TSideNavItem, TSideNavMode, TSideNavTogglePosition, TBreadcrumb, TCrumbItem, TSteps, TDropdownMenu, TDropdownMenuItem, TPopupPlacement, TBackTop, TMessage } from "@tela-ui/common.slint";
+import { DemoSection } from "../demo-section.slint";
 import { ScrollView } from "std-widgets.slint";
 
 export component NavigationSection inherits VerticalLayout {
@@ -45,283 +46,243 @@ export component NavigationSection inherits VerticalLayout {
     in-out property <bool> side-collapsed: false;
 
     // ======================= TTabs =========================
-    VerticalLayout {
-        spacing: 8px;
+    DemoSection {
+        title: "选项卡 TTabs";
+        code: "import { TTabs } from \"@tela-ui/common.slint\";\n\nTTabs { items: [\"首页\", \"组件\", \"文档\", \"关于\"]; current-index <=> i; }\nif root.i == 0: TParagraph { text: \"首页内容\"; }";
 
-        TCard {
-            title: "选项卡 TTabs";
+        VerticalLayout {
+            spacing: 16px;
 
-            VerticalLayout {
-                spacing: 16px;
+            TTabs {
+                items: root.tab-titles;
+                current-index <=> root.tab-index;
+            }
 
-                TTabs {
-                    items: root.tab-titles;
-                    current-index <=> root.tab-index;
-                }
+            Rectangle {
+                height: 72px;
+                border-radius: TTheme.radius-medium;
+                background: TTheme.bg-color-secondarycontainer;
 
-                Rectangle {
-                    height: 72px;
-                    border-radius: TTheme.radius-medium;
-                    background: TTheme.bg-color-secondarycontainer;
+                VerticalLayout {
+                    padding: TTheme.margin-l;
+                    spacing: 4px;
 
-                    VerticalLayout {
-                        padding: TTheme.margin-l;
-                        spacing: 4px;
-
-                        if root.tab-index == 0: TParagraph { text: "首页内容：这里根据 current-index 切换显示不同的面板。"; }
-                        if root.tab-index == 1: TParagraph { text: "组件内容：TTabs 组件的下方通过 if 表达式渲染当前页。"; }
-                        if root.tab-index == 2: TParagraph { text: "文档内容：下划线位置随选中项平滑移动。"; }
-                        if root.tab-index == 3: TParagraph { text: "关于内容：Tela UI — TDesign-inspired Slint components."; }
-                    }
+                    if root.tab-index == 0: TParagraph { text: "首页内容：这里根据 current-index 切换显示不同的面板。"; }
+                    if root.tab-index == 1: TParagraph { text: "组件内容：TTabs 组件的下方通过 if 表达式渲染当前页。"; }
+                    if root.tab-index == 2: TParagraph { text: "文档内容：下划线位置随选中项平滑移动。"; }
+                    if root.tab-index == 3: TParagraph { text: "关于内容：Tela UI — TDesign-inspired Slint components."; }
                 }
             }
         }
-
-        TCodeBlock { code: "import { TTabs } from \"@tela-ui/common.slint\";\n\nTTabs { items: [\"首页\", \"组件\", \"文档\", \"关于\"]; current-index <=> i; }\nif root.i == 0: TParagraph { text: \"首页内容\"; }"; }
     }
 
     // ==================== TPagination ======================
-    VerticalLayout {
-        spacing: 8px;
+    DemoSection {
+        title: "分页 TPagination";
+        code: "import { TPagination } from \"@tela-ui/common.slint\";\n\nTPagination { total-pages: 20; current <=> page; }";
 
-        TCard {
-            title: "分页 TPagination";
+        HorizontalLayout {
+            spacing: 24px;
+
+            TPagination {
+                y: (parent.height - self.height) / 2;
+                total-pages: 20;
+                current <=> root.page;
+            }
+
+            TCaption { text: "当前第 \{root.page} 页"; vertical-alignment: center; }
+        }
+    }
+
+    // ======================= TNavBar =======================
+    DemoSection {
+        title: "导航栏 TNavBar";
+        code: "import { TNavBar } from \"@tela-ui/common.slint\";\n\nTNavBar {\n    title: \"Tela UI\";\n    logo: TIconSet.LayoutDashboard;\n    items: [{ label: \"首页\", value: \"home\" }, …];\n    current-value <=> nav;\n    TButton { text: \"操作\"; } // 右侧操作区\n}";
+
+        VerticalLayout {
+            spacing: 16px;
+
+            TNavBar {
+                title: "Tela UI";
+                logo: TIconSet.LayoutDashboard;
+                items: root.demo-nav-items;
+                current-value <=> root.demo-nav-value;
+
+                TButton { size: TSize.small; theme: TThemeRole.primary; text: "操作"; }
+            }
+
+            TCaption { text: "右侧操作区由 TNavBar 的子元素提供,点击菜单项切换高亮；本演示页顶部的分组导航也是这个组件。"; }
+        }
+    }
+
+    // ======================= TSideNav ======================
+    DemoSection {
+        title: "侧边导航 TSideNav";
+        code: "import { TSideNav, TSideNavItem } from \"@tela-ui/common.slint\";\n\nTSideNav {\n    title: \"Tela UI\";\n    logo: TIconSet.LayoutDashboard;\n    items: [{ label: \"仪表盘\", value: \"dash\", icon: TIconSet.LayoutDashboard }, …];\n    current-value <=> nav;\n    collapsed <=> c; // 收起后仅显示图标\n}";
+
+        VerticalLayout {
+            spacing: 16px;
+
+            HorizontalLayout {
+                height: 360px;
+                spacing: 24px;
+
+                TSideNav {
+                    title: "Tela UI";
+                    logo: TIconSet.LayoutDashboard;
+                    items: root.side-nav-items;
+                    current-value <=> root.side-nav-value;
+                    collapsed <=> root.side-collapsed;
+                }
+
+                TSideNav {
+                    mode: TSideNavMode.icon;
+                    title: "Tela UI";
+                    logo: TIconSet.LayoutDashboard;
+                    items: root.side-nav-items;
+                    current-value <=> root.side-nav-value;
+                }
+
+                TSideNav {
+                    // TCollapse toggle in a bottom row instead of the header.
+                    toggle-position: TSideNavTogglePosition.bottom;
+                    title: "Tela UI";
+                    logo: TIconSet.LayoutDashboard;
+                    items: root.side-nav-items;
+                    current-value <=> root.side-nav-value;
+                }
+
+                VerticalLayout {
+                    spacing: TTheme.spacing-3;
+
+                    TButton {
+                        size: TSize.small;
+                        theme: TThemeRole.primary;
+                        text: root.side-collapsed ? "展开导航" : "收起导航";
+                        clicked => {
+                            root.side-collapsed = !root.side-collapsed;
+                        }
+                    }
+
+                    // Absorbs the leftover row space so the navs and the
+                    // toggle stay left-packed instead of spreading.
+                    Rectangle { }
+                }
+
+                Rectangle { }
+            }
+
+            TParagraph { text: "左侧为可收起的图标+文本导航 (TSideNavMode.icon-text), 头部按钮切换收起, 收起后按钮自动居中, 宽度在 232px 与 64px 间平滑过渡; 中间为纯图标导航 (TSideNavMode.icon); 右侧为收起按钮置于底部的变体 (TSideNavTogglePosition.bottom)。三者共享 current-value, 选中项联动高亮; 消息反馈为 disabled 状态。"; }
+        }
+    }
+
+    // ================== TDropdownMenu =====================
+    DemoSection {
+        title: "下拉菜单 TDropdownMenu";
+        code: "import { TDropdownMenu, TDropdownMenuItem } from \"@tela-ui/common.slint\";\n\ndm := TDropdownMenu {\n    auto-open: false;\n    items: [\n        { label: \"编辑\", value: \"edit\", icon: TIconSet.Pencil },\n        { label: \"删除\", value: \"delete\", danger: true },\n        { label: \"分隔线\", value: \"\", divider: true },\n    ];\n    selected(i, v) => { … }\n    TButton { text: \"更多操作\"; clicked => dm.toggle(); }\n}";
+
+        VerticalLayout {
+            spacing: 16px;
 
             HorizontalLayout {
                 spacing: 24px;
 
-                TPagination {
-                    y: (parent.height - self.height) / 2;
-                    total-pages: 20;
-                    current <=> root.page;
+                // TButton trigger: auto-open off, toggle from clicked.
+                dm := TDropdownMenu {
+                    auto-open: false;
+                    items: root.menu-items;
+                    selected(i, v) => {
+                        TMessage.info("选中: \{root.menu-items[i].label}");
+                    }
+
+                    TButton {
+                        variant: TButtonVariant.outline;
+                        text: "更多操作";
+                        clicked => { dm.toggle(); }
+                    }
                 }
 
-                TCaption { text: "当前第 \{root.page} 页"; vertical-alignment: center; }
-            }
-        }
+                // Static trigger: the internal auto-open TouchArea
+                // handles the click.
+                TDropdownMenu {
+                    items: root.menu-items;
+                    placement: TPopupPlacement.bottom-end;
+                    selected(i, v) => {
+                        TMessage.info("选中: \{root.menu-items[i].label}");
+                    }
 
-        TCodeBlock { code: "import { TPagination } from \"@tela-ui/common.slint\";\n\nTPagination { total-pages: 20; current <=> page; }"; }
-    }
+                    Rectangle {
+                        width: 140px;
+                        height: TTheme.height-m;
+                        background: TTheme.bg-color-secondarycontainer;
+                        border-radius: TTheme.radius-default;
 
-    // ======================= TNavBar =======================
-    VerticalLayout {
-        spacing: 8px;
-
-        TCard {
-            title: "导航栏 TNavBar";
-
-            VerticalLayout {
-                spacing: 16px;
-
-                TNavBar {
-                    title: "Tela UI";
-                    logo: TIconSet.LayoutDashboard;
-                    items: root.demo-nav-items;
-                    current-value <=> root.demo-nav-value;
-
-                    TButton { size: TSize.small; theme: TThemeRole.primary; text: "操作"; }
+                        Text {
+                            text: "点击打开 (自动)";
+                            font-size: TTheme.font-size-m;
+                            color: TTheme.text-color-secondary;
+                            horizontal-alignment: center;
+                            vertical-alignment: center;
+                        }
+                    }
                 }
 
-                TCaption { text: "右侧操作区由 TNavBar 的子元素提供,点击菜单项切换高亮；本演示页顶部的分组导航也是这个组件。"; }
+                // Absorbs the leftover row space.
+                Rectangle { }
             }
+
+            TCaption { text: "按钮触发需设 auto-open: false 并在 clicked 中调用 toggle(); 静态内容由内部 TouchArea 自动开合。支持图标, 禁用, 危险项与分隔线; 点击外部或选中后关闭。"; wrap: word-wrap; }
         }
-
-        TCodeBlock { code: "import { TNavBar } from \"@tela-ui/common.slint\";\n\nTNavBar {\n    title: \"Tela UI\";\n    logo: TIconSet.LayoutDashboard;\n    items: [{ label: \"首页\", value: \"home\" }, …];\n    current-value <=> nav;\n    TButton { text: \"操作\"; } // 右侧操作区\n}"; }
-    }
-
-    // ======================= TSideNav ======================
-    VerticalLayout {
-        spacing: 8px;
-
-        TCard {
-            title: "侧边导航 TSideNav";
-
-            VerticalLayout {
-                spacing: 16px;
-
-                HorizontalLayout {
-                    height: 360px;
-                    spacing: 24px;
-
-                    TSideNav {
-                        title: "Tela UI";
-                        logo: TIconSet.LayoutDashboard;
-                        items: root.side-nav-items;
-                        current-value <=> root.side-nav-value;
-                        collapsed <=> root.side-collapsed;
-                    }
-
-                    TSideNav {
-                        mode: TSideNavMode.icon;
-                        title: "Tela UI";
-                        logo: TIconSet.LayoutDashboard;
-                        items: root.side-nav-items;
-                        current-value <=> root.side-nav-value;
-                    }
-
-                    TSideNav {
-                        // TCollapse toggle in a bottom row instead of the header.
-                        toggle-position: TSideNavTogglePosition.bottom;
-                        title: "Tela UI";
-                        logo: TIconSet.LayoutDashboard;
-                        items: root.side-nav-items;
-                        current-value <=> root.side-nav-value;
-                    }
-
-                    VerticalLayout {
-                        spacing: TTheme.spacing-3;
-
-                        TButton {
-                            size: TSize.small;
-                            theme: TThemeRole.primary;
-                            text: root.side-collapsed ? "展开导航" : "收起导航";
-                            clicked => {
-                                root.side-collapsed = !root.side-collapsed;
-                            }
-                        }
-
-                        // Absorbs the leftover row space so the navs and the
-                        // toggle stay left-packed instead of spreading.
-                        Rectangle { }
-                    }
-
-                    Rectangle { }
-                }
-
-                TParagraph { text: "左侧为可收起的图标+文本导航 (TSideNavMode.icon-text), 头部按钮切换收起, 收起后按钮自动居中, 宽度在 232px 与 64px 间平滑过渡; 中间为纯图标导航 (TSideNavMode.icon); 右侧为收起按钮置于底部的变体 (TSideNavTogglePosition.bottom)。三者共享 current-value, 选中项联动高亮; 消息反馈为 disabled 状态。"; }
-            }
-        }
-
-        TCodeBlock { code: "import { TSideNav, TSideNavItem } from \"@tela-ui/common.slint\";\n\nTSideNav {\n    title: \"Tela UI\";\n    logo: TIconSet.LayoutDashboard;\n    items: [{ label: \"仪表盘\", value: \"dash\", icon: TIconSet.LayoutDashboard }, …];\n    current-value <=> nav;\n    collapsed <=> c; // 收起后仅显示图标\n}"; }
-    }
-
-    // ================== TDropdownMenu =====================
-    VerticalLayout {
-        spacing: 8px;
-
-        TCard {
-            title: "下拉菜单 TDropdownMenu";
-
-            VerticalLayout {
-                spacing: 16px;
-
-                HorizontalLayout {
-                    spacing: 24px;
-
-                    // TButton trigger: auto-open off, toggle from clicked.
-                    dm := TDropdownMenu {
-                        auto-open: false;
-                        items: root.menu-items;
-                        selected(i, v) => {
-                            TMessage.info("选中: \{root.menu-items[i].label}");
-                        }
-
-                        TButton {
-                            variant: TButtonVariant.outline;
-                            text: "更多操作";
-                            clicked => { dm.toggle(); }
-                        }
-                    }
-
-                    // Static trigger: the internal auto-open TouchArea
-                    // handles the click.
-                    TDropdownMenu {
-                        items: root.menu-items;
-                        placement: TPopupPlacement.bottom-end;
-                        selected(i, v) => {
-                            TMessage.info("选中: \{root.menu-items[i].label}");
-                        }
-
-                        Rectangle {
-                            width: 140px;
-                            height: TTheme.height-m;
-                            background: TTheme.bg-color-secondarycontainer;
-                            border-radius: TTheme.radius-default;
-
-                            Text {
-                                text: "点击打开 (自动)";
-                                font-size: TTheme.font-size-m;
-                                color: TTheme.text-color-secondary;
-                                horizontal-alignment: center;
-                                vertical-alignment: center;
-                            }
-                        }
-                    }
-
-                    // Absorbs the leftover row space.
-                    Rectangle { }
-                }
-
-                TCaption { text: "按钮触发需设 auto-open: false 并在 clicked 中调用 toggle(); 静态内容由内部 TouchArea 自动开合。支持图标, 禁用, 危险项与分隔线; 点击外部或选中后关闭。"; wrap: word-wrap; }
-            }
-        }
-
-        TCodeBlock { code: "import { TDropdownMenu, TDropdownMenuItem } from \"@tela-ui/common.slint\";\n\ndm := TDropdownMenu {\n    auto-open: false;\n    items: [\n        { label: \"编辑\", value: \"edit\", icon: TIconSet.Pencil },\n        { label: \"删除\", value: \"delete\", danger: true },\n        { label: \"分隔线\", value: \"\", divider: true },\n    ];\n    selected(i, v) => { … }\n    TButton { text: \"更多操作\"; clicked => dm.toggle(); }\n}"; }
     }
 
     // ==================== TBreadcrumb ======================
-    VerticalLayout {
-        spacing: 8px;
+    DemoSection {
+        title: "面包屑 TBreadcrumb";
+        code: "import { TBreadcrumb } from \"@tela-ui/common.slint\";\n\nTBreadcrumb {\n    items: [{ label: \"首页\", value: \"home\" }, …];\n    current-value <=> crumb;\n}";
 
-        TCard {
-            title: "面包屑 TBreadcrumb";
-
-            TBreadcrumb {
-                items: root.crumb-items;
-                current-value <=> root.crumb-value;
-            }
+        TBreadcrumb {
+            items: root.crumb-items;
+            current-value <=> root.crumb-value;
         }
-
-        TCodeBlock { code: "import { TBreadcrumb } from \"@tela-ui/common.slint\";\n\nTBreadcrumb {\n    items: [{ label: \"首页\", value: \"home\" }, …];\n    current-value <=> crumb;\n}"; }
     }
 
     // ======================== TSteps ========================
-    VerticalLayout {
-        spacing: 8px;
+    DemoSection {
+        title: "步骤条 TSteps";
+        code: "import { TSteps } from \"@tela-ui/common.slint\";\n\nTSteps { items: [\"注册账号\", \"填写信息\", \"验证邮箱\", \"完成\"]; current: 1; }";
 
-        TCard {
-            title: "步骤条 TSteps";
-
-            TSteps {
-                items: root.step-items;
-                current: 1;
-            }
+        TSteps {
+            items: root.step-items;
+            current: 1;
         }
-
-        TCodeBlock { code: "import { TSteps } from \"@tela-ui/common.slint\";\n\nTSteps { items: [\"注册账号\", \"填写信息\", \"验证邮箱\", \"完成\"]; current: 1; }"; }
     }
     // ======================== TBackTop ======================
-    VerticalLayout {
-        spacing: 8px;
+    DemoSection {
+        title: "回到顶部 TBackTop";
+        code: "import { TBackTop } from \"@tela-ui/common.slint\";\n\nRectangle {\n    sv := ScrollView { … }\n    TBackTop {\n        x: …; y: …;\n        content-y <=> sv.content-y; // 超过阈值显示, 点击回顶\n        threshold: 40px; // 默认 200px, 内容短时调小\n    }\n}";
 
-        TCard {
-            title: "回到顶部 TBackTop";
+        Rectangle {
+            height: 240px;
+            border-radius: TTheme.radius-medium;
+            clip: true;
 
-            Rectangle {
-                height: 240px;
-                border-radius: TTheme.radius-medium;
-                clip: true;
+            sv := ScrollView {
+                VerticalLayout {
+                    padding: TTheme.padding-lr-l;
+                    spacing: TTheme.spacing-3;
 
-                sv := ScrollView {
-                    VerticalLayout {
-                        padding: TTheme.padding-lr-l;
-                        spacing: TTheme.spacing-3;
-
-                        for i in 24: TParagraph { text: "滚动内容第 \{i + 1} 行,滚动超过阈值后右下角出现回到顶部按钮。"; }
-                    }
-                }
-
-                TBackTop {
-                    x: parent.width - self.width - 16px;
-                    y: parent.height - self.height - 16px;
-                    content-y <=> sv.content-y;
-                    // 演示区内容不长, 阈值调小才能看到按钮出现.
-                    threshold: 40px;
+                    for i in 24: TParagraph { text: "滚动内容第 \{i + 1} 行,滚动超过阈值后右下角出现回到顶部按钮。"; }
                 }
             }
-        }
 
-        TCodeBlock { code: "import { TBackTop } from \"@tela-ui/common.slint\";\n\nRectangle {\n    sv := ScrollView { … }\n    TBackTop {\n        x: …; y: …;\n        content-y <=> sv.content-y; // 超过阈值显示, 点击回顶\n        threshold: 40px; // 默认 200px, 内容短时调小\n    }\n}"; }
+            TBackTop {
+                x: parent.width - self.width - 16px;
+                y: parent.height - self.height - 16px;
+                content-y <=> sv.content-y;
+                // 演示区内容不长, 阈值调小才能看到按钮出现.
+                threshold: 40px;
+            }
+        }
     }
 
 }

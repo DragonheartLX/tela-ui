@@ -5,56 +5,24 @@
 // `open` toggles it.
 // Overlay clicks close it when `close-on-overlay` is set.
 // Children render below the content text as custom body content.
+// Backdrop, ESC and stack bookkeeping come from TModalSurface.
 
 import { TTheme } from "../theme.slint";
 import { TThemeRole } from "../structs/enums.slint";
 import { TButton, TButtonVariant } from "../base/button.slint";
-import { TPopupStackLayer } from "../popup-stack.slint";
+import { TModalSurface } from "../modal-surface.slint";
 
-export component TDialog inherits Rectangle {
-    in-out property <bool> open: false;
+export component TDialog inherits TModalSurface {
     in property <string> title;
     in property <string> content;
     in property <string> confirm-text: "确认";
     in property <string> cancel-text: "取消";
-    in property <bool> close-on-overlay: true;
-    in property <length> dialog-width: 480px;
     // false hides the cancel button (alert-style single-action dialogs).
     in property <bool> show-cancel: true;
+    in property <length> dialog-width: 480px;
 
     callback accepted();
     callback canceled();
-    callback closed();
-
-    // Fades instead of `visible: open`, which would drop the subtree the
-    // instant `open` flips and leave the slide-out mid-flight invisible.
-    // The overlay shares this opacity. The card only slides.
-    opacity: root.open ? 1 : 0;
-    background: TTheme.mask-active;
-    z: TTheme.z-modal;
-    animate opacity { duration: TTheme.duration-base; easing: ease-out; }
-
-    public function close() {
-        open = false;
-        root.closed();
-    }
-
-    // Stack bookkeeping and ESC.
-    // ESC closes the topmost open layer.
-    // A dialog closed that way is a plain dismissal — `closed`, not `canceled`.
-    TPopupStackLayer {
-        active: root.open;
-        close-requested => {
-            root.close();
-        }
-    }
-
-    TouchArea {
-        enabled: root.open && root.close-on-overlay;
-        clicked => {
-            root.close();
-        }
-    }
 
     Rectangle {
         x: (parent.width - self.width) / 2;

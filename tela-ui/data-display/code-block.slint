@@ -3,6 +3,8 @@
 // Monospace code panel: themed surface (secondary container + primary text,
 // so it adapts to light/dark) with a fixed Consolas face. Non-wrapping —
 // wide lines require a wide container.
+// The 1px component-border edge keeps the panel readable on the page
+// background, which light-secondarycontainer differs from by only ~5/255.
 
 import { TTheme } from "../theme.slint";
 
@@ -10,6 +12,8 @@ export component TCodeBlock inherits Rectangle {
     in property <string> code;
 
     background: TTheme.bg-color-secondarycontainer;
+    border-width: 1px;
+    border-color: TTheme.component-border;
     border-radius: TTheme.radius-medium;
     clip: true;
     height: code-text.preferred-height + TTheme.spacing-4 * 2;

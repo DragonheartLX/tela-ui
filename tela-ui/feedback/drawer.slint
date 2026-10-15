@@ -7,11 +7,12 @@
 // animation is visible.
 // Overlay clicks close it when `close-on-overlay` is set.
 // Children form the body below the title.
+// Backdrop, ESC and stack bookkeeping come from TModalSurface.
 
 import { TTheme } from "../theme.slint";
 import { TIcon } from "../base/icon/icon.slint";
 import { TIconSet } from "../base/icon/data.slint";
-import { TPopupStackLayer } from "../popup-stack.slint";
+import { TModalSurface } from "../modal-surface.slint";
 
 export enum TDrawerPlacement {
     top,
@@ -20,50 +21,15 @@ export enum TDrawerPlacement {
     left,
 }
 
-export component TDrawer inherits Rectangle {
-    in-out property <bool> open: false;
+export component TDrawer inherits TModalSurface {
     in property <string> title;
     in property <TDrawerPlacement> placement: TDrawerPlacement.right;
     // Width for left/right drawers, height for top/bottom drawers.
     in property <length> drawer-width: 320px;
     in property <length> drawer-height: 280px;
-    in property <bool> close-on-overlay: true;
-
-    callback closed();
 
     private property <bool> horizontal:
         root.placement == TDrawerPlacement.left || root.placement == TDrawerPlacement.right;
-
-    // Fades instead of `visible: open`, which would drop the subtree the
-    // instant `open` flips and leave no close animation to see.
-    // `TInput` stays safe.
-    // The backdrop TouchArea is only enabled while open.
-    // The panel rests fully off-window when closed.
-    opacity: root.open ? 1 : 0;
-    z: TTheme.z-modal;
-    animate opacity { duration: TTheme.duration-base; easing: ease-out; }
-    background: TTheme.mask-active;
-
-    public function close() {
-        open = false;
-        root.closed();
-    }
-
-    // Stack bookkeeping and ESC.
-    // ESC closes the topmost open layer.
-    TPopupStackLayer {
-        active: root.open;
-        close-requested => {
-            root.close();
-        }
-    }
-
-    TouchArea {
-        enabled: root.open && root.close-on-overlay;
-        clicked => {
-            root.close();
-        }
-    }
 
     panel := Rectangle {
         width: root.horizontal ? min(root.drawer-width, parent.width - 48px) : parent.width;

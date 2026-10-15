@@ -73,7 +73,12 @@ export component MainWindow inherits TBorderlessWindow {
 
                 page-scroll := ScrollView {
                     VerticalLayout {
-                        padding: 32px;
+                        // Top is 16px, tighter than the 32px page gutters —
+                        // the window header already separates the content.
+                        padding-top: 16px;
+                        padding-left: 32px;
+                        padding-right: 32px;
+                        padding-bottom: 32px;
                         spacing: 28px;
 
                         if root.group-value == "basics": BasicsSection { vertical-stretch: 0; }
@@ -140,4 +145,5 @@ export component MainWindow inherits TBorderlessWindow {
 
 // Re-export the theme global so hosts can control it from Rust:
 //   TTheme::get(ui).set_preference(TThemePreference::Dark);
-export { TTheme, TThemePreference }
+// TLoadingService rides along so Rust can show/hide the fullscreen loading.
+export { TTheme, TThemePreference, TLoadingService }

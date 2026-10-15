@@ -41,20 +41,38 @@ export component TLoadingServiceOverlay inherits Rectangle {
     animate opacity { duration: TTheme.duration-fast; }
 
     // Swallows clicks while the mask is up.
+    // No wait cursor: 1.18 only re-pushes the OS cursor during pointer
+    // event processing, so a busy cursor would linger after hide until the
+    // mouse moves. The spinner and card already carry the loading signal.
     TouchArea {
-        enabled: TLoadingService.visible;
-        mouse-cursor: MouseCursor.wait;
+        enabled <=> TLoadingService.visible;
     }
 
-    // TLoading's root is a HorizontalLayout; without locked width/height
-    // the parent stretch would drag it to the overlay's full bounds, and
-    // the spinner would render at the bottom of the stretched cell.
-    // Locking both to preferred keeps it a compact box we can center.
-    loading := TLoading {
-        width: self.preferred-width;
-        height: self.preferred-height;
+    // The spinner and label sit on an opaque card, the TDialog card look.
+    // Bare on the mask, the secondary-gray label dissolved into the dimmed
+    // page in light mode; the card gives both themes one high-contrast focal
+    // object.
+    Rectangle {
         x: (parent.width - self.width) / 2;
         y: (parent.height - self.height) / 2;
-        text: TLoadingService.text;
+        width: loading.preferred-width + TTheme.margin-xl * 2;
+        height: loading.preferred-height + TTheme.margin-xl * 2;
+        border-radius: TTheme.radius-large;
+        background: TTheme.bg-color-container;
+        drop-shadow-blur: TTheme.shadow-3-blur;
+        drop-shadow-offset-y: TTheme.shadow-3-offset-y;
+        drop-shadow-color: TTheme.shadow-3-color;
+
+        // TLoading's root is a HorizontalLayout; without locked width/height
+        // the parent stretch would drag it to the card's full bounds, and
+        // the spinner would render at the bottom of the stretched cell.
+        // Locking both to preferred keeps it a compact box we can center.
+        loading := TLoading {
+            x: (parent.width - self.width) / 2;
+            y: (parent.height - self.height) / 2;
+            width: self.preferred-width;
+            height: self.preferred-height;
+            text: TLoadingService.text;
+        }
     }
 }

@@ -3,320 +3,271 @@
 
 import { TTheme,  TThemeRole,  TSize } from "@tela-ui/theme.slint";
 import { TIcon, TIconSet, TButton, TCaption } from "@tela-ui/base.slint";
-import { TTag, TTagVariant, TBadge, TAvatar, TAvatarSize, TAvatarShape, TCard, TEmpty, TTimeline, TDescriptions, TStatistic, TCollapse, TCarousel, TCodeBlock } from "@tela-ui/common.slint";
+import { TTag, TTagVariant, TBadge, TAvatar, TAvatarSize, TAvatarShape, TEmpty, TTimeline, TDescriptions, TStatistic, TCollapse, TCarousel } from "@tela-ui/common.slint";
 import { TTooltipArea, TTooltipPlacement } from "@tela-ui/data-display.slint";
+import { DemoSection } from "../demo-section.slint";
 
 export component DataDisplaySection inherits VerticalLayout {
     spacing: 28px;
 
     // ========================= TTag =========================
-    VerticalLayout {
-        spacing: 8px;
+    DemoSection {
+        title: "标签 TTag";
+        code: "import { TTag } from \"@tela-ui/common.slint\";\n\nTTag { text: \"主要\"; theme: TThemeRole.primary; }\nTTag { text: \"可关闭\"; theme: TThemeRole.primary; closable: true; }\nTTag { text: \"描边\"; variant: TTagVariant.outline; }";
 
-        TCard {
-            title: "标签 TTag";
-
-            HorizontalLayout {
-                spacing: 8px;
-                TTag { text: "默认"; }
-                TTag { theme: TThemeRole.primary; text: "主要"; }
-                TTag { theme: TThemeRole.success; text: "成功"; }
-                TTag { theme: TThemeRole.warning; text: "警告"; }
-                TTag { theme: TThemeRole.error; text: "危险"; }
-                TTag { theme: TThemeRole.primary; variant: TTagVariant.dark; text: "深色"; }
-                TTag { theme: TThemeRole.primary; variant: TTagVariant.outline; text: "描边"; }
-                TTag { theme: TThemeRole.primary; text: "可关闭"; closable: true; }
-                TTag { theme: TThemeRole.primary; size: TSize.small; text: "小"; }
-                TTag { theme: TThemeRole.primary; size: TSize.large; text: "大"; }
-                // Absorbs the leftover row space.
-                Rectangle { }
-            }
+        HorizontalLayout {
+            spacing: 8px;
+            TTag { text: "默认"; }
+            TTag { theme: TThemeRole.primary; text: "主要"; }
+            TTag { theme: TThemeRole.success; text: "成功"; }
+            TTag { theme: TThemeRole.warning; text: "警告"; }
+            TTag { theme: TThemeRole.error; text: "危险"; }
+            TTag { theme: TThemeRole.primary; variant: TTagVariant.dark; text: "深色"; }
+            TTag { theme: TThemeRole.primary; variant: TTagVariant.outline; text: "描边"; }
+            TTag { theme: TThemeRole.primary; text: "可关闭"; closable: true; }
+            TTag { theme: TThemeRole.primary; size: TSize.small; text: "小"; }
+            TTag { theme: TThemeRole.primary; size: TSize.large; text: "大"; }
+            // Absorbs the leftover row space.
+            Rectangle { }
         }
-
-        TCodeBlock { code: "import { TTag } from \"@tela-ui/common.slint\";\n\nTTag { text: \"主要\"; theme: TThemeRole.primary; }\nTTag { text: \"可关闭\"; theme: TThemeRole.primary; closable: true; }\nTTag { text: \"描边\"; variant: TTagVariant.outline; }"; }
     }
 
     // ======================== TBadge ========================
-    VerticalLayout {
-        spacing: 8px;
+    DemoSection {
+        title: "徽标 TBadge";
+        code: "import { TBadge } from \"@tela-ui/common.slint\";\nimport { TIcon, TIconSet } from \"@tela-ui/base.slint\";\n\nTBadge { count: 6; TIcon { icon: TIconSet.Bell; } }\nTBadge { dot: true; TIcon { icon: TIconSet.Settings; } }";
 
-        TCard {
-            title: "徽标 TBadge";
+        HorizontalLayout {
+            spacing: 28px;
 
-            HorizontalLayout {
-                spacing: 28px;
-
-                TBadge {
-                    count: 6;
-                    TIcon { icon: TIconSet.Bell; size: 24px; icon-color: TTheme.text-color-primary; }
-                }
-                TBadge {
-                    count: 128;
-                    TIcon { icon: TIconSet.Mail; size: 24px; icon-color: TTheme.text-color-primary; }
-                }
-                TBadge {
-                    dot: true;
-                    TIcon { icon: TIconSet.Settings; size: 24px; icon-color: TTheme.text-color-primary; }
-                }
-
-                // Absorbs the leftover row space.
-                Rectangle { }
+            TBadge {
+                count: 6;
+                TIcon { icon: TIconSet.Bell; size: 24px; icon-color: TTheme.text-color-primary; }
             }
-        }
+            TBadge {
+                count: 128;
+                TIcon { icon: TIconSet.Mail; size: 24px; icon-color: TTheme.text-color-primary; }
+            }
+            TBadge {
+                dot: true;
+                TIcon { icon: TIconSet.Settings; size: 24px; icon-color: TTheme.text-color-primary; }
+            }
 
-        TCodeBlock { code: "import { TBadge } from \"@tela-ui/common.slint\";\nimport { TIcon, TIconSet } from \"@tela-ui/base.slint\";\n\nTBadge { count: 6; TIcon { icon: TIconSet.Bell; } }\nTBadge { dot: true; TIcon { icon: TIconSet.Settings; } }"; }
+            // Absorbs the leftover row space.
+            Rectangle { }
+        }
     }
 
     // ======================== TAvatar =======================
-    VerticalLayout {
-        spacing: 8px;
+    DemoSection {
+        title: "头像 TAvatar";
+        code: "import { TAvatar } from \"@tela-ui/common.slint\";\n\nTAvatar { text: \"T\"; }\nTAvatar { size: TAvatarSize.large; shape: TAvatarShape.square; text: \"\"; }";
 
-        TCard {
-            title: "头像 TAvatar";
+        HorizontalLayout {
+            spacing: 24px;
 
-            HorizontalLayout {
-                spacing: 24px;
+            TAvatar { text: "T"; }
+            TAvatar { size: TAvatarSize.small; text: "TD"; }
+            TAvatar { size: TAvatarSize.large; text: "龙"; }
+            TAvatar { size: TAvatarSize.extra-large; shape: TAvatarShape.square; text: ""; }
 
-                TAvatar { text: "T"; }
-                TAvatar { size: TAvatarSize.small; text: "TD"; }
-                TAvatar { size: TAvatarSize.large; text: "龙"; }
-                TAvatar { size: TAvatarSize.extra-large; shape: TAvatarShape.square; text: ""; }
-
-                // Absorbs the leftover row space.
-                Rectangle { }
-            }
+            // Absorbs the leftover row space.
+            Rectangle { }
         }
-
-        TCodeBlock { code: "import { TAvatar } from \"@tela-ui/common.slint\";\n\nTAvatar { text: \"T\"; }\nTAvatar { size: TAvatarSize.large; shape: TAvatarShape.square; text: \"\"; }"; }
     }
 
     // ======================== TEmpty ========================
-    VerticalLayout {
-        spacing: 8px;
+    DemoSection {
+        title: "空状态 TEmpty";
+        code: "import { TEmpty } from \"@tela-ui/common.slint\";\n\nTEmpty { description: \"暂无数据\"; }\n\nTEmpty {\n    icon: TIconSet.Search;\n    description: \"未找到相关结果\";\n    TButton { text: \"立即创建\"; } // 子元素作为操作区\n}";
 
-        TCard {
-            title: "空状态 TEmpty";
+        HorizontalLayout {
+            spacing: 24px;
 
-            HorizontalLayout {
-                spacing: 24px;
-
-                Rectangle {
-                    width: 240px;
-                    height: 180px;
-                    TEmpty { }
-                }
-
-                Rectangle {
-                    width: 240px;
-                    height: 180px;
-                    TEmpty {
-                        description: "暂无订单数据";
-
-                        TButton {
-                            size: TSize.small;
-                            text: "立即创建";
-                        }
-                    }
-                }
-
-                Rectangle {
-                    width: 240px;
-                    height: 180px;
-                    TEmpty {
-                        icon: TIconSet.Search;
-                        description: "未找到相关结果";
-                    }
-                }
-
-                // Absorbs the leftover row space.
-                Rectangle { }
+            Rectangle {
+                width: 240px;
+                height: 180px;
+                TEmpty { }
             }
-        }
 
-        TCodeBlock { code: "import { TEmpty } from \"@tela-ui/common.slint\";\n\nTEmpty { description: \"暂无数据\"; }\n\nTEmpty {\n    icon: TIconSet.Search;\n    description: \"未找到相关结果\";\n    TButton { text: \"立即创建\"; } // 子元素作为操作区\n}"; }
+            Rectangle {
+                width: 240px;
+                height: 180px;
+                TEmpty {
+                    description: "暂无订单数据";
+
+                    TButton {
+                        size: TSize.small;
+                        text: "立即创建";
+                    }
+                }
+            }
+
+            Rectangle {
+                width: 240px;
+                height: 180px;
+                TEmpty {
+                    icon: TIconSet.Search;
+                    description: "未找到相关结果";
+                }
+            }
+
+            // Absorbs the leftover row space.
+            Rectangle { }
+        }
     }
 
     // ======================= TTimeline ======================
-    VerticalLayout {
-        spacing: 8px;
+    DemoSection {
+        title: "时间线 TTimeline";
+        code: "import { TTimeline } from \"@tela-ui/common.slint\";\n\nTTimeline {\n    items: [\n        { label: \"创建订单\", content: \"…\", theme: TThemeRole.primary },\n        { label: \"支付完成\", content: \"…\", theme: TThemeRole.success },\n    ];\n}";
 
-        TCard {
-            title: "时间线 TTimeline";
-
-            TTimeline {
-                items: [
-                    { label: "创建订单", content: "用户提交了订单,等待支付。", theme: TThemeRole.primary },
-                    { label: "支付完成", content: "微信支付 ¥199.00,交易号 202610070001。", theme: TThemeRole.success },
-                    { label: "商品出库", content: "包裹已从杭州仓发出,预计明日送达。", theme: TThemeRole.default },
-                    { label: "确认收货", content: "", theme: TThemeRole.default },
-                ];
-            }
+        TTimeline {
+            items: [
+                { label: "创建订单", content: "用户提交了订单,等待支付。", theme: TThemeRole.primary },
+                { label: "支付完成", content: "微信支付 ¥199.00,交易号 202610070001。", theme: TThemeRole.success },
+                { label: "商品出库", content: "包裹已从杭州仓发出,预计明日送达。", theme: TThemeRole.default },
+                { label: "确认收货", content: "", theme: TThemeRole.default },
+            ];
         }
-
-        TCodeBlock { code: "import { TTimeline } from \"@tela-ui/common.slint\";\n\nTTimeline {\n    items: [\n        { label: \"创建订单\", content: \"…\", theme: TThemeRole.primary },\n        { label: \"支付完成\", content: \"…\", theme: TThemeRole.success },\n    ];\n}"; }
     }
 
     // ===================== TDescriptions ====================
-    VerticalLayout {
-        spacing: 8px;
+    DemoSection {
+        title: "描述列表 TDescriptions";
+        code: "import { TDescriptions } from \"@tela-ui/common.slint\";\n\nTDescriptions {\n    bordered: true;\n    columns: 2;\n    items: [{ label: \"订单编号\", value: \"TD202610070001\" }, …];\n}";
 
-        TCard {
-            title: "描述列表 TDescriptions";
+        VerticalLayout {
+            spacing: 16px;
 
-            VerticalLayout {
-                spacing: 16px;
-
-                TDescriptions {
-                    bordered: true;
-                    items: [
-                        { label: "订单编号", value: "TD202610070001" },
-                        { label: "支付方式", value: "微信支付" },
-                        { label: "配送方式", value: "顺丰速运" },
-                        { label: "收货地址", value: "浙江省杭州市西湖区某某街道 88 号" },
-                        { label: "商品数量", value: "3 件" },
-                        { label: "订单金额", value: "¥199.00" },
-                    ];
-                }
-
-                TDescriptions {
-                    columns: 1;
-                    items: [
-                        { label: "订单编号", value: "TD202610070001" },
-                        { label: "订单金额", value: "¥199.00" },
-                    ];
-                }
-            }
-        }
-
-        TCodeBlock { code: "import { TDescriptions } from \"@tela-ui/common.slint\";\n\nTDescriptions {\n    bordered: true;\n    columns: 2;\n    items: [{ label: \"订单编号\", value: \"TD202610070001\" }, …];\n}"; }
-    }
-
-    // ======================= TStatistic =====================
-    VerticalLayout {
-        spacing: 8px;
-
-        TCard {
-            title: "数值统计 TStatistic";
-
-            HorizontalLayout {
-                spacing: 48px;
-
-                TStatistic { title: "总销售额"; value: "¥ 286,860"; horizontal-stretch: 0; }
-                TStatistic { title: "下载量"; value: "12,930"; suffix: "次"; theme: TThemeRole.success; horizontal-stretch: 0; }
-                TStatistic { title: "在线人数"; loading: true; horizontal-stretch: 0; }
-                Rectangle { }
-            }
-        }
-
-        TCodeBlock { code: "import { TStatistic } from \"@tela-ui/common.slint\";\n\nTStatistic { title: \"总销售额\"; value: \"¥ 286,860\"; }\nTStatistic { title: \"在线人数\"; loading: true; }"; }
-    }
-
-    // ======================== TCollapse =====================
-    VerticalLayout {
-        spacing: 8px;
-
-        TCard {
-            title: "折叠面板 TCollapse";
-
-            HorizontalLayout {
-                spacing: 24px;
-
-                TCollapse {
-                    horizontal-stretch: 1;
-                    accordion: true;
-                    items: [
-                        { label: "什么是 Tela UI?", content: "TDesign 风格的 Slint 第三方组件库,提供主题令牌、基础与常用组件,支持亮暗双主题。" },
-                        { label: "如何自定义主题?", content: "通过 TTheme.light / TTheme.dark 预设逐项修改,或整体替换 theme 配置。" },
-                        { label: "是否支持暗色模式?", content: "支持,preference 设为 dark 或直接跟随系统。" },
-                    ];
-                }
-
-                TCollapse {
-                    horizontal-stretch: 1;
-                    items: [
-                        { label: "面板一", content: "非手风琴模式下多个面板可同时展开。" },
-                        { label: "面板二", content: "每个面板独立开关,展开收起带高度过渡动画。" },
-                        { label: "禁用面板", content: "这一项不可展开。", disabled: true },
-                    ];
-                }
-            }
-        }
-
-        TCodeBlock { code: "import { TCollapse } from \"@tela-ui/common.slint\";\n\n// 手风琴: accordion: true, current-index 记录展开项\nTCollapse { accordion: true; items: [{ label: \"面板一\", content: \"…\" }, …]; }"; }
-    }
-
-    // ======================== Tooltip ======================
-    VerticalLayout {
-        spacing: 8px;
-
-        TCard {
-            title: "气泡提示 Tooltip";
-
-            HorizontalLayout {
-                spacing: 24px;
-
-                // TTooltipArea fills its parent, wires the hover and reports
-                // to the window-level overlay — no clipping worries.
-                TTooltipArea {
-                    width: 120px;
-                    height: TTheme.height-m;
-                    background: TTheme.bg-color-secondarycontainer;
-                    border-radius: TTheme.radius-default;
-                    text: "我是 Tooltip, 鼠标移开即消失, 250ms 延迟出现";
-                    placement: TTooltipPlacement.top;
-
-                    Text {
-                        text: "上方提示";
-                        font-size: TTheme.font-size-m;
-                        color: TTheme.text-color-secondary;
-                        horizontal-alignment: center;
-                        vertical-alignment: center;
-                    }
-                }
-
-                TTooltipArea {
-                    width: 120px;
-                    height: TTheme.height-m;
-                    background: TTheme.bg-color-secondarycontainer;
-                    border-radius: TTheme.radius-default;
-                    text: "placement: TTooltipPlacement.bottom";
-                    placement: TTooltipPlacement.bottom;
-
-                    Text {
-                        text: "下方提示";
-                        font-size: TTheme.font-size-m;
-                        color: TTheme.text-color-secondary;
-                        horizontal-alignment: center;
-                        vertical-alignment: center;
-                    }
-                }
-
-                TCaption { text: "渲染在窗口级 (TTooltipOverlay), 不受卡片或滚动容器裁剪; 亮暗均为深色气泡。"; vertical-alignment: center; wrap: word-wrap; horizontal-stretch: 1; }
-            }
-        }
-
-        TCodeBlock { code: "import { TTooltipArea, TTooltipOverlay } from \"@tela-ui/common.slint\";\n\n// 窗口根部放置一次:\nTTooltipOverlay { }\n\nTTooltipArea {\n    text: \"提示\"; placement: TTooltipPlacement.top;\n    Text { text: \"目标\"; }\n}"; }
-    }
-
-    // ======================== TCarousel =====================
-    VerticalLayout {
-        spacing: 8px;
-
-        TCard {
-            title: "走马灯 TCarousel";
-
-            TCarousel {
-                height: 240px;
-                autoplay: true;
-                interval: 3s;
+            TDescriptions {
+                bordered: true;
                 items: [
-                    { image: @image-url("../assets/slide-1.svg") },
-                    { image: @image-url("../assets/slide-2.svg") },
-                    { image: @image-url("../assets/slide-3.svg") },
+                    { label: "订单编号", value: "TD202610070001" },
+                    { label: "支付方式", value: "微信支付" },
+                    { label: "配送方式", value: "顺丰速运" },
+                    { label: "收货地址", value: "浙江省杭州市西湖区某某街道 88 号" },
+                    { label: "商品数量", value: "3 件" },
+                    { label: "订单金额", value: "¥199.00" },
+                ];
+            }
+
+            TDescriptions {
+                columns: 1;
+                items: [
+                    { label: "订单编号", value: "TD202610070001" },
+                    { label: "订单金额", value: "¥199.00" },
                 ];
             }
         }
+    }
 
-        TCodeBlock { code: "import { TCarousel } from \"@tela-ui/common.slint\";\n\nTCarousel {\n    height: 240px;\n    autoplay: true;\n    items: [{ image: @image-url(\"slide-1.svg\") }, …];\n}"; }
+    // ======================= TStatistic =====================
+    DemoSection {
+        title: "数值统计 TStatistic";
+        code: "import { TStatistic } from \"@tela-ui/common.slint\";\n\nTStatistic { title: \"总销售额\"; value: \"¥ 286,860\"; }\nTStatistic { title: \"在线人数\"; loading: true; }";
+
+        HorizontalLayout {
+            spacing: 48px;
+
+            TStatistic { title: "总销售额"; value: "¥ 286,860"; horizontal-stretch: 0; }
+            TStatistic { title: "下载量"; value: "12,930"; suffix: "次"; theme: TThemeRole.success; horizontal-stretch: 0; }
+            TStatistic { title: "在线人数"; loading: true; horizontal-stretch: 0; }
+            Rectangle { }
+        }
+    }
+
+    // ======================== TCollapse =====================
+    DemoSection {
+        title: "折叠面板 TCollapse";
+        code: "import { TCollapse } from \"@tela-ui/common.slint\";\n\n// 手风琴: accordion: true, current-index 记录展开项\nTCollapse { accordion: true; items: [{ label: \"面板一\", content: \"…\" }, …]; }";
+
+        HorizontalLayout {
+            spacing: 24px;
+
+            TCollapse {
+                horizontal-stretch: 1;
+                accordion: true;
+                items: [
+                    { label: "什么是 Tela UI?", content: "TDesign 风格的 Slint 第三方组件库,提供主题令牌、基础与常用组件,支持亮暗双主题。" },
+                    { label: "如何自定义主题?", content: "通过 TTheme.light / TTheme.dark 预设逐项修改,或整体替换 theme 配置。" },
+                    { label: "是否支持暗色模式?", content: "支持,preference 设为 dark 或直接跟随系统。" },
+                ];
+            }
+
+            TCollapse {
+                horizontal-stretch: 1;
+                items: [
+                    { label: "面板一", content: "非手风琴模式下多个面板可同时展开。" },
+                    { label: "面板二", content: "每个面板独立开关,展开收起带高度过渡动画。" },
+                    { label: "禁用面板", content: "这一项不可展开。", disabled: true },
+                ];
+            }
+        }
+    }
+
+    // ======================== Tooltip ======================
+    DemoSection {
+        title: "气泡提示 Tooltip";
+        code: "import { TTooltipArea, TTooltipOverlay } from \"@tela-ui/common.slint\";\n\n// 窗口根部放置一次:\nTTooltipOverlay { }\n\nTTooltipArea {\n    text: \"提示\"; placement: TTooltipPlacement.top;\n    Text { text: \"目标\"; }\n}";
+
+        HorizontalLayout {
+            spacing: 24px;
+
+            // TTooltipArea fills its parent, wires the hover and reports
+            // to the window-level overlay — no clipping worries.
+            TTooltipArea {
+                width: 120px;
+                height: TTheme.height-m;
+                background: TTheme.bg-color-secondarycontainer;
+                border-radius: TTheme.radius-default;
+                text: "我是 Tooltip, 鼠标移开即消失, 250ms 延迟出现";
+                placement: TTooltipPlacement.top;
+
+                Text {
+                    text: "上方提示";
+                    font-size: TTheme.font-size-m;
+                    color: TTheme.text-color-secondary;
+                    horizontal-alignment: center;
+                    vertical-alignment: center;
+                }
+            }
+
+            TTooltipArea {
+                width: 120px;
+                height: TTheme.height-m;
+                background: TTheme.bg-color-secondarycontainer;
+                border-radius: TTheme.radius-default;
+                text: "placement: TTooltipPlacement.bottom";
+                placement: TTooltipPlacement.bottom;
+
+                Text {
+                    text: "下方提示";
+                    font-size: TTheme.font-size-m;
+                    color: TTheme.text-color-secondary;
+                    horizontal-alignment: center;
+                    vertical-alignment: center;
+                }
+            }
+
+            TCaption { text: "渲染在窗口级 (TTooltipOverlay), 不受卡片或滚动容器裁剪; 亮暗均为深色气泡。"; vertical-alignment: center; wrap: word-wrap; horizontal-stretch: 1; }
+        }
+    }
+
+    // ======================== TCarousel =====================
+    DemoSection {
+        title: "走马灯 TCarousel";
+        code: "import { TCarousel } from \"@tela-ui/common.slint\";\n\nTCarousel {\n    height: 240px;\n    autoplay: true;\n    items: [{ image: @image-url(\"slide-1.svg\") }, …];\n}";
+
+        TCarousel {
+            height: 240px;
+            autoplay: true;
+            interval: 3s;
+            items: [
+                { image: @image-url("../assets/slide-1.svg") },
+                { image: @image-url("../assets/slide-2.svg") },
+                { image: @image-url("../assets/slide-3.svg") },
+            ];
+        }
     }
 }

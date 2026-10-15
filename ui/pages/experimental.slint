@@ -2,13 +2,14 @@
 
 import { TSkeleton } from "@tela-ui/experimental.slint";
 import { TParagraph } from "@tela-ui/base.slint";
-import { TCard , TCodeBlock} from "@tela-ui/common.slint";
+import { DemoSection } from "../demo-section.slint";
 
 export component ExperimentalSection inherits VerticalLayout {
     spacing: 28px;
 
-    TCard {
+    DemoSection {
         title: "实验性 Experimental(TSkeleton)";
+        code: "import { TSkeleton } from \"@tela-ui/experimental.slint\";\n\nTSkeleton { width: 240px; height: 14px; }\nTSkeleton { width: 48px; height: 48px; circle: true; }";
 
         HorizontalLayout {
             spacing: 16px;
@@ -27,18 +28,11 @@ export component ExperimentalSection inherits VerticalLayout {
         }
     }
 
-    TCodeBlock { code: "import { TSkeleton } from \"@tela-ui/experimental.slint\";\n\nTSkeleton { width: 240px; height: 14px; }\nTSkeleton { width: 48px; height: 48px; circle: true; }"; }
-
     // ================== TBorderlessWindow ==================
-    VerticalLayout {
-        spacing: 8px;
+    DemoSection {
+        title: "无边框窗口 TBorderlessWindow";
+        code: "import { TBorderlessWindow } from \"@tela-ui/base.slint\";\n\nTBorderlessWindow {\n    title: \"我的应用\";\n    header-height: 40px;\n\n    VerticalLayout {\n        // 窗口内容…\n    }\n}";
 
-        TCard {
-            title: "无边框窗口 TBorderlessWindow";
-
-            TParagraph { text: "以 Window 为根的无边框应用窗口: no-frame 去掉系统装饰, 自绘标题栏含拖拽热区与最小化/最大化/关闭按钮, 关闭钮悬停为红色。最小化/最大化/关闭与拖拽全部纯 .slint 实现 (minimized/maximized 内建属性 + hide() + 内建 WindowMoveArea 拖拽热区)。把 TBorderlessWindow 当作应用窗口的根使用 (替代 Window), 子元素即窗口内容。"; }
-        }
-
-        TCodeBlock { code: "import { TBorderlessWindow } from \"@tela-ui/base.slint\";\n\nTBorderlessWindow {\n    title: \"我的应用\";\n    header-height: 40px;\n\n    VerticalLayout {\n        // 窗口内容…\n    }\n}"; }
+        TParagraph { text: "以 Window 为根的无边框应用窗口: no-frame 去掉系统装饰, 自绘标题栏含拖拽热区与最小化/最大化/关闭按钮, 关闭钮悬停为红色。最小化/最大化/关闭与拖拽全部纯 .slint 实现 (minimized/maximized 内建属性 + hide() + 内建 WindowMoveArea 拖拽热区)。把 TBorderlessWindow 当作应用窗口的根使用 (替代 Window), 子元素即窗口内容。"; }
     }
 }

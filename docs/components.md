@@ -32,6 +32,7 @@ Slint 组件为单继承 (`inherits`), 子类可直接使用基类的全部属�
 | 组件 | 继承自 | 说明 |
 | --- | --- | --- |
 | TInput, TTextArea, TInputNumber | `TInputFrame` (私有) | 共享状态边框, 悬停/聚焦/禁用态与点击聚焦行为 |
+| TDialog, TDrawer | `TModalSurface` (私有) | 共享遮罩, z-modal 层级, 淡入淡出, ESC 与背景点击关闭 |
 | TBorderlessWindow | `Window` | 在 Window 内建属性 (`title`, `no-frame` 等) 上叠加自绘标题栏 |
 | THeading, TParagraph, TCaption | `Text` | 保留 Text 全部内建属性 (`text`, `color`, `wrap` 等) |
 | TRadioGroup | `HorizontalLayout` | 本身就是一行布局 |
@@ -43,7 +44,8 @@ Slint 组件为单继承 (`inherits`), 子类可直接使用基类的全部属�
 
 - TButton = TIcon + TLoadingSpinner
 - TLoading = TLoadingSpinner
-- TDialog = TButton x2 (确认/取消)
+- TDialog = TModalSurface (遮罩基类) + TButton x2 (确认/取消)
+- TNavBar, TTabs, TBreadcrumb = 私有 TNavLabel xN (文本行悬停/选中态与点击共享)
 - TPopconfirm = TButton x2 (取消/确认)
 - TRadioGroup = TRadio xN
 - TSideNav = 私有 TNavRow xN (菜单行, 底部行与收起行共用)
@@ -55,7 +57,9 @@ Slint 组件为单继承 (`inherits`), 子类可直接使用基类的全部属�
   TTooltipArea (触发内容), TResult (操作区), TBorderlessWindow (窗口内容)
 
 私有组件 (仅供实现参考, 不经聚合器导出): `TInputFrame` (data-entry/input.slint,
-已对库内导出供 TInputNumber 复用), `TNavRow` (navigation/side-nav.slint),
+已对库内导出供 TInputNumber 复用), `TModalSurface` (modal-surface.slint, 已对库内
+导出供 TDialog/TDrawer 继承), `TNavLabel` (navigation/nav-label.slint),
+`TNavRow` (navigation/side-nav.slint),
 `TWindowButton` (base/borderless-window.slint), `TPageBtn`
 (navigation/pagination.slint)。
 
@@ -637,7 +641,8 @@ ta := TouchArea {
 
 ### TCodeBlock
 
-代码块。主题化底色的等宽字体面板 (固定 Consolas), 不换行, 高度随内容自适应。
+代码块。主题化底色的等宽字体面板 (固定 Consolas), 带 1px `component-border` 描边,
+不换行, 高度随内容自适应。
 
 继承: `Rectangle`。
 
@@ -673,7 +678,8 @@ import { TAlert, TDialog, TDrawer, TPopconfirm, TMessage, TNotification, TProgre
 
 模态对话框。渲染半透明遮罩与居中卡片, 需放置在窗口级覆盖层中。
 
-继承: `Rectangle`。内部组合 TButton (取消/确认)。
+继承: `TModalSurface` (私有, 提供 `open`/`close-on-overlay`/`closed`/`close()` 与
+遮罩, ESC, z-modal)。内部组合 TButton (取消/确认)。
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
@@ -696,7 +702,7 @@ import { TAlert, TDialog, TDrawer, TPopconfirm, TMessage, TNotification, TProgre
 抽屉面板。从指定边缘滑入, 覆盖在半透明遮罩上; 面板常驻, 通过透明度与位移动画
 出入场, 关闭动画不会被裁断。
 
-继承: `Rectangle`。内部组合 TIcon (关闭钮)。
+继承: `TModalSurface` (私有, 同 TDialog)。内部组合 TIcon (关闭钮)。
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |

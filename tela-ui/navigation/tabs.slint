@@ -4,6 +4,7 @@
 // Render page content in the host with `if current-index == i : ...`.
 
 import { TTheme } from "../theme.slint";
+import { TNavLabel } from "nav-label.slint";
 
 export component TTabs inherits Rectangle {
     in property <[string]> items;
@@ -26,35 +27,20 @@ export component TTabs inherits Rectangle {
         for it[i] in root.items: Rectangle {
             height: parent.height;
 
-            touch := TouchArea {
-                mouse-cursor: MouseCursor.pointer;
+            TNavLabel {
+                width: 100%;
+                height: 100%;
+                label: it;
+                label-align: TextHorizontalAlignment.left;
+                label-valign: TextVerticalAlignment.top;
+                selected: i == root.safe-index;
+                semibold-when-selected: true;
                 clicked => {
                     if root.current-index != i {
                         root.current-index = i;
                         root.changed(i);
                     }
                 }
-            }
-
-            Text {
-                width: 100%;
-                height: 100%;
-                text: it;
-                font-size: TTheme.font-size-m;
-                font-weight: TTheme.font-weight-regular;
-                color: TTheme.text-color-primary;
-                animate color { duration: TTheme.duration-fast; }
-
-                // Later states win over earlier ones.
-                states [
-                    hovered when touch.has-hover: {
-                        color: TTheme.brand-color-hover;
-                    }
-                    selected when i == root.safe-index: {
-                        color: TTheme.brand-color;
-                        font-weight: TTheme.font-weight-semibold;
-                    }
-                ]
             }
         }
     }

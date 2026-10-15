@@ -7,6 +7,7 @@
 import { TTheme } from "../theme.slint";
 import { TIcon } from "../base/icon/icon.slint";
 import { TIconData } from "../base/icon/data.slint";
+import { TNavLabel } from "nav-label.slint";
 
 export struct TNavItem {
     label: string,
@@ -58,47 +59,29 @@ export component TNavBar inherits Rectangle {
 
         // Menu ------------------------------------------------------------
         for it[i] in root.items: Rectangle {
-            width: nav-text.preferred-width + TTheme.padding-lr-m * 2;
+            width: nav-label.label-width + TTheme.padding-lr-m * 2;
             height: parent.height;
 
-            nav-text := Text {
+            nav-label := TNavLabel {
                 width: 100%;
                 height: 100%;
-                text: it.label;
-                font-size: TTheme.font-size-m;
-                horizontal-alignment: center;
-                vertical-alignment: center;
-                color: TTheme.text-color-primary;
-                animate color { duration: TTheme.duration-fast; }
-
-                // Later states win over earlier ones.
-                states [
-                    hovered when item-ta.has-hover && it.value != root.current-value: {
-                        color: TTheme.brand-color-hover;
-                    }
-                    active when it.value == root.current-value: {
-                        color: TTheme.brand-color;
-                    }
-                ]
-            }
-
-            if it.value == root.current-value: Rectangle {
-                x: (parent.width - self.width) / 2;
-                y: parent.height - self.height;
-                width: nav-text.preferred-width;
-                height: 3px;
-                border-radius: 2px;
-                background: TTheme.brand-color;
-            }
-
-            item-ta := TouchArea {
-                mouse-cursor: MouseCursor.pointer;
+                label: it.label;
+                selected: it.value == root.current-value;
                 clicked => {
                     if it.value != root.current-value {
                         root.current-value = it.value;
                         root.changed(it.value);
                     }
                 }
+            }
+
+            if it.value == root.current-value: Rectangle {
+                x: (parent.width - self.width) / 2;
+                y: parent.height - self.height;
+                width: nav-label.label-width;
+                height: 3px;
+                border-radius: 2px;
+                background: TTheme.brand-color;
             }
         }
 

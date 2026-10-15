@@ -5,6 +5,7 @@
 // primary text.
 
 import { TTheme } from "../theme.slint";
+import { TNavLabel } from "nav-label.slint";
 
 export struct TCrumbItem {
     label: string,
@@ -34,6 +35,17 @@ export component TBreadcrumb inherits Rectangle {
             height: parent.height;
             width: crumb-row.preferred-width;
 
+            // Declared before the row: the label's own TouchArea stays
+            // topmost so its hover recolor works, and clicks that miss the
+            // label (the separator) fall through to this one.
+            crumb-ta := TouchArea {
+                enabled: it.value != root.current-value;
+                mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;
+                clicked => {
+                    root.changed(it.value);
+                }
+            }
+
             crumb-row := HorizontalLayout {
                 height: parent.height;
                 spacing: TTheme.spacing-2;
@@ -45,30 +57,16 @@ export component TBreadcrumb inherits Rectangle {
                     vertical-alignment: center;
                 }
 
-                crumb-label := Text {
-                    text: it.label;
-                    font-size: TTheme.font-size-m;
-                    vertical-alignment: center;
-                    color: TTheme.text-color-link;
-                    animate color { duration: TTheme.duration-fast; }
-
-                    // Later states win over earlier ones.
-                    states [
-                        hovered when crumb-ta.has-hover && it.value != root.current-value: {
-                            color: TTheme.brand-color-hover;
-                        }
-                        current when it.value == root.current-value: {
-                            color: TTheme.text-color-primary;
-                        }
-                    ]
-                }
-            }
-
-            crumb-ta := TouchArea {
-                enabled: it.value != root.current-value;
-                mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;
-                clicked => {
-                    root.changed(it.value);
+                crumb-label := TNavLabel {
+                    width: self.label-width;
+                    label: it.label;
+                    base-color: TTheme.text-color-link;
+                    selected-color: TTheme.text-color-primary;
+                    selected: it.value == root.current-value;
+                    disabled: it.value == root.current-value;
+                    clicked => {
+                        root.changed(it.value);
+                    }
                 }
             }
         }

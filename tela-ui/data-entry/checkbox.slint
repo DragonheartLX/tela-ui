@@ -16,6 +16,12 @@ export component TCheckBox inherits Rectangle {
 
     private property <bool> on: checked || indeterminate;
 
+    // Pointer click and the assistive-tech default action share one path.
+    function toggle() {
+        root.checked = !root.checked;
+        root.changed(root.checked);
+    }
+
     // Rest state; overridden by the `states` below.
     private property <brush> box-bg: TTheme.bg-color-specialcomponent;
     private property <brush> box-border: TTheme.component-border;
@@ -44,8 +50,7 @@ export component TCheckBox inherits Rectangle {
         enabled: !root.disabled;
         mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;
         clicked => {
-            root.checked = !root.checked;
-            root.changed(root.checked);
+            root.toggle();
         }
     }
 
@@ -96,7 +101,6 @@ export component TCheckBox inherits Rectangle {
     accessible-label: text;
     accessible-checked: checked;
     accessible-action-default => {
-        root.checked = !root.checked;
-        root.changed(root.checked);
+        root.toggle();
     }
 }

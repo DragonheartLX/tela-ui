@@ -23,6 +23,12 @@ export component TSwitch inherits Rectangle {
     private property <length> thumb: h - 6px;
     private property <length> inset: 3px;
 
+    // Pointer click and the assistive-tech default action share one path.
+    function toggle() {
+        root.checked = !root.checked;
+        root.changed(root.checked);
+    }
+
     width: w;
     height: h;
     border-radius: self.height / 2;
@@ -49,8 +55,7 @@ export component TSwitch inherits Rectangle {
         enabled: !root.disabled;
         mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;
         clicked => {
-            root.checked = !root.checked;
-            root.changed(root.checked);
+            root.toggle();
         }
     }
 
@@ -70,7 +75,6 @@ export component TSwitch inherits Rectangle {
     accessible-role: AccessibleRole.checkbox;
     accessible-checked: checked;
     accessible-action-default => {
-        root.checked = !root.checked;
-        root.changed(root.checked);
+        root.toggle();
     }
 }

@@ -12,7 +12,7 @@
 - 顶层聚合按类别分(`base.slint` / `data-display.slint` / …), `common.slint` 仅作兼容出口, 新代码与演示页都用分类聚合。
 - `ui/` + `src/` 是演示程序(bin `tela`): `ui/MainWindow.slint` 挂 7 个页面, 页面用 `if` 懒挂载。
 - Slint 1.18.1 (Cargo.lock 锁定), edition 2024, 样式 `fluent`(`build.rs` 的 `with_style`), 启用 accessibility / backend-winit / renderer-skia / renderer-software。
-- 70 个 `.slint` 共 8,610 行: `tela-ui/` 62 个 6,831 行, `ui/` 8 个 1,779 行。
+- 73 个 `.slint` 共 8,589 行: `tela-ui/` 64 个 6,996 行, `ui/` 9 个 1,593 行(P4 前为 70 个 8,610 行)。
 - 设计令牌: `theme.slint` 的 `TTheme` global (151 个顶层转发) → `structs/theme.slint` 的 `TAppThemeConfig` (103 字段); 色板在 `colors.slint` (亮/暗两套 ramp)。
 - 浮层体系: `TPopupSurface` 锚定弹层 + `TPopupStack` 层计数与 ESC + z 序令牌(`z-popup` / `z-modal` / `z-message`) + 服务型 global(`TDialogService` / `TLoadingService` / `TMessage` / `TNotification` / `TTooltip`)。
 
@@ -51,6 +51,7 @@ slint-viewer -L "tela-ui=$PWD\tela-ui" --screenshot out-light.png --size 1200x80
 9. **`a <=> b` 的初值取右侧** — `in` 属性也可以双向绑定; 组件内不写 `in/out/private` 的 `property` 默认就是私有。
 10. **带 `animate` 的绑定首次求值不跑动画** — `AnimatedBindingCallable` 初始态 NotAnimating 时直接赋值(`properties_animations.rs:380`), 动画只在依赖变化后启动; "组件挂载/切页会全量触发动画"的推断不成立(TCarousel 探针实证: 挂载后两帧 diff = 0)。
 11. **`animate` 支持 `enabled:` 条件关断** — `animate x { enabled: <bool表达式>; }`(`PropertyAnimation.enabled`, `items.rs:1238`), 关断时当帧直达目标值; 要"索引变化才动画、几何变化即时跟随"就把动画放在标量镜像属性上、让几何属性非动画地引用它(TCarousel 的 `slide-pos` 即此法, 动画写在 `x` 上会让 resize 重放整段滑动)。
+12. **Timer 是布局不可见元素** — 可直接作为布局子元素, 不占槽位、不触发 spacing(探针实测: spacing 28 下 红40+Timer+绿40 总高 108 = 单份 spacing); 旧说法"Timer 不能直接放布局、要用 0 高 Rectangle 包装"不成立, 包装反而多出一份 spacing 与 28px 内容高度。
 
 ## 组件 API 约定
 
@@ -74,6 +75,7 @@ slint-viewer -L "tela-ui=$PWD\tela-ui" --screenshot out-light.png --size 1200x80
 - **`line-height-headline-s/m/l` 是预留令牌** — 仅缺顶层转发, 加注释即可。
 - **各浮层皮肤直接引用 `shadow-*` 三行组属有意保留** — 单面组件各自独立, 不属于重复收敛目标。
 - **"TCollapse 换数据后错误面板仍展开"已被否决** — 整份模型替换走 repeater reset() 会清空实例, 真实表现是全部收起(见语义实证第 3 条)。
+- **TIconSet 图标不抽公共路径属性 (2026-10-15)** — 每个图标独立, 哪怕 Star/StarFill 逐字节同路径也不去重, 图标数据保持可整段复制替换。
 - **演示页的状态失同步与 Timer 常驻属演示代码问题** — 修的时候不要顺手改组件库语义。
 
 ## 参考

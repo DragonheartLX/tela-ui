@@ -5,13 +5,15 @@
 
 import { TTheme,  TThemePreference } from "@tela-ui/theme.slint";
 import { TCaption, TParagraph } from "@tela-ui/base.slint";
-import { TCard, TCodeBlock, TRadio } from "@tela-ui/common.slint";
+import { TCard, TRadio } from "@tela-ui/common.slint";
+import { DemoSection } from "../demo-section.slint";
 
 export component SettingsSection inherits VerticalLayout {
     spacing: 28px;
 
-    TCard {
+    DemoSection {
         title: "主题模式 TTheme mode";
+        code: "import { TTheme, TThemePreference } from \"@tela-ui/theme.slint\";\n\nTTheme.preference = TThemePreference.dark;\n// TTheme.is-dark 是实际生效的模式 (system 已按系统解析)";
 
         VerticalLayout {
             spacing: 12px;
@@ -45,8 +47,6 @@ export component SettingsSection inherits VerticalLayout {
             TCaption { text: "选择即时写入 TTheme.preference; 跟随系统时实际模式由操作系统的深浅色设置决定, 侧边栏底部的按钮仍是亮暗快捷切换。"; }
         }
     }
-
-    TCodeBlock { code: "import { TTheme, TThemePreference } from \"@tela-ui/theme.slint\";\n\nTTheme.preference = TThemePreference.dark;\n// TTheme.is-dark 是实际生效的模式 (system 已按系统解析)"; }
 
     TCard {
         title: "关于 About";

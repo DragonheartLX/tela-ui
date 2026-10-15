@@ -1,0 +1,49 @@
+// Tela UI — TModalSurface (internal infrastructure)
+//
+// Shared base of the window-covering modal layers (TDialog / TDrawer):
+// dimmed backdrop, z-modal layering, fade in/out, ESC via TPopupStackLayer
+// and backdrop-click close. Subclasses draw their panel via `@children`
+// and put an absorb TouchArea inside it — a bare Rectangle consumes no
+// input, so without it body clicks would fall through to the backdrop.
+// TLoadingService deliberately does not build on this: it is a status
+// overlay, not a modal — no ESC, no backdrop click.
+
+import { TTheme } from "theme.slint";
+import { TPopupStackLayer } from "popup-stack.slint";
+
+export component TModalSurface inherits Rectangle {
+    in-out property <bool> open: false;
+    in property <bool> close-on-overlay: true;
+
+    callback closed();
+
+    // Fades instead of `visible: open`, which would drop the subtree the
+    // instant `open` flips and leave the exit animation invisible.
+    opacity: root.open ? 1 : 0;
+    background: TTheme.mask-active;
+    z: TTheme.z-modal;
+    animate opacity { duration: TTheme.duration-base; easing: ease-out; }
+
+    public function close() {
+        open = false;
+        root.closed();
+    }
+
+    // Stack bookkeeping; ESC closes the topmost open layer.
+    // A layer closed that way is a plain dismissal — `closed`, not `canceled`.
+    TPopupStackLayer {
+        active: root.open;
+        close-requested => {
+            root.close();
+        }
+    }
+
+    TouchArea {
+        enabled: root.open && root.close-on-overlay;
+        clicked => {
+            root.close();
+        }
+    }
+
+    @children
+}
