@@ -1,7 +1,8 @@
 // Tela UI — TCarousel
 //
-// Sliding slideshow: one image per slide, dots indicator, optional autoplay.
-// Slides keep the component's own size — set width/height on the instance.
+// Sliding slideshow: one image per slide, dots indicator, optional autoplay,
+// pointer drag with edge resistance. Slides keep the component's own size —
+// set width/height on the instance.
 
 import { TTheme } from "../theme.slint";
 
@@ -15,20 +16,37 @@ export component TCarousel inherits Rectangle {
     in property <bool> autoplay: false;
     in property <duration> interval: 3s;
 
+    // Fires after current actually changed (drag / dots / autoplay), never on
+    // writes that keep the same value.
+    callback changed(int);
+
     // Clamped index every visual reads; an out-of-range current would park
     // the track past the last slide and highlight no dot. Writing current
     // stays unclamped so the host sees what it set.
     private property <int> safe-current:
         Math.max(0, Math.min(current, items.length - 1));
 
+    // Animating this float mirror instead of `x` keeps width changes
+    // (window resize) instant: an `animate x` would re-run the whole slide
+    // animation on every resize because x also depends on parent.width.
+    private property <float> slide-pos: safe-current;
+    animate slide-pos { duration: TTheme.duration-slow; }
+
+    // Live finger offset while dragging. Released drags fold back to 0 with
+    // the same duration as slide-pos, so the track glides from wherever the
+    // finger left it to the target slide; `enabled` keeps the drag itself
+    // glued to the pointer.
+    private property <length> drag-x: 0;
+    private property <bool> dragging: false;
+    animate drag-x { duration: TTheme.duration-slow; enabled: !root.dragging; }
+
     clip: true;
 
     track := Rectangle {
-        x: -root.safe-current * parent.width;
+        x: -root.slide-pos * parent.width + root.drag-x;
         y: 0;
         width: parent.width;
         height: parent.height;
-        animate x { duration: TTheme.duration-slow; }
         for it[i] in root.items: Image {
             x: i * root.width;
             y: 0;
@@ -36,6 +54,44 @@ export component TCarousel inherits Rectangle {
             height: root.height;
             source: it.image;
             image-fit: cover;
+        }
+    }
+
+    // Absorbs presses on the slide area and turns drags into slide changes.
+    // Declared before the dots, so their own TouchAreas stay in front.
+    swipe-ta := TouchArea {
+        moved => {
+            // Beyond the first/last slide only a third of the movement
+            // applies; recomputed from the absolute press point, so it does
+            // not compound across move events.
+            let raw = self.mouse-x - self.pressed-x;
+            root.drag-x = (root.safe-current == 0 && raw > 0)
+                || (root.safe-current == root.items.length - 1 && raw < 0)
+                ? raw / 3 : raw;
+        }
+        pointer-event(ev) => {
+            if (ev.kind == PointerEventKind.down) {
+                root.dragging = true;
+            } else if (ev.kind == PointerEventKind.cancel) {
+                root.dragging = false;
+                root.drag-x = 0;
+            } else if (ev.kind == PointerEventKind.up) {
+                root.dragging = false;
+                // Switch only when the drag passed the threshold (and actually
+                // moved: at zero width the comparison would be vacuously
+                // true); otherwise glide back to the slide the drag started
+                // from.
+                let step = root.drag-x != 0px
+                    && Math.abs(root.drag-x) >= Math.min(80px, root.width / 2)
+                    ? (root.drag-x < 0 ? 1 : -1) : 0;
+                let target = Math.max(0,
+                    Math.min(root.items.length - 1, root.safe-current + step));
+                if (target != root.safe-current) {
+                    root.current = target;
+                    root.changed(target);
+                }
+                root.drag-x = 0;
+            }
         }
     }
 
@@ -58,7 +114,10 @@ export component TCarousel inherits Rectangle {
             dot-ta := TouchArea {
                 mouse-cursor: MouseCursor.pointer;
                 clicked => {
-                    root.current = i;
+                    if (i != root.current) {
+                        root.current = i;
+                        root.changed(i);
+                    }
                 }
             }
         }
@@ -69,10 +128,13 @@ export component TCarousel inherits Rectangle {
         running: root.autoplay && root.items.length > 1;
         interval: root.interval;
         triggered => {
-            if (root.current + 1 >= root.items.length) {
-                root.current = 0;
-            } else {
-                root.current = root.current + 1;
+            if (!root.dragging) {
+                if (root.current + 1 >= root.items.length) {
+                    root.current = 0;
+                } else {
+                    root.current = root.current + 1;
+                }
+                root.changed(root.current);
             }
         }
     }

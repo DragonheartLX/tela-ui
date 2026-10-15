@@ -32,6 +32,12 @@ debug = false
 opt-level = 0
 incremental = true
 
+# The app itself stays unoptimized for fast iteration; the UI toolkit's
+# rendering/layout/text paths must run optimized, or every page mount and
+# frame stutters (~85ms vs ~5ms for the gallery page mount).
+[profile.dev.package."*"]
+opt-level = 2
+
 [profile.release]
 codegen-units = 16
 lto = true
