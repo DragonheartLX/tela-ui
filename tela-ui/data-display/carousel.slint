@@ -111,6 +111,17 @@ export component TCarousel inherits Rectangle {
             animate width { duration: TTheme.duration-fast; }
             animate background { duration: TTheme.duration-fast; }
 
+            // The current slide's dot is disabled: activating it is a no-op.
+            accessible-role: AccessibleRole.button;
+            accessible-label: "第 \{i + 1} 张";
+            accessible-enabled: i != root.safe-current;
+            accessible-action-default => {
+                if (i != root.safe-current) {
+                    root.current = i;
+                    root.changed(i);
+                }
+            }
+
             dot-ta := TouchArea {
                 mouse-cursor: MouseCursor.pointer;
                 clicked => {

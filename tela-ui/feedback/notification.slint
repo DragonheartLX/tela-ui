@@ -152,6 +152,9 @@ export component TNotificationOverlay inherits Rectangle {
                             font-weight: TTheme.font-weight-medium;
                             color: TTheme.text-color-primary;
                             overflow: elide;
+                            // Live region: assistive tech announces each
+                            // queued notification's title.
+                            accessible-live-region: AccessibleLiveness.polite;
                         }
 
                         Text {
@@ -169,6 +172,12 @@ export component TNotificationOverlay inherits Rectangle {
                         width: 16px;
                         height: 16px;
                         y: (parent.height - self.height) / 2;
+
+                        accessible-role: AccessibleRole.button;
+                        accessible-label: "关闭";
+                        accessible-action-default => {
+                            TNotification.close(i);
+                        }
 
                         TIcon {
                             x: 1px;

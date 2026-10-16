@@ -38,6 +38,18 @@ export component TSegmented inherits Rectangle {
                 }
             ]
 
+            // Radio-button semantics: segments are an exclusive picker.
+            accessible-role: AccessibleRole.radio-button;
+            accessible-label: it;
+            accessible-checked: i == root.current-index;
+            accessible-enabled: !root.disabled;
+            accessible-action-default => {
+                if (!root.disabled && root.current-index != i) {
+                    root.current-index = i;
+                    root.changed(i);
+                }
+            }
+
             ta := TouchArea {
                 enabled: !root.disabled;
                 mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;

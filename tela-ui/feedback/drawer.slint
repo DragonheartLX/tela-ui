@@ -82,6 +82,15 @@ export component TDrawer inherits TModalSurface {
                     width: 24px;
                     height: 24px;
 
+                    accessible-role: AccessibleRole.button;
+                    accessible-label: "关闭";
+                    accessible-enabled: root.open;
+                    accessible-action-default => {
+                        if (root.open) {
+                            root.close();
+                        }
+                    }
+
                     TIcon {
                         x: 5px;
                         y: 5px;

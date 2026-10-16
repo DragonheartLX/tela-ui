@@ -150,6 +150,8 @@ export component TMessageOverlay inherits Rectangle {
                 font-size: TTheme.font-size-m;
                 color: TTheme.text-color-primary;
                 vertical-alignment: center;
+                // Live region: assistive tech announces each new message.
+                accessible-live-region: AccessibleLiveness.polite;
             }
         }
     }

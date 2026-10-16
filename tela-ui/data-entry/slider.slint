@@ -136,6 +136,25 @@ export component TSlider inherits Rectangle {
         }
     }
 
+    // Slider semantics for assistive tech; set-value already clamps,
+    // snaps and fires changed only on real changes.
+    accessible-role: AccessibleRole.slider;
+    accessible-enabled: !root.disabled;
+    accessible-value: value;
+    accessible-value-minimum: minimum;
+    accessible-value-maximum: maximum;
+    accessible-value-step: root.step;
+    accessible-action-increment => {
+        if (!root.disabled && root.step > 0) {
+            root.set-value(root.value + root.step);
+        }
+    }
+    accessible-action-decrement => {
+        if (!root.disabled && root.step > 0) {
+            root.set-value(root.value - root.step);
+        }
+    }
+
     pure function map-position(x: length) -> float {
         minimum + (x / max(1px, root.width)) * (maximum - minimum)
     }

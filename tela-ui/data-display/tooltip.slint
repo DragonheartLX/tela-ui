@@ -170,6 +170,18 @@ export component TTooltipArea inherits Rectangle {
     in property <string> text;
     in property <TTooltipPlacement> placement: TTooltipPlacement.top;
 
+    // Hover shows/hides reactively; assistive tech has no hover, so the
+    // default action toggles the same latch through the global.
+    private property <bool> revealed: false;
+
+    // Bubble geometry is the trigger's own box in both paths.
+    accessible-role: AccessibleRole.button;
+    accessible-label: root.text;
+    accessible-action-default => {
+        self.revealed = !self.revealed;
+        TTooltip.show(root.text, root.placement, self.revealed, self.absolute-position, self.width, self.height);
+    }
+
     @children
 
     ta := TouchArea {

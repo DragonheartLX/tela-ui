@@ -32,6 +32,11 @@ export global TLoadingService {
 // It sits above the modal tier so it also covers open dialogs.
 export component TLoadingServiceOverlay inherits Rectangle {
     z: TTheme.z-message;
+    // Announced as an indeterminate progress indicator; the label
+    // carries the loading text.
+    accessible-role: AccessibleRole.progress-indicator;
+    accessible-value: "";
+    accessible-label: TLoadingService.text;
     background: TTheme.mask-active;
     // `visible` stays true so the fade is seen — binding it to the flag
     // would drop the subtree the instant it flips.

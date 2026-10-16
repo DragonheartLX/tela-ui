@@ -12,7 +12,7 @@
 - 顶层聚合按类别分(`base.slint` / `data-display.slint` / …), `common.slint` 仅作兼容出口, 新代码与演示页都用分类聚合。
 - `ui/` + `src/` 是演示程序(bin `tela`): `ui/MainWindow.slint` 挂 7 个页面, 页面用 `if` 懒挂载。
 - Slint 1.18.1 (Cargo.lock 锁定), edition 2024, 样式 `fluent`(`build.rs` 的 `with_style`), 启用 accessibility / backend-winit / renderer-skia / renderer-software。
-- 73 个 `.slint` 共 8,589 行: `tela-ui/` 64 个 6,996 行, `ui/` 9 个 1,593 行(P4 前为 70 个 8,610 行)。
+- 73 个 `.slint` 共 8,793 行: `tela-ui/` 64 个 7,197 行, `ui/` 9 个 1,596 行(P4 前为 70 个 8,610 行)。
 - 设计令牌: `theme.slint` 的 `TTheme` global (151 个顶层转发) → `structs/theme.slint` 的 `TAppThemeConfig` (103 字段); 色板在 `colors.slint` (亮/暗两套 ramp)。
 - 浮层体系: `TPopupSurface` 锚定弹层 + `TPopupStack` 层计数与 ESC + z 序令牌(`z-popup` / `z-modal` / `z-message`) + 服务型 global(`TDialogService` / `TLoadingService` / `TMessage` / `TNotification` / `TTooltip`)。
 
@@ -52,6 +52,7 @@ slint-viewer -L "tela-ui=$PWD\tela-ui" --screenshot out-light.png --size 1200x80
 10. **带 `animate` 的绑定首次求值不跑动画** — `AnimatedBindingCallable` 初始态 NotAnimating 时直接赋值(`properties_animations.rs:380`), 动画只在依赖变化后启动; "组件挂载/切页会全量触发动画"的推断不成立(TCarousel 探针实证: 挂载后两帧 diff = 0)。
 11. **`animate` 支持 `enabled:` 条件关断** — `animate x { enabled: <bool表达式>; }`(`PropertyAnimation.enabled`, `items.rs:1238`), 关断时当帧直达目标值; 要"索引变化才动画、几何变化即时跟随"就把动画放在标量镜像属性上、让几何属性非动画地引用它(TCarousel 的 `slide-pos` 即此法, 动画写在 `x` 上会让 resize 重放整段滑动)。
 12. **Timer 是布局不可见元素** — 可直接作为布局子元素, 不占槽位、不触发 spacing(探针实测: spacing 28 下 红40+Timer+绿40 总高 108 = 单份 spacing); 旧说法"Timer 不能直接放布局、要用 0 高 Rectangle 包装"不成立, 包装反而多出一份 spacing 与 28px 内容高度。
+13. **无障碍声明只落在显式写了 `accessible-role` 的元素上** — role 必须是常量表达式(`lower_accessibility.rs:32`), 其余 accessible-* 可动态绑定; `accessible-value` 绑 float 自动转 string; 生成代码里枚举变体带 `r#` 前缀, 特征串要写 `AccessibleStringProperty :: r#Label` 形态, 普通匹配会漏统计。
 
 ## 组件 API 约定
 
@@ -59,7 +60,7 @@ slint-viewer -L "tela-ui=$PWD\tela-ui" --screenshot out-light.png --size 1200x80
 - 点击后先自更新再回调(nav / side-nav / tabs / pagination 都是这个顺序), 不做"只回调、等宿主写回"的受控组件(TBreadcrumb 是已知例外)。
 - 索引与页码必须夹紧: 越界值不能画到组件外, 也不能让分页出现"一页都不高亮"的坏状态。
 - struct 的 `bool` 字段给默认值; 组件属性默认私有, 不必写 `private`。
-- 可点击元素要有 `accessible-role` 与 `accessible-label`; 表单类已覆盖, 导航与展示类还有 14 个文件待补。
+- 可点击元素要有 `accessible-role` 与 `accessible-label`; 全库已覆盖 (2026-10-16)。禁用态要显式写 `accessible-enabled`, AT 动作回调自带守卫; 浮层/消息类文本用 `accessible-live-region`。
 - 颜色一律走令牌(组件目录当前 0 处硬编码色值, 保持这条); 阴影几何也走 `shadow-*` 令牌, 不要就地写 blur/offset 数值。
 - 浮层 z 序取 `TTheme.z-*`; 需要 ESC 与层计数的模态接入 `TPopupStackLayer`。
 

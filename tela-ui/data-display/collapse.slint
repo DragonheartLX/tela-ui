@@ -22,9 +22,18 @@ export component TCollapse inherits VerticalLayout {
 
     spacing: 0px;
 
-    for it[i] in root.items: VerticalLayout {
+    for it[i] in root.items: panel := VerticalLayout {
         private property <bool> local-open: false;
         private property <bool> open: root.accordion ? i == root.current-index : self.local-open;
+
+        // Pointer click and the assistive-tech default action share one path.
+        function toggle-open() {
+            if (root.accordion) {
+                root.current-index = open ? -1 : i;
+            } else {
+                local-open = !local-open;
+            }
+        }
 
         // The TouchArea overlays the whole header: inside the layout it
         // only ever received a slice of the free space, so clicks on the
@@ -66,17 +75,22 @@ export component TCollapse inherits VerticalLayout {
                 }
             }
 
+            accessible-role: AccessibleRole.button;
+            accessible-label: it.label;
+            accessible-enabled: !it.disabled;
+            accessible-action-default => {
+                if (!it.disabled) {
+                    panel.toggle-open();
+                }
+            }
+
             header-ta := TouchArea {
                 width: 100%;
                 height: 100%;
                 enabled: !it.disabled;
                 mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;
                 clicked => {
-                    if (root.accordion) {
-                        root.current-index = open ? -1 : i;
-                    } else {
-                        local-open = !local-open;
-                    }
+                    panel.toggle-open();
                 }
             }
         }

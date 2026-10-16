@@ -69,4 +69,31 @@ export component TRate inherits Rectangle {
             root.changed(root.value);
         }
     }
+
+    // Slider semantics for assistive tech: increment/decrement keep the
+    // pointer path's same-value rule (no changed() when nothing moved).
+    accessible-role: AccessibleRole.slider;
+    accessible-enabled: !root.disabled;
+    accessible-value: root.value;
+    accessible-value-minimum: 0;
+    accessible-value-maximum: root.max;
+    accessible-value-step: 1;
+    accessible-action-increment => {
+        if (!root.disabled && !root.read-only) {
+            let next = Math.min(root.max, Math.floor(root.value) + 1);
+            if (next != root.value) {
+                root.value = next;
+                root.changed(next);
+            }
+        }
+    }
+    accessible-action-decrement => {
+        if (!root.disabled && !root.read-only) {
+            let next = Math.max(0, Math.ceil(root.value) - 1);
+            if (next != root.value) {
+                root.value = next;
+                root.changed(next);
+            }
+        }
+    }
 }

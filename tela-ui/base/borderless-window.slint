@@ -37,6 +37,8 @@ component TWindowButton inherits Rectangle {
     in property <float> icon-stroke: 2.0;
     in property <bool> icon-absolute-stroke: false;
     in property <bool> danger: false;
+    // Assistive-tech label; the glyphs carry no meaning to a screen reader.
+    in property <string> name: "";
     callback clicked();
 
     // No height binding.
@@ -63,6 +65,10 @@ component TWindowButton inherits Rectangle {
         icon-color: ta.has-hover && root.danger ? TTheme.text-color-anti : TTheme.text-color-secondary;
         animate icon-color { duration: TTheme.duration-fast; }
     }
+
+    accessible-role: AccessibleRole.button;
+    accessible-label: root.name;
+    accessible-action-default => { root.clicked(); }
 
     ta := TouchArea {
         mouse-cursor: MouseCursor.pointer;
@@ -144,6 +150,7 @@ export component TBorderlessWindow inherits Window {
 
                     TWindowButton {
                         icon: TIconSet.Minus;
+                        name: "最小化";
                         // 10px optical line + round caps (lucide Minus is 14/24 wide).
                         // Stroke 1.3: the centered line straddles a pixel row at
                         // 1x scale, so it needs extra ink to match the square/X.
@@ -157,6 +164,13 @@ export component TBorderlessWindow inherits Window {
                     if root.maximizable: Rectangle {
                         width: 46px;
                         height: parent.height;
+
+                        accessible-role: AccessibleRole.button;
+                        // Labels the toggle target, not the current state.
+                        accessible-label: root.maximized ? "向下还原" : "最大化";
+                        accessible-action-default => {
+                            root.maximized = !root.maximized;
+                        }
 
                         states [
                             hovered when max-ta.has-hover: {
@@ -184,6 +198,7 @@ export component TBorderlessWindow inherits Window {
 
                     TWindowButton {
                         icon: TIconSet.X;
+                        name: "关闭";
                         // 10px optical X (lucide X is 12/24 wide).
                         icon-size: 20px;
                         icon-stroke: 1.1;

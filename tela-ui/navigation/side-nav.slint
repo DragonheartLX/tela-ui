@@ -132,6 +132,12 @@ component TNavRow inherits Rectangle {
         ]
     }
 
+    // Falls back to the route value when the fold hides the label.
+    accessible-role: AccessibleRole.button;
+    accessible-label: root.label != "" ? root.label : root.value;
+    accessible-enabled: !root.disabled;
+    accessible-action-default => { root.clicked(); }
+
     row-ta := TouchArea {
         enabled: !root.disabled;
         mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;
@@ -235,6 +241,14 @@ export component TSideNav inherits Rectangle {
                     animate transform-rotation { duration: TTheme.duration-base; easing: ease-out; }
                     icon-color: toggle-ta.has-hover ? TTheme.brand-color : TTheme.text-color-secondary;
                     animate icon-color { duration: TTheme.duration-fast; }
+                }
+
+                accessible-role: AccessibleRole.button;
+                // Mirrors the toggle target; the flipped glyph alone
+                // carries no meaning for assistive tech.
+                accessible-label: root.collapsed ? "展开" : "收起";
+                accessible-action-default => {
+                    root.collapsed = !root.collapsed;
                 }
 
                 toggle-ta := TouchArea {

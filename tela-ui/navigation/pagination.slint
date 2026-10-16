@@ -11,6 +11,8 @@ component TPageBtn inherits Rectangle {
     // Page number label; empty for icon-only buttons (prev/next).
     in property <string> label: "";
     in property <TIconData> icon;
+    // Name for icon-only buttons; assistive tech reads it as the label.
+    in property <string> name: "";
     in property <bool> active;
     in property <bool> disabled;
 
@@ -34,6 +36,11 @@ component TPageBtn inherits Rectangle {
             background: transparent;
         }
     ]
+
+    accessible-role: AccessibleRole.button;
+    accessible-label: root.label != "" ? "第 \{root.label} 页" : root.name;
+    accessible-enabled: !root.disabled;
+    accessible-action-default => { root.clicked(); }
 
     ta := TouchArea {
         enabled: !root.disabled;
@@ -113,6 +120,7 @@ export component TPagination inherits Rectangle {
 
         TPageBtn {
             icon: TIconSet.ChevronLeft;
+            name: "上一页";
             disabled: root.safe-current <= 1;
             clicked => {
                 root.current = root.safe-current - 1;
@@ -131,6 +139,7 @@ export component TPagination inherits Rectangle {
 
         TPageBtn {
             icon: TIconSet.ChevronRight;
+            name: "下一页";
             disabled: root.safe-current >= root.total-pages;
             clicked => {
                 root.current = root.safe-current + 1;

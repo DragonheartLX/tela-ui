@@ -35,6 +35,16 @@ export component TBreadcrumb inherits Rectangle {
             height: parent.height;
             width: crumb-row.preferred-width;
 
+            // The current crumb is disabled: it is plain text, not a link.
+            accessible-role: AccessibleRole.button;
+            accessible-label: it.label;
+            accessible-enabled: it.value != root.current-value;
+            accessible-action-default => {
+                if (it.value != root.current-value) {
+                    root.changed(it.value);
+                }
+            }
+
             // Declared before the row: the label's own TouchArea stays
             // topmost so its hover recolor works, and clicks that miss the
             // label (the separator) fall through to this one.
