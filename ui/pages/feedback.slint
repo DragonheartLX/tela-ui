@@ -6,7 +6,7 @@
 import { TTheme,  TThemeRole, TPopupPlacement } from "@tela-ui/theme.slint";
 import { TText, TButton, TButtonVariant, TCaption } from "@tela-ui/base.slint";
 import { TSelect, TSelectItem, TSlider, TSwitch } from "@tela-ui/data-entry.slint";
-import { TAlert, TMessage, TMessagePlacement, TDrawerPlacement, TNotification, TPopconfirm, TResult, TResultStatus, TProgress, TProgressVariant, TDialogService, TLoadingService } from "@tela-ui/feedback.slint";
+import { TAlert, TMessage, TMessagePlacement, TDrawerPlacement, TNotification, TPopconfirm, TResult, TResultStatus, TProgress, TProgressVariant, TDialogService, TLoadingService, TImageViewerService, TCommandPaletteService, TCommandItem, TActionSheetService, TActionSheetItem } from "@tela-ui/feedback.slint";
 import { DemoSection } from "../demo-section.slint";
 
 export component FeedbackSection inherits VerticalLayout {
@@ -15,6 +15,7 @@ export component FeedbackSection inherits VerticalLayout {
     // Overlays owned by MainWindow.
     in-out property <bool> dialog-open: false;
     in-out property <bool> drawer-open: false;
+    in-out property <bool> sheet-open: false;
     in-out property <TDrawerPlacement> drawer-placement: TDrawerPlacement.right;
     in-out property <float> progress-value: 40;
     // Defaults to the component's own default (no easing), so the slider
@@ -77,6 +78,59 @@ export component FeedbackSection inherits VerticalLayout {
     changed svc-dialog-result => {
         TMessage.info(TDialogService.accepted ? "服务框: 已确认" : "服务框: 已取消/关闭");
     }
+
+    // ======================== P5 demo state ========================
+    private property <[image]> viewer-images: [
+        @image-url("../assets/slide-1.svg"),
+        @image-url("../assets/slide-2.svg"),
+        @image-url("../assets/slide-3.svg"),
+    ];
+
+    private property <[TCommandItem]> palette-commands: [
+        { label: "打开设置", shortcut: "Ctrl+," },
+        { label: "切换深色模式", shortcut: "Ctrl+Shift+D" },
+        { label: "新建文件", shortcut: "Ctrl+N" },
+        { label: "打开文件", shortcut: "Ctrl+O" },
+        { label: "保存全部", shortcut: "Ctrl+Alt+S" },
+        { label: "查找替换", shortcut: "Ctrl+H" },
+        { label: "切换侧边栏", shortcut: "Ctrl+B" },
+        { label: "关闭当前标签", shortcut: "Ctrl+W" },
+    ];
+
+    // The palette is a window-level overlay, so its command list cannot ride on
+    // this lazily mounted page: hand the data to the service once on mount.
+    init => {
+        TCommandPaletteService.commands = root.palette-commands;
+    }
+
+    // Viewer navigation → toast, demonstrating change-seq listening.
+    private property <int> viewer-seq: TImageViewerService.change-seq;
+    changed viewer-seq => {
+        TMessage.info("图片预览: 第 " + (TImageViewerService.current-index + 1) + " / "
+            + TImageViewerService.urls.length + " 张");
+    }
+
+    // Action sheet outcome → toast; -1 is cancel / ESC / mask.
+    private property <int> sheet-seq: TActionSheetService.result-seq;
+    changed sheet-seq => {
+        TMessage.info(TActionSheetService.selected-index >= 0
+            ? "动作面板: " + TActionSheetService.actions[TActionSheetService.selected-index].label
+            : "动作面板: 已取消");
+    }
+
+    private property <int> palette-seq: TCommandPaletteService.run-seq;
+    changed palette-seq => {
+        TMessage.info(TCommandPaletteService.run-index >= 0
+            ? "命令面板: " + TCommandPaletteService.commands[TCommandPaletteService.run-index].label
+            : "命令面板: 已关闭");
+    }
+
+    private property <[TActionSheetItem]> sheet-actions: [
+        { label: "分享给同事", theme: TThemeRole.primary },
+        { label: "复制链接", theme: TThemeRole.default },
+        { label: "归档", theme: TThemeRole.warning },
+        { label: "删除", theme: TThemeRole.error, disabled: true },
+    ];
 
     // ======================== TAlert ========================
     DemoSection {
@@ -219,6 +273,47 @@ export component FeedbackSection inherits VerticalLayout {
 
             TButton { variant: TButtonVariant.outline; theme: TThemeRole.primary; text: "打开抽屉"; clicked => { root.drawer-open = true; } }
             TCaption { text: "抽屉本体挂载在窗口根部, 从指定边缘滑出。"; vertical-alignment: center; wrap: word-wrap; horizontal-stretch: 1; }
+        }
+    }
+
+    // ==================== TImageViewer ====================
+    DemoSection {
+        title: "图片预览 TImageViewer";
+        code: "import { TImageViewerService, TImageViewerOverlay } from \"@tela-ui/feedback.slint\";\n\n// 窗口根部放置一次:\nTImageViewerOverlay { max-zoom: 4; thumbnails: true; }\n\n// 任意代码调用:\nTImageViewerService.open([@image-url(\"a.svg\"), @image-url(\"b.svg\")], 0);\n\n// 切换监听 (change-seq + current-index):\nprivate property <int> n: TImageViewerService.change-seq;\nchanged n => { /* 第 current-index + 1 张 */ }";
+
+        HorizontalLayout {
+            spacing: 12px;
+
+            TButton { variant: TButtonVariant.outline; theme: TThemeRole.primary; text: "预览第 1 张"; clicked => { TImageViewerService.open(root.viewer-images, 0); } }
+            TButton { variant: TButtonVariant.outline; text: "预览第 3 张"; clicked => { TImageViewerService.open(root.viewer-images, 2); } }
+            TCaption { text: "全屏遮罩上按原图比例适配显示; 图片上左右拖拽切换 (首尾有阻力), 滚轮/双击缩放并可拖拽平移, 底部缩略图条直达任意一张; 点图片框以外的视口区域 / 关闭钮 / ESC 关闭, 索引变化经 change-seq 上报。"; vertical-alignment: center; wrap: word-wrap; horizontal-stretch: 1; }
+        }
+    }
+
+    // ==================== TCommandPalette ====================
+    DemoSection {
+        title: "命令面板 TCommandPalette";
+        code: "import { TCommandPaletteService, TCommandPaletteOverlay } from \"@tela-ui/feedback.slint\";\n\n// 窗口根部放置一次:\nTCommandPaletteOverlay { }\n\n// 命令表一次写入, 之后 open() 即可:\nTCommandPaletteService.commands = [ { label: \"打开设置\", shortcut: \"Ctrl+,\" } ];\nTCommandPaletteService.open();\n\n// 执行监听 (run-seq + run-index):\nprivate property <int> r: TCommandPaletteService.run-seq;\nchanged r => { /* run-index < 0 表示未执行任何命令 */ }";
+
+        HorizontalLayout {
+            spacing: 12px;
+
+            TButton { variant: TButtonVariant.outline; theme: TThemeRole.primary; text: "打开命令面板"; clicked => { TCommandPaletteService.open(); } }
+            TCaption { text: "输入即过滤 (子串匹配, 不区分大小写), 回车执行高亮的第一条, 点击列表项直接执行, ESC / 点遮罩关闭; 快捷键由宿主绑定 (KeyBinding 放窗口级 FocusScope 里)。"; vertical-alignment: center; wrap: word-wrap; horizontal-stretch: 1; }
+        }
+    }
+
+    // ==================== TBottomSheet / TActionSheet ====================
+    DemoSection {
+        title: "底部弹层 TBottomSheet / 动作面板 TActionSheet";
+        code: "import { TBottomSheet, TActionSheetService, TActionSheetOverlay } from \"@tela-ui/feedback.slint\";\n\n// 窗口根部:\nTBottomSheet {\n    open <=> sheet-open;\n    title: \"底部弹层标题\";\n    TParagraph { text: \"面板主体由子元素提供\"; }\n}\n\n// 全局动作面板, 一次调用即得结果:\nTActionSheetService.show(\"选择操作\", \"该操作不可撤销\", [\n    { label: \"分享\", theme: TThemeRole.primary },\n    { label: \"删除\", theme: TThemeRole.error, disabled: true },\n]);";
+
+        HorizontalLayout {
+            spacing: 12px;
+
+            TButton { variant: TButtonVariant.outline; theme: TThemeRole.primary; text: "打开底部弹层"; clicked => { root.sheet-open = true; } }
+            TButton { variant: TButtonVariant.outline; text: "打开动作面板"; clicked => { TActionSheetService.show("选择操作", "该操作不可撤销,请谨慎选择", root.sheet-actions); } }
+            TCaption { text: "两者都由 TModalSurface 提供遮罩 / ESC / z-modal; 动作面板的结果经 result-seq + selected-index 上报, -1 表示取消。"; vertical-alignment: center; wrap: word-wrap; horizontal-stretch: 1; }
         }
     }
 

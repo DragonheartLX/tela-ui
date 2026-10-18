@@ -7,7 +7,7 @@
 import { TTheme,  TThemePreference } from "@tela-ui/theme.slint";
 import { TBorderlessWindow, TIconSet, TParagraph, TButton, TButtonVariant } from "@tela-ui/base.slint";
 import { TTooltipOverlay } from "@tela-ui/data-display.slint";
-import { TDialog, TDialogService, TDialogServiceOverlay, TDrawer, TDrawerPlacement, TMessageOverlay, TMessage, TNotificationOverlay, TLoadingService, TLoadingServiceOverlay } from "@tela-ui/feedback.slint";
+import { TDialog, TDialogService, TDialogServiceOverlay, TDrawer, TDrawerPlacement, TBottomSheet, TActionSheetOverlay, TActionSheetService, TImageViewerOverlay, TImageViewerService, TCommandPaletteOverlay, TCommandPaletteService, TMessageOverlay, TMessage, TNotificationOverlay, TLoadingService, TLoadingServiceOverlay } from "@tela-ui/feedback.slint";
 import { TSideNav, TSideNavItem, TSideNavTogglePosition, TBackTop } from "@tela-ui/navigation.slint";
 import { ScrollView } from "std-widgets.slint";
 
@@ -46,6 +46,7 @@ export component MainWindow inherits TBorderlessWindow {
     in-out property <string> group-value: "basics";
     in-out property <bool> dialog-open: false;
     in-out property <bool> drawer-open: false;
+    in-out property <bool> sheet-open: false;
     in-out property <TDrawerPlacement> drawer-placement: TDrawerPlacement.right;
 
     VerticalLayout {
@@ -93,6 +94,7 @@ export component MainWindow inherits TBorderlessWindow {
                             vertical-stretch: 0;
                             dialog-open <=> root.dialog-open;
                             drawer-open <=> root.drawer-open;
+                            sheet-open <=> root.sheet-open;
                             drawer-placement <=> root.drawer-placement;
                         }
                         if root.group-value == "navigation": NavigationSection { vertical-stretch: 0; }
@@ -137,6 +139,24 @@ export component MainWindow inherits TBorderlessWindow {
         }
     }
 
+    TBottomSheet {
+        open <=> root.sheet-open;
+        title: "底部弹层标题";
+
+        TParagraph { text: "TBottomSheet 从窗口底边滑出,高度随内容,由 TModalSurface 提供遮罩、ESC 与点击遮罩关闭。"; }
+        TButton {
+            variant: TButtonVariant.outline;
+            text: "关闭弹层";
+            clicked => { root.sheet-open = false; }
+        }
+    }
+
+    TActionSheetOverlay { }
+
+    TImageViewerOverlay { }
+
+    TCommandPaletteOverlay { }
+
     TDialogServiceOverlay { }
 
     TLoadingServiceOverlay { }
@@ -151,4 +171,6 @@ export component MainWindow inherits TBorderlessWindow {
 // Re-export the theme global so hosts can control it from Rust:
 //   TTheme::get(ui).set_preference(TThemePreference::Dark);
 // TLoadingService rides along so Rust can show/hide the fullscreen loading.
-export { TTheme, TThemePreference, TLoadingService }
+// The P5 services ride along too: every global-driven overlay is drivable
+// from Rust only when the global is exported from the main .slint.
+export { TTheme, TThemePreference, TLoadingService, TDialogService, TActionSheetService, TImageViewerService, TCommandPaletteService }

@@ -48,6 +48,10 @@ export global TPopupStack {
 // all.
 export component TPopupStackLayer {
     in property <bool> active;
+    // false leaves focus alone: a layer that hosts its own focusable content
+    // (the command palette text field) focuses itself and forwards ESC, and
+    // `keys.focus()` would otherwise steal the caret on activation.
+    in property <bool> grab-focus: true;
     callback close-requested();
 
     // Slot captured at activation, count before increment.
@@ -72,10 +76,14 @@ export component TPopupStackLayer {
         if (root.active) {
             root.depth = TPopupStack.open-count;
             TPopupStack.layer-opened();
-            keys.focus();
+            if (root.grab-focus) {
+                keys.focus();
+            }
         } else {
             TPopupStack.layer-closed(root.depth);
-            keys.clear-focus();
+            if (root.grab-focus) {
+                keys.clear-focus();
+            }
         }
     }
 

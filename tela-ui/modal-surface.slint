@@ -14,6 +14,9 @@ import { TPopupStackLayer } from "popup-stack.slint";
 export component TModalSurface inherits Rectangle {
     in-out property <bool> open: false;
     in property <bool> close-on-overlay: true;
+    // Forwarded to the layer: false lets a subclass that owns focusable
+    // content keep the keyboard (the command palette).
+    in property <bool> grab-focus: true;
 
     callback closed();
 
@@ -33,6 +36,7 @@ export component TModalSurface inherits Rectangle {
     // A layer closed that way is a plain dismissal — `closed`, not `canceled`.
     TPopupStackLayer {
         active: root.open;
+        grab-focus: root.grab-focus;
         close-requested => {
             root.close();
         }

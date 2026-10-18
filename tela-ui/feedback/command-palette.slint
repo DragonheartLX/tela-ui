@@ -1,0 +1,391 @@
+// Tela UI — TCommandPalette (TCommandPaletteService + TCommandPaletteOverlay)
+//
+// Global command palette (the Ctrl+K pattern), the TDialogService shape.
+//   TCommandPaletteService.commands = [
+//       { label: "打开设置", shortcut: "Ctrl+," },
+//       { label: "切换深色模式", shortcut: "" },
+//   ];
+//   TCommandPaletteService.open();
+// One `TCommandPaletteOverlay` near the window root renders it; ESC closes it
+// through TPopupStack and Enter runs the highlighted command.
+//
+// Filtering runs in the component, not in the model: every command keeps its
+// row and a miss collapses to zero height, so nothing has to rebuild the
+// array or remap indices. `active-index` is the FIRST match — each row
+// reports itself on a keyword change and the smallest index wins, so the
+// result never depends on the order the rows fire in.
+//
+// Focus: the overlay owns the text field. The modal layer is built with
+// `grab-focus: false` so its ESC scope cannot take the caret, and the field's
+// enclosing FocusScope forwards ESC to TPopupStack.
+//
+// Not included: stepping the highlight with the up/down arrows (the service
+// has no way to scan in-language — see README 已知限制); the highlight
+// follows the first match and the pointer, and Enter runs it.
+
+import { TTheme } from "../theme.slint";
+import { TText } from "../base/typography.slint";
+import { TIcon } from "../base/icon/icon.slint";
+import { TIconSet } from "../base/icon/data.slint";
+import { TDivider } from "../base/divider.slint";
+import { TModalSurface } from "../modal-surface.slint";
+import { TPopupStack } from "../popup-stack.slint";
+import { ScrollView } from "std-widgets.slint";
+
+export struct TCommandItem {
+    label: string,
+    // Right-aligned hint text, typically the keyboard shortcut.
+    shortcut: string = "",
+}
+
+export global TCommandPaletteService {
+    // Two-way so the overlay's `open` drives it.
+    in-out property <bool> visible: false;
+    in-out property <[TCommandItem]> commands: [];
+    // Written only through set-keyword(), so the highlight reset always
+    // precedes the rows' reports.
+    out property <string> keyword: "";
+    // Highlighted command; -1 while nothing matches.
+    out property <int> active-index: -1;
+    // Bumped once per close. `run-index` is the command's index, -1 when the
+    // palette closed without running anything.
+    out property <int> run-seq: 0;
+    out property <int> run-index: -1;
+
+    public function open() {
+        self.visible = true;
+        root.set-keyword("");
+    }
+
+    public function set-keyword(text: string) {
+        // Reset first: the rows report their match while `keyword` is written,
+        // and a highlight from the previous filter must not survive.
+        self.active-index = -1;
+        self.keyword = text;
+        // Rows report only on a real value change. With an empty filter every
+        // command matches, so the first row is the highlight when nothing
+        // reported (opening the palette, or a fresh keyword).
+        if (text == "" && self.active-index < 0 && self.commands.length > 0) {
+            self.active-index = 0;
+        }
+    }
+
+    // Called by every row on a keyword change; the smallest match wins, which
+    // makes the result independent of the order the rows fire in.
+    public function consider(index: int) {
+        if (self.active-index < 0 || index < self.active-index) {
+            self.active-index = index;
+        }
+    }
+
+    // Pointer hover moves the highlight off the first match.
+    public function highlight(index: int) {
+        self.active-index = index;
+    }
+
+    public function close() {
+        root.run(-1);
+    }
+
+    public function run-active() {
+        root.run(self.active-index);
+    }
+
+    // index < 0 closes without running. The match guard keeps a stale
+    // highlight from running a command the current filter hides.
+    public function run(index: int) {
+        let ok = index >= 0 && index < self.commands.length
+            ? root.hit(self.commands[index])
+            : false;
+        self.run-index = ok ? index : -1;
+        self.run-seq += 1;
+        self.visible = false;
+    }
+
+    // Case-insensitive substring match on the label; an empty filter matches
+    // everything. `replace-all` is the only substring test 1.18 offers —
+    // a hit leaves the string changed, a miss returns it unchanged.
+    public pure function hit(command: TCommandItem) -> bool {
+        return self.keyword == ""
+            || command.label.to-lowercase().replace-all(self.keyword.to-lowercase(), "")
+                != command.label.to-lowercase();
+    }
+}
+
+// Place one near the window root, after the main content.
+export component TCommandPaletteOverlay inherits TModalSurface {
+    // The text field owns the keyboard: the layer must not grab focus.
+    grab-focus: false;
+    open <=> TCommandPaletteService.visible;
+
+    in property <length> palette-width: 560px;
+    // Rows shown before the list scrolls.
+    in property <int> max-rows: 6;
+    in property <string> placeholder-text: "输入命令名称…";
+    in property <string> empty-text: "未找到匹配的命令";
+
+    private property <length> row-h: TTheme.height-l;
+    private property <length> row-gap: TTheme.spacing-2;
+    private property <length> field-h: TTheme.height-l + TTheme.spacing-4;
+    private property <length> list-cap: root.max-rows * (root.row-h + root.row-gap);
+    // Scroll content height, pinned explicitly rather than left to the stock
+    // ScrollView's own content-size bookkeeping: the travel then always equals
+    // `list-h - list-cap` (measured 277px for 12 rows against a 264px viewport).
+    private property <length> list-h: list.preferred-height;
+    // The stock ScrollView's inner Flickable ignores `enabled` (and so all
+    // ancestor gating) for the wheel, which would leave the closed palette's
+    // card a wheel dead zone. `visible: false` does block input, so the list is
+    // dropped only after the close fade has finished — otherwise the rows would
+    // vanish while the card is still fading.
+    private property <bool> list-visible: false;
+    // The field's left text inset: icon padding + icon box + gap.
+    private property <length> field-text-x: TTheme.padding-lr-m + 16px + TTheme.spacing-3;
+
+    // Opening takes the caret and starts from an empty filter; closing hands
+    // the keyboard back, so a hidden field can never swallow keystrokes.
+    // `grab-focus: false` above keeps the layer's ESC scope out of the way.
+    changed open => {
+        if (root.open) {
+            root.list-visible = true;
+            field.text = "";
+            TCommandPaletteService.set-keyword("");
+            field.focus();
+        } else {
+            field.clear-focus();
+        }
+    }
+
+    // ESC and mask clicks close through TModalSurface, which never touches the
+    // service: report the dismissal here. `run()` is the single writer, so no
+    // other path can bump run-seq twice.
+    closed => {
+        TCommandPaletteService.run(-1);
+    }
+
+    // The panel fades in place: TModalSurface already animates the whole
+    // overlay's opacity, so there is no slide to run — and staying centred is
+    // only safe because every interactive child below is gated on `open`.
+    Rectangle {
+        x: (parent.width - self.width) / 2;
+        y: (root.height - self.height) / 2;
+        width: min(root.palette-width, parent.width - TTheme.spacing-13);
+        height: min(content.preferred-height, root.height - TTheme.spacing-13);
+        border-radius: TTheme.radius-large;
+        background: TTheme.bg-color-container;
+        drop-shadow-blur: TTheme.shadow-3-blur;
+        drop-shadow-offset-y: TTheme.shadow-3-offset-y;
+        drop-shadow-color: TTheme.shadow-3-color;
+
+        // Absorbs clicks on the panel body so only the mask closes the
+        // palette. Declared before the layout: traversal is front-to-back and
+        // starts at the last declared sibling, so the rows and the field still
+        // get theirs.
+        TouchArea {
+            enabled: root.open;
+            width: parent.width;
+            height: parent.height;
+        }
+
+        content := VerticalLayout {
+            padding: TTheme.spacing-2;
+            spacing: 0px;
+
+            // ---- search row; x/y placement mirrors TInput's frame ----
+            Rectangle {
+                height: root.field-h;
+
+                TIcon {
+                    x: TTheme.padding-lr-m;
+                    y: (parent.height - self.height) / 2;
+                    icon: TIconSet.Search;
+                    size: 16px;
+                    icon-color: TTheme.text-color-placeholder;
+                }
+
+                // Keys pressed in the field bubble up here, which is why the
+                // layer's own scope is off: ESC is forwarded to the stack.
+                FocusScope {
+                    x: 0;
+                    y: 0;
+                    width: parent.width;
+                    height: parent.height;
+                    // The field focuses itself; the scope only relays keys.
+                    focus-on-click: false;
+
+                    key-pressed(event) => {
+                        if (event.text == Key.Escape) {
+                            TPopupStack.press-escape();
+                            accept
+                        } else {
+                            reject
+                        }
+                    }
+
+                    field := TextInput {
+                        // Gated: the panel stays mounted while closed, so
+                        // without this it would take clicks and the caret at
+                        // the screen centre.
+                        enabled: root.open;
+                        x: root.field-text-x;
+                        y: 0;
+                        width: parent.width - self.x - TTheme.padding-lr-m;
+                        height: parent.height;
+                        single-line: true;
+                        vertical-alignment: center;
+                        font-size: TTheme.font-size-m;
+                        font-family: TTheme.font-family;
+                        color: TTheme.text-color-primary;
+                        selection-background-color: TTheme.brand-color-light;
+                        selection-foreground-color: TTheme.text-color-primary;
+
+                        accepted => {
+                            TCommandPaletteService.run-active();
+                        }
+                        edited => {
+                            TCommandPaletteService.set-keyword(self.text);
+                        }
+                    }
+
+                    TText {
+                        x: field.x;
+                        y: 0;
+                        width: parent.width - self.x;
+                        height: parent.height;
+                        vertical-alignment: center;
+                        text: (field.text == "" && field.preedit-text == "") ? root.placeholder-text : "";
+                        font-size: TTheme.font-size-m;
+                        line-height: TTheme.line-height-m;
+                        color: TTheme.text-color-placeholder;
+                        overflow: elide;
+                    }
+                }
+            }
+
+            TDivider { }
+
+            ScrollView {
+                visible: root.list-visible;
+                enabled: root.open;
+                // Grows with the filtered list, stops at max-rows and scrolls
+                // from there. The rows are fixed height, so the inner layout's
+                // preferred height never depends on this height.
+                height: min(root.list-h, root.list-cap);
+                content-height: root.list-h;
+
+                list := VerticalLayout {
+                    padding-top: TTheme.spacing-2;
+                    padding-bottom: TTheme.spacing-2;
+                    // Gap is baked into each row so a collapsed row leaves no
+                    // spacing behind: layout spacing is applied per child even
+                    // when the child is zero sized.
+                    spacing: 0px;
+
+                    for it[i] in TCommandPaletteService.commands: Rectangle {
+                        // Outer box: fixed height + baked gap.
+                        // A miss collapses to zero height; clip keeps its
+                        // content from painting outside the 0px box.
+                        height: TCommandPaletteService.hit(it) ? root.row-h + root.row-gap : 0px;
+                        clip: true;
+
+                        // Every row reports its own match; the smallest index
+                        // wins, so handler order cannot change the result.
+                        private property <string> kw: TCommandPaletteService.keyword;
+                        changed kw => {
+                            if (TCommandPaletteService.hit(it)) {
+                                TCommandPaletteService.consider(i);
+                            }
+                        }
+
+                        // Inner box carries the skin, so the highlight and the
+                        // hover fill stop at the row instead of bleeding into
+                        // the gap below it.
+                        Rectangle {
+                            width: parent.width;
+                            height: root.row-h;
+                            border-radius: TTheme.radius-default;
+                            background: transparent;
+                            animate background { duration: TTheme.duration-fast; }
+
+                            states [
+                                hovered when row-ta.has-hover: {
+                                    background: TTheme.bg-color-container-hover;
+                                }
+                                // Later states win: the highlight paints over hover.
+                                highlighted when i == TCommandPaletteService.active-index: {
+                                    background: TTheme.bg-color-secondarycontainer;
+                                }
+                            ]
+
+                            HorizontalLayout {
+                                width: parent.width;
+                                height: parent.height;
+                                padding-left: TTheme.padding-lr-m;
+                                padding-right: TTheme.padding-lr-m;
+                                spacing: TTheme.spacing-4;
+
+                                TText {
+                                    text: it.label;
+                                    vertical-alignment: center;
+                                    horizontal-stretch: 1;
+                                    overflow: elide;
+                                    color: i == TCommandPaletteService.active-index
+                                        ? TTheme.brand-color
+                                        : TTheme.text-color-primary;
+                                }
+
+                                if it.shortcut != "": TText {
+                                    text: it.shortcut;
+                                    font-size: TTheme.font-size-s;
+                                    line-height: TTheme.line-height-s;
+                                    color: TTheme.text-color-placeholder;
+                                    vertical-alignment: center;
+                                }
+                            }
+
+                            row-ta := TouchArea {
+                                enabled: root.open && TCommandPaletteService.hit(it);
+                                mouse-cursor: MouseCursor.pointer;
+                                clicked => {
+                                    TCommandPaletteService.run(i);
+                                }
+                                changed has-hover => {
+                                    if (self.has-hover) {
+                                        TCommandPaletteService.highlight(i);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // `active-index` names the first match, so a negative one is
+            // exactly "nothing matches".
+            if TCommandPaletteService.active-index < 0: Rectangle {
+                height: root.row-h;
+
+                TText {
+                    text: root.empty-text;
+                    color: TTheme.text-color-placeholder;
+                    horizontal-alignment: center;
+                    vertical-alignment: center;
+                }
+            }
+        }
+    }
+
+    // Drops the list once the close fade is over (the overlay fades for
+    // `duration-base`); on open it is restored immediately. The `list-visible`
+    // term makes it one-shot: a declarative Timer repeats, and a palette left
+    // closed must not keep ticking.
+    Timer {
+        running: !root.open && root.list-visible;
+        interval: TTheme.duration-base;
+        triggered => {
+            root.list-visible = false;
+        }
+    }
+
+    accessible-role: AccessibleRole.groupbox;
+    accessible-label: "命令面板";
+}

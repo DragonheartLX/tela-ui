@@ -86,13 +86,18 @@ TSwitch {
 }
 ```
 
-`@tela-ui/common.slint` 保留为全量兼容出口, 完整参数说明见 [docs/components.md](docs/components.md)。
+52 个组件 (基础 12 / 数据录入 11 / 数据展示 12 / 反馈 7 / 导航 9, 另有实验性 1) 按类别聚合导出; 另有 8 个服务型浮层 (对话框 / 加载 / 消息 / 通知 / 图片预览 / 命令面板 / 动作面板 / 提示) 与主题、图标、浮层栈三个全局对象。`@tela-ui/common.slint` 保留为全量兼容出口, 完整参数说明见 [docs/components.md](docs/components.md)。
 
 ## 致谢与说明
 
 - 图标几何数据来自 [Lucide](https://lucide.dev) (ISC 许可), 按 [lucide-slint](https://github.com/cnlancehu/lucide-slint) (MIT OR Apache-2.0)的数据化结构打包。
 - 设计令牌遵循 [TDesign 规范](https://tdesign.tencent.com)。
-- 已知限制: 按钮无虚线变体 (Slint 边框仅支持实线), TSelect 与 TDropdownMenu 暂无键盘导航, TTextArea 暂无 maxLength 字数统计, 对话框正文与通知正文超过窗口高度时按上限裁剪 (无滚动容器)。
+- 已知限制:
+    - 按钮无虚线变体 (Slint 边框仅支持实线)。
+    - TSelect 与 TDropdownMenu 暂无键盘导航; TCommandPalette 的列表不支持上下方向键步进 (1.18 语言内没有循环语句, 组件层无法扫描匹配项 —— 高亮停在第一条匹配项, 回车执行它或点击列表项)。
+    - TTextArea 暂无 maxLength 字数统计。
+    - 对话框 / 通知 / 底部弹层正文超过窗口高度时按上限裁剪 (无滚动容器)。
+    - TImageViewer 无旋转与图片说明文字。
 
 ## 许可证
 

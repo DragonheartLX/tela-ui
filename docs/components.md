@@ -32,13 +32,15 @@ Slint 组件为单继承 (`inherits`), 子类可直接使用基类的全部属�
 | 组件 | 继承自 | 说明 |
 | --- | --- | --- |
 | TInput, TTextArea, TInputNumber | `TInputFrame` (私有) | 共享状态边框, 悬停/聚焦/禁用态与点击聚焦行为 |
-| TDialog, TDrawer | `TModalSurface` (私有) | 共享遮罩, z-modal 层级, 淡入淡出, ESC 与背景点击关闭 |
+| TDialog, TDrawer, TBottomSheet, TImageViewerOverlay, TCommandPaletteOverlay | `TModalSurface` (私有) | 共享遮罩, z-modal 层级, 淡入淡出, ESC 与背景点击关闭 |
+| TActionSheetOverlay | `TBottomSheet` | 动作列表就是一张底部弹层 |
 | TBorderlessWindow | `Window` | 在 Window 内建属性 (`title`, `no-frame` 等) 上叠加自绘标题栏 |
 | TText | `Text` | 主题字体 + TDesign 正文样式 (14px/22px); 库内所有文本的基类 |
 | THeading, TParagraph, TCaption | `TText` | 依次覆盖字号与行高, 保留 `text`, `color`, `wrap` 等全部内建属性 |
 | TRadioGroup | `HorizontalLayout` | 本身就是一行布局 |
+| TRadioGroup, TLoading | `HorizontalLayout` | 本身就是一行布局 |
 | TTimeline, TStatistic, TCollapse | `VerticalLayout` | 本身即纵向布局, 首选尺寸随内容 |
-| TLoading, TSegmented, TCarousel (内部) | 布局参与 sizing | 见各组件说明 (布局根的约束是头等公民) |
+| TSegmented, TCarousel (内部) | 布局参与 sizing | 见各组件说明 (布局根的约束是头等公民) |
 | 其余全部组件 | `Rectangle` | 基础容器 |
 
 组合关系 (has-a, 内部使用的组件):
@@ -46,6 +48,9 @@ Slint 组件为单继承 (`inherits`), 子类可直接使用基类的全部属�
 - TButton = TIcon + TLoadingSpinner
 - TLoading = TLoadingSpinner
 - TDialog = TModalSurface (遮罩基类) + TButton x2 (确认/取消)
+- TActionSheetOverlay = TBottomSheet (底部弹层基类) + 自绘整行取消块 (`TButton` 无法横向撑满自身, 见语义实证第 23 条)
+- TImageViewerOverlay = TModalSurface + 私有 TViewerButton x6 (上一张/下一张/缩小/放大/适应窗口/关闭) + TViewerChip x4 (计数/缩放组/关闭/缩略图条) + 窗口宽的图片轨道
+- TCommandPaletteOverlay = TModalSurface + TDivider + TIcon + ScrollView (列表)
 - TNavBar, TTabs, TBreadcrumb = 私有 TNavLabel xN (文本行悬停/选中态与点击共享)
 - TPopconfirm = TButton x2 (取消/确认)
 - TRadioGroup = TRadio xN
@@ -59,7 +64,9 @@ Slint 组件为单继承 (`inherits`), 子类可直接使用基类的全部属�
 
 私有组件 (仅供实现参考, 不经聚合器导出): `TInputFrame` (data-entry/input.slint,
 已对库内导出供 TInputNumber 复用), `TModalSurface` (modal-surface.slint, 已对库内
-导出供 TDialog/TDrawer 继承), `TNavLabel` (navigation/nav-label.slint),
+导出供 TDialog/TDrawer/TBottomSheet/TImageViewerOverlay/TCommandPaletteOverlay 继承),
+`TViewerButton` / `TViewerChip` (feedback/image-viewer.slint, 遮罩上的圆形图标按钮与控件卡片),
+`TNavLabel` (navigation/nav-label.slint),
 `TNavRow` (navigation/side-nav.slint),
 `TWindowButton` (base/borderless-window.slint), `TPageBtn`
 (navigation/pagination.slint), `TPopupSurface` (popup-surface.slint,
@@ -89,7 +96,6 @@ import { TText, TButton, TLink, TIcon, THeading, TParagraph, TCaption, TDivider,
 | variant | `TButtonVariant` | `TButtonVariant.base` | `base` 实底 / `outline` 描边 / `text` 纯文字 |
 | size | `TSize` | `TSize.medium` | 高度 24/32/40px |
 | shape | `TButtonShape` | `TButtonShape.rectangle` | `rectangle` / `square` 图标按钮 (宽=高) / `round` 胶囊 |
-| block | `bool` | `false` | 撑满所在布局的剩余宽度 |
 | text | `string` | `""` | 按钮文字, 空串不渲染文本 |
 | icon | `TIconData` | 空 | 前置图标, loading 时被转圈替代 |
 | loading | `bool` | `false` | 显示旋转指示并禁用点击 |
@@ -186,7 +192,7 @@ TText { font-size: TTheme.size-font(size); line-height: TTheme.size-line-height(
 加载指示。`TLoading` 是带文字标签的完整组件, `TLoadingSpinner` 是裸转圈
 (TButton 内部也使用它)。
 
-继承: `TLoading` 继承 `Rectangle`, `TLoadingSpinner` 继承私有 `TStrokedShape` (见"继承
+继承: `TLoading` 继承 `HorizontalLayout` (本身就是一行布局), `TLoadingSpinner` 继承私有 `TStrokedShape` (见"继承
 与组合总览")。TLoading 内部组合 TLoadingSpinner。
 
 | 组件 | 参数 | 类型 | 默认值 | 说明 |
@@ -689,7 +695,7 @@ ta := TouchArea {
 ## 反馈 feedback
 
 ```slint
-import { TAlert, TDialog, TDialogService, TDialogServiceOverlay, TLoadingService, TLoadingServiceOverlay, TDrawer, TPopconfirm, TMessage, TNotification, TProgress, TResult } from "@tela-ui/feedback.slint";
+import { TAlert, TDialog, TDialogService, TDialogServiceOverlay, TLoadingService, TLoadingServiceOverlay, TDrawer, TBottomSheet, TActionSheetService, TActionSheetOverlay, TActionSheetItem, TImageViewerService, TImageViewerOverlay, TCommandPaletteService, TCommandPaletteOverlay, TCommandItem, TPopconfirm, TMessage, TNotification, TProgress, TResult } from "@tela-ui/feedback.slint";
 ```
 
 ### TAlert
@@ -722,6 +728,7 @@ import { TAlert, TDialog, TDialogService, TDialogServiceOverlay, TLoadingService
 | content | `string` | `""` | 正文文字 |
 | confirm-text | `string` | `"确认"` | 确认按钮文字 |
 | cancel-text | `string` | `"取消"` | 取消按钮文字 |
+| show-cancel | `bool` | `true` | 为 false 时只渲染确认按钮 (alert 式单按钮) |
 | close-on-overlay | `bool` | `true` | 点击遮罩是否关闭 |
 | dialog-width | `length` | `480px` | 卡片宽度 (不超过父容器 - 48px) |
 
@@ -779,6 +786,11 @@ import { TAlert, TDialog, TDialogService, TDialogServiceOverlay, TLoadingService
 抽屉面板。从指定边缘滑入, 覆盖在半透明遮罩上; 面板常驻, 通过透明度与位移动画
 出入场, 关闭动画不会被裁断。
 
+与 `TBottomSheet` 的分工: TDrawer 是桌面口径的四边面板 (直角、尺寸由
+`drawer-width`/`drawer-height` 固定、恒有标题行与关闭钮); `placement: bottom` 只是
+把它贴到底边, 不代表移动端形态。移动端形态的底部弹层 (顶部圆角、高度随内容、可无标题
+行) 用 TBottomSheet, 二者共用 TModalSurface 的遮罩与 ESC 语义。
+
 继承: `TModalSurface` (私有, 同 TDialog)。内部组合 TIcon (关闭钮)。
 
 | 参数 | 类型 | 默认值 | 说明 |
@@ -793,6 +805,137 @@ import { TAlert, TDialog, TDialogService, TDialogServiceOverlay, TLoadingService
 回调: `closed()`。公开函数: `close()`。
 
 插槽: 默认子元素为标题下方的面板主体。
+
+### TBottomSheet
+
+底部弹层 (移动端形态)。面板贴窗口底边, 带圆角上沿, 高度默认随内容, 通过位移动画滑入
+滑出; 遮罩, z-modal 层级, ESC 与点击遮罩关闭都来自 `TModalSurface`。适合动作列表、
+移动端风格的选择面板等。与 `TDrawer` 的分工见上节: 需要固定尺寸的桌面边缘面板用
+TDrawer, 需要"内容多高就多高"的底部面板用 TBottomSheet。
+
+继承: `TModalSurface` (私有, 同 TDialog)。内部组合 TIcon (关闭钮)。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| open | `bool` (in-out) | `false` | 显示/隐藏 |
+| title | `string` | `""` | 面板标题 |
+| sheet-height | `length` | `0px` | `0px` 时高度随主体内容, 其余值固定面板高度 |
+| closable | `bool` | `true` | 为 false 时隐藏标题右侧关闭钮 (动作面板自带取消行) |
+| close-on-overlay | `bool` | `true` | 点击遮罩是否关闭 |
+
+高度上限为 `窗口高 - 48px`, 超出部分被裁掉 (与 TDialog / TDrawer 同策略, 无滚动容器)。
+
+回调: `closed()`。公开函数: `close()`。
+
+插槽: 默认子元素为标题下方的面板主体。
+
+### TActionSheet (TActionSheetService + TActionSheetOverlay)
+
+全局动作面板。任何代码 (Slint 或 Rust) 调 `TActionSheetService` 的函数弹面板, 窗口
+根部放一个 `TActionSheetOverlay` 负责渲染; 面板本身就是 `TBottomSheet`, 因此遮罩,
+ESC, z-modal 与滑入动画全部复用。结果通过 `result-seq` / `selected-index` 上报。
+
+`TActionSheetService` 全局属性:
+
+| 属性 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| visible | `bool` (in-out) | `false` | 显示状态, 由函数与 Overlay 维护 |
+| title | `string` (out) | `""` | 面板标题 |
+| description | `string` (out) | `""` | 标题下的说明, 空串不渲染 |
+| actions | `[TActionSheetItem]` (out) | `[]` | 动作列表 |
+| cancel-text | `string` (in-out) | `"取消"` | 底部取消按钮文字, 宿主可改以适配语言 |
+| result-seq | `int` (out) | `0` | 每次关闭自增一次, 供宿主监听 |
+| selected-index | `int` (out) | `-1` | 本次结果: 动作下标, 取消 / ESC / 点遮罩均为 `-1` |
+
+`TActionSheetService` 函数: `show(title, description, actions)` 打开面板,
+`close()` (等价 `finish(-1)`), `finish(int)` (记录结果并关闭; 各关闭路径唯一的
+写入点, 所以不会重复上报)。
+
+动作行高 48px, 文案居中并取 `theme` 语义色; `disabled` 行为禁用色且不响应点击/AT 动作。
+`TActionSheetItem { label, theme: TThemeRole, disabled }`。
+
+监听结果: 用镜像属性 `private property <int> r: TActionSheetService.result-seq;`, 在
+`changed r` 里读 `TActionSheetService.selected-index`。
+
+### TImageViewer (TImageViewerService + TImageViewerOverlay)
+
+全局全屏图片预览。任何代码 (Slint 或 Rust) 调 `TImageViewerService.open(urls, index)`
+打开, 窗口根部放一个 `TImageViewerOverlay` 负责渲染; 1x 时图片按原图比例适配进适配框
+(四周留白) 居中, 适配框下方是缩略图条 (多于一张时), 左上角是 `当前 / 总数`、右上角是
+缩放控件与关闭钮, 适配框左右各一个翻页箭头 (到端点变暗不可点)。
+
+交互:
+
+| 操作 | 效果 |
+| --- | --- |
+| 在图片上左右拖拽 | 超过 `min(80px, 适配框宽 / 3)` 切换上一张/下一张, 首尾拖拽有 1/3 阻力 |
+| 滚轮 | 以指针为锚点缩放, 向下放大 / 向上缩小, 范围 `1x`(适配) ~ `max-zoom` |
+| 双击图片 | 在适配与 2x 之间切换 |
+| 缩放后拖拽 | 平移画面, 直到画面边缘到达窗口边缘 (放大态不再触发切换) |
+| 点缩略图 | 直接跳到该图 |
+| 点图片以外的窗口区域 / 关闭钮 / ESC | 关闭 |
+
+缩放的显示范围是整个窗口: 放大后只被窗口裁剪, 可以铺满全屏。缩放是视图状态, 换图或
+关闭时自动回到适配; 缩略图条超过窗口宽度时横向滚动。
+
+计数 / 缩放组 / 关闭 / 左右箭头 / 缩略图条都坐在 `TLoadingServiceOverlay` 同款的不透明
+卡片上 (`bg-color-container` + `radius-large` + shadow-3): 放大后图片会从控件底下走过,
+白底图不再吞掉图标。
+
+`TImageViewerService` 全局属性:
+
+| 属性 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| visible | `bool` (in-out) | `false` | 显示状态, 由函数与 Overlay 维护 |
+| urls | `[image]` (out) | `[]` | 图片表 |
+| current-index | `int` (out) | `0` | 当前图片下标, 永远夹紧在 `[0, urls.length - 1]` |
+| change-seq | `int` (out) | `0` | 下标真正变化时自增一次, 供宿主监听 |
+
+`TImageViewerService` 函数: `open(urls, index)` (下标越界自动夹紧), `close()`,
+`previous()`, `next()`, `go-to(index)` (同值或夹紧到边界不触发 `change-seq`)。
+
+`TImageViewerOverlay` 组件参数: `max-zoom` (`float`, `4`, 缩放上限; 下限恒为适配),
+`thumbnails` (`bool`, `true`, 是否显示缩略图条)。未包含: 旋转, 图片说明文字,
+方向键翻页 (键盘焦点由模态层的 ESC 作用域占用)。
+
+### TCommandPalette (TCommandPaletteService + TCommandPaletteOverlay)
+
+全局命令面板 (Ctrl+K 形态)。宿主先把命令表写进 `TCommandPaletteService.commands`,
+再调 `open()`; 窗口根部放一个 `TCommandPaletteOverlay` 负责渲染。面板顶部是搜索框
+(打开时自动取得键盘焦点), 下面是命令列表; 输入即过滤, 回车执行高亮的第一条, 点击列表
+项直接执行, ESC 与点遮罩关闭并上报"未执行"。
+
+面板原地淡入淡出 (位移留给列表滚动), 因此关闭态的面板仍居中挂载 —— 面板内每个可交互元素
+都按 `open` 闸住, 不可见的输入框不会吃掉焦点或点击。
+
+过滤在组件内完成, 不动模型: 每条命令始终保留自己的行, 不匹配的行高折叠为 0, 因此不需要
+重建数组或重排下标。`active-index` 是**第一条匹配项** — 关键字变化时每行各报一次自己,
+取最小下标, 与各行触发顺序无关。匹配规则是 `label` 的大小写不敏感子串匹配。
+
+`TCommandPaletteService` 全局属性:
+
+| 属性 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| visible | `bool` (in-out) | `false` | 显示状态, 由函数与 Overlay 维护 |
+| commands | `[TCommandItem]` (in-out) | `[]` | 命令表, 宿主可随时替换 |
+| keyword | `string` (out) | `""` | 过滤关键字, 只经 `set-keyword()` 写入 |
+| active-index | `int` (out) | `-1` | 高亮项下标; 第一条匹配项, 指针悬停会改写它, 无匹配为 `-1` |
+| run-seq | `int` (out) | `0` | 每次关闭自增一次 |
+| run-index | `int` (out) | `-1` | 本次执行的下标, 未执行任何命令为 `-1` |
+
+`TCommandPaletteService` 函数: `open()` (清空关键字并聚焦输入框), `close()`
+(等价 `run(-1)`), `set-keyword(string)`, `run(int)` / `run-active()` (越界或当前
+过滤下不匹配的下标不执行), `consider(int)` 与 `highlight(int)` (供 Overlay 内部
+上报匹配与悬停), `hit(TCommandItem)` (只读的匹配判定)。
+
+`TCommandItem { label, shortcut }`, `shortcut` 右对齐显示在行尾, 通常放快捷键提示。
+
+`TCommandPaletteOverlay` 组件参数: `palette-width` (`length`, `560px`),
+`max-rows` (`int`, `6`, 超出后列表滚动), `placeholder-text`, `empty-text`。
+
+未包含: 上下方向键在列表内步进 (1.18 的语言内没有循环语句, 服务层无法扫描匹配项 —
+见 README 已知限制), 分组标题, 快捷键内置绑定 (宿主用 `KeyBinding` 放在窗口级
+`FocusScope` 里自行绑定)。
 
 ### TPopconfirm
 
@@ -824,6 +967,7 @@ import { TAlert, TDialog, TDialogService, TDialogServiceOverlay, TLoadingService
 | text | `string` (in-out) | `""` | 消息文字 |
 | theme | `TMessageTheme` (in-out) | `TMessageTheme.info` | 消息类型, 决定图标与颜色 |
 | visible | `bool` (in-out) | `false` | 显示状态, 由 show 函数与 Overlay 定时器维护 |
+| seq | `int` (out) | `0` | 每次 show 自增, Overlay 靠它重置 3 秒计时 |
 | placement | `TMessagePlacement` (in-out) | `TMessagePlacement.top-center` | 贴靠的窗口角落 |
 
 `TMessage` 函数: `info(string)`, `success(string)`, `warning(string)`,
@@ -846,6 +990,7 @@ import { TAlert, TDialog, TDialogService, TDialogServiceOverlay, TLoadingService
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | items | `[TNotificationData]` (in-out) | `[]` | 变长队列, 下标 0 最旧; 用 Slint 1.18 的 array push/remove 维护, 最多 4 条 |
+| seq | `int` (out) | `0` | 每次 show 自增, 并作为 stamp 写进新条目 |
 | placement | `TNotificationPlacement` (in-out) | `TNotificationPlacement.top-right` | 贴靠的窗口角落 |
 
 `TNotification` 函数: `info(string, string)`, `success(…)`, `warning(…)`,
@@ -1020,7 +1165,7 @@ import { TTabs, TPagination, TNavBar, TSideNav, TBreadcrumb, TSteps, TDropdownMe
 | items | `[TDropdownMenuItem]` | `[]` | 菜单项 |
 | placement | `TPopupPlacement` | `TPopupPlacement.bottom-start` | 弹出锚点 |
 | auto-open | `bool` | `true` | 内置点击层开合; 交互式触发器关掉它 |
-| item-height | `length` | `32px` | 单项高度 (分隔线行 9px) |
+| item-height | `length` | `TTheme.height-m` | 单项高度 (分隔线行同高) |
 | max-visible-items | `int` | `6` | 弹层内直接可见的行数, 超出后滚动 |
 
 回调: `selected(int, string)` — (下标, value)。公开函数: `show()`, `close()`,
@@ -1151,7 +1296,11 @@ PanelLeftClose, PanelLeftOpen, FlaskConical, Inbox, Square, Copy。
 | 属性/回调 | 类型 | 说明 |
 | --- | --- | --- |
 | active | `bool` (in) | 绑到宿主 open 状态, 为 true 时入栈并抢焦点 |
+| grab-focus | `bool` (in) | 默认 `true`; 层内自带可聚焦内容 (命令面板输入框) 时置 false, 由宿主自己聚焦并转发 ESC |
 | close-requested() | callback | ESC 落到本层时要求关闭 |
+
+`TModalSurface` 把 `grab-focus` 原样透出给自己的层, 所以 `TCommandPaletteOverlay`
+只需在子类上写 `grab-focus: false`, 再让输入框所在的 `FocusScope` 处理 ESC。
 
 基于 PopupWindow 的弹层 (dropdown / popconfirm / select) 不注册: Slint 运行时自己
 就会在 ESC 时关掉最上面的那个 PopupWindow。
@@ -1187,6 +1336,8 @@ PanelLeftClose, PanelLeftOpen, FlaskConical, Inbox, Square, Copy。
 | TProgressVariant | TProgress | line, circle |
 | TAvatarSize / TAvatarShape | TAvatar | small, medium, large, extra-large / circle, square |
 | TDrawerPlacement | TDrawer | top, right, bottom, left |
+| TActionSheetItem | TActionSheetService | label, theme, disabled |
+| TCommandItem | TCommandPaletteService | label, shortcut |
 | TMessageTheme / TMessagePlacement | Message | info, success, warning, error / 六向贴靠 |
 | TNotificationTheme / TNotificationPlacement / TNotificationData | Notification | info, success, warning, error / 四角贴靠 / title, content, theme, stamp |
 | TTooltipPlacement | Tooltip | top, bottom, left, right |

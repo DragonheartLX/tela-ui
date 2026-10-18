@@ -1,0 +1,152 @@
+// Tela UI — TActionSheet (TActionSheetService + TActionSheetOverlay)
+//
+// Global action list, the TDialogService pattern: one call opens a
+// bottom sheet with the choices, one result broadcasts what was picked.
+//   TActionSheetService.show("选择操作", "删除后不可恢复", [
+//       { label: "分享", theme: TThemeRole.primary },
+//       { label: "归档", theme: TThemeRole.warning },
+//   ]);
+// One `TActionSheetOverlay` near the window root renders it.
+//
+// Outcome reporting: `result-seq` bumps on every close.
+// `selected-index` is the action's index, -1 for cancel, ESC and mask clicks.
+// Watch it with a mirrored property:
+//   private property <int> r: TActionSheetService.result-seq;
+//   changed r => { if (TActionSheetService.selected-index >= 0) { … } }
+//
+// The sheet itself is TBottomSheet, so mask, ESC and z-modal layering all
+// come from there.
+
+import { TTheme, TThemeRole } from "../theme.slint";
+import { TText } from "../base.slint";
+import { TBottomSheet } from "bottom-sheet.slint";
+
+export struct TActionSheetItem {
+    label: string,
+    theme: TThemeRole = TThemeRole.default,
+    disabled: bool = false,
+}
+
+export global TActionSheetService {
+    // Two-way so the overlay's `open` drives it.
+    in-out property <bool> visible: false;
+    out property <string> title: "";
+    out property <string> description: "";
+    out property <[TActionSheetItem]> actions: [];
+    in-out property <string> cancel-text: "取消";
+    // Bumped once per close, whatever the path.
+    out property <int> result-seq: 0;
+    out property <int> selected-index: -1;
+
+    public function show(title: string, description: string, actions: [TActionSheetItem]) {
+        self.title = title;
+        self.description = description;
+        self.actions = actions;
+        self.visible = true;
+    }
+
+    // Programmatic dismissal counts as a cancel, like ESC.
+    public function close() {
+        root.finish(-1);
+    }
+
+    // The single writer of both the verdict and the close: no path — action
+    // row, cancel row, ESC, mask, host — can report twice.
+    public function finish(index: int) {
+        self.selected-index = index;
+        self.result-seq += 1;
+        self.visible = false;
+    }
+}
+
+// Place one near the window root, after the main content.
+export component TActionSheetOverlay inherits TBottomSheet {
+    open <=> TActionSheetService.visible;
+    title: TActionSheetService.title;
+    // The cancel row below replaces the header X.
+    closable: false;
+
+    // ESC and mask clicks close the sheet without touching the service, so
+    // they report the dismissal here. Rows write the service directly and
+    // never reach this handler (`finish` is not `close`).
+    closed => {
+        TActionSheetService.finish(-1);
+    }
+
+    // Description line (hidden when empty).
+    if TActionSheetService.description != "": TText {
+        text: TActionSheetService.description;
+        font-size: TTheme.font-size-s;
+        line-height: TTheme.line-height-s;
+        color: TTheme.text-color-secondary;
+        wrap: word-wrap;
+    }
+
+    for it[i] in TActionSheetService.actions: Rectangle {
+        height: TTheme.height-l + TTheme.spacing-4;
+        border-radius: TTheme.radius-medium;
+        background: transparent;
+        animate background { duration: TTheme.duration-fast; }
+
+        states [
+            hovered when row-ta.has-hover && !it.disabled: {
+                background: TTheme.bg-color-secondarycontainer-hover;
+            }
+        ]
+
+        accessible-role: AccessibleRole.button;
+        accessible-label: it.label;
+        accessible-enabled: !it.disabled;
+        accessible-action-default => {
+            if (!it.disabled) {
+                TActionSheetService.finish(i);
+            }
+        }
+
+        TText {
+            text: it.label;
+            font-size: TTheme.font-size-l;
+            line-height: TTheme.line-height-l;
+            horizontal-alignment: center;
+            vertical-alignment: center;
+            color: it.disabled ? TTheme.text-color-disabled : TTheme.theme-color(it.theme);
+        }
+
+        row-ta := TouchArea {
+            enabled: !it.disabled;
+            mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;
+            clicked => {
+                TActionSheetService.finish(i);
+            }
+        }
+    }
+
+    // Cancel block: a full-width row rather than a TButton, so it matches the
+    // sheet rows and carries the sheet's own look.
+    Rectangle {
+        height: TTheme.height-l + TTheme.spacing-4;
+        border-radius: TTheme.radius-medium;
+        background: TTheme.bg-color-secondarycontainer;
+
+        accessible-role: AccessibleRole.button;
+        accessible-label: TActionSheetService.cancel-text;
+        accessible-action-default => {
+            TActionSheetService.finish(-1);
+        }
+
+        TText {
+            text: TActionSheetService.cancel-text;
+            font-size: TTheme.font-size-l;
+            line-height: TTheme.line-height-l;
+            horizontal-alignment: center;
+            vertical-alignment: center;
+        }
+
+        TouchArea {
+            mouse-cursor: MouseCursor.pointer;
+            clicked => {
+                TActionSheetService.finish(-1);
+            }
+        }
+    }
+}

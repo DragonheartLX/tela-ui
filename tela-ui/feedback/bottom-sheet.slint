@@ -1,0 +1,116 @@
+// Tela UI — TBottomSheet
+//
+// Bottom-anchored modal panel: dimmed backdrop, rounded top corners, the
+// panel slides up from the bottom edge.
+// Backdrop, ESC and stack bookkeeping come from TModalSurface, so placing it
+// in a window-level overlay is enough to get all three.
+// Children are the panel body below the title.
+//
+// Height: the panel follows the body's own height until `sheet-height` is
+// set; either way it never grows past `window - 48px`, and a taller body is
+// clipped (same cap policy as TDialog and TDrawer — no scroll container).
+
+import { TTheme } from "../theme.slint";
+import { TText } from "../base/typography.slint";
+import { TIcon } from "../base/icon/icon.slint";
+import { TIconSet } from "../base/icon/data.slint";
+import { TModalSurface } from "../modal-surface.slint";
+
+export component TBottomSheet inherits TModalSurface {
+    in property <string> title;
+    // 0px follows the body; a length pins the panel to that height.
+    in property <length> sheet-height: 0px;
+    // false hides the header close button (an action sheet carries its own
+    // cancel row instead).
+    in property <bool> closable: true;
+
+    // Preferred height of the whole panel (header + body + padding).
+    private property <length> want-h:
+        root.sheet-height > 0px ? root.sheet-height : content.preferred-height;
+    private property <length> panel-h: min(root.want-h, root.height - TTheme.spacing-13);
+
+    Rectangle {
+        x: 0;
+        // Closed, the panel rests just below the window edge: an opacity-only
+        // fade would leave the body sitting at the bottom eating clicks.
+        y: root.open ? parent.height - self.height : parent.height;
+        width: parent.width;
+        height: root.panel-h;
+        border-top-left-radius: TTheme.radius-extra-large;
+        border-top-right-radius: TTheme.radius-extra-large;
+        background: TTheme.bg-color-container;
+        drop-shadow-blur: TTheme.shadow-3-blur;
+        drop-shadow-offset-y: TTheme.shadow-3-offset-y;
+        drop-shadow-color: TTheme.shadow-3-color;
+        // The cap clips an over-tall body instead of pushing the panel off.
+        clip: true;
+        animate y { duration: TTheme.duration-base; easing: ease-out; }
+
+        // Absorbs clicks on the panel body so they cannot reach the backdrop.
+        // Declared before the layout: traversal is front-to-back and starts at
+        // the last declared sibling, so the close button still gets its.
+        // Disabled while closed — during the slide the panel sweeps across the
+        // window and would eat those clicks.
+        TouchArea {
+            enabled: root.open;
+            width: parent.width;
+            height: parent.height;
+        }
+
+        content := VerticalLayout {
+            padding: TTheme.margin-l;
+            spacing: TTheme.margin-s;
+
+            HorizontalLayout {
+                spacing: TTheme.margin-s;
+
+                TText {
+                    text: root.title;
+                    font-size: TTheme.font-size-title-m;
+                    line-height: TTheme.line-height-title;
+                    font-weight: TTheme.font-weight-semibold;
+                    vertical-alignment: center;
+                    horizontal-stretch: 1;
+                    overflow: elide;
+                }
+
+                if root.closable: Rectangle {
+                    width: 24px;
+                    height: 24px;
+
+                    accessible-role: AccessibleRole.button;
+                    accessible-label: "关闭";
+                    accessible-enabled: root.open;
+                    accessible-action-default => {
+                        if (root.open) {
+                            root.close();
+                        }
+                    }
+
+                    TIcon {
+                        x: 5px;
+                        y: 5px;
+                        icon: TIconSet.X;
+                        size: 14px;
+                        icon-color: close-ta.has-hover ? TTheme.text-color-primary : TTheme.text-color-secondary;
+                        animate icon-color { duration: TTheme.duration-fast; }
+                    }
+                    close-ta := TouchArea {
+                        mouse-cursor: MouseCursor.pointer;
+                        clicked => {
+                            root.close();
+                        }
+                    }
+                }
+            }
+
+            VerticalLayout {
+                spacing: TTheme.spacing-4;
+                @children
+            }
+        }
+    }
+
+    accessible-role: AccessibleRole.groupbox;
+    accessible-label: title;
+}
