@@ -46,7 +46,7 @@ export component MainWindow inherits Window {
 
 ```sh
 cargo run                     # 跟随系统深浅色
-TELA_THEME=dark cargo run     # 强制暗色
+TELA_THEME=dark cargo run     # 强制暗色 (只认 light / dark 两个字面量, 其它值启动即报错退出)
 ```
 
 ## 主题

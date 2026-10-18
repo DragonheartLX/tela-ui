@@ -28,7 +28,9 @@ slint-build = "1.18.1"
 
 [profile.dev]
 lto = false
-debug = false
+# `line-tables-only` keeps file:line in backtraces.
+# It costs a fraction of what full debug info adds to every rebuild.
+debug = "line-tables-only"
 opt-level = 0
 incremental = true
 
@@ -37,13 +39,20 @@ incremental = true
 # frame stutters (~85ms vs ~5ms for the gallery page mount).
 [profile.dev.package."*"]
 opt-level = 2
+# Dependencies are not the code a backtrace is read for.
+debug = false
 
 [profile.release]
+# `incremental` stays out: release builds are one-off artifacts, not an
+# edit/build loop.
 codegen-units = 16
 lto = true
 opt-level = "s"
+# Overflow checks stay on, so an arithmetic bug aborts instead of wrapping
+# silently. `src/fatal.rs` reports that abort through a native dialog: the
+# release binary has no console (`windows_subsystem = "windows"` in
+# `src/main.rs`).
 panic = "abort"
 strip = true
 debug = false
-incremental = true
 overflow-checks = true

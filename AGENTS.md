@@ -95,6 +95,10 @@ slint-viewer -L "tela-ui=$PWD\tela-ui" --screenshot out-light.png --size 1200x80
 - **"TCollapse 换数据后错误面板仍展开"已被否决** — 整份模型替换走 repeater reset() 会清空实例, 真实表现是全部收起(见语义实证第 3 条)。
 - **TIconSet 图标不抽公共路径属性 (2026-10-15)** — 每个图标独立, 哪怕 Star/StarFill 逐字节同路径也不去重, 图标数据保持可整段复制替换。
 - **演示页的状态失同步与 Timer 常驻属演示代码问题** — 修的时候不要顺手改组件库语义。
+- **cdylib 保留 (2026-10-18)** — `Cargo.toml` 的 `crate-type = ["lib", "cdylib"]` 是移动平台预留, 不因"当前无 C ABI 消费者"删除。
+- **TELA_THEME 精确匹配 (2026-10-18)** — 只认字面量 `light` / `dark`, 不做 trim 也不做小写化; 设了别的值一律报错退出(`src/lib.rs` 的 `theme_from_env`), 不静默跟随系统。
+- **启动失败只在没有控制台的构建里弹窗 (2026-10-18)** — `src/fatal.rs` 的 `MessageBoxW` 只在 Windows 且 `not(debug_assertions)` 时弹原生错误框; dev 只写 stderr, 否则自动化运行会被模态框卡住。panic 走同一通道, 因为 release 是 `panic = "abort"` 加 `windows_subsystem = "windows"`, 什么都不留。
+- **不做令牌漂移守卫 (2026-10-18)** — 两套预设里那 70 个字段重复是刻意对齐 TDesign 令牌清单的结果, 不加运行时断言也不建测试工程; 改 `theme.slint` 时人工比对两套预设。
 
 ## 参考
 
