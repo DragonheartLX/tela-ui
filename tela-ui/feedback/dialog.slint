@@ -25,6 +25,16 @@ export component TDialog inherits TModalSurface {
     callback accepted();
     callback canceled();
 
+    // Rows the card spends on chrome: vertical padding, the title line when
+    // present, one gap per child boundary and the button row.
+    private property <length> card-chrome:
+        TTheme.margin-xxl * 2 + TTheme.height-m
+        + (root.title != "" ? TTheme.line-height-title : 0px)
+        + TTheme.margin-m * (root.title != "" ? 2 : 1);
+    // Body cap: 48px of window inset plus the chrome above. Without it a long
+    // body would outgrow the window and push the button row off-screen.
+    private property <length> max-content-h: root.height - 48px - root.card-chrome;
+
     Rectangle {
         x: (parent.width - self.width) / 2;
         // When closed the card rests fully off-window below the overlay.
@@ -64,10 +74,20 @@ export component TDialog inherits TModalSurface {
                 font-weight: TTheme.font-weight-semibold;
             }
 
-            if root.content != "": TText {
-                text: root.content;
-                color: TTheme.text-color-secondary;
-                wrap: word-wrap;
+            if root.content != "": Rectangle {
+                // Bounded box + clip, the TCollapse fold pattern: a wrapping
+                // Text keeps its full wrapped height inside a layout (Slint
+                // only shrinks its min-width, and ignores max-height), so the
+                // cap has to sit on a clipping wrapper.
+                clip: true;
+                height: min(body-text.preferred-height, root.max-content-h);
+
+                body-text := TText {
+                    width: 100%;
+                    text: root.content;
+                    color: TTheme.text-color-secondary;
+                    wrap: word-wrap;
+                }
             }
 
             @children

@@ -34,6 +34,10 @@ export component TNavLabel inherits Rectangle {
         width: 100%;
         height: 100%;
         text: root.label;
+        // One-line rows: elide a long label rather than clip it mid-glyph.
+        // Elide leaves preferred-width (hosts size rows/indicators from it)
+        // untouched, so only the drawing is affected.
+        overflow: elide;
         font-weight: root.selected && root.semibold-when-selected
             ? TTheme.font-weight-semibold : TTheme.font-weight-regular;
         color: root.base-color;

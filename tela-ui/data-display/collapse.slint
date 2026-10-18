@@ -21,6 +21,11 @@ export component TCollapse inherits VerticalLayout {
     // Accordion mode only: index of the open panel, -1 = all closed.
     in-out property <int> current-index: -1;
 
+    // Accordion mode only: the newly open index after a real change
+    // (-1 = all closed). Panels keep their open state locally when
+    // `accordion` is false, so `current-index` never moves there.
+    callback changed(int);
+
     spacing: 0px;
 
     for it[i] in root.items: panel := VerticalLayout {
@@ -31,6 +36,7 @@ export component TCollapse inherits VerticalLayout {
         function toggle-open() {
             if (root.accordion) {
                 root.current-index = open ? -1 : i;
+                root.changed(root.current-index);
             } else {
                 local-open = !local-open;
             }

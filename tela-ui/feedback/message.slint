@@ -112,7 +112,9 @@ export component TMessageOverlay inherits Rectangle {
         y: root.to-bottom
             ? parent.height - self.height - self.edge-gap
             : self.edge-gap;
-        width: row.preferred-width + TTheme.padding-lr-m * 2;
+        // 48px of window inset, as TDialog: a long message elides instead of
+        // running the pill off the window edge.
+        width: min(row.preferred-width + TTheme.padding-lr-m * 2, parent.width - 48px);
         height: TTheme.height-m + 8px;
         border-radius: TTheme.radius-medium;
         background: TTheme.bg-color-container;
@@ -129,7 +131,9 @@ export component TMessageOverlay inherits Rectangle {
         row := HorizontalLayout {
             x: TTheme.padding-lr-m;
             y: (parent.height - self.height) / 2;
-            width: self.preferred-width;
+            // Capped with the pill: the label can only elide once the row
+            // itself is narrower than the text.
+            width: min(self.preferred-width, parent.width - TTheme.padding-lr-m * 2);
             height: self.preferred-height;
             spacing: TTheme.spacing-2;
 
@@ -149,6 +153,8 @@ export component TMessageOverlay inherits Rectangle {
             TText {
                 text: TMessage.text;
                 vertical-alignment: center;
+                // Single-line pill: elide when the width cap bites.
+                overflow: elide;
                 // Live region: assistive tech announces each new message.
                 accessible-live-region: AccessibleLiveness.polite;
             }

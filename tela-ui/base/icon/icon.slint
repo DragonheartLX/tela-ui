@@ -9,22 +9,12 @@
 
 import { TTheme } from "../../theme.slint";
 import { TIconData } from "data.slint";
+import { TStrokedShape } from "../stroked-shape.slint";
 
-export component TIcon inherits Rectangle {
+export component TIcon inherits TStrokedShape {
     // TIcon geometry: an entry from TIconSet or custom TIconData.
     in property <TIconData> icon;
     in property <brush> icon-color: TTheme.text-color-primary;
-    // TDesign base icon size is 16px.
-    in-out property <length> size: 16px;
-    // Stroke width in 24-grid units, scaled to `size` unless absolute.
-    in-out property <float> stroke-width: 2.0;
-    in property <bool> absolute-stroke-width: false;
-
-    out property <length> computed-stroke-width:
-        absolute-stroke-width ? stroke-width * 1px : size / 24 * stroke-width;
-
-    width: size;
-    height: size;
 
     for p in icon.paths: Path {
         viewbox-width: 24;

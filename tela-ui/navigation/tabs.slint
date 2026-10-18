@@ -18,7 +18,7 @@ export component TTabs inherits Rectangle {
         Math.max(0, Math.min(current-index, items.length - 1));
 
     callback changed(int);
-    height: 40px;
+    height: TTheme.height-l;
 
     HorizontalLayout {
         width: parent.width;
@@ -26,6 +26,18 @@ export component TTabs inherits Rectangle {
 
         for it[i] in root.items: Rectangle {
             height: parent.height;
+
+            // One tab per column; the bar itself is the tab-list.
+            // The current tab is disabled: activating it is a no-op.
+            accessible-role: AccessibleRole.tab;
+            accessible-label: it;
+            accessible-enabled: i != root.safe-index;
+            accessible-action-default => {
+                if (root.current-index != i) {
+                    root.current-index = i;
+                    root.changed(i);
+                }
+            }
 
             TNavLabel {
                 width: 100%;
@@ -50,7 +62,7 @@ export component TTabs inherits Rectangle {
         x: root.safe-index * (parent.width / max(1, root.items.length));
         width: parent.width / max(1, root.items.length);
         height: 3px;
-        border-radius: 2px;
+        border-radius: TTheme.radius-small;
         background: TTheme.brand-color;
         animate x { duration: TTheme.duration-base; easing: ease-out; }
     }
@@ -62,5 +74,6 @@ export component TTabs inherits Rectangle {
         background: TTheme.component-stroke;
     }
 
-    accessible-role: AccessibleRole.tab;
+    // The bar is the container role; each column below is one tab.
+    accessible-role: AccessibleRole.tab-list;
 }

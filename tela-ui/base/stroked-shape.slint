@@ -1,0 +1,23 @@
+// Tela UI — TStrokedShape (internal infrastructure)
+//
+// Stroke model shared by the two 24-grid scalables (TIcon, TLoadingSpinner):
+// a square box of `size` plus a `stroke-width` given in 24-grid units and
+// scaled to that size, unless `absolute-stroke-width` asks for raw pixels.
+//
+// Consumers draw their own paths and read `computed-stroke-width`.
+// Neither of them writes `size` or `stroke-width` back, so both are plain
+// `in` properties.
+
+export component TStrokedShape inherits Rectangle {
+    // TDesign's base icon size is 16px.
+    in property <length> size: 16px;
+    // Stroke width in 24-grid units, scaled to `size` unless absolute.
+    in property <float> stroke-width: 2.0;
+    in property <bool> absolute-stroke-width: false;
+
+    out property <length> computed-stroke-width:
+        absolute-stroke-width ? stroke-width * 1px : size / 24 * stroke-width;
+
+    width: size;
+    height: size;
+}

@@ -18,11 +18,16 @@ export component TProgress inherits Rectangle {
     in property <TThemeRole> theme: TThemeRole.primary;
     in property <TSize> size: TSize.medium;
     in property <bool> show-label: true;
+    // Eases every value change over `duration-base`.
+    // Off by default: a live progress value moves every frame, and easing it
+    // would only lag the bar and the label behind the data. Turn it on for
+    // one-shot jumps (0 → 100 on completion, step changes).
+    in property <bool> animated: false;
 
     private property <float> p: max(0, min(100, value)) / 100;
-    // One animated source drives both the linear fill width and the
-    // circular arc, so value changes ease in both variants.
-    animate p { duration: TTheme.duration-base; }
+    // `enabled:` rather than a mount/unmount switch, so the default snaps the
+    // current frame to the target value instead of running a 200ms animation.
+    animate p { enabled: root.animated; duration: TTheme.duration-base; }
     private property <length> th:
         size == TSize.small ? 4px
         : size == TSize.large ? 10px

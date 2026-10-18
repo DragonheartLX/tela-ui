@@ -2,9 +2,10 @@
 // TBreadcrumb / TSteps), 一个组件一张卡. The app's own top navigation bar is
 // the live TNavBar demo; this section covers the rest.
 
-import { TTheme,  TThemeRole,  TSize } from "@tela-ui/theme.slint";
+import { TTheme,  TThemeRole,  TSize, TPopupPlacement } from "@tela-ui/theme.slint";
 import { TText, TIconSet, TCaption, TDivider, TButton, TButtonVariant, TParagraph } from "@tela-ui/base.slint";
-import { TTabs, TPagination, TNavBar, TNavItem, TSideNav, TSideNavItem, TSideNavMode, TSideNavTogglePosition, TBreadcrumb, TCrumbItem, TSteps, TDropdownMenu, TDropdownMenuItem, TPopupPlacement, TBackTop, TMessage } from "@tela-ui/common.slint";
+import { TMessage } from "@tela-ui/feedback.slint";
+import { TTabs, TPagination, TNavBar, TNavItem, TSideNav, TSideNavItem, TSideNavMode, TSideNavTogglePosition, TBreadcrumb, TCrumbItem, TSteps, TDropdownMenu, TDropdownMenuItem, TBackTop } from "@tela-ui/navigation.slint";
 import { DemoSection } from "../demo-section.slint";
 import { ScrollView } from "std-widgets.slint";
 
@@ -48,7 +49,7 @@ export component NavigationSection inherits VerticalLayout {
     // ======================= TTabs =========================
     DemoSection {
         title: "选项卡 TTabs";
-        code: "import { TTabs } from \"@tela-ui/common.slint\";\n\nTTabs { items: [\"首页\", \"组件\", \"文档\", \"关于\"]; current-index <=> i; }\nif root.i == 0: TParagraph { text: \"首页内容\"; }";
+        code: "import { TTabs } from \"@tela-ui/navigation.slint\";\n\nTTabs { items: [\"首页\", \"组件\", \"文档\", \"关于\"]; current-index <=> i; }\nif root.i == 0: TParagraph { text: \"首页内容\"; }";
 
         VerticalLayout {
             spacing: 16px;
@@ -79,7 +80,7 @@ export component NavigationSection inherits VerticalLayout {
     // ==================== TPagination ======================
     DemoSection {
         title: "分页 TPagination";
-        code: "import { TPagination } from \"@tela-ui/common.slint\";\n\nTPagination { total-pages: 20; current <=> page; }";
+        code: "import { TPagination } from \"@tela-ui/navigation.slint\";\n\nTPagination { total-pages: 20; current <=> page; }";
 
         HorizontalLayout {
             spacing: 24px;
@@ -97,7 +98,7 @@ export component NavigationSection inherits VerticalLayout {
     // ======================= TNavBar =======================
     DemoSection {
         title: "导航栏 TNavBar";
-        code: "import { TNavBar } from \"@tela-ui/common.slint\";\n\nTNavBar {\n    title: \"Tela UI\";\n    logo: TIconSet.LayoutDashboard;\n    items: [{ label: \"首页\", value: \"home\" }, …];\n    current-value <=> nav;\n    TButton { text: \"操作\"; } // 右侧操作区\n}";
+        code: "import { TNavBar } from \"@tela-ui/navigation.slint\";\n\nTNavBar {\n    title: \"Tela UI\";\n    logo: TIconSet.LayoutDashboard;\n    items: [{ label: \"首页\", value: \"home\" }, …];\n    current-value <=> nav;\n    TButton { text: \"操作\"; } // 右侧操作区\n}";
 
         VerticalLayout {
             spacing: 16px;
@@ -118,7 +119,7 @@ export component NavigationSection inherits VerticalLayout {
     // ======================= TSideNav ======================
     DemoSection {
         title: "侧边导航 TSideNav";
-        code: "import { TSideNav, TSideNavItem } from \"@tela-ui/common.slint\";\n\nTSideNav {\n    title: \"Tela UI\";\n    logo: TIconSet.LayoutDashboard;\n    items: [{ label: \"仪表盘\", value: \"dash\", icon: TIconSet.LayoutDashboard }, …];\n    current-value <=> nav;\n    collapsed <=> c; // 收起后仅显示图标\n}";
+        code: "import { TSideNav, TSideNavItem } from \"@tela-ui/navigation.slint\";\n\nTSideNav {\n    title: \"Tela UI\";\n    logo: TIconSet.LayoutDashboard;\n    items: [{ label: \"仪表盘\", value: \"dash\", icon: TIconSet.LayoutDashboard }, …];\n    current-value <=> nav;\n    collapsed <=> c; // 收起后仅显示图标\n}";
 
         VerticalLayout {
             spacing: 16px;
@@ -179,7 +180,7 @@ export component NavigationSection inherits VerticalLayout {
     // ================== TDropdownMenu =====================
     DemoSection {
         title: "下拉菜单 TDropdownMenu";
-        code: "import { TDropdownMenu, TDropdownMenuItem } from \"@tela-ui/common.slint\";\n\ndm := TDropdownMenu {\n    auto-open: false;\n    items: [\n        { label: \"编辑\", value: \"edit\", icon: TIconSet.Pencil },\n        { label: \"删除\", value: \"delete\", danger: true },\n        { label: \"分隔线\", value: \"\", divider: true },\n    ];\n    selected(i, v) => { … }\n    TButton { text: \"更多操作\"; clicked => dm.toggle(); }\n}";
+        code: "import { TDropdownMenu, TDropdownMenuItem } from \"@tela-ui/navigation.slint\";\n\ndm := TDropdownMenu {\n    auto-open: false;\n    items: [\n        { label: \"编辑\", value: \"edit\", icon: TIconSet.Pencil },\n        { label: \"删除\", value: \"delete\", danger: true },\n        { label: \"分隔线\", value: \"\", divider: true },\n    ];\n    selected(i, v) => { … }\n    TButton { text: \"更多操作\"; clicked => dm.toggle(); }\n}";
 
         VerticalLayout {
             spacing: 16px;
@@ -238,7 +239,7 @@ export component NavigationSection inherits VerticalLayout {
     // ==================== TBreadcrumb ======================
     DemoSection {
         title: "面包屑 TBreadcrumb";
-        code: "import { TBreadcrumb } from \"@tela-ui/common.slint\";\n\nTBreadcrumb {\n    items: [{ label: \"首页\", value: \"home\" }, …];\n    current-value <=> crumb;\n}";
+        code: "import { TBreadcrumb } from \"@tela-ui/navigation.slint\";\n\nTBreadcrumb {\n    items: [{ label: \"首页\", value: \"home\" }, …];\n    current-value <=> crumb;\n}";
 
         TBreadcrumb {
             items: root.crumb-items;
@@ -249,7 +250,7 @@ export component NavigationSection inherits VerticalLayout {
     // ======================== TSteps ========================
     DemoSection {
         title: "步骤条 TSteps";
-        code: "import { TSteps } from \"@tela-ui/common.slint\";\n\nTSteps { items: [\"注册账号\", \"填写信息\", \"验证邮箱\", \"完成\"]; current: 1; }";
+        code: "import { TSteps } from \"@tela-ui/navigation.slint\";\n\nTSteps { items: [\"注册账号\", \"填写信息\", \"验证邮箱\", \"完成\"]; current: 1; }";
 
         TSteps {
             items: root.step-items;
@@ -259,7 +260,7 @@ export component NavigationSection inherits VerticalLayout {
     // ======================== TBackTop ======================
     DemoSection {
         title: "回到顶部 TBackTop";
-        code: "import { TBackTop } from \"@tela-ui/common.slint\";\n\nRectangle {\n    sv := ScrollView { … }\n    TBackTop {\n        x: …; y: …;\n        content-y <=> sv.content-y; // 超过阈值显示, 点击回顶\n        threshold: 40px; // 默认 200px, 内容短时调小\n    }\n}";
+        code: "import { TBackTop } from \"@tela-ui/navigation.slint\";\n\nRectangle {\n    sv := ScrollView { … }\n    TBackTop {\n        x: …; y: …;\n        content-y <=> sv.content-y; // 超过阈值显示, 点击回顶\n        threshold: 40px; // 默认 200px, 内容短时调小\n    }\n}";
 
         Rectangle {
             height: 240px;

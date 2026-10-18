@@ -45,6 +45,7 @@ component TWindowButton inherits Rectangle {
     // No height binding.
     // The title-bar layout stretches it, and component roots cannot
     // reference `parent` anyway.
+    // 46px is Windows' caption-button width; no token lands on that step.
     width: 46px;
 
     states [
@@ -87,8 +88,10 @@ export component TBorderlessWindow inherits Window {
     // Visible surface color of the rounded window rectangle.
     in property <brush> window-background: TTheme.bg-color-page;
     // Window corner radius. 0 while maximized.
-    in property <length> window-radius: 8px;
+    // radius-large (9px) is the closest step on the radius scale.
+    in property <length> window-radius: TTheme.radius-large;
     // Edge hit zone for frameless resizing, in logical px.
+    // Not a visual measurement, so it stays a literal (no matching token).
     // The winit backend reads the Window's `resize-border-width`.
     // It defaults to 0, which means resizing is disabled.
     // It starts a native drag-resize when the cursor nears an edge.
@@ -96,7 +99,7 @@ export component TBorderlessWindow inherits Window {
     in property <length> resize-border: 8px;
     resize-border-width: root.maximized ? 0px : root.resize-border;
 
-    in property <length> header-height: 40px;
+    in property <length> header-height: TTheme.height-l;
     in property <brush> header-background: TTheme.bg-color-container;
     // Optional brand glyph shown before the header title.
     in property <TIconData> logo;
@@ -161,39 +164,20 @@ export component TBorderlessWindow inherits Window {
                         clicked => { root.minimized = true; }
                     }
 
-                    if root.maximizable: Rectangle {
-                        width: 46px;
-                        height: parent.height;
-
-                        accessible-role: AccessibleRole.button;
+                    // Same control as minimize/close: one 46px hit target and
+                    // one hover skin, instead of a second hand-rolled button.
+                    // The glyph tracks the window state: Square expands,
+                    // Copy's offset squares restore.
+                    if root.maximizable: TWindowButton {
+                        icon: root.maximized ? TIconSet.Copy : TIconSet.Square;
                         // Labels the toggle target, not the current state.
-                        accessible-label: root.maximized ? "向下还原" : "最大化";
-                        accessible-action-default => {
-                            root.maximized = !root.maximized;
-                        }
-
-                        states [
-                            hovered when max-ta.has-hover: {
-                                background: TTheme.bg-color-component-hover;
-                            }
-                        ]
-
-                        Rectangle {
-                            width: 10px;
-                            height: 10px;
-                            x: (parent.width - self.width) / 2;
-                            y: (parent.height - self.height) / 2;
-                            border-width: 1px;
-                            border-color: max-ta.has-hover
-                                ? TTheme.text-color-primary
-                                : TTheme.text-color-secondary;
-                            animate border-color { duration: TTheme.duration-fast; }
-                        }
-
-                        max-ta := TouchArea {
-                            mouse-cursor: MouseCursor.pointer;
-                            clicked => { root.maximized = !root.maximized; }
-                        }
+                        name: root.maximized ? "向下还原" : "最大化";
+                        // 10px optical box like the other caption glyphs:
+                        // lucide Square spans 18/24 of its size, Copy 20/24.
+                        icon-size: root.maximized ? 12px : 13.33px;
+                        icon-stroke: 1.1;
+                        icon-absolute-stroke: true;
+                        clicked => { root.maximized = !root.maximized; }
                     }
 
                     TWindowButton {

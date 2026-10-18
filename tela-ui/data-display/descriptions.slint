@@ -20,10 +20,12 @@ export component TDescriptions inherits Rectangle {
     private property <int> cols: Math.max(1, root.columns);
     private property <length> row-h: root.bordered ? 40px : 32px;
     // Cell row/column from the flat index (int math kept float-safe).
-    function col-of(i: int) -> int {
+    // Pure: every cell's x/y binding calls them, and purity lets the
+    // compiler dedupe the repeated `cols` read.
+    pure function col-of(i: int) -> int {
         return Math.mod(i, self.cols);
     }
-    function row-of(i: int) -> int {
+    pure function row-of(i: int) -> int {
         return Math.floor(i / (self.cols * 1.0));
     }
 

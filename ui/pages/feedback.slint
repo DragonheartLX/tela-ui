@@ -3,9 +3,10 @@
 // overlays live at window level in MainWindow; this section only hosts the
 // trigger buttons via two-way bound properties.
 
-import { TTheme,  TThemeRole } from "@tela-ui/theme.slint";
+import { TTheme,  TThemeRole, TPopupPlacement } from "@tela-ui/theme.slint";
 import { TText, TButton, TButtonVariant, TCaption } from "@tela-ui/base.slint";
-import { TAlert, TSelect, TSelectItem, TMessage, TMessagePlacement, TDrawerPlacement, TNotification, TPopconfirm, TPopupPlacement, TResult, TResultStatus, TProgress, TProgressVariant, TSlider, TDialogService, TLoadingService } from "@tela-ui/common.slint";
+import { TSelect, TSelectItem, TSlider, TSwitch } from "@tela-ui/data-entry.slint";
+import { TAlert, TMessage, TMessagePlacement, TDrawerPlacement, TNotification, TPopconfirm, TResult, TResultStatus, TProgress, TProgressVariant, TDialogService, TLoadingService } from "@tela-ui/feedback.slint";
 import { DemoSection } from "../demo-section.slint";
 
 export component FeedbackSection inherits VerticalLayout {
@@ -16,6 +17,9 @@ export component FeedbackSection inherits VerticalLayout {
     in-out property <bool> drawer-open: false;
     in-out property <TDrawerPlacement> drawer-placement: TDrawerPlacement.right;
     in-out property <float> progress-value: 40;
+    // Defaults to the component's own default (no easing), so the slider
+    // reads as the "live value" case until the switch is flipped.
+    in-out property <bool> progress-animated: false;
     // The two selects store their current value on a surviving location —
     // TMessage.placement is a global, drawer-placement lives on
     // MainWindow — while the section itself is rebuilt on every page
@@ -77,7 +81,7 @@ export component FeedbackSection inherits VerticalLayout {
     // ======================== TAlert ========================
     DemoSection {
         title: "警告提示 TAlert";
-        code: "import { TAlert } from \"@tela-ui/common.slint\";\n\nTAlert { theme: TThemeRole.success; title: \"操作成功\"; description: \"表单已成功提交。\"; closable: true; }";
+        code: "import { TAlert } from \"@tela-ui/feedback.slint\";\n\nTAlert { theme: TThemeRole.success; title: \"操作成功\"; description: \"表单已成功提交。\"; closable: true; }";
 
         VerticalLayout {
             spacing: 12px;
@@ -92,7 +96,7 @@ export component FeedbackSection inherits VerticalLayout {
     // ======================== Message ======================
     DemoSection {
         title: "全局消息 Message";
-        code: "import { TMessage, TMessagePlacement } from \"@tela-ui/common.slint\";\n\nTMessage.success(\"保存成功\");\nTMessage.placement = TMessagePlacement.bottom-right;";
+        code: "import { TMessage, TMessagePlacement } from \"@tela-ui/feedback.slint\";\n\nTMessage.success(\"保存成功\");\nTMessage.placement = TMessagePlacement.bottom-right;";
 
         VerticalLayout {
             spacing: 12px;
@@ -135,7 +139,7 @@ export component FeedbackSection inherits VerticalLayout {
     // ======================= Notification ==================
     DemoSection {
         title: "通知 Notification";
-        code: "import { TNotification, TNotificationOverlay } from \"@tela-ui/common.slint\";\n\n// 窗口根部放置一次:\nTNotificationOverlay { }\n\n// 任意代码调用:\nTNotification.info(\"提示\", \"这是一条信息通知\");\nTNotification.success(\"操作成功\", \"数据已保存\");";
+        code: "import { TNotification, TNotificationOverlay } from \"@tela-ui/feedback.slint\";\n\n// 窗口根部放置一次:\nTNotificationOverlay { }\n\n// 任意代码调用:\nTNotification.info(\"提示\", \"这是一条信息通知\");\nTNotification.success(\"操作成功\", \"数据已保存\");";
 
         VerticalLayout {
             spacing: 12px;
@@ -159,7 +163,7 @@ export component FeedbackSection inherits VerticalLayout {
     // ======================== TDialog =======================
     DemoSection {
         title: "对话框 TDialog";
-        code: "import { TDialog } from \"@tela-ui/common.slint\";\n\n// 窗口根部:\nTDialog {\n    open <=> open;\n    title: \"对话框标题\";\n    content: \"这是内容\";\n    accepted => { … }\n    canceled => { … }\n}";
+        code: "import { TDialog } from \"@tela-ui/feedback.slint\";\n\n// 窗口根部:\nTDialog {\n    open <=> open;\n    title: \"对话框标题\";\n    content: \"这是内容\";\n    accepted => { … }\n    canceled => { … }\n}";
 
         HorizontalLayout {
             spacing: 12px;
@@ -172,7 +176,7 @@ export component FeedbackSection inherits VerticalLayout {
     // ==================== TDialogService ====================
     DemoSection {
         title: "对话框服务 TDialogService";
-        code: "import { TDialogService, TDialogServiceOverlay } from \"@tela-ui/common.slint\";\n\n// 窗口根部放置一次:\nTDialogServiceOverlay { }\n\n// 任意代码调用:\nTDialogService.confirm(\"删除\", \"确认删除该项?\");\nTDialogService.alert(\"提示\", \"仅确认按钮\");\n\n// 结果监听 (result-seq + accepted):\nprivate property <int> r: TDialogService.result-seq;\nchanged r => { if (TDialogService.accepted) { /* 已确认 */ } }";
+        code: "import { TDialogService, TDialogServiceOverlay } from \"@tela-ui/feedback.slint\";\n\n// 窗口根部放置一次:\nTDialogServiceOverlay { }\n\n// 任意代码调用:\nTDialogService.confirm(\"删除\", \"确认删除该项?\");\nTDialogService.alert(\"提示\", \"仅确认按钮\");\n\n// 结果监听 (result-seq + accepted):\nprivate property <int> r: TDialogService.result-seq;\nchanged r => { if (TDialogService.accepted) { /* 已确认 */ } }";
 
         HorizontalLayout {
             spacing: 12px;
@@ -186,7 +190,7 @@ export component FeedbackSection inherits VerticalLayout {
     // ==================== TLoadingService ====================
     DemoSection {
         title: "加载服务 TLoadingService";
-        code: "import { TLoadingService, TLoadingServiceOverlay } from \"@tela-ui/common.slint\";\n\n// 窗口根部放置一次:\nTLoadingServiceOverlay { }\n\n// 任意代码调用:\nTLoadingService.show(\"保存中…\");\nTLoadingService.hide();";
+        code: "import { TLoadingService, TLoadingServiceOverlay } from \"@tela-ui/feedback.slint\";\n\n// 窗口根部放置一次:\nTLoadingServiceOverlay { }\n\n// 任意代码调用:\nTLoadingService.show(\"保存中…\");\nTLoadingService.hide();";
 
         HorizontalLayout {
             spacing: 12px;
@@ -199,7 +203,7 @@ export component FeedbackSection inherits VerticalLayout {
     // ======================== TDrawer =======================
     DemoSection {
         title: "抽屉 TDrawer";
-        code: "import { TDrawer } from \"@tela-ui/common.slint\";\n\n// 窗口根部:\nTDrawer {\n    open <=> open;\n    placement: TDrawerPlacement.right;\n    title: \"抽屉标题\";\n    TParagraph { text: \"面板主体由子元素提供\"; }\n}";
+        code: "import { TDrawer } from \"@tela-ui/feedback.slint\";\n\n// 窗口根部:\nTDrawer {\n    open <=> open;\n    placement: TDrawerPlacement.right;\n    title: \"抽屉标题\";\n    TParagraph { text: \"面板主体由子元素提供\"; }\n}";
 
         HorizontalLayout {
             spacing: 12px;
@@ -221,7 +225,7 @@ export component FeedbackSection inherits VerticalLayout {
     // ======================= TPopconfirm ====================
     DemoSection {
         title: "气泡确认 TPopconfirm";
-        code: "import { TPopconfirm } from \"@tela-ui/common.slint\";\n\nTPopconfirm {\n    text: \"确定删除吗?\";\n    confirm => { … }\n    TButton { text: \"删除\"; clicked => pc.toggle(); } // auto-open: false\n}";
+        code: "import { TPopconfirm } from \"@tela-ui/feedback.slint\";\n\nTPopconfirm {\n    text: \"确定删除吗?\";\n    confirm => { … }\n    TButton { text: \"删除\"; clicked => pc.toggle(); } // auto-open: false\n}";
 
         HorizontalLayout {
             spacing: 24px;
@@ -270,7 +274,7 @@ export component FeedbackSection inherits VerticalLayout {
     // ======================== TProgress =====================
     DemoSection {
         title: "进度 TProgress(拖动滑块实时变化)";
-        code: "import { TProgress } from \"@tela-ui/common.slint\";\n\nTProgress { value: 40; theme: TThemeRole.primary; }\nTProgress { value: 66; theme: TThemeRole.success; variant: TProgressVariant.circle; }\nTProgress { value: 90; theme: TThemeRole.error; show-label: false; }";
+        code: "import { TProgress } from \"@tela-ui/feedback.slint\";\n\nTProgress { value: 40; theme: TThemeRole.primary; }\nTProgress { value: 66; theme: TThemeRole.success; variant: TProgressVariant.circle; }\nTProgress { value: 90; theme: TThemeRole.error; show-label: false; }\n// 默认数值直通; 一次性跳变想要缓动就打开:\nTProgress { value: v; animated: true; }";
 
         VerticalLayout {
             spacing: 16px;
@@ -278,7 +282,7 @@ export component FeedbackSection inherits VerticalLayout {
             HorizontalLayout {
                 spacing: 32px;
 
-                TProgress { value: root.progress-value; theme: TThemeRole.primary; horizontal-stretch: 1; }
+                TProgress { value: root.progress-value; theme: TThemeRole.primary; horizontal-stretch: 1; animated: root.progress-animated; }
                 TProgress { value: 66; theme: TThemeRole.success; horizontal-stretch: 1; }
                 TProgress { value: 30; theme: TThemeRole.warning; horizontal-stretch: 1; }
                 TProgress { value: 90; theme: TThemeRole.error; horizontal-stretch: 1; show-label: false; }
@@ -286,7 +290,7 @@ export component FeedbackSection inherits VerticalLayout {
 
             HorizontalLayout {
                 spacing: 32px;
-                TProgress { variant: TProgressVariant.circle; value: root.progress-value; theme: TThemeRole.primary; }
+                TProgress { variant: TProgressVariant.circle; value: root.progress-value; theme: TThemeRole.primary; animated: root.progress-animated; }
                 TProgress { variant: TProgressVariant.circle; value: 66; theme: TThemeRole.success; }
                 TProgress { variant: TProgressVariant.circle; value: 30; theme: TThemeRole.warning; }
                 TProgress { variant: TProgressVariant.circle; value: 100; theme: TThemeRole.error; }
@@ -297,13 +301,26 @@ export component FeedbackSection inherits VerticalLayout {
             TSlider {
                 value <=> root.progress-value;
             }
+
+            HorizontalLayout {
+                spacing: TTheme.spacing-4;
+
+                TSwitch {
+                    checked <=> root.progress-animated;
+                }
+
+                TCaption {
+                    vertical-alignment: center;
+                    text: "缓动动画 — 关 (默认) 时滑块拖到哪数值就到哪; 开时那两根进度按 200ms 缓动追上去。";
+                }
+            }
         }
     }
 
     // ========================= TResult ======================
     DemoSection {
         title: "结果页 TResult";
-        code: "import { TResult } from \"@tela-ui/common.slint\";\n\nTResult {\n    status: TResultStatus.success;\n    title: \"提交成功\";\n    description: \"表单已提交。\";\n    TButton { text: \"查看详情\"; } // 子元素作为操作区\n}";
+        code: "import { TResult } from \"@tela-ui/feedback.slint\";\n\nTResult {\n    status: TResultStatus.success;\n    title: \"提交成功\";\n    description: \"表单已提交。\";\n    TButton { text: \"查看详情\"; } // 子元素作为操作区\n}";
 
         HorizontalLayout {
             spacing: 24px;

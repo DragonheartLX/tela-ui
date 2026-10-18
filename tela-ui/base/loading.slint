@@ -6,19 +6,10 @@
 import { TTheme } from "../theme.slint";
 import { TText } from "typography.slint";
 import { TThemeRole } from "../structs/enums.slint";
+import { TStrokedShape } from "stroked-shape.slint";
 
-export component TLoadingSpinner inherits Rectangle {
+export component TLoadingSpinner inherits TStrokedShape {
     in property <brush> spinner-color: TTheme.brand-color;
-    in-out property <length> size: 16px;
-    // Stroke width in 24-grid units, scaled to `size` unless absolute.
-    in-out property <float> stroke-width: 2.0;
-    in property <bool> absolute-stroke-width: false;
-
-    out property <length> computed-stroke-width:
-        absolute-stroke-width ? stroke-width * 1px : size / 24 * stroke-width;
-
-    width: size;
-    height: size;
 
     Path {
         private property <float> start: 1 * mod(animation-tick(), 3s) / 3s;

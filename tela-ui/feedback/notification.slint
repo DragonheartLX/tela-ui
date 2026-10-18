@@ -98,6 +98,9 @@ export component TNotificationOverlay inherits Rectangle {
         TNotification.placement == TNotificationPlacement.bottom-left
         || TNotification.placement == TNotificationPlacement.bottom-right;
 
+    // Four cards plus the 2 × 12px edge insets must fit the window height.
+    private property <length> max-card-h: (root.height - TTheme.spacing-8) / 4;
+
     column := VerticalLayout {
         width: 320px;
         x: root.to-left ? 24px : parent.width - self.width - 24px;
@@ -107,7 +110,10 @@ export component TNotificationOverlay inherits Rectangle {
 
         for it[i] in TNotification.items: Rectangle {
             private property <length> card-h: row.preferred-height + TTheme.padding-lr-m * 2;
-            height: card-h + TTheme.spacing-5;
+            // Four cards plus the 12px edge insets must fit the window, so a
+            // longer body is clipped (Text clips by default) instead of
+            // pushing the stack off-screen.
+            height: min(card-h + TTheme.spacing-5, root.max-card-h);
             clip: true;
 
             card := Rectangle {

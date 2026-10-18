@@ -6,7 +6,9 @@
 
 import { TTheme,  TThemePreference } from "@tela-ui/theme.slint";
 import { TBorderlessWindow, TIconSet, TParagraph, TButton, TButtonVariant } from "@tela-ui/base.slint";
-import { TSideNav, TSideNavItem, TSideNavTogglePosition, TDialog, TDialogService, TDialogServiceOverlay, TDrawer, TDrawerPlacement, TMessageOverlay, TMessage, TNotificationOverlay, TTooltipOverlay, TLoadingService, TLoadingServiceOverlay, TBackTop } from "@tela-ui/common.slint";
+import { TTooltipOverlay } from "@tela-ui/data-display.slint";
+import { TDialog, TDialogService, TDialogServiceOverlay, TDrawer, TDrawerPlacement, TMessageOverlay, TMessage, TNotificationOverlay, TLoadingService, TLoadingServiceOverlay } from "@tela-ui/feedback.slint";
+import { TSideNav, TSideNavItem, TSideNavTogglePosition, TBackTop } from "@tela-ui/navigation.slint";
 import { ScrollView } from "std-widgets.slint";
 
 import { BasicsSection } from "pages/basics.slint";
@@ -22,9 +24,12 @@ export component MainWindow inherits TBorderlessWindow {
     // OS-level window icon (taskbar etc.): the exported LayoutDashboard logo.
     icon: @image-url("assets/logo.svg");
     logo: TIconSet.LayoutDashboard;
-    header-height: 40px;
     preferred-width: 1200px;
     preferred-height: 800px;
+    // Below this the page content overflows and the ScrollView grows a
+    // horizontal scrollbar.
+    min-width: 960px;
+    min-height: 600px;
     window-background: TTheme.bg-color-page;
 
     // ------------------------------------------------------------------

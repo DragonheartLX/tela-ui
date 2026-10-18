@@ -65,6 +65,8 @@ export component TSegmented inherits Rectangle {
 
             TText {
                 text: it;
+                // Equal-width segments: elide a label too long for its slice.
+                overflow: elide;
                 font-size: root.fs;
                 line-height: root.line;
                 vertical-alignment: center;

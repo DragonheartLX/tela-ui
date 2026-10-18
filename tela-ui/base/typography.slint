@@ -50,7 +50,8 @@ export component THeading inherits TText {
         : level == 3 ? TTheme.line-height-headline-s
         : TTheme.line-height-title;
 
-    text: "THeading";
+    text: "";
+    wrap: word-wrap;
     font-size: level-size;
     line-height: level-line;
     font-weight: TTheme.font-weight-semibold;

@@ -92,7 +92,7 @@ TSwitch {
 
 - 图标几何数据来自 [Lucide](https://lucide.dev) (ISC 许可), 按 [lucide-slint](https://github.com/cnlancehu/lucide-slint) (MIT OR Apache-2.0)的数据化结构打包。
 - 设计令牌遵循 [TDesign 规范](https://tdesign.tencent.com)。
-- 已知限制: 按钮无虚线变体 (Slint 边框仅支持实线), TSelect 与 TDropdownMenu 暂无键盘导航, TTextArea 暂无 maxLength 字数统计。
+- 已知限制: 按钮无虚线变体 (Slint 边框仅支持实线), TSelect 与 TDropdownMenu 暂无键盘导航, TTextArea 暂无 maxLength 字数统计, 对话框正文与通知正文超过窗口高度时按上限裁剪 (无滚动容器)。
 
 ## 许可证
 

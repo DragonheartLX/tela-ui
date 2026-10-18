@@ -61,6 +61,7 @@ export component TSteps inherits Rectangle {
                 text: step;
                 color: i <= root.current ? TTheme.text-color-primary : TTheme.text-color-secondary;
                 vertical-alignment: center;
+                overflow: elide;
             }
 
             // Connector to the next step.

@@ -33,7 +33,7 @@ export component TDropdownMenu inherits Rectangle {
     // Click-toggle TouchArea over the trigger content.
     // Non-interactive triggers only.
     in property <bool> auto-open: true;
-    in property <length> item-height: 32px;
+    in property <length> item-height: TTheme.height-m;
     in property <int> max-visible-items: 6;
     // Every row — entry or divider — occupies item-height so the popup
     // height formula `count * item-height + padding` stays exact. The

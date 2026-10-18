@@ -97,8 +97,10 @@ export component TSlider inherits Rectangle {
         border-color: TTheme.brand-color;
         animate border-color { duration: TTheme.duration-fast; }
         animate border-width { duration: TTheme.duration-fast; }
-        drop-shadow-blur: 4px;
-        drop-shadow-offset-y: 1px;
+        // Small-control elevation: the shadow-1 trio, as on TSegmented's
+        // raised thumb; the pair used to be a hand-rolled 4px/1px.
+        drop-shadow-blur: TTheme.shadow-1-blur;
+        drop-shadow-offset-y: TTheme.shadow-1-offset-y;
         drop-shadow-color: TTheme.shadow-1-color;
 
         // Later states win over earlier ones.

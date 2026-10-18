@@ -62,7 +62,12 @@ Slint 组件为单继承 (`inherits`), 子类可直接使用基类的全部属�
 导出供 TDialog/TDrawer 继承), `TNavLabel` (navigation/nav-label.slint),
 `TNavRow` (navigation/side-nav.slint),
 `TWindowButton` (base/borderless-window.slint), `TPageBtn`
-(navigation/pagination.slint)。
+(navigation/pagination.slint), `TPopupSurface` (popup-surface.slint,
+TDropdownMenu / TPopconfirm / TSelect 共用的锚定弹层骨架: 零尺寸锚定宿主 + placement
+定位 + 弹层皮肤), `TPopupStackLayer` (popup-stack.slint, 覆盖层的入栈/深度重排/ESC
+焦点壳, 由 TModalSurface 复用), `TStrokedShape` (base/stroked-shape.slint, 共享 24
+网格描边模型: `size`, `stroke-width` 按 size 缩放或 `absolute-stroke-width` 取原始
+像素, 以及只读 `computed-stroke-width`; TIcon 与 TLoadingSpinner 都继承它)。
 
 ---
 
@@ -115,14 +120,14 @@ import { TText, TButton, TLink, TIcon, THeading, TParagraph, TCaption, TDivider,
 
 通用图标渲染器。数据驱动, 与 lucide-slint 相同的几何组织方式。
 
-继承: `Rectangle`。
+继承: 私有 `TStrokedShape` (见"继承与组合总览"), 因此 `size` / `stroke-width` 为 `in`。
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | icon | `TIconData` | 空 | `TIconSet.Xxx` 或自定义字形 |
 | icon-color | `brush` | `TTheme.text-color-primary` | 线条与填充颜色 |
-| size | `length` (in-out) | `16px` | 渲染尺寸 |
-| stroke-width | `float` (in-out) | `2.0` | 24 网格单位的线宽, 随 size 缩放 |
+| size | `length` (in) | `16px` | 渲染尺寸 |
+| stroke-width | `float` (in) | `2.0` | 24 网格单位的线宽, 随 size 缩放 |
 | absolute-stroke-width | `bool` | `false` | 为 true 时 stroke-width 按绝对像素 |
 
 只读输出: `computed-stroke-width` (`length`, 实际线宽)。
@@ -141,6 +146,9 @@ import { TText, TButton, TLink, TIcon, THeading, TParagraph, TCaption, TDivider,
 | THeading | level | `int` | `3` | 1..5 对应 36/28/24/20/18px, 行高 44/36/32/24/24px, 半粗字重 |
 | TParagraph | secondary | `bool` | `false` | true 时用次级文本灰 |
 | TCaption | (无新增参数) | — | — | 12px / 20px 次级灰, 常用于辅助说明 |
+
+`THeading`, `TParagraph`, `TCaption` 三者默认 `text` 为空串, 并各自设 `word-wrap` 自动
+换行 (`TText` 基类不设 `text`/`wrap`, 单独使用时继承宿主 `Text` 的默认值)。
 
 组件的其它文字一律用 `TText` (只有代码块保留原始 `Text` + 等宽字体): 未设
 `font-family` 的 `Text` 会落到宿主 `Window.default-font-family`, 再落到渲染器通用族
@@ -178,7 +186,8 @@ TText { font-size: TTheme.size-font(size); line-height: TTheme.size-line-height(
 加载指示。`TLoading` 是带文字标签的完整组件, `TLoadingSpinner` 是裸转圈
 (TButton 内部也使用它)。
 
-继承: 均为 `Rectangle`。TLoading 内部组合 TLoadingSpinner。
+继承: `TLoading` 继承 `Rectangle`, `TLoadingSpinner` 继承私有 `TStrokedShape` (见"继承
+与组合总览")。TLoading 内部组合 TLoadingSpinner。
 
 | 组件 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- | --- |
@@ -186,9 +195,11 @@ TText { font-size: TTheme.size-font(size); line-height: TTheme.size-line-height(
 | TLoading | theme | `TThemeRole` | `TThemeRole.primary` | 圈的颜色 |
 | TLoading | size | `length` (in-out) | `24px` | 圈直径 |
 | TLoadingSpinner | spinner-color | `brush` | `TTheme.brand-color` | 圈的颜色 |
-| TLoadingSpinner | size | `length` (in-out) | `16px` | 圈直径 |
-| TLoadingSpinner | stroke-width | `float` (in-out) | `2.0` | 24 网格单位线宽 |
+| TLoadingSpinner | size | `length` (in) | `16px` | 圈直径 |
+| TLoadingSpinner | stroke-width | `float` (in) | `2.0` | 24 网格单位线宽 |
 | TLoadingSpinner | absolute-stroke-width | `bool` | `false` | 按绝对像素解释线宽 |
+
+`TLoadingSpinner` 只读输出: `computed-stroke-width` (`length`, 实际线宽)。
 
 ### TBorderlessWindow
 
@@ -200,15 +211,17 @@ TText { font-size: TTheme.size-font(size); line-height: TTheme.size-line-height(
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | window-background | `brush` | `TTheme.bg-color-page` | 圆角窗口表面色; 不要设置 Window 自身的 `background`, 那会把圆角涂成不透明 |
-| window-radius | `length` | `8px` | 窗口圆角, 最大化时归零 |
+| window-radius | `length` | `TTheme.radius-large` | 窗口圆角 (9px), 最大化时归零 |
 | resize-border | `length` | `8px` | 边缘拖拽缩放热区宽度, 最大化时归零 |
-| header-height | `length` | `40px` | 标题栏高度 |
+| header-height | `length` | `TTheme.height-l` | 标题栏高度 (40px) |
 | header-background | `brush` | `TTheme.bg-color-container` | 标题栏底色 |
 | logo | `TIconData` | 空 | 标题前的品牌图标 |
 | maximizable | `bool` | `true` | 为 false 时隐藏最大化按钮 (工具对话框等) |
 | header-title-visible | `bool` | `true` | 隐藏标题文字 (任务栏 title 不受影响) |
 
-内部组合: 私有 TWindowButton, TIcon 与内建 `WindowMoveArea` (拖拽热区)。
+内部组合: 私有 TWindowButton (最小化 / 最大化 / 关闭三个键共用 46px 命中区与悬停皮肤,
+最大化键按 `maximized` 在 `TIconSet.Square` 与 `TIconSet.Copy` 之间换字形), TIcon 与
+内建 `WindowMoveArea` (拖拽热区)。
 
 ---
 
@@ -221,7 +234,9 @@ TText { font-size: TTheme.size-font(size); line-height: TTheme.size-line-height(
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| text | `string` | `""` | 键帽文字 |
+| text | `string` | `""` | 单个键帽文字 |
+| keys | `[string]` | `[]` | 组合键的各按键, 非空时优先于 `text`, 芯片之间自动插入 "+" |
+| size | `TSize` | `TSize.medium` | 键帽尺寸, 全部由令牌驱动: 高 `TTheme.size-height(size)` (24/32/40px), 字号 `TTheme.size-font(size)` (12/14/16px), 行盒 `TTheme.size-line-height(size)`, 左右内边距 `TTheme.size-padding(size)` (8/12/16px) |
 
 ## 数据录入 data-entry
 
@@ -579,6 +594,9 @@ import { TTag, TAvatar, TBadge, TCard, TEmpty, TDescriptions, TTimeline, TStatis
 | accordion | `bool` | `false` | 手风琴模式 |
 | current-index | `int` (in-out) | `-1` | 仅手风琴模式有效 |
 
+回调: `changed(int)` — 仅手风琴模式下 `current-index` 真正变化后触发, 参数是新索引,
+`-1` 表示全部收起; 非手风琴模式不触发。
+
 相关结构: `TCollapseItem { label: string, content: string, disabled: bool }`。
 
 ### Tooltip
@@ -671,7 +689,7 @@ ta := TouchArea {
 ## 反馈 feedback
 
 ```slint
-import { TAlert, TDialog, TDrawer, TPopconfirm, TMessage, TNotification, TProgress, TResult } from "@tela-ui/feedback.slint";
+import { TAlert, TDialog, TDialogService, TDialogServiceOverlay, TLoadingService, TLoadingServiceOverlay, TDrawer, TPopconfirm, TMessage, TNotification, TProgress, TResult } from "@tela-ui/feedback.slint";
 ```
 
 ### TAlert
@@ -712,6 +730,49 @@ import { TAlert, TDialog, TDrawer, TPopconfirm, TMessage, TNotification, TProgre
 公开函数: `close()` — 关闭并触发 `closed()`。
 
 插槽: 默认子元素渲染在 content 与按钮行之间, 作自定义主体。
+
+### TDialogService (TDialogService + TDialogServiceOverlay)
+
+全局确认/警示框。任何代码 (Slint 或 Rust) 调 `TDialogService` 的函数弹框, 窗口根部
+放一个 `TDialogServiceOverlay` 负责渲染; 结果通过 `result-seq` / `accepted` 上报。
+
+`TDialogService` 全局属性:
+
+| 属性 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| visible | `bool` (in-out) | `false` | 显示状态, 由函数与 Overlay 维护 |
+| title | `string` (out) | `""` | 标题 |
+| content | `string` (out) | `""` | 正文文字 |
+| show-cancel | `bool` (out) | `true` | 为 false 时只渲染确认按钮 (alert 用) |
+| result-seq | `int` (out) | `0` | 每次关闭自增一次, 供宿主监听 |
+| accepted | `bool` (out) | `false` | 本次结果: 确认按钮为 true, 取消 / ESC / 点遮罩均为 false |
+
+`TDialogService` 函数: `confirm(string, string)` (取消 + 确认), `alert(string, string)`
+(仅确认), 以及 Overlay 内部使用的 `finish(bool)`。
+
+`TDialogServiceOverlay` 组件无参数, 放置在窗口根部即可; 它借用 TDialog 的 z-modal
+层级渲染, 并注册进 `TPopupStack`, 所以 ESC 也能关闭。
+
+监听结果: 用镜像属性 `private property <int> r: TDialogService.result-seq;`, 在
+`changed r` 里读 `TDialogService.accepted`。
+
+### TLoadingService (TLoadingService + TLoadingServiceOverlay)
+
+全局全屏加载遮罩。任何代码 (Slint 或 Rust) 调 `TLoadingService.show(text)` 开启,
+`hide()` 关闭; 窗口根部放一个 `TLoadingServiceOverlay` 负责渲染, 遮罩期间吞掉指针输入。
+
+`TLoadingService` 全局属性:
+
+| 属性 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| visible | `bool` (in-out) | `false` | 显示状态, 由 show/hide 维护 |
+| text | `string` (out) | `"加载中…"` | 卡片上的加载文字 |
+
+`TLoadingService` 函数: `show(string)`, `hide()`。
+
+`TLoadingServiceOverlay` 组件无参数, 放置在窗口根部即可; 层级在模态之上 (也盖住已打开
+的对话框), 淡出后隐藏且隐藏时不吞输入。它刻意不注册进 `TPopupStack` — 加载是状态,
+不该被 ESC 关掉。
 
 ### TDrawer
 
@@ -800,7 +861,7 @@ import { TAlert, TDialog, TDrawer, TPopconfirm, TMessage, TNotification, TProgre
 
 ### TProgress
 
-进度条。线性或圆环, value 变化带缓动动画。
+进度条。线性或圆环;默认数值直通,`animated: true` 时按 `duration-base` 缓动。
 
 继承: `Rectangle`。
 
@@ -811,6 +872,7 @@ import { TAlert, TDialog, TDrawer, TPopconfirm, TMessage, TNotification, TProgre
 | theme | `TThemeRole` | `TThemeRole.primary` | 进度色 |
 | size | `TSize` | `TSize.medium` | 线粗 4/6/10px, 圆环直径 64/80/96px |
 | show-label | `bool` | `true` | 是否显示百分比文字 |
+| animated | `bool` | `false` | 数值变化带缓动 (200ms);给逐帧变化的值(拖动、轮询)保持默认即可 |
 
 相关枚举: `TProgressVariant { line, circle }`。
 
@@ -1041,19 +1103,58 @@ import { TSkeleton } from "@tela-ui/experimental.slint";
 - `TIconPath { command: string, has_fill: bool }` — 单条路径
 - `TIconData { paths: [TIconPath] }` — 完整图标, 即各组件的图标参数类型
 
-内置 39 个字形, 以 `TIconSet.名称` 取用:
+内置 43 个字形, 以 `TIconSet.名称` 取用 (按源文件声明顺序):
 
 X, Check, Minus, Plus, Search, ChevronDown, ChevronUp, ChevronLeft, ChevronRight,
 Menu, Info, CircleCheck, CircleX, CircleAlert, TriangleAlert, Eye, Calendar, User,
-LoaderCircle, Sun, Moon, Bell, House, Lock, Mail, Star, Heart, Trash2, Pencil,
+LoaderCircle, Sun, Moon, Bell, House, Lock, Mail, Star, StarFill, Heart, Trash2, Pencil,
 Settings, Download, Upload, RefreshCw, Image, Ellipsis, LayoutDashboard,
-PanelLeftClose, PanelLeftOpen, FlaskConical。
+PanelLeftClose, PanelLeftOpen, FlaskConical, Inbox, Square, Copy。
+
+其中 `Square` / `Copy` 是窗口最大化键的两个字形 (最大化显示 `Square`, 已最大化显示
+`Copy` 表示"向下还原")。
 
 ### TLightColors / TDarkColors (调色板)
 
 定义在 `@tela-ui/colors.slint`。两组 `out` 属性 `brand` / `success` / `warning` /
 `error`, 各返回一个完整 `TPrimaryColor`。内置预设消费它们; 自定义主题也应基于
 它们派生以保留原色阶。
+
+### TPopupStack (浮层计数与 ESC)
+
+窗口级浮层账本, 定义在 `tela-ui/popup-stack.slint` (顶层文件, 不经聚合器导出)。
+记录当前打开了多少层覆盖 (对话框 / 抽屉 / 服务 Overlay) 与哪一层在最上面; ESC 只
+投递给最顶层, 由那一层自己关闭。
+
+`TPopupStack` 全局属性:
+
+| 属性 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| open-count | `int` (out) | `0` | 当前打开的层数 |
+| close-top-seq | `int` (out) | `0` | 自增一次表示"最顶层该关了" (ESC) |
+| closed-seq | `int` (out) | `0` | 任意层关闭时自增 |
+| closed-depth | `int` (out) | `-1` | 刚关闭那一层的槽位, 供其上的层重排深度 |
+
+`TPopupStack` 函数:
+
+| 函数 | 说明 |
+| --- | --- |
+| `layer-opened()` | 层激活时调用; 该层先把当时的 `open-count` 记为自己的深度, 再调它 |
+| `layer-closed(int)` | 层关闭时调用, 参数是该层深度 |
+| `press-escape()` | 转发一次 ESC; `open-count > 0` 时自增 `close-top-seq` |
+
+`TPopupStackLayer` 组件: 每个覆盖层嵌一个, `active` 绑本层的 open 状态, 收到
+`close-requested` 就按自己的方式关闭 (通常调 `close()`)。它负责登记/注销深度、在
+激活期间抓住键盘焦点 (否则 ESC 到不了这里)、并在 `depth == open-count - 1` 时响应
+`close-top-seq`; 中间层关闭后上层深度自动下移。
+
+| 属性/回调 | 类型 | 说明 |
+| --- | --- | --- |
+| active | `bool` (in) | 绑到宿主 open 状态, 为 true 时入栈并抢焦点 |
+| close-requested() | callback | ESC 落到本层时要求关闭 |
+
+基于 PopupWindow 的弹层 (dropdown / popconfirm / select) 不注册: Slint 运行时自己
+就会在 ESC 时关掉最上面的那个 PopupWindow。
 
 ---
 
@@ -1087,7 +1188,7 @@ PanelLeftClose, PanelLeftOpen, FlaskConical。
 | TAvatarSize / TAvatarShape | TAvatar | small, medium, large, extra-large / circle, square |
 | TDrawerPlacement | TDrawer | top, right, bottom, left |
 | TMessageTheme / TMessagePlacement | Message | info, success, warning, error / 六向贴靠 |
-| TNotificationTheme / TNotificationPlacement / TNotificationData | Notification | info, success, warning, error / 四角贴靠 / title, content, theme, visible |
+| TNotificationTheme / TNotificationPlacement / TNotificationData | Notification | info, success, warning, error / 四角贴靠 / title, content, theme, stamp |
 | TTooltipPlacement | Tooltip | top, bottom, left, right |
 | TDropdownMenuItem | TDropdownMenu | label, value, icon, disabled, danger, divider |
 | TPopupPlacement | TDropdownMenu, TPopconfirm (经 @tela-ui/theme.slint 再导出) | bottom-start, bottom-end, top-start, top-end |
