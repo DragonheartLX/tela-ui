@@ -1,8 +1,30 @@
-# Rust 探针配方与踩坑
+# 自证配方与探针踩坑
 
-> 一次性 Rust 探针 (testing backend) 的搭建配方与已踩过的坑。写在 `Temp/` 下, 收尾删除。
-> 行为/事件类改动的自证要求见 `AGENTS.md` "改动后必须自证"。
+> 改动后必须自证的**规则**在 `AGENTS.md` "改动后必须自证"; 这里只放怎么做的配方、
+> 参考值与踩坑。一次性 Rust 探针写在 `Temp/` 下, 收尾删除。
 
+## 自证配方
+
+```powershell
+# 1) 每个改动文件 0 诊断才算通过
+slint-viewer -L "tela-ui=<repo>\tela-ui" --check <file.slint> --style fluent
+
+# 2) 全量检查 (仅 5 个非组件数据文件报既有 "No component found": colors / theme /
+#    base/icon/data / structs/enums / structs/theme)
+Get-ChildItem tela-ui,ui -Recurse -Filter *.slint |
+  ForEach-Object { slint-viewer -L "tela-ui=$PWD\tela-ui" --check $_.FullName --style fluent }
+
+# 3) 亮/暗各一张, 交付前必做
+slint-viewer -L "tela-ui=$PWD\tela-ui" --screenshot out-light.png --size 1200x800 ui\MainWindow.slint
+#    暗色: --load-data dark.json, 内容 {"TTheme": {"preference": "dark"}}
+#    JSON 必须无 BOM, Set-Content 默认带 BOM 会报 "expected value at line 1 column 1"
+```
+
+- 本机工具: `slint-viewer` / `slint-lsp` / `cargo`。
+- 像素参考值 (2026-10-18 基准, 1200x800 MainWindow): 亮 `#ffffff 56.1%` / `#f3f3f3 20.5%` / `#eeeeee 14.0%` / `#0052d9 1.5%`, 暗 `#242424 56.1%` / `#2c2c2c 20.5%` / `#181818 14.0%` / `#4582e6 1.5%`。演示页 A/B 的最强口径是"把新内容剥掉的副本渲染, 与 HEAD worktree 逐字节一致"。
+- 想看声明是否真生效就查生成代码 `target\debug\build\tela-ui-*\out\MainWindow.rs`, 用 `Select-String` 统计特征串比读文档可靠; 生成代码里枚举变体带 `r#` 前缀, 特征串要写 `AccessibleStringProperty :: r#Label` 这种形态。
+
+## 探针踩坑
 
 1. `mock_elapsed_time` 要 `std::time::Duration`, 不是裸整数。
 2. 指针用 `slint::LogicalPosition { x: f32, y: f32 }`(`platform::` 下没有), 按钮用 `slint::platform::PointerEventButton`。

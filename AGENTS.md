@@ -12,30 +12,17 @@
 - 顶层聚合按类别分(`base.slint` / `data-display.slint` / …), `common.slint` 仅作兼容出口, 新代码与 gallery 页都用分类聚合。
 - `ui/` + `src/` 是 gallery 程序(bin `tela`): `ui/MainWindow.slint` 挂 7 个页面, 页面用 `if` 懒挂载。
 - Slint 1.18.1 (Cargo.lock 锁定), edition 2024, 样式 `fluent`(`build.rs` 的 `with_style`), 启用 accessibility / backend-winit / renderer-skia / renderer-software。
-- 78 个 `.slint` 共 10,337 行: `tela-ui/` 69 个 8,601 行, `ui/` 9 个 1,736 行; 65 个导出组件 = 54 个 UI 组件 + 8 个服务 overlay + 3 个库内基类 (TStrokedShape / TInputFrame / TModalSurface)。
+- 78 个 `.slint` 共 10,337 行: `tela-ui/` 69 个 8,601 行, `ui/` 9 个 1,736 行; 65 个导出组件 = 52 个 UI 组件 + 8 个服务 overlay + 5 个库内基类 (TStrokedShape / TInputFrame / TModalSurface / TPopupSurface / TPopupStackLayer)。
 - 设计令牌: `theme.slint` 的 `TTheme` global (151 个顶层转发) → `structs/theme.slint` 的 `TAppThemeConfig` (103 字段); 色板在 `colors.slint` (亮/暗两套 ramp)。
 - 浮层体系: `TPopupSurface` 锚定弹层 + `TPopupStack` 层计数与 ESC + z 序令牌(`z-popup` / `z-modal` / `z-message`) + 服务型 global(`TDialogService` / `TLoadingService` / `TMessage` / `TNotification` / `TTooltip` / `TImageViewerService` / `TActionSheetService` / `TCommandPaletteService`)。
 
 ## 改动后必须自证
 
-```powershell
-# 1) 每个改动文件 0 诊断才算通过
-slint-viewer -L "tela-ui=<repo>\tela-ui" --check <file.slint> --style fluent
+三条硬要求; 配方、命令与参考值在 `docs/harness.md`。
 
-# 2) 全量检查
-Get-ChildItem tela-ui,ui -Recurse -Filter *.slint |
-  ForEach-Object { slint-viewer -L "tela-ui=$PWD\tela-ui" --check $_.FullName --style fluent }
-
-# 3) 亮/暗各一张, 交付前必做
-slint-viewer -L "tela-ui=$PWD\tela-ui" --screenshot out-light.png --size 1200x800 ui\MainWindow.slint
-#    暗色: --load-data dark.json, 内容 {"TTheme": {"preference": "dark"}}
-#    JSON 必须无 BOM, Set-Content 默认带 BOM 会报 "expected value at line 1 column 1"
-```
-
-- 本机工具: `slint-viewer` / `slint-lsp` / `cargo`。
-- 视觉终判要人眼: 读不了图就别声称"我看过了", 改统计像素色值分布(2026-10-18 基准, 1200x800 MainWindow: 亮 `#ffffff 56.1%` / `#f3f3f3 20.5%` / `#eeeeee 14.0%` / `#0052d9 1.5%`, 暗 `#242424 56.1%` / `#2c2c2c 20.5%` / `#181818 14.0%` / `#4582e6 1.5%`), 再把 PNG 交用户确认。
-- 想看声明是否真生效就查生成代码 `target\debug\build\tela-ui-*\out\MainWindow.rs`, 用 `Select-String` 统计特征串比读文档可靠。
-- 行为/事件类改动要有运行时证据: 一次性 Rust 探针(testing backend 注入指针事件、`take_snapshot` 按帧量像素), 配方与踩坑见 `docs/harness.md`; 探针放 `Temp/` 且收尾时删掉。
+- 改动的每个 `.slint` 文件 `--check` 0 诊断, 全量扫描也 0 (只有 5 个非组件数据文件报既有的 "No component found")。
+- 交付前亮/暗各渲染一张, 像素分布对 `docs/harness.md` 的参考值; 读不了图就别声称"看过了", 把 PNG 交用户人眼终判。
+- 行为/事件类改动要有 Rust 探针的运行时证据; 探针放 `Temp/`, 收尾删除。
 
 ## Slint 1.18 语义实证
 
