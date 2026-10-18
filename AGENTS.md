@@ -12,9 +12,9 @@
 - 顶层聚合按类别分(`base.slint` / `data-display.slint` / …), `common.slint` 仅作兼容出口, 新代码与演示页都用分类聚合。
 - `ui/` + `src/` 是演示程序(bin `tela`): `ui/MainWindow.slint` 挂 7 个页面, 页面用 `if` 懒挂载。
 - Slint 1.18.1 (Cargo.lock 锁定), edition 2024, 样式 `fluent`(`build.rs` 的 `with_style`), 启用 accessibility / backend-winit / renderer-skia / renderer-software。
-- 74 个 `.slint` 共 8,936 行: `tela-ui/` 65 个 7,317 行, `ui/` 9 个 1,619 行(P4 前为 70 个 8,610 行)。
+- 78 个 `.slint` 共 10,344 行: `tela-ui/` 69 个 8,608 行, `ui/` 9 个 1,736 行; 65 个导出组件 = 54 个 UI 组件 + 8 个服务 overlay + 3 个库内基类 (TStrokedShape / TInputFrame / TModalSurface)。
 - 设计令牌: `theme.slint` 的 `TTheme` global (151 个顶层转发) → `structs/theme.slint` 的 `TAppThemeConfig` (103 字段); 色板在 `colors.slint` (亮/暗两套 ramp)。
-- 浮层体系: `TPopupSurface` 锚定弹层 + `TPopupStack` 层计数与 ESC + z 序令牌(`z-popup` / `z-modal` / `z-message`) + 服务型 global(`TDialogService` / `TLoadingService` / `TMessage` / `TNotification` / `TTooltip`)。
+- 浮层体系: `TPopupSurface` 锚定弹层 + `TPopupStack` 层计数与 ESC + z 序令牌(`z-popup` / `z-modal` / `z-message`) + 服务型 global(`TDialogService` / `TLoadingService` / `TMessage` / `TNotification` / `TTooltip` / `TImageViewerService` / `TActionSheetService` / `TCommandPaletteService`)。
 
 ## 改动后必须自证
 
@@ -35,7 +35,7 @@ slint-viewer -L "tela-ui=$PWD\tela-ui" --screenshot out-light.png --size 1200x80
 - 本机工具: `slint-viewer` / `slint-lsp` / `cargo`。
 - 视觉终判要人眼: 读不了图就别声称"我看过了", 改统计像素色值分布(2026-10-18 基准, 1200x800 MainWindow: 亮 `#ffffff 56.1%` / `#f3f3f3 20.5%` / `#eeeeee 14.0%` / `#0052d9 1.5%`, 暗 `#242424 56.1%` / `#2c2c2c 20.5%` / `#181818 14.0%` / `#4582e6 1.5%`), 再把 PNG 交用户确认。
 - 想看声明是否真生效就查生成代码 `target\debug\build\tela-ui-*\out\MainWindow.rs`, 用 `Select-String` 统计特征串比读文档可靠。
-- 行为/事件类改动要有运行时证据: 一次性 Rust 探针(testing backend 注入指针事件、`take_snapshot` 按帧量像素), 配方见 `docs/TODO.md` 末尾"Rust harness 踩坑"; 探针放 `Temp/` 且收尾时删掉。
+- 行为/事件类改动要有运行时证据: 一次性 Rust 探针(testing backend 注入指针事件、`take_snapshot` 按帧量像素), 配方与踩坑见 `docs/harness.md`; 探针放 `Temp/` 且收尾时删掉。
 
 ## Slint 1.18 语义实证
 
@@ -61,8 +61,17 @@ slint-viewer -L "tela-ui=$PWD\tela-ui" --screenshot out-light.png --size 1200x80
 18. **`overflow: elide` 不改 `preferred-width`** — 宿主拿 `preferred-width` 量行宽与指示条时(如 TNavBar / TCard 的 `label-width`), 加省略只影响绘制: 探针里 200px 盒的 clip 版最后一个字形顶到 x=199, elide 版收在 x=195 且尾部是三个稀疏点。
 19. **`animate` 的参数在同一"帧"内改不生效** — 动画的 `enabled` / `duration` 由动画在重新武装时读取(`properties_animations.rs:171` 的 `!enabled` 快路径直接返回目标值), 所以"先写开关、再写值、中间没有任何一帧被求值"时那次变化不缓动; 隔一帧(哪怕只是先渲染一次)就正常。探针实测: 开关开+值同 tick 写 → 当帧满格; 隔一帧 → 0.06→0.24→1.00; 点击开关(天然隔帧)→ 正常缓动。`enabled:` 与 `duration:` 两种写法表现一致, 换写法绕不开。
 
-## 组件 API 约定
+20. **`visible: false` 不改变布局占用** (第 2 条"不渲染但仍实例化"的补充) — 编译器把它降级成一个 `is-visibility-clip` 的 `Clip`(`passes/visible.rs:128`), 重复元素甚至被注入成实例根; 探针实测 `VerticalLayout` spacing 12 里 红40 + 隐藏绿40 + 蓝40 的蓝条从 y=104 起, 隐藏行与它的 spacing 全在。要"整行消失"只能自己塌陷高度(`height: hit ? h : 0px` + `clip: true`), 并让容器 `spacing: 0px`、把行距烘进行高 —— 布局 spacing 对 0 高子元素照样生效。
+21. **1.18 语言内没有循环语句, 数组只有 `length`/`push`/`remove`/`insert`** — `index-of`/`any`/`all`/`find-index` 在 `lookup.rs:1336-1341` 存在但挂在 `experimental_lookup_enabled()` 后面, 稳定模式拿不到; 函数也不能递归(`passes` 直接报 binding loop: root.fn -> root.fn)。所以"按条件过滤模型 / 找下一个匹配项"无法在 .slint 里扫描, 只能用元素树表达(命令面板即: 每行自己塌陷 + 每行在关键字变化时上报自己的下标, 取最小者 = 第一条匹配项, 与触发顺序无关)。
 
+22. **内容尺寸的容器用自身尺寸定位时, 内容会画在第一轮的绝对坐标上** — 容器(布局或组件)没写 `width`、靠内容撑开, `x` 又读 `self.width`(右对齐 `parent.width - self.width - 8px`、居中 `(parent.width - self.width) / 2`)时, 第一轮 `self.width` 还没算出来(暂等于父宽), 容器的定位置于 x≈-8 并被画在那个位置, 之后只有部分子元素被修正, 表现为"文本跑到窗口左缘、同级矩形还在正确位置"。探针实测三种: 居中布局里的红字画在 x 2..35(应 ~590); 右对齐布局里文本画在 x 4..22(应 ~1112)而同一布局的 40px 矩形落在正确的 1152..1191; 矩形在前文本在后时两者都停在 x≈-8。skia 与软件渲染器一致, 不是渲染器问题。**只在布局落定前就开始绘制时出现**: 用 `slint-viewer --screenshot`(单帧)必现, 而先 `mock_elapsed_time` + 派发 `Resized` 再截图的探针没重现(那一帧里布局已定, 位置是对的)。修法: 给容器显式宽度或固定 `x`, 或者把元素用 `x`/`y` 自己定位(实测 `TText { x: parent.width - self.width - 8px; }` 位置正确)。TImageViewerOverlay 的右上角计数即因此从"内容尺寸布局"改为直接定位。
+
+23. **显式 `width` 绑定压过 `horizontal-stretch`** — 子元素自己写了 `width`(哪怕只是绑定到常量)时, 布局分配剩余空间不会给它, 它就拿绑定值; 交叉轴上 `horizontal-stretch` 本来也不生效(VerticalLayout 的横轴是交叉轴, 那里只有没写 `width` 的子元素才铺满)。探针实测(1000px 宽的 HorizontalLayout 里): 无 `width` 的 Rectangle 加 stretch → 铺满 16..1005; `width: 100px` 加 stretch → 仍是 16..115; `TButton { block: true }`(内部是 `width: max(h, 内容宽 + 内边距)` 加 `horizontal-stretch: block ? 1 : 0`)→ 只有 52px, 后面的 10px 标记元素紧跟着落在 x=68。所以 `block` 从未真正生效, 参数已删 (要整行按钮就在外层布局里撑满), 动作面板的取消行也是自绘整行。
+
+24. **TouchArea 的点击判定把拖拽也算一次点击** — 双击检测只看"两次 press 间隔 < 500ms 且位移 < 10px"的计数, 中间发生过多少次 `moved` 不参与判定, 所以**两次快速滑动会凑成一次 `double-clicked`**。探针实测: 连续两次 800px 拖拽后 `double-clicked` 触发, 视口缩放从 2x 回到 1x; 探针改用每次释放后推进 600ms 的拖拽才稳定。给"拖拽"和"双击"同时挂处理器时, 双击分支必须自己用私有 flag 排除拖拽(图片预览即 `if (!root.dragged)`)。
+25. **std `ScrollView` 的内层 `Flickable` 不认祖先的输入闸** — `ScrollView.enabled` 只管滚动条, 滚轮由内核 `Flickable` 自己吃(`flickable.rs` 的 `MouseEvent::Wheel` 分支), 而 `ScrollView` 没有暴露 `interactive`; 于是"整个覆盖层 `opacity: 0`"的关闭态里, 面板上的那块 `ScrollView` 仍是一个滚轮黑洞(探针: 关着命令面板时窗口中心 100 格里有 16 格滚轮被吞, 卸载该 overlay 后 0 格)。阻断办法只有 `visible: false`(它降级的 visibility Clip 会拦输入, 见第 2/20 条), 且要等淡出动画走完再置 false, 否则列表会先于卡片消失; 裸 `Flickable` 则可以自己写 `interactive: false`(内核文档: "all events are forwarded to elements underneath")。
+
+## 组件 API 约定
 - 可变索引或值的组件必须配 `callback changed(...)`, 且只在真正变化时触发; TCollapse 手风琴模式已于 2026-10-18 补上 `changed(int)`(参数为新索引, `-1` 全收), TCarousel 由拖拽/指示点/自动轮播共用同一条触发路径。
 - 点击后先自更新再回调(nav / side-nav / tabs / pagination 都是这个顺序), 不做"只回调、等宿主写回"的受控组件(TBreadcrumb 是已知例外)。
 - 索引与页码必须夹紧: 越界值不能画到组件外, 也不能让分页出现"一页都不高亮"的坏状态。
@@ -73,13 +82,13 @@ slint-viewer -L "tela-ui=$PWD\tela-ui" --screenshot out-light.png --size 1200x80
 - 装长文本的容器要么固定单行给 `overflow: elide`(默认 `clip` 会把字形拦腰截断), 要么给上限: 多行正文用 `clip: true` 包装盒 + 显式高度, `max-height` 无效 (语义实证第 16 条)。
 - `TText` 已有默认的字体/字号/字重/颜色/行高, 站点不要再抄一遍同值属性(`font-size-m`、`text-color-primary`、`font-weight-regular`)。
 - 浮层 z 序取 `TTheme.z-*`; 需要 ESC 与层计数的模态接入 `TPopupStackLayer`。
+- 内容尺寸的容器(没写 `width`)不要用自身 `self.width` 定位: 里面的 `Text` 会画在第一轮坐标上, 给容器显式宽度或把文本自己定位 (语义实证第 22 条)。
 
 ## 文档同步
 
 - 新增、改名、改签名的组件要同步 `docs/components.md`, 以及 `README.md` 的"已知限制"一节。
-- 一条事实只写一处: 语言/框架机制进 `AGENTS.md`"语义实证", 不可翻案的取舍进"已定决策", 组件 API 进 `docs/components.md`, 验证数字与踩坑进 `docs/TODO.md`; 别处只用 `(见…第 N 条)` 指过去, 不复制正文。
-- `docs/TODO.md` 是 gitignored 的本地文件; 新增待办写清 `文件:行号` 与一句话结论。
-- `docs/TODO.md` 只留未完成项, 已完成直接删; 历史记 daily log, 决策记本节"已定决策"。
+- 一条事实只写一处: 语言/框架机制进 `AGENTS.md`"语义实证", 不可翻案的取舍进"已定决策", 组件 API 进 `docs/components.md`, 探针配方与踩坑进 `docs/harness.md`, 待办与组件规划进 `docs/components-plan.md`; 别处只用 `(见…第 N 条)` 指过去, 不复制正文。
+- `docs/components-plan.md` 是 gitignored 的本地清单, 只列未做项, 完成一个删一条; 里程碑与验证数字随当次提交记在提交说明与 `docs/harness.md`。
 
 ## 已定决策 (勿再翻案)
 
@@ -103,4 +112,4 @@ slint-viewer -L "tela-ui=$PWD\tela-ui" --screenshot out-light.png --size 1200x80
 ## 参考
 
 - `skills/slint/` — 本仓库内置的 Slint 技能与参考文档。
-- `docs/components.md` — 组件文档(需同步); `docs/TODO.md` — 待办; `docs/screenshot-*.png` — 官方截图。
+- `docs/components.md` — 组件文档(需同步); `docs/harness.md` — 探针配方; `docs/screenshot-*.png` — 官方截图。
