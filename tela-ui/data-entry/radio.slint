@@ -4,6 +4,7 @@
 // Standalone TRadio buttons can be composed the same way via `checked`.
 
 import { TTheme } from "../theme.slint";
+import { TText } from "../base/typography.slint";
 
 export struct TRadioItem {
     text: string,
@@ -74,9 +75,8 @@ export component TRadio inherits Rectangle {
             }
         }
 
-        if root.text != "": Text {
+        if root.text != "": TText {
             text: root.text;
-            font-size: TTheme.font-size-m;
             color: root.disabled ? TTheme.text-color-disabled : TTheme.text-color-primary;
             vertical-alignment: center;
         }

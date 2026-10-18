@@ -2,7 +2,7 @@
 // TDescriptions / TStatistic / TCollapse / Tooltip / TCarousel), 一个组件一张卡.
 
 import { TTheme,  TThemeRole,  TSize } from "@tela-ui/theme.slint";
-import { TIcon, TIconSet, TButton, TCaption } from "@tela-ui/base.slint";
+import { TText, TIcon, TIconSet, TButton, TCaption } from "@tela-ui/base.slint";
 import { TTag, TTagVariant, TBadge, TAvatar, TAvatarSize, TAvatarShape, TEmpty, TTimeline, TDescriptions, TStatistic, TCollapse, TCarousel } from "@tela-ui/common.slint";
 import { TTooltipArea, TTooltipPlacement } from "@tela-ui/data-display.slint";
 import { DemoSection } from "../demo-section.slint";
@@ -224,7 +224,7 @@ export component DataDisplaySection inherits VerticalLayout {
                 text: "我是 Tooltip, 鼠标移开即消失, 250ms 延迟出现";
                 placement: TTooltipPlacement.top;
 
-                Text {
+                TText {
                     text: "上方提示";
                     font-size: TTheme.font-size-m;
                     color: TTheme.text-color-secondary;
@@ -241,7 +241,7 @@ export component DataDisplaySection inherits VerticalLayout {
                 text: "placement: TTooltipPlacement.bottom";
                 placement: TTooltipPlacement.bottom;
 
-                Text {
+                TText {
                     text: "下方提示";
                     font-size: TTheme.font-size-m;
                     color: TTheme.text-color-secondary;

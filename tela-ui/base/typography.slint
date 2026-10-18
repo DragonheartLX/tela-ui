@@ -1,40 +1,74 @@
 // Tela UI — Typography
 //
 // TDesign type scale as ready-made text components.
+//   TText      : plain Text carrying the TDesign body style (14px / 22px)
 //   THeading   : page/section headings, level 1 (36px) .. 5 (18px), semibold
 //   TParagraph : body copy (14px), optional `secondary` gray
 //   TCaption   : auxiliary notes (12px, secondary)
+//
+// Every tela-ui text goes through TText: Slint resolves an unset `font-family`
+// to the enclosing Window's `default-font-family`, which is the renderer's
+// generic family (Arial here) unless the host sets it — so a bare `Text` would
+// silently drop the theme typeface.
+//
+// Line height: Slint only offers `line-height-factor`, a factor on the font's
+// natural line box, while TDesign states px line heights. TText therefore takes
+// the TDesign line box (`line-height`) and converts it against whatever
+// `font-size` the instance ends up with: Microsoft YaHei's natural line box is
+// `ceil(size × 1.3198)` (measured: 19px at 14px), so the factor is
+// `line-height / ceil(font-size × 1.3198)`. Re-measure 1.3198 when the theme
+// font changes.
 
 import { TTheme } from "../theme.slint";
 
-export component THeading inherits Text {
+export component TText inherits Text {
+    // TDesign line box (px token) paired with this element's font size; set it
+    // whenever `font-size` is overridden (e.g. `TTheme.size-line-height(size)`).
+    in property <length> line-height: TTheme.line-height-m;
+
+    font-family: TTheme.font-family;
+    font-size: TTheme.font-size-m;
+    font-weight: TTheme.font-weight-regular;
+    color: TTheme.text-color-primary;
+    line-height-factor: self.line-height / 1px / Math.ceil(self.font-size / 1px * 1.3198);
+}
+
+export component THeading inherits TText {
     // 1 = 36px, 2 = 28px, 3 = 24px, 4 = 20px, 5 = 18px
     in property <int> level: 3;
 
-    text: "THeading";
-    font-size:
+    // TDesign headline/title size and line box for the current level.
+    property <length> level-size:
         level == 1 ? TTheme.font-size-headline-l
         : level == 2 ? TTheme.font-size-headline-m
         : level == 3 ? TTheme.font-size-headline-s
         : level == 4 ? TTheme.font-size-title-xl
         : TTheme.font-size-title-l;
+    property <length> level-line:
+        level == 1 ? TTheme.line-height-headline-l
+        : level == 2 ? TTheme.line-height-headline-m
+        : level == 3 ? TTheme.line-height-headline-s
+        : TTheme.line-height-title;
+
+    text: "THeading";
+    font-size: level-size;
+    line-height: level-line;
     font-weight: TTheme.font-weight-semibold;
-    color: TTheme.text-color-primary;
     vertical-alignment: center;
 }
 
-export component TParagraph inherits Text {
+export component TParagraph inherits TText {
     in property <bool> secondary: false;
 
     text: "";
     wrap: word-wrap;
-    font-size: TTheme.font-size-m;
     color: secondary ? TTheme.text-color-secondary : TTheme.text-color-primary;
 }
 
-export component TCaption inherits Text {
+export component TCaption inherits TText {
     text: "";
     wrap: word-wrap;
     font-size: TTheme.font-size-s;
+    line-height: TTheme.line-height-s;
     color: TTheme.text-color-secondary;
 }

@@ -4,6 +4,7 @@
 // variant: TProgressVariant (line / circle); theme: TThemeRole; size: TSize.
 
 import { TTheme } from "../theme.slint";
+import { TText } from "../base/typography.slint";
 import { TThemeRole,  TSize } from "../structs/enums.slint";
 
 export enum TProgressVariant {
@@ -58,10 +59,11 @@ export component TProgress inherits Rectangle {
             }
         }
 
-        if root.show-label: Text {
+        if root.show-label: TText {
             text: "\{Math.round(root.p * 100)}%";
             width: 40px;
             font-size: TTheme.font-size-s;
+            line-height: TTheme.line-height-s;
             color: TTheme.text-color-secondary;
             vertical-alignment: center;
         }
@@ -122,13 +124,13 @@ export component TProgress inherits Rectangle {
             }
         }
 
-        if root.show-label: Text {
+        if root.show-label: TText {
             width: 100%;
             y: (parent.height - self.preferred-height) / 2;
             text: Math.round(root.p * 100) + "%";
             font-size: root.d / 5;
+            line-height: root.d / 5;
             font-weight: TTheme.font-weight-semibold;
-            color: TTheme.text-color-primary;
             horizontal-alignment: center;
         }
     }

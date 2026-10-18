@@ -4,6 +4,7 @@
 // indicator. Sizes: 16px default; use 24px/32px for standalone spinners.
 
 import { TTheme } from "../theme.slint";
+import { TText } from "typography.slint";
 import { TThemeRole } from "../structs/enums.slint";
 
 export component TLoadingSpinner inherits Rectangle {
@@ -89,9 +90,8 @@ export component TLoading inherits HorizontalLayout {
         }
     }
 
-    if root.text != "": Text {
+    if root.text != "": TText {
         text: root.text;
-        font-size: TTheme.font-size-m;
         color: TTheme.text-color-secondary;
         vertical-alignment: center;
     }

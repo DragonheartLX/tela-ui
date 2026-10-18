@@ -4,6 +4,7 @@
 // `underline`). theme: TTheme (default/primary/success/warning/error).
 
 import { TTheme } from "../theme.slint";
+import { TText } from "typography.slint";
 import { TIcon } from "icon/icon.slint";
 import { TIconData } from "icon/data.slint";
 import { TThemeRole,  TSize } from "../structs/enums.slint";
@@ -19,6 +20,7 @@ export component TLink inherits Rectangle {
     callback clicked();
 
     private property <length> fs: TTheme.size-font(size);
+    private property <length> line: TTheme.size-line-height(size);
 
     // Per-state colors for the current theme (default uses the link/brand
     // tokens, other themes their color ramp) so the `states` stay flat.
@@ -69,9 +71,10 @@ export component TLink inherits Rectangle {
             icon-color: root.content-color;
         }
 
-        Text {
+        TText {
             text: root.text;
             font-size: root.fs;
+            line-height: root.line;
             color: root.content-color;
             vertical-alignment: center;
         }

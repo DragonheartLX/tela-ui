@@ -5,6 +5,7 @@
 // plain label/value stack. Cells are single-line and elide.
 
 import { TTheme } from "../theme.slint";
+import { TText } from "../base/typography.slint";
 
 export struct TDescriptionItem {
     label: string,
@@ -46,12 +47,10 @@ export component TDescriptions inherits Rectangle {
                 // the grid without doubled lines.
                 border-color: TTheme.component-border;
 
-                Text {
+                TText {
                     x: TTheme.padding-lr-m;
                     y: (parent.height - self.preferred-height) / 2;
                     text: it.label;
-                    font-size: TTheme.font-size-m;
-                    font-family: TTheme.font-family;
                     color: TTheme.text-color-secondary;
                     overflow: elide;
                     width: parent.width - TTheme.padding-lr-m * 2;
@@ -65,14 +64,11 @@ export component TDescriptions inherits Rectangle {
                 border-width: root.bordered ? 1px : 0;
                 border-color: TTheme.component-border;
 
-                Text {
+                TText {
                     x: TTheme.padding-lr-m;
                     y: (parent.height - self.preferred-height) / 2;
                     width: parent.width - TTheme.padding-lr-m * 2;
                     text: it.value;
-                    font-size: TTheme.font-size-m;
-                    font-family: TTheme.font-family;
-                    color: TTheme.text-color-primary;
                     overflow: elide;
                 }
             }

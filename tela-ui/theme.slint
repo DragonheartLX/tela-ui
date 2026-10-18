@@ -442,6 +442,9 @@ export global TTheme {
     out property <length> line-height-m: root.theme.line-height-m;
     out property <length> line-height-l: root.theme.line-height-l;
     out property <length> line-height-title: root.theme.line-height-title;
+    out property <length> line-height-headline-s: root.theme.line-height-headline-s;
+    out property <length> line-height-headline-m: root.theme.line-height-headline-m;
+    out property <length> line-height-headline-l: root.theme.line-height-headline-l;
 
     // Motion
     out property <duration> duration-fast: root.theme.duration-fast;
@@ -508,6 +511,13 @@ export global TTheme {
         s == TSize.small ? root.theme.font-size-s
         : s == TSize.large ? root.theme.font-size-l
         : root.theme.font-size-m;
+    }
+
+    // TDesign line box paired with `size-font`; pass it to TText.line-height.
+    public pure function size-line-height(s: TSize) -> length {
+        s == TSize.small ? root.theme.line-height-s
+        : s == TSize.large ? root.theme.line-height-l
+        : root.theme.line-height-m;
     }
 
     public pure function size-padding(s: TSize) -> length {

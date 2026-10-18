@@ -7,6 +7,7 @@
 // `cancel` and closes on either button or on outside clicks.
 
 import { TTheme,  TThemeRole,  TSize } from "../theme.slint";
+import { TText } from "../base/typography.slint";
 import { TButton, TButtonVariant } from "../base/button.slint";
 import { TPopupPlacement } from "../structs/enums.slint";
 import { TPopupSurface } from "../popup-surface.slint";
@@ -63,11 +64,8 @@ export component TPopconfirm inherits Rectangle {
             padding-bottom: TTheme.padding-lr-m;
             spacing: TTheme.spacing-4;
 
-            Text {
+            TText {
                 text: root.text;
-                font-size: TTheme.font-size-m;
-                font-family: TTheme.font-family;
-                color: TTheme.text-color-primary;
                 wrap: word-wrap;
                 width: min(self.preferred-width, 232px);
             }

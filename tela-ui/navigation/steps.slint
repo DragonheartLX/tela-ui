@@ -5,6 +5,7 @@
 // later ones as pending.
 
 import { TTheme } from "../theme.slint";
+import { TText } from "../base/typography.slint";
 import { TIcon } from "../base/icon/icon.slint";
 import { TIconSet } from "../base/icon/data.slint";
 
@@ -40,11 +41,12 @@ export component TSteps inherits Rectangle {
                     icon-color: TTheme.text-color-anti;
                 }
 
-                if i >= root.current: Text {
+                if i >= root.current: TText {
                     width: 100%;
                     height: 100%;
                     text: "\{i + 1}";
                     font-size: TTheme.font-size-s;
+                    line-height: TTheme.line-height-s;
                     font-weight: TTheme.font-weight-medium;
                     color: i == root.current ? TTheme.text-color-anti : TTheme.text-color-secondary;
                     horizontal-alignment: center;
@@ -52,12 +54,11 @@ export component TSteps inherits Rectangle {
                 }
             }
 
-            step-text := Text {
+            step-text := TText {
                 x: step-icon.x + step-icon.width + TTheme.spacing-2;
                 y: 0;
                 height: parent.height;
                 text: step;
-                font-size: TTheme.font-size-m;
                 color: i <= root.current ? TTheme.text-color-primary : TTheme.text-color-secondary;
                 vertical-alignment: center;
             }

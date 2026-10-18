@@ -2,7 +2,7 @@
 // TLoading / TKbd), 一个组件一张卡.
 
 import { TTheme,  TThemeRole,  TSize } from "@tela-ui/theme.slint";
-import { TButton, TButtonVariant, TButtonShape, TLink, TIcon, TIconSet, THeading, TParagraph, TCaption, TKbd, TDivider, TDividerAlign, TLoading } from "@tela-ui/base.slint";
+import { TText, TButton, TButtonVariant, TButtonShape, TLink, TIcon, TIconSet, THeading, TParagraph, TCaption, TKbd, TDivider, TDividerAlign, TLoading } from "@tela-ui/base.slint";
 import { DemoSection } from "../demo-section.slint";
 
 export component BasicsSection inherits VerticalLayout {
@@ -163,7 +163,7 @@ export component BasicsSection inherits VerticalLayout {
             HorizontalLayout {
                 spacing: 8px;
 
-                Text { text: "单键"; font-size: TTheme.font-size-m; color: TTheme.text-color-secondary; vertical-alignment: center; }
+                TText { text: "单键"; font-size: TTheme.font-size-m; color: TTheme.text-color-secondary; vertical-alignment: center; }
                 TKbd { text: "Esc"; }
                 TKbd { text: "Tab"; }
                 TKbd { text: "Enter"; }
@@ -173,11 +173,11 @@ export component BasicsSection inherits VerticalLayout {
             HorizontalLayout {
                 spacing: 8px;
 
-                Text { text: "组合"; font-size: TTheme.font-size-m; color: TTheme.text-color-secondary; vertical-alignment: center; }
+                TText { text: "组合"; font-size: TTheme.font-size-m; color: TTheme.text-color-secondary; vertical-alignment: center; }
                 TKbd { keys: ["Ctrl", "C"]; }
-                Text { text: "复制"; font-size: TTheme.font-size-m; color: TTheme.text-color-secondary; vertical-alignment: center; }
+                TText { text: "复制"; font-size: TTheme.font-size-m; color: TTheme.text-color-secondary; vertical-alignment: center; }
                 TKbd { keys: ["Ctrl", "Shift", "V"]; }
-                Text { text: "粘贴为纯文本"; font-size: TTheme.font-size-m; color: TTheme.text-color-secondary; vertical-alignment: center; }
+                TText { text: "粘贴为纯文本"; font-size: TTheme.font-size-m; color: TTheme.text-color-secondary; vertical-alignment: center; }
                 Rectangle { }
             }
 

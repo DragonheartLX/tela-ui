@@ -5,6 +5,7 @@
 // children) on the right.
 
 import { TTheme } from "../theme.slint";
+import { TText } from "../base/typography.slint";
 import { TIcon } from "../base/icon/icon.slint";
 import { TIconData } from "../base/icon/data.slint";
 import { TNavLabel } from "nav-label.slint";
@@ -47,11 +48,11 @@ export component TNavBar inherits Rectangle {
                     icon-color: TTheme.brand-color;
                 }
 
-                if root.title != "": Text {
+                if root.title != "": TText {
                     text: root.title;
                     font-size: TTheme.font-size-title-m;
+                    line-height: TTheme.line-height-title;
                     font-weight: TTheme.font-weight-semibold;
-                    color: TTheme.text-color-primary;
                     vertical-alignment: center;
                 }
             }

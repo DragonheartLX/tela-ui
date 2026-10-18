@@ -11,6 +11,7 @@
 // Tags emit `clicked` when `clickable` styling is desired.
 
 import { TTheme } from "../theme.slint";
+import { TText } from "../base/typography.slint";
 import { TIcon } from "../base/icon/icon.slint";
 import { TIconSet, TIconData } from "../base/icon/data.slint";
 import { TThemeRole,  TSize } from "../structs/enums.slint";
@@ -114,9 +115,10 @@ export component TTag inherits Rectangle {
             icon-color: root.content-color;
         }
 
-        if root.text != "": Text {
+        if root.text != "": TText {
             text: root.text;
             font-size: root.fs;
+            line-height: TTheme.line-height-s;
             color: root.content-color;
             vertical-alignment: center;
         }

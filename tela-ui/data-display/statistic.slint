@@ -4,6 +4,7 @@
 // value color. `loading` swaps the value for a spinner.
 
 import { TTheme,  TThemeRole } from "../theme.slint";
+import { TText } from "../base/typography.slint";
 import { TLoadingSpinner } from "../base/loading.slint";
 
 export component TStatistic inherits VerticalLayout {
@@ -16,20 +17,18 @@ export component TStatistic inherits VerticalLayout {
 
     spacing: TTheme.spacing-2;
 
-    if root.title != "": Text {
+    if root.title != "": TText {
         text: root.title;
-        font-size: TTheme.font-size-m;
-        font-family: TTheme.font-family;
         color: TTheme.text-color-secondary;
     }
 
     HorizontalLayout {
         spacing: TTheme.spacing-2;
 
-        if root.prefix != "": Text {
+        if root.prefix != "": TText {
             text: root.prefix;
             font-size: TTheme.font-size-title-m;
-            font-family: TTheme.font-family;
+            line-height: TTheme.line-height-title;
             color: TTheme.text-color-secondary;
             vertical-alignment: center;
         }
@@ -44,19 +43,19 @@ export component TStatistic inherits VerticalLayout {
             }
         }
 
-        if !root.loading: Text {
+        if !root.loading: TText {
             text: root.value;
             font-size: TTheme.font-size-headline-s;
-            font-family: TTheme.font-family;
+            line-height: TTheme.line-height-headline-s;
             font-weight: TTheme.font-weight-semibold;
             color: TTheme.theme-color(root.theme);
             vertical-alignment: center;
         }
 
-        if root.suffix != "": Text {
+        if root.suffix != "": TText {
             text: root.suffix;
             font-size: TTheme.font-size-title-m;
-            font-family: TTheme.font-family;
+            line-height: TTheme.line-height-title;
             color: TTheme.text-color-secondary;
             vertical-alignment: center;
         }

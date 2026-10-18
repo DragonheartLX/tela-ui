@@ -4,6 +4,7 @@
 // numbers (up to 7). Emits `changed` with the new 1-based page.
 
 import { TTheme } from "../theme.slint";
+import { TText } from "../base/typography.slint";
 import { TIcon } from "../base/icon/icon.slint";
 import { TIconData, TIconSet } from "../base/icon/data.slint";
 
@@ -69,12 +70,10 @@ component TPageBtn inherits Rectangle {
         ]
     }
 
-    if root.label != "": Text {
+    if root.label != "": TText {
         width: 100%;
         height: 100%;
         text: root.label;
-        font-size: TTheme.font-size-m;
-        color: TTheme.text-color-primary;
         horizontal-alignment: center;
         vertical-alignment: center;
         animate color { duration: TTheme.duration-fast; }

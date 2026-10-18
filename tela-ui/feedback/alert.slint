@@ -5,6 +5,7 @@
 // text; optionally closable (sets `open = false`).
 
 import { TTheme } from "../theme.slint";
+import { TText } from "../base/typography.slint";
 import { TIcon } from "../base/icon/icon.slint";
 import { TIconSet } from "../base/icon/data.slint";
 import { TThemeRole } from "../structs/enums.slint";
@@ -43,18 +44,15 @@ export component TAlert inherits Rectangle {
             spacing: TTheme.spacing-1;
             horizontal-stretch: 1;
 
-            Text {
+            TText {
                 text: root.title;
-                font-size: TTheme.font-size-m;
                 font-weight: TTheme.font-weight-semibold;
                 color: TTheme.theme-color(root.theme);
                 wrap: word-wrap;
             }
 
-            if root.description != "": Text {
+            if root.description != "": TText {
                 text: root.description;
-                font-size: TTheme.font-size-m;
-                color: TTheme.text-color-primary;
                 wrap: word-wrap;
             }
         }

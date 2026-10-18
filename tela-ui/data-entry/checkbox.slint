@@ -3,6 +3,7 @@
 // Checkbox with label, indeterminate state and disabled state.
 
 import { TTheme } from "../theme.slint";
+import { TText } from "../base/typography.slint";
 import { TIcon } from "../base/icon/icon.slint";
 import { TIconSet } from "../base/icon/data.slint";
 
@@ -89,9 +90,8 @@ export component TCheckBox inherits Rectangle {
             }
         }
 
-        if root.text != "": Text {
+        if root.text != "": TText {
             text: root.text;
-            font-size: TTheme.font-size-m;
             color: root.disabled ? TTheme.text-color-disabled : TTheme.text-color-primary;
             vertical-alignment: center;
         }

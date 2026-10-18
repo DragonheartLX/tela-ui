@@ -6,6 +6,7 @@
 // Keyboard support is not included yet.
 
 import { TTheme } from "../theme.slint";
+import { TText } from "../base/typography.slint";
 import { TSize } from "../structs/enums.slint";
 import { TIcon } from "../base/icon/icon.slint";
 import { TIconData, TIconSet } from "../base/icon/data.slint";
@@ -34,6 +35,7 @@ export component TSelect inherits Rectangle {
 
     private property <length> h: TTheme.size-height(size);
     private property <length> fs: TTheme.size-font(size);
+    private property <length> line: TTheme.size-line-height(size);
     private property <length> item-h: 32px;
 
     private property <string> display-label:
@@ -81,10 +83,10 @@ export component TSelect inherits Rectangle {
             icon-color: TTheme.text-color-placeholder;
         }
 
-        Text {
+        TText {
             text: root.has-selection ? root.display-label : root.placeholder-text;
             font-size: root.fs;
-            font-family: TTheme.font-family;
+            line-height: root.line;
             color: TTheme.text-color-placeholder;
             vertical-alignment: center;
             horizontal-stretch: 1;
@@ -93,7 +95,6 @@ export component TSelect inherits Rectangle {
             // Later states win over earlier ones.
             states [
                 selected when root.has-selection: {
-                    color: TTheme.text-color-primary;
                 }
                 disabled when root.disabled: {
                     color: TTheme.text-color-disabled;
@@ -148,11 +149,10 @@ export component TSelect inherits Rectangle {
                     padding-right: TTheme.spacing-2;
                     spacing: TTheme.spacing-2;
 
-                    Text {
+                    TText {
                         text: it.label;
                         font-size: root.fs;
-                        font-family: TTheme.font-family;
-                        color: TTheme.text-color-primary;
+                        line-height: root.line;
                         vertical-alignment: center;
                         horizontal-stretch: 1;
                         overflow: elide;

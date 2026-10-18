@@ -4,7 +4,7 @@
 // trigger buttons via two-way bound properties.
 
 import { TTheme,  TThemeRole } from "@tela-ui/theme.slint";
-import { TButton, TButtonVariant, TCaption } from "@tela-ui/base.slint";
+import { TText, TButton, TButtonVariant, TCaption } from "@tela-ui/base.slint";
 import { TAlert, TSelect, TSelectItem, TMessage, TMessagePlacement, TDrawerPlacement, TNotification, TPopconfirm, TPopupPlacement, TResult, TResultStatus, TProgress, TProgressVariant, TSlider, TDialogService, TLoadingService } from "@tela-ui/common.slint";
 import { DemoSection } from "../demo-section.slint";
 
@@ -100,7 +100,7 @@ export component FeedbackSection inherits VerticalLayout {
             HorizontalLayout {
                 spacing: 12px;
 
-                Text {
+                TText {
                     text: "消息位置";
                     font-size: TTheme.font-size-m;
                     color: TTheme.text-color-secondary;
@@ -253,7 +253,7 @@ export component FeedbackSection inherits VerticalLayout {
                     background: TTheme.bg-color-secondarycontainer;
                     border-radius: TTheme.radius-default;
 
-                    Text {
+                    TText {
                         text: "点击确认";
                         font-size: TTheme.font-size-m;
                         color: TTheme.text-color-secondary;

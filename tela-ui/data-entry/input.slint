@@ -4,6 +4,7 @@
 // password mode; multi-line TTextArea.
 
 import { TTheme } from "../theme.slint";
+import { TText } from "../base/typography.slint";
 import { TSize } from "../structs/enums.slint";
 import { TIcon } from "../base/icon/icon.slint";
 import { TIconData, TIconSet } from "../base/icon/data.slint";
@@ -82,6 +83,7 @@ export component TInput inherits TInputFrame {
 
     private property <length> h: TTheme.size-height(size);
     private property <length> fs: TTheme.size-font(size);
+    private property <length> line: TTheme.size-line-height(size);
     private property <length> pad:
         size == TSize.large ? TTheme.spacing-3 : TTheme.spacing-2;
     private property <length> spacing-left: TTheme.spacing-2;
@@ -161,14 +163,14 @@ export component TInput inherits TInputFrame {
     }
 
     // Placeholder (above the background, hidden once text is entered)
-    placeholder := Text {
+    placeholder := TText {
         x: root.prefix-icon.paths.length > 0 ? pad + 16px + spacing-left : pad;
         y: 0;
         height: parent.height;
         vertical-alignment: center;
         text: (root.text == "" && ti.preedit-text == "") ? root.placeholder-text : "";
         font-size: root.fs;
-        font-family: TTheme.font-family;
+        line-height: root.line;
         color: root.disabled ? TTheme.text-color-disabled : TTheme.text-color-placeholder;
         overflow: elide;
         width: parent.width - self.x - pad;
@@ -212,14 +214,12 @@ export component TTextArea inherits TInputFrame {
         }
     }
 
-    placeholder := Text {
+    placeholder := TText {
         x: TTheme.spacing-3;
         y: TTheme.spacing-3;
         width: parent.width - self.x * 2;
         text: (root.text == "" && ti.preedit-text == "") ? root.placeholder-text : "";
         wrap: word-wrap;
-        font-size: TTheme.font-size-m;
-        font-family: TTheme.font-family;
         color: root.disabled ? TTheme.text-color-disabled : TTheme.text-color-placeholder;
     }
 

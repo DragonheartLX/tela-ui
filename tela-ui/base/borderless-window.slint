@@ -21,6 +21,7 @@
 // `window-radius` collapses to 0 while maximized.
 
 import { TTheme } from "../theme.slint";
+import { TText } from "typography.slint";
 import { TIcon } from "icon/icon.slint";
 import { TIconData, TIconSet } from "icon/data.slint";
 
@@ -139,9 +140,8 @@ export component TBorderlessWindow inherits Window {
                         icon-color: TTheme.brand-color;
                     }
 
-                    Text {
+                    TText {
                         text: root.title;
-                        font-size: TTheme.font-size-m;
                         color: TTheme.text-color-secondary;
                         vertical-alignment: center;
                         horizontal-stretch: 1;

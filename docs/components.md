@@ -34,7 +34,8 @@ Slint 组件为单继承 (`inherits`), 子类可直接使用基类的全部属�
 | TInput, TTextArea, TInputNumber | `TInputFrame` (私有) | 共享状态边框, 悬停/聚焦/禁用态与点击聚焦行为 |
 | TDialog, TDrawer | `TModalSurface` (私有) | 共享遮罩, z-modal 层级, 淡入淡出, ESC 与背景点击关闭 |
 | TBorderlessWindow | `Window` | 在 Window 内建属性 (`title`, `no-frame` 等) 上叠加自绘标题栏 |
-| THeading, TParagraph, TCaption | `Text` | 保留 Text 全部内建属性 (`text`, `color`, `wrap` 等) |
+| TText | `Text` | 主题字体 + TDesign 正文样式 (14px/22px); 库内所有文本的基类 |
+| THeading, TParagraph, TCaption | `TText` | 依次覆盖字号与行高, 保留 `text`, `color`, `wrap` 等全部内建属性 |
 | TRadioGroup | `HorizontalLayout` | 本身就是一行布局 |
 | TTimeline, TStatistic, TCollapse | `VerticalLayout` | 本身即纵向布局, 首选尺寸随内容 |
 | TLoading, TSegmented, TCarousel (内部) | 布局参与 sizing | 见各组件说明 (布局根的约束是头等公民) |
@@ -68,7 +69,7 @@ Slint 组件为单继承 (`inherits`), 子类可直接使用基类的全部属�
 ## 基础组件 base
 
 ```slint
-import { TButton, TLink, TIcon, THeading, TParagraph, TCaption, TDivider, TLoading, TKbd, TBorderlessWindow } from "@tela-ui/base.slint";
+import { TText, TButton, TLink, TIcon, THeading, TParagraph, TCaption, TDivider, TLoading, TKbd, TBorderlessWindow } from "@tela-ui/base.slint";
 ```
 
 ### TButton
@@ -126,18 +127,33 @@ import { TButton, TLink, TIcon, THeading, TParagraph, TCaption, TDivider, TLoadi
 
 只读输出: `computed-stroke-width` (`length`, 实际线宽)。
 
-### THeading / TParagraph / TCaption
+### TText / THeading / TParagraph / TCaption
 
-排版组件, 均继承 `Text`, 保留 `text`, `color`, `wrap` 等全部内建属性。
+排版组件。`TText` 是库内文本的基类, 默认即 TDesign `body-medium`:
+主题字体, 字号 14px, 行高 22px, 常规字重, 主文本色; 其余三者继承它, 只写各自不同的部分
+(如 THeading 的 `level` 字号/行高, TParagraph 的 `secondary`, TCaption 的 12px/20px)。
+均继承 `Text`, 保留 `text`, `color`, `wrap` 等全部内建属性。
 
 | 组件 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- | --- |
-| THeading | level | `int` | `3` | 1..5 对应 36/28/24/20/18px, 半粗字重 |
+| TText | line-height | `length` | `TTheme.line-height-m` | TDesign 行盒; 覆盖 `font-size` 时必须一并给出 (如 `TTheme.line-height-title`, 或 `TTheme.size-line-height(size)`) |
+| TText | (其余) | — | — | 14px / 22px 正文样式, 库内所有文本的落点 |
+| THeading | level | `int` | `3` | 1..5 对应 36/28/24/20/18px, 行高 44/36/32/24/24px, 半粗字重 |
 | TParagraph | secondary | `bool` | `false` | true 时用次级文本灰 |
-| TCaption | (无新增参数) | — | — | 12px 次级灰, 常用于辅助说明 |
+| TCaption | (无新增参数) | — | — | 12px / 20px 次级灰, 常用于辅助说明 |
 
-三者的默认颜色为 `text-color-primary` (THeading/TParagraph) 与
-`text-color-secondary` (TCaption), TParagraph 与 TCaption 默认 `wrap: word-wrap`。
+组件的其它文字一律用 `TText` (只有代码块保留原始 `Text` + 等宽字体): 未设
+`font-family` 的 `Text` 会落到宿主 `Window.default-font-family`, 再落到渲染器通用族
+(本机为 Arial), 与主题字体不一致。
+
+行高: Slint 只提供"相对字体自然行盒"的 `line-height-factor`, 所以 `TText` 收下 TDesign
+的行盒令牌, 再按自身 `font-size` 换算成系数 —— 覆盖字号时只需补 `line-height`:
+
+```slint
+TText { font-size: TTheme.font-size-title-m; line-height: TTheme.line-height-title; text: "标题"; }
+// 尺寸枚举随 TSize 变时用成对的辅助函数
+TText { font-size: TTheme.size-font(size); line-height: TTheme.size-line-height(size); text: root.text; }
+```
 
 ### TDivider
 
@@ -1011,6 +1027,7 @@ import { TSkeleton } from "@tela-ui/experimental.slint";
 | `theme-color(t)` / `-hover` / `-active` / `-light` / `-light-hover` / `-disabled` | `color` | 语义色的各状态; default 保持中性灰语义 |
 | `size-height(s: TSize)` | `length` | 控件高度 24/32/40px |
 | `size-font(s: TSize)` | `length` | 字号 12/14/16px |
+| `size-line-height(s: TSize)` | `length` | `size-font` 配套的行盒 20/22/24px, 交给 `TText.line-height` |
 | `size-padding(s: TSize)` | `length` | 水平内边距 8/12/16px |
 
 ### TIconSet (图标数据)

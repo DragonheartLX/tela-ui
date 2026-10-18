@@ -8,6 +8,7 @@
 // Backdrop, ESC and stack bookkeeping come from TModalSurface.
 
 import { TTheme } from "../theme.slint";
+import { TText } from "../base/typography.slint";
 import { TThemeRole } from "../structs/enums.slint";
 import { TButton, TButtonVariant } from "../base/button.slint";
 import { TModalSurface } from "../modal-surface.slint";
@@ -56,16 +57,15 @@ export component TDialog inherits TModalSurface {
             padding: TTheme.margin-xxl;
             spacing: TTheme.margin-m;
 
-            if root.title != "": Text {
+            if root.title != "": TText {
                 text: root.title;
                 font-size: TTheme.font-size-title-xl;
+                line-height: TTheme.line-height-title;
                 font-weight: TTheme.font-weight-semibold;
-                color: TTheme.text-color-primary;
             }
 
-            if root.content != "": Text {
+            if root.content != "": TText {
                 text: root.content;
-                font-size: TTheme.font-size-m;
                 color: TTheme.text-color-secondary;
                 wrap: word-wrap;
             }

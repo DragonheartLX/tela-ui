@@ -9,6 +9,7 @@
 // Each card auto-dismisses after 4.5 s and can be closed manually.
 
 import { TTheme } from "../theme.slint";
+import { TText } from "../base/typography.slint";
 import { TIcon } from "../base/icon/icon.slint";
 import { TIconSet } from "../base/icon/data.slint";
 
@@ -145,24 +146,21 @@ export component TNotificationOverlay inherits Rectangle {
                         width: 228px;
                         spacing: TTheme.spacing-2;
 
-                        Text {
+                        TText {
                             text: it.title;
-                            font-size: TTheme.font-size-m;
-                            font-family: TTheme.font-family;
                             font-weight: TTheme.font-weight-medium;
-                            color: TTheme.text-color-primary;
                             overflow: elide;
                             // Live region: assistive tech announces each
                             // queued notification's title.
                             accessible-live-region: AccessibleLiveness.polite;
                         }
 
-                        Text {
+                        TText {
                             // Wraps to the fixed 228px column.
                             // The card height follows the wrapped line count.
                             text: it.content;
                             font-size: TTheme.font-size-s;
-                            font-family: TTheme.font-family;
+                            line-height: TTheme.line-height-s;
                             color: TTheme.text-color-secondary;
                             wrap: word-wrap;
                         }

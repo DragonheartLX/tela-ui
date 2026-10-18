@@ -4,6 +4,7 @@
 // by the children slot (buttons etc., rendered in a centered row).
 
 import { TTheme } from "../theme.slint";
+import { TText } from "../base/typography.slint";
 import { TIcon } from "../base/icon/icon.slint";
 import { TIconData, TIconSet } from "../base/icon/data.slint";
 
@@ -28,7 +29,7 @@ export component TEmpty inherits Rectangle {
         icon-color: TTheme.text-color-placeholder;
     }
 
-    if root.description != "": Text {
+    if root.description != "": TText {
         y: root.y0 + root.icon-size + root.gap;
         height: root.desc-h;
         width: parent.width;
@@ -36,7 +37,7 @@ export component TEmpty inherits Rectangle {
         vertical-alignment: center;
         text: root.description;
         font-size: TTheme.font-size-s;
-        font-family: TTheme.font-family;
+        line-height: TTheme.line-height-s;
         color: TTheme.text-color-secondary;
     }
 

@@ -5,6 +5,7 @@
 // when fewer/shorter options are wanted.
 
 import { TTheme,  TSize } from "../theme.slint";
+import { TText } from "../base/typography.slint";
 
 export component TSegmented inherits Rectangle {
     in property <[string]> items;
@@ -15,6 +16,7 @@ export component TSegmented inherits Rectangle {
     callback changed(int);
 
     private property <length> fs: TTheme.size-font(size);
+    private property <length> line: TTheme.size-line-height(size);
 
     height: TTheme.size-height(size);
     background: TTheme.bg-color-secondarycontainer;
@@ -61,10 +63,10 @@ export component TSegmented inherits Rectangle {
                 }
             }
 
-            Text {
+            TText {
                 text: it;
                 font-size: root.fs;
-                font-family: TTheme.font-family;
+                line-height: root.line;
                 vertical-alignment: center;
                 horizontal-alignment: center;
                 color: i == root.current-index ? TTheme.text-color-primary : TTheme.text-color-secondary;
@@ -72,7 +74,6 @@ export component TSegmented inherits Rectangle {
 
                 states [
                     hovered when ta.has-hover && !root.disabled && i != root.current-index: {
-                        color: TTheme.text-color-primary;
                     }
                     disabled when root.disabled: {
                         color: TTheme.text-color-disabled;

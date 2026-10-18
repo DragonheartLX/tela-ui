@@ -19,6 +19,7 @@
 //   } }
 
 import { TTheme } from "../theme.slint";
+import { TText } from "../base/typography.slint";
 
 export enum TTooltipPlacement {
     top,
@@ -104,14 +105,14 @@ export component TTooltipOverlay inherits Rectangle {
         opacity: root.has-waited ? 1 : 0;
         animate opacity { duration: TTheme.duration-fast; }
 
-        content := Text {
+        content := TText {
             x: TTheme.spacing-4;
             y: (parent.height - self.preferred-height) / 2;
             width: min(self.preferred-width, root.wrap-width);
             text: TTooltip.text;
             wrap: word-wrap;
             font-size: TTheme.font-size-s;
-            font-family: TTheme.font-family;
+            line-height: TTheme.line-height-s;
             color: bubble-fg;
         }
 

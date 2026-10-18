@@ -4,6 +4,7 @@
 // footer strip. Children of the component form the card body.
 
 import { TTheme } from "../theme.slint";
+import { TText } from "../base/typography.slint";
 
 export component TCard inherits Rectangle {
     in property <string> title;
@@ -28,16 +29,17 @@ export component TCard inherits Rectangle {
         if root.title != "" || root.subtitle != "": VerticalLayout {
             spacing: TTheme.spacing-2;
 
-            if root.title != "": Text {
+            if root.title != "": TText {
                 text: root.title;
                 font-size: TTheme.font-size-title-m;
+                line-height: TTheme.line-height-title;
                 font-weight: TTheme.font-weight-semibold;
-                color: TTheme.text-color-primary;
             }
 
-            if root.subtitle != "": Text {
+            if root.subtitle != "": TText {
                 text: root.subtitle;
                 font-size: TTheme.font-size-s;
+                line-height: TTheme.line-height-s;
                 color: TTheme.text-color-secondary;
             }
         }
@@ -52,9 +54,8 @@ export component TCard inherits Rectangle {
                 background: TTheme.component-stroke;
             }
 
-            Text {
+            TText {
                 text: root.footer;
-                font-size: TTheme.font-size-m;
                 color: TTheme.text-color-secondary;
             }
         }

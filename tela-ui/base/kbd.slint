@@ -6,6 +6,7 @@
 // (small/medium/large).
 
 import { TTheme } from "../theme.slint";
+import { TText } from "typography.slint";
 import { TSize } from "../structs/enums.slint";
 
 export component TKbd inherits Rectangle {
@@ -21,6 +22,10 @@ export component TKbd inherits Rectangle {
         size == TSize.small ? TTheme.font-size-s
         : size == TSize.large ? TTheme.font-size-m
         : TTheme.font-size-s;
+    private property <length> line:
+        size == TSize.small ? TTheme.line-height-s
+        : size == TSize.large ? TTheme.line-height-m
+        : TTheme.line-height-s;
     private property <length> pad-lr:
         size == TSize.small ? 5px
         : size == TSize.large ? 9px
@@ -48,13 +53,13 @@ export component TKbd inherits Rectangle {
                 border-color: TTheme.component-border;
                 border-radius: TTheme.radius-small;
 
-                cap-label := Text {
+                cap-label := TText {
                     x: root.pad-lr;
                     width: parent.width - root.pad-lr * 2;
                     height: parent.height;
                     text: k;
                     font-size: root.fs;
-                    font-family: TTheme.font-family;
+                    line-height: root.line;
                     color: TTheme.text-color-secondary;
                     vertical-alignment: center;
                     horizontal-alignment: center;
@@ -64,11 +69,11 @@ export component TKbd inherits Rectangle {
             // Full-height box so `vertical-alignment` actually centers the
             // glyph against the chips — a bare Text stays at its preferred
             // height and rides the top of the row.
-            if k != "" && i < root.items.length - 1: Text {
+            if k != "" && i < root.items.length - 1: TText {
                 height: root.h;
                 text: "+";
                 font-size: root.fs;
-                font-family: TTheme.font-family;
+                line-height: root.line;
                 color: TTheme.text-color-secondary;
                 vertical-alignment: center;
             }

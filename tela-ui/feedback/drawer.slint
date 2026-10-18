@@ -10,6 +10,7 @@
 // Backdrop, ESC and stack bookkeeping come from TModalSurface.
 
 import { TTheme } from "../theme.slint";
+import { TText } from "../base/typography.slint";
 import { TIcon } from "../base/icon/icon.slint";
 import { TIconSet } from "../base/icon/data.slint";
 import { TModalSurface } from "../modal-surface.slint";
@@ -69,11 +70,11 @@ export component TDrawer inherits TModalSurface {
             HorizontalLayout {
                 spacing: TTheme.margin-s;
 
-                Text {
+                TText {
                     text: root.title;
                     font-size: TTheme.font-size-title-m;
+                    line-height: TTheme.line-height-title;
                     font-weight: TTheme.font-weight-semibold;
-                    color: TTheme.text-color-primary;
                     vertical-alignment: center;
                     horizontal-stretch: 1;
                 }

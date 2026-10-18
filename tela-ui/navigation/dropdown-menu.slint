@@ -10,6 +10,7 @@
 // The menu closes on outside clicks and after selecting an entry.
 
 import { TTheme } from "../theme.slint";
+import { TText } from "../base/typography.slint";
 import { TPopupPlacement } from "../structs/enums.slint";
 import { TIcon } from "../base/icon/icon.slint";
 import { TIconData } from "../base/icon/data.slint";
@@ -125,10 +126,8 @@ export component TDropdownMenu inherits Rectangle {
                             icon-color: label-c;
                         }
 
-                        Text {
+                        TText {
                             text: it.label;
-                            font-size: TTheme.font-size-m;
-                            font-family: TTheme.font-family;
                             color: label-c;
                             vertical-alignment: center;
                             horizontal-stretch: 1;

@@ -5,6 +5,7 @@
 // primary text.
 
 import { TTheme } from "../theme.slint";
+import { TText } from "../base/typography.slint";
 import { TNavLabel } from "nav-label.slint";
 
 export struct TCrumbItem {
@@ -60,9 +61,8 @@ export component TBreadcrumb inherits Rectangle {
                 height: parent.height;
                 spacing: TTheme.spacing-2;
 
-                if i > 0: Text {
+                if i > 0: TText {
                     text: root.separator;
-                    font-size: TTheme.font-size-m;
                     color: root.separator-color;
                     vertical-alignment: center;
                 }

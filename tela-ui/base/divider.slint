@@ -4,6 +4,7 @@
 // rule (orientation: Orientation.vertical).
 
 import { TTheme } from "../theme.slint";
+import { TText } from "typography.slint";
 
 export enum TDividerAlign {
     left,
@@ -50,9 +51,8 @@ export component TDivider inherits Rectangle {
             horizontal-stretch: 1;
         }
 
-        Text {
+        TText {
             text: root.text;
-            font-size: TTheme.font-size-m;
             color: root.text-color;
             vertical-alignment: center;
         }

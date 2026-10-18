@@ -4,6 +4,7 @@
 // area fed by the children slot (buttons etc., centered below).
 
 import { TTheme } from "../theme.slint";
+import { TText } from "../base/typography.slint";
 import { TIcon } from "../base/icon/icon.slint";
 import { TIconData, TIconSet } from "../base/icon/data.slint";
 
@@ -47,7 +48,7 @@ export component TResult inherits Rectangle {
         icon-color: root.icon-color;
     }
 
-    if root.title != "": Text {
+    if root.title != "": TText {
         y: root.y0 + root.icon-size + root.gap-1;
         height: TTheme.line-height-title;
         width: parent.width;
@@ -55,20 +56,17 @@ export component TResult inherits Rectangle {
         vertical-alignment: center;
         text: root.title;
         font-size: TTheme.font-size-title-l;
-        font-family: TTheme.font-family;
+        line-height: TTheme.line-height-title;
         font-weight: TTheme.font-weight-medium;
-        color: TTheme.text-color-primary;
     }
 
-    if root.description != "": Text {
+    if root.description != "": TText {
         y: root.y0 + root.icon-size + root.gap-1 + TTheme.line-height-title + root.gap-2;
         height: root.desc-h;
         width: parent.width;
         horizontal-alignment: center;
         vertical-alignment: center;
         text: root.description;
-        font-size: TTheme.font-size-m;
-        font-family: TTheme.font-family;
         color: TTheme.text-color-secondary;
         overflow: elide;
     }

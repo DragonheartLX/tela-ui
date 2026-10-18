@@ -15,6 +15,7 @@
 // `mode` is icon-text (collapsible, default), text, or icon (always 64px wide).
 
 import { TTheme } from "../theme.slint";
+import { TText } from "../base/typography.slint";
 import { TIcon } from "../base/icon/icon.slint";
 import { TIconData, TIconSet } from "../base/icon/data.slint";
 
@@ -107,13 +108,11 @@ component TNavRow inherits Rectangle {
         ]
     }
 
-    if root.label != "": Text {
+    if root.label != "": TText {
         x: root.icon.paths.length > 0 && root.show-icon ? 44px : TTheme.padding-lr-m;
         y: (parent.height - self.preferred-height) / 2;
         height: self.preferred-height;
         text: root.label;
-        font-size: TTheme.font-size-m;
-        color: TTheme.text-color-primary;
         vertical-alignment: center;
         opacity: root.show-text ? 1 : 0;
         animate opacity { duration: TTheme.duration-base; }
@@ -121,7 +120,6 @@ component TNavRow inherits Rectangle {
 
         states [
             hovered when row-ta.has-hover && !root.disabled: {
-                color: TTheme.text-color-primary;
             }
             active when root.value != "" && root.value == root.current-value && !root.disabled: {
                 color: TTheme.brand-color;
@@ -201,11 +199,11 @@ export component TSideNav inherits Rectangle {
                     icon-color: TTheme.brand-color;
                 }
 
-                if root.title != "": Text {
+                if root.title != "": TText {
                     text: root.title;
                     font-size: TTheme.font-size-title-m;
+                    line-height: TTheme.line-height-title;
                     font-weight: TTheme.font-weight-semibold;
-                    color: TTheme.text-color-primary;
                     vertical-alignment: center;
                 }
             }

@@ -3,7 +3,7 @@
 // the live TNavBar demo; this section covers the rest.
 
 import { TTheme,  TThemeRole,  TSize } from "@tela-ui/theme.slint";
-import { TIconSet, TCaption, TDivider, TButton, TButtonVariant, TParagraph } from "@tela-ui/base.slint";
+import { TText, TIconSet, TCaption, TDivider, TButton, TButtonVariant, TParagraph } from "@tela-ui/base.slint";
 import { TTabs, TPagination, TNavBar, TNavItem, TSideNav, TSideNavItem, TSideNavMode, TSideNavTogglePosition, TBreadcrumb, TCrumbItem, TSteps, TDropdownMenu, TDropdownMenuItem, TPopupPlacement, TBackTop, TMessage } from "@tela-ui/common.slint";
 import { DemoSection } from "../demo-section.slint";
 import { ScrollView } from "std-widgets.slint";
@@ -217,7 +217,7 @@ export component NavigationSection inherits VerticalLayout {
                         background: TTheme.bg-color-secondarycontainer;
                         border-radius: TTheme.radius-default;
 
-                        Text {
+                        TText {
                             text: "点击打开 (自动)";
                             font-size: TTheme.font-size-m;
                             color: TTheme.text-color-secondary;

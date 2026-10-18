@@ -5,6 +5,7 @@
 // row below its dot; the last entry draws none.
 
 import { TTheme,  TThemeRole } from "../theme.slint";
+import { TText } from "../base/typography.slint";
 
 export struct TTimelineItem {
     label: string,
@@ -55,19 +56,16 @@ export component TTimeline inherits VerticalLayout {
             padding-top: 2px;
             spacing: TTheme.spacing-2;
 
-            Text {
+            TText {
                 text: it.label;
-                font-size: TTheme.font-size-m;
-                font-family: TTheme.font-family;
                 font-weight: TTheme.font-weight-medium;
-                color: TTheme.text-color-primary;
                 overflow: elide;
             }
 
-            if it.content != "": Text {
+            if it.content != "": TText {
                 text: it.content;
                 font-size: TTheme.font-size-s;
-                font-family: TTheme.font-family;
+                line-height: TTheme.line-height-s;
                 color: TTheme.text-color-secondary;
                 wrap: word-wrap;
             }

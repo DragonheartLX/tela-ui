@@ -4,6 +4,7 @@
 // a red dot or a count pill (capped at `max-count`, hidden at 0).
 
 import { TTheme } from "../theme.slint";
+import { TText } from "../base/typography.slint";
 
 export component TBadge inherits Rectangle {
     in property <int> count: 0;
@@ -49,11 +50,12 @@ export component TBadge inherits Rectangle {
         border-width: 1px;
         border-color: TTheme.bg-color-container;
 
-        label-text := Text {
+        label-text := TText {
             x: (parent.width - self.width) / 2;
             y: (parent.height - self.height) / 2;
             text: root.label;
             font-size: TTheme.font-size-s;
+            line-height: TTheme.line-height-s;
             color: TTheme.text-color-anti;
         }
     }
