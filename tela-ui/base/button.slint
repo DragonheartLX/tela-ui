@@ -1,7 +1,7 @@
 // Tela UI — TButton
 //
 // TDesign button: theme × variant × size, optional icon, loading and
-// disabled states, square (icon button) / round shapes, block width.
+// disabled states, square (icon button) / round shapes.
 //
 //   theme   : TTheme (default/primary/success/warning/error)
 //   variant : TButtonVariant (base solid / outline / text)
@@ -31,7 +31,6 @@ export component TButton inherits Rectangle {
     in property <TButtonVariant> variant: TButtonVariant.base;
     in property <TSize> size: TSize.medium;
     in property <TButtonShape> shape: TButtonShape.rectangle;
-    in property <bool> block: false;
     in property <string> text;
     in property <TIconData> icon;
     in property <bool> loading;
@@ -81,8 +80,6 @@ export component TButton inherits Rectangle {
     border-radius: shape == TButtonShape.round ? TTheme.radius-round : TTheme.radius-default;
     height: h;
     width: shape == TButtonShape.square ? h : max(h, content.preferred-width + pad-lr * 2);
-    // Block buttons absorb the extra space of the surrounding layout.
-    horizontal-stretch: block ? 1 : 0;
     animate bg { duration: TTheme.duration-fast; }
     animate content-color { duration: TTheme.duration-fast; }
     animate border-brush { duration: TTheme.duration-fast; }

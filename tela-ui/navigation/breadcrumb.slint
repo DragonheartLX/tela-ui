@@ -49,7 +49,7 @@ export component TBreadcrumb inherits Rectangle {
             // Declared before the row: the label's own TouchArea stays
             // topmost so its hover recolor works, and clicks that miss the
             // label (the separator) fall through to this one.
-            crumb-ta := TouchArea {
+            TouchArea {
                 enabled: it.value != root.current-value;
                 mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;
                 clicked => {
@@ -67,7 +67,7 @@ export component TBreadcrumb inherits Rectangle {
                     vertical-alignment: center;
                 }
 
-                crumb-label := TNavLabel {
+                TNavLabel {
                     width: self.label-width;
                     label: it.label;
                     base-color: TTheme.text-color-link;

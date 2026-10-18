@@ -59,7 +59,7 @@ export component TCarousel inherits Rectangle {
 
     // Absorbs presses on the slide area and turns drags into slide changes.
     // Declared before the dots, so their own TouchAreas stay in front.
-    swipe-ta := TouchArea {
+    TouchArea {
         moved => {
             // Beyond the first/last slide only a third of the movement
             // applies; recomputed from the absolute press point, so it does
@@ -122,7 +122,7 @@ export component TCarousel inherits Rectangle {
                 }
             }
 
-            dot-ta := TouchArea {
+            TouchArea {
                 mouse-cursor: MouseCursor.pointer;
                 clicked => {
                     if (i != root.current) {
