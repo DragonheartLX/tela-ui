@@ -1,16 +1,16 @@
-// Demo section: 数据展示 (TTag / TBadge / TAvatar / TEmpty / TTimeline /
+// Gallery section: 数据展示 (TTag / TBadge / TAvatar / TEmpty / TTimeline /
 // TDescriptions / TStatistic / TCollapse / Tooltip / TCarousel), 一个组件一张卡.
 
 import { TTheme,  TThemeRole,  TSize } from "@tela-ui/theme.slint";
 import { TText, TIcon, TIconSet, TButton, TCaption } from "@tela-ui/base.slint";
 import { TTag, TTagVariant, TBadge, TAvatar, TAvatarSize, TAvatarShape, TEmpty, TTimeline, TDescriptions, TStatistic, TCollapse, TCarousel, TTooltipArea, TTooltipPlacement } from "@tela-ui/data-display.slint";
-import { DemoSection } from "../demo-section.slint";
+import { GallerySection } from "../gallery-section.slint";
 
 export component DataDisplaySection inherits VerticalLayout {
     spacing: 28px;
 
     // ========================= TTag =========================
-    DemoSection {
+    GallerySection {
         title: "标签 TTag";
         code: "import { TTag } from \"@tela-ui/data-display.slint\";\n\nTTag { text: \"主要\"; theme: TThemeRole.primary; }\nTTag { text: \"可关闭\"; theme: TThemeRole.primary; closable: true; }\nTTag { text: \"描边\"; variant: TTagVariant.outline; }";
 
@@ -32,7 +32,7 @@ export component DataDisplaySection inherits VerticalLayout {
     }
 
     // ======================== TBadge ========================
-    DemoSection {
+    GallerySection {
         title: "徽标 TBadge";
         code: "import { TBadge } from \"@tela-ui/data-display.slint\";\nimport { TIcon, TIconSet } from \"@tela-ui/base.slint\";\n\nTBadge { count: 6; TIcon { icon: TIconSet.Bell; } }\nTBadge { dot: true; TIcon { icon: TIconSet.Settings; } }";
 
@@ -58,7 +58,7 @@ export component DataDisplaySection inherits VerticalLayout {
     }
 
     // ======================== TAvatar =======================
-    DemoSection {
+    GallerySection {
         title: "头像 TAvatar";
         code: "import { TAvatar } from \"@tela-ui/data-display.slint\";\n\nTAvatar { text: \"T\"; }\nTAvatar { size: TAvatarSize.large; shape: TAvatarShape.square; text: \"\"; }";
 
@@ -76,7 +76,7 @@ export component DataDisplaySection inherits VerticalLayout {
     }
 
     // ======================== TEmpty ========================
-    DemoSection {
+    GallerySection {
         title: "空状态 TEmpty";
         code: "import { TEmpty } from \"@tela-ui/data-display.slint\";\n\nTEmpty { description: \"暂无数据\"; }\n\nTEmpty {\n    icon: TIconSet.Search;\n    description: \"未找到相关结果\";\n    TButton { text: \"立即创建\"; } // 子元素作为操作区\n}";
 
@@ -117,7 +117,7 @@ export component DataDisplaySection inherits VerticalLayout {
     }
 
     // ======================= TTimeline ======================
-    DemoSection {
+    GallerySection {
         title: "时间线 TTimeline";
         code: "import { TTimeline } from \"@tela-ui/data-display.slint\";\n\nTTimeline {\n    items: [\n        { label: \"创建订单\", content: \"…\", theme: TThemeRole.primary },\n        { label: \"支付完成\", content: \"…\", theme: TThemeRole.success },\n    ];\n}";
 
@@ -132,7 +132,7 @@ export component DataDisplaySection inherits VerticalLayout {
     }
 
     // ===================== TDescriptions ====================
-    DemoSection {
+    GallerySection {
         title: "描述列表 TDescriptions";
         code: "import { TDescriptions } from \"@tela-ui/data-display.slint\";\n\nTDescriptions {\n    bordered: true;\n    columns: 2;\n    items: [{ label: \"订单编号\", value: \"TD202610070001\" }, …];\n}";
 
@@ -162,7 +162,7 @@ export component DataDisplaySection inherits VerticalLayout {
     }
 
     // ======================= TStatistic =====================
-    DemoSection {
+    GallerySection {
         title: "数值统计 TStatistic";
         code: "import { TStatistic } from \"@tela-ui/data-display.slint\";\n\nTStatistic { title: \"总销售额\"; value: \"¥ 286,860\"; }\nTStatistic { title: \"在线人数\"; loading: true; }";
 
@@ -177,7 +177,7 @@ export component DataDisplaySection inherits VerticalLayout {
     }
 
     // ======================== TCollapse =====================
-    DemoSection {
+    GallerySection {
         title: "折叠面板 TCollapse";
         code: "import { TCollapse } from \"@tela-ui/data-display.slint\";\n\n// 手风琴: accordion: true, current-index 记录展开项\nTCollapse { accordion: true; items: [{ label: \"面板一\", content: \"…\" }, …]; }";
 
@@ -206,7 +206,7 @@ export component DataDisplaySection inherits VerticalLayout {
     }
 
     // ======================== Tooltip ======================
-    DemoSection {
+    GallerySection {
         title: "气泡提示 Tooltip";
         code: "import { TTooltipArea, TTooltipOverlay } from \"@tela-ui/data-display.slint\";\n\n// 窗口根部放置一次:\nTTooltipOverlay { }\n\nTTooltipArea {\n    text: \"提示\"; placement: TTooltipPlacement.top;\n    Text { text: \"目标\"; }\n}";
 
@@ -254,7 +254,7 @@ export component DataDisplaySection inherits VerticalLayout {
     }
 
     // ======================== TCarousel =====================
-    DemoSection {
+    GallerySection {
         title: "走马灯 TCarousel";
         code: "import { TCarousel } from \"@tela-ui/data-display.slint\";\n\nTCarousel {\n    height: 240px;\n    autoplay: true;\n    items: [{ image: @image-url(\"slide-1.svg\") }, …];\n}";
 

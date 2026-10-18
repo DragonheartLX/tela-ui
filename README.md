@@ -42,7 +42,7 @@ export component MainWindow inherits Window {
 }
 ```
 
-运行演示应用
+运行 gallery (组件陈列应用)
 
 ```sh
 cargo run                     # 跟随系统深浅色

@@ -1180,7 +1180,7 @@ divider }` (icon 为 `TIconData` 默认空; divider 为 true 时渲染分隔线�
 
 回到顶部按钮。`content-y` 与目标 ScrollView 的 `content-y` 双向绑定:
 滚动超过 `threshold` 显示, 点击滚动归零。需绝对定位于滚动容器内
-(参见演示页)。
+(参见 gallery 页)。
 
 继承: `Rectangle`。
 

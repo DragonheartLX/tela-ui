@@ -1,13 +1,13 @@
-// Demo section: 实验性 (TSkeleton). APIs here are unstable.
+// Gallery section: 实验性 (TSkeleton). APIs here are unstable.
 
 import { TSkeleton } from "@tela-ui/experimental.slint";
 import { TParagraph } from "@tela-ui/base.slint";
-import { DemoSection } from "../demo-section.slint";
+import { GallerySection } from "../gallery-section.slint";
 
 export component ExperimentalSection inherits VerticalLayout {
     spacing: 28px;
 
-    DemoSection {
+    GallerySection {
         title: "实验性 Experimental(TSkeleton)";
         code: "import { TSkeleton } from \"@tela-ui/experimental.slint\";\n\nTSkeleton { width: 240px; height: 14px; }\nTSkeleton { width: 48px; height: 48px; circle: true; }";
 
@@ -29,7 +29,7 @@ export component ExperimentalSection inherits VerticalLayout {
     }
 
     // ================== TBorderlessWindow ==================
-    DemoSection {
+    GallerySection {
         title: "无边框窗口 TBorderlessWindow";
         code: "import { TBorderlessWindow } from \"@tela-ui/base.slint\";\n\nTBorderlessWindow {\n    title: \"我的应用\";\n    header-height: 40px;\n\n    VerticalLayout {\n        // 窗口内容…\n    }\n}";
 

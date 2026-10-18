@@ -1,10 +1,10 @@
-// Demo section: 数据录入 (TInput / TSelect / TTextArea / TCheckBox / TRadio /
+// Gallery section: 数据录入 (TInput / TSelect / TTextArea / TCheckBox / TRadio /
 // TSwitch / TSlider / TInputNumber / TRate), 一个组件一张卡.
 
 import { TThemeRole,  TSize } from "@tela-ui/theme.slint";
 import { TIconSet, TCaption } from "@tela-ui/base.slint";
 import { TInput, TTextArea, TSelect, TSelectItem, TCheckBox, TRadioGroup, TRadioItem, TSwitch, TSlider, TInputNumber, TRate, TSegmented } from "@tela-ui/data-entry.slint";
-import { DemoSection } from "../demo-section.slint";
+import { GallerySection } from "../gallery-section.slint";
 
 export component FormSection inherits VerticalLayout {
     spacing: 28px;
@@ -35,7 +35,7 @@ export component FormSection inherits VerticalLayout {
     in-out property <int> seg-index: 1;
 
     // ======================== TInput ========================
-    DemoSection {
+    GallerySection {
         title: "输入框 TInput";
         code: "import { TInput } from \"@tela-ui/data-entry.slint\";\n\nTInput { placeholder-text: \"请输入内容\"; clearable: true; prefix-icon: TIconSet.Search; text <=> v; }\nTInput { placeholder-text: \"密码\"; input-type: password; }";
 
@@ -66,7 +66,7 @@ export component FormSection inherits VerticalLayout {
     }
 
     // ======================== TSelect =======================
-    DemoSection {
+    GallerySection {
         title: "选择器 TSelect";
         code: "import { TSelect } from \"@tela-ui/data-entry.slint\";\n\nTSelect {\n    items: [{ label: \"北京\", value: \"bj\" }, …];\n    placeholder-text: \"请选择城市\";\n    current-value <=> city;\n}";
 
@@ -86,7 +86,7 @@ export component FormSection inherits VerticalLayout {
     }
 
     // ======================= TTextArea ======================
-    DemoSection {
+    GallerySection {
         title: "多行输入 TTextArea";
         code: "import { TTextArea } from \"@tela-ui/data-entry.slint\";\n\nTTextArea { rows: 3; placeholder-text: \"请输入描述…\"; text <=> v; }";
 
@@ -98,7 +98,7 @@ export component FormSection inherits VerticalLayout {
     }
 
     // ======================= TCheckBox ======================
-    DemoSection {
+    GallerySection {
         title: "复选框 TCheckBox";
         code: "import { TCheckBox } from \"@tela-ui/data-entry.slint\";\n\nTCheckBox { text: \"选项 A\"; checked <=> a; }\nTCheckBox { text: \"全选\"; indeterminate: a != b; }";
 
@@ -119,7 +119,7 @@ export component FormSection inherits VerticalLayout {
     }
 
     // ======================== TRadio ========================
-    DemoSection {
+    GallerySection {
         title: "单选框 TRadio";
         code: "import { TRadioGroup } from \"@tela-ui/data-entry.slint\";\n\nTRadioGroup {\n    items: [{ text: \"北京\", value: \"bj\" }, …];\n    value <=> city;\n}";
 
@@ -130,7 +130,7 @@ export component FormSection inherits VerticalLayout {
     }
 
     // ======================== TSwitch =======================
-    DemoSection {
+    GallerySection {
         title: "开关 TSwitch";
         code: "import { TSwitch } from \"@tela-ui/data-entry.slint\";\n\nTSwitch { checked <=> on; }\nTSwitch { size: TSize.small; checked: true; }\nTSwitch { disabled: true; }";
 
@@ -148,7 +148,7 @@ export component FormSection inherits VerticalLayout {
     }
 
     // ======================== TSlider =======================
-    DemoSection {
+    GallerySection {
         title: "滑块 TSlider";
         code: "import { TSlider } from \"@tela-ui/data-entry.slint\";\n\nTSlider { value <=> v; }";
 
@@ -158,7 +158,7 @@ export component FormSection inherits VerticalLayout {
     }
 
     // ====================== TInputNumber ====================
-    DemoSection {
+    GallerySection {
         title: "数字输入框 TInputNumber";
         code: "import { TInputNumber } from \"@tela-ui/data-entry.slint\";\n\nTInputNumber { min: 0; max: 10; step: 1; value <=> n; }\n// 文本框内 Up/Down 方向键也可步进; 到达边界时对应按钮禁用。";
 
@@ -179,7 +179,7 @@ export component FormSection inherits VerticalLayout {
     }
 
     // ========================= TRate ========================
-    DemoSection {
+    GallerySection {
         title: "评分 TRate";
         code: "import { TRate } from \"@tela-ui/data-entry.slint\";\n\nTRate { value <=> score; }\nTRate { value: 2; read-only: true; }\nTRate { theme: TThemeRole.primary; size: TSize.small; }";
 
@@ -194,7 +194,7 @@ export component FormSection inherits VerticalLayout {
         }
     }
     // ====================== TSegmented =====================
-    DemoSection {
+    GallerySection {
         title: "分段控制器 TSegmented";
         code: "import { TSegmented } from \"@tela-ui/data-entry.slint\";\n\nRectangle {\n    max-width: 480px;\n    TSegmented { items: [\"日\", \"周\", \"月\", \"年\"]; current-index <=> i; }\n}";
 

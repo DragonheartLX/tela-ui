@@ -7,12 +7,12 @@ import { TTheme,  TThemePreference } from "@tela-ui/theme.slint";
 import { TCaption, TParagraph } from "@tela-ui/base.slint";
 import { TCard } from "@tela-ui/data-display.slint";
 import { TRadio } from "@tela-ui/data-entry.slint";
-import { DemoSection } from "../demo-section.slint";
+import { GallerySection } from "../gallery-section.slint";
 
 export component SettingsSection inherits VerticalLayout {
     spacing: 28px;
 
-    DemoSection {
+    GallerySection {
         title: "主题模式 TTheme mode";
         code: "import { TTheme, TThemePreference } from \"@tela-ui/theme.slint\";\n\nTTheme.preference = TThemePreference.dark;\n// TTheme.is-dark 是实际生效的模式 (system 已按系统解析)";
 

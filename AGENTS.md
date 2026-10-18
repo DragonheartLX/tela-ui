@@ -9,10 +9,10 @@
 ## 仓库速览
 
 - `tela-ui/` 是组件库本体, `build.rs` 的 `with_library_paths` 把它注册为 import 前缀 `@tela-ui/...`。
-- 顶层聚合按类别分(`base.slint` / `data-display.slint` / …), `common.slint` 仅作兼容出口, 新代码与演示页都用分类聚合。
-- `ui/` + `src/` 是演示程序(bin `tela`): `ui/MainWindow.slint` 挂 7 个页面, 页面用 `if` 懒挂载。
+- 顶层聚合按类别分(`base.slint` / `data-display.slint` / …), `common.slint` 仅作兼容出口, 新代码与 gallery 页都用分类聚合。
+- `ui/` + `src/` 是 gallery 程序(bin `tela`): `ui/MainWindow.slint` 挂 7 个页面, 页面用 `if` 懒挂载。
 - Slint 1.18.1 (Cargo.lock 锁定), edition 2024, 样式 `fluent`(`build.rs` 的 `with_style`), 启用 accessibility / backend-winit / renderer-skia / renderer-software。
-- 78 个 `.slint` 共 10,344 行: `tela-ui/` 69 个 8,608 行, `ui/` 9 个 1,736 行; 65 个导出组件 = 54 个 UI 组件 + 8 个服务 overlay + 3 个库内基类 (TStrokedShape / TInputFrame / TModalSurface)。
+- 78 个 `.slint` 共 10,337 行: `tela-ui/` 69 个 8,601 行, `ui/` 9 个 1,736 行; 65 个导出组件 = 54 个 UI 组件 + 8 个服务 overlay + 3 个库内基类 (TStrokedShape / TInputFrame / TModalSurface)。
 - 设计令牌: `theme.slint` 的 `TTheme` global (151 个顶层转发) → `structs/theme.slint` 的 `TAppThemeConfig` (103 字段); 色板在 `colors.slint` (亮/暗两套 ramp)。
 - 浮层体系: `TPopupSurface` 锚定弹层 + `TPopupStack` 层计数与 ESC + z 序令牌(`z-popup` / `z-modal` / `z-message`) + 服务型 global(`TDialogService` / `TLoadingService` / `TMessage` / `TNotification` / `TTooltip` / `TImageViewerService` / `TActionSheetService` / `TCommandPaletteService`)。
 
@@ -103,7 +103,7 @@ slint-viewer -L "tela-ui=$PWD\tela-ui" --screenshot out-light.png --size 1200x80
 - **各浮层皮肤直接引用 `shadow-*` 三行组属有意保留** — 单面组件各自独立, 不属于重复收敛目标。
 - **"TCollapse 换数据后错误面板仍展开"已被否决** — 整份模型替换走 repeater reset() 会清空实例, 真实表现是全部收起(见语义实证第 3 条)。
 - **TIconSet 图标不抽公共路径属性 (2026-10-15)** — 每个图标独立, 哪怕 Star/StarFill 逐字节同路径也不去重, 图标数据保持可整段复制替换。
-- **演示页的状态失同步与 Timer 常驻属演示代码问题** — 修的时候不要顺手改组件库语义。
+- **gallery 页的状态失同步与 Timer 常驻属 gallery 代码问题** — 修的时候不要顺手改组件库语义。
 - **cdylib 保留 (2026-10-18)** — `Cargo.toml` 的 `crate-type = ["lib", "cdylib"]` 是移动平台预留, 不因"当前无 C ABI 消费者"删除。
 - **TELA_THEME 精确匹配 (2026-10-18)** — 只认字面量 `light` / `dark`, 不做 trim 也不做小写化; 设了别的值一律报错退出(`src/lib.rs` 的 `theme_from_env`), 不静默跟随系统。
 - **启动失败只在没有控制台的构建里弹窗 (2026-10-18)** — `src/fatal.rs` 的 `MessageBoxW` 只在 Windows 且 `not(debug_assertions)` 时弹原生错误框; dev 只写 stderr, 否则自动化运行会被模态框卡住。panic 走同一通道, 因为 release 是 `panic = "abort"` 加 `windows_subsystem = "windows"`, 什么都不留。

@@ -1,10 +1,10 @@
-// Demo gallery building block: one component = one TCard + one TCodeBlock.
+// Gallery building block: one component = one TCard + one TCodeBlock.
 // `title` and `code` feed the two; the children form the card body.
-// Keeps the 8px card-to-code gap uniform across every demo page.
+// Keeps the 8px card-to-code gap uniform across every gallery page.
 
 import { TCard, TCodeBlock } from "@tela-ui/data-display.slint";
 
-export component DemoSection inherits VerticalLayout {
+export component GallerySection inherits VerticalLayout {
     in property <string> title;
     in property <string> code;
     spacing: 8px;
