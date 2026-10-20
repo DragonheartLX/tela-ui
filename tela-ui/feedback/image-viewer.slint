@@ -418,7 +418,7 @@ export component TImageViewerOverlay inherits TModalSurface {
     // Toolbar chips: counter (left), zoom cluster and close (right). Each chip
     // has a computable width, so every x comes from known boxes — a
     // content-sized container positioned by its own width mispaints its
-    // `Text` children (AGENTS 语义实证第 22 条).
+    // `Text` children (docs/slint-semantics.md 第 22 条).
     // ------------------------------------------------------------------
     private property <length> btn: TTheme.height-l;
     private property <length> gap: TTheme.spacing-2;

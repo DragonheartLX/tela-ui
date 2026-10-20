@@ -25,10 +25,11 @@ fn main() {
 ```
 
 ```slint
-import { TTheme,  TThemeRole } from "@tela-ui/theme.slint";
+import { TTheme, TThemeRole } from "@tela-ui/theme.slint";
 // 分类聚合导出 — 也可以直接从 "@tela-ui/base/button.slint" 等文件导入
-import { TButton, TButtonVariant, TIcon, TTag } from "@tela-ui/base.slint";
-import { TInput, TSelect, TCard, TMessage, TMessageOverlay } from "@tela-ui/common.slint";
+import { TButton, TButtonVariant, TIcon } from "@tela-ui/base.slint";
+import { TInput, TSelect } from "@tela-ui/data-entry.slint";
+import { TCard, TTag } from "@tela-ui/data-display.slint";
 import { TSkeleton } from "@tela-ui/experimental.slint";
 
 export component MainWindow inherits Window {
@@ -42,16 +43,17 @@ export component MainWindow inherits Window {
 }
 ```
 
-运行 gallery (组件陈列应用)
+运行 gallery (组件陈列应用):
 
 ```sh
 cargo run                     # 跟随系统深浅色
-TELA_THEME=dark cargo run     # 强制暗色 (只认 light / dark 两个字面量, 其它值启动即报错退出)
+TELA_THEME=dark cargo run     # POSIX: 强制暗色 (只认 light / dark, 其它值启动即报错退出)
+$env:TELA_THEME="dark"; cargo run   # PowerShell 写法
 ```
 
 ## 主题
 
-所有令牌都在 `TTheme` 全局 (`theme.slint`) 上。当前生效的配置是一个`TAppThemeConfig` 结构体; `light` / `dark` 是两个 `in-out` 预设。
+所有令牌都在 `TTheme` 全局 (`theme.slint`) 上。当前生效的配置是一个 `TAppThemeConfig` 结构体; `light` / `dark` 是两个 `in-out` 预设。
 
 ```slint
 // 读取令牌
@@ -86,7 +88,7 @@ TSwitch {
 }
 ```
 
-52 个组件 (基础 12 / 数据录入 11 / 数据展示 12 / 反馈 7 / 导航 9, 另有实验性 1) 按类别聚合导出; 另有 8 个服务型浮层 (对话框 / 加载 / 消息 / 通知 / 图片预览 / 命令面板 / 动作面板 / 提示) 与主题、图标、浮层栈三个全局对象。`@tela-ui/common.slint` 保留为全量兼容出口, 完整参数说明见 [docs/components.md](docs/components.md)。
+53 个组件 (基础 12 / 数据录入 11 / 数据展示 13 / 反馈 7 / 导航 9, 另有实验性 1; 导航 9 含私有 TNavLabel) 按类别聚合导出; 另有 8 个服务型浮层 (对话框 / 加载 / 消息 / 通知 / 图片预览 / 命令面板 / 动作面板 / 提示) 与主题、图标、浮层栈三个全局对象。`@tela-ui/common.slint` 保留为全量兼容出口, 完整参数说明见 [docs/components.md](docs/components.md)。
 
 ## 致谢与说明
 
@@ -98,6 +100,7 @@ TSwitch {
     - TTextArea 暂无 maxLength 字数统计。
     - 对话框 / 通知 / 底部弹层正文超过窗口高度时按上限裁剪 (无滚动容器)。
     - TImageViewer 无旋转与图片说明文字。
+    - TTable 列宽不可拖拽, 不支持多列排序; 排序只回调, 行重排由宿主完成 (1.18 语言内没有循环语句)。
 
 ## 许可证
 

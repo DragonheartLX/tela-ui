@@ -37,10 +37,8 @@ Slint 组件为单继承 (`inherits`), 子类可直接使用基类的全部属�
 | TBorderlessWindow | `Window` | 在 Window 内建属性 (`title`, `no-frame` 等) 上叠加自绘标题栏 |
 | TText | `Text` | 主题字体 + TDesign 正文样式 (14px/22px); 库内所有文本的基类 |
 | THeading, TParagraph, TCaption | `TText` | 依次覆盖字号与行高, 保留 `text`, `color`, `wrap` 等全部内建属性 |
-| TRadioGroup | `HorizontalLayout` | 本身就是一行布局 |
 | TRadioGroup, TLoading | `HorizontalLayout` | 本身就是一行布局 |
 | TTimeline, TStatistic, TCollapse | `VerticalLayout` | 本身即纵向布局, 首选尺寸随内容 |
-| TSegmented, TCarousel (内部) | 布局参与 sizing | 见各组件说明 (布局根的约束是头等公民) |
 | 其余全部组件 | `Rectangle` | 基础容器 |
 
 组合关系 (has-a, 内部使用的组件):
@@ -48,7 +46,8 @@ Slint 组件为单继承 (`inherits`), 子类可直接使用基类的全部属�
 - TButton = TIcon + TLoadingSpinner
 - TLoading = TLoadingSpinner
 - TDialog = TModalSurface (遮罩基类) + TButton x2 (确认/取消)
-- TActionSheetOverlay = TBottomSheet (底部弹层基类) + 自绘整行取消块 (`TButton` 无法横向撑满自身, 见语义实证第 23 条)
+- TTable = ListView (行) + TEmpty (空态)
+- TActionSheetOverlay = TBottomSheet (底部弹层基类) + 自绘整行取消块 (`TButton` 无法横向撑满自身, 见 `docs/slint-semantics.md` 第 23 条)
 - TImageViewerOverlay = TModalSurface + 私有 TViewerButton x6 (上一张/下一张/缩小/放大/适应窗口/关闭) + TViewerChip x4 (计数/缩放组/关闭/缩略图条) + 窗口宽的图片轨道
 - TCommandPaletteOverlay = TModalSurface + TDivider + TIcon + ScrollView (列表)
 - TNavBar, TTabs, TBreadcrumb = 私有 TNavLabel xN (文本行悬停/选中态与点击共享)
@@ -57,7 +56,7 @@ Slint 组件为单继承 (`inherits`), 子类可直接使用基类的全部属�
 - TSideNav = 私有 TNavRow xN (菜单行, 底部行与收起行共用)
 - TTag, TCheckBox, TAlert, TMessageOverlay, TNotificationOverlay, TNavBar, TSideNav,
   TSelect, TPagination, TAvatar, TDropdownMenu, TRate, TEmpty, TResult,
-  TCollapse, TBorderlessWindow 内部均使用 TIcon 渲染字形
+  TCollapse, TTable, TBorderlessWindow 内部均使用 TIcon 渲染字形
 - 提供 `@children` 插槽的组件: TBadge (被标记内容), TCard (卡片主体), TDialog
   (自定义主体), TDrawer (面板主体), TNavBar (右侧操作区), TEmpty (操作区),
   TTooltipArea (触发内容), TResult (操作区), TBorderlessWindow (窗口内容)
@@ -68,6 +67,7 @@ Slint 组件为单继承 (`inherits`), 子类可直接使用基类的全部属�
 `TViewerButton` / `TViewerChip` (feedback/image-viewer.slint, 遮罩上的圆形图标按钮与控件卡片),
 `TNavLabel` (navigation/nav-label.slint),
 `TNavRow` (navigation/side-nav.slint),
+`TTableCell` (data-display/table.slint, 表头与数据单元格的文本、对齐与排序图标),
 `TWindowButton` (base/borderless-window.slint), `TPageBtn`
 (navigation/pagination.slint), `TPopupSurface` (popup-surface.slint,
 TDropdownMenu / TPopconfirm / TSelect 共用的锚定弹层骨架: 零尺寸锚定宿主 + placement
@@ -452,7 +452,7 @@ TRadioGroup 参数:
 ## 数据展示 data-display
 
 ```slint
-import { TTag, TAvatar, TBadge, TCard, TEmpty, TDescriptions, TTimeline, TStatistic, TCollapse, TTooltipArea, TCarousel, TCodeBlock } from "@tela-ui/data-display.slint";
+import { TTag, TAvatar, TBadge, TCard, TEmpty, TDescriptions, TTimeline, TStatistic, TCollapse, TTable, TTableAlign, TTableSortDirection, TTooltipArea, TCarousel, TCodeBlock } from "@tela-ui/data-display.slint";
 ```
 
 ### TTag
@@ -689,6 +689,35 @@ ta := TouchArea {
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | code | `string` | `""` | 代码文本 |
+
+### TTable
+
+数据表格。表头 + ListView 行 (只实例化可见行); 弹性列均分剩余宽度, 固定列按给定宽度;
+固定列宽总和超出表宽时表体出现底部横向滚动条, 表头随表体同步水平滚动并保持纵向固定;
+可排序列点击循环 升序 → 降序 → 取消; 模型为空时显示空态。
+排序只上报, 行重排由宿主在 `sort-changed` 里完成 (Slint 无循环语句, 组件内无法扫描模型)。
+
+继承: `Rectangle`。内部组合 ListView 与 TEmpty。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| columns | `[TTableColumn]` | `[]` | 列定义 |
+| rows | `[TTableRow]` | `[]` | 行模型, 单元格文本按列下标对应 |
+| sort-column | `int` (in-out) | `-1` | 当前排序列, -1 为无 |
+| sort-direction | `TTableSortDirection` (in-out) | `TTableSortDirection.none` | 当前排序方向 |
+| row-height | `length` | `TTheme.height-l + TTheme.spacing-4` (48px) | 表头与数据行高 |
+| empty-text | `string` | `"暂无数据"` | 空态描述 |
+
+回调: `sort-changed(int, TTableSortDirection)` — 点击可排序表头后触发, 参数为当前排序列与方向;
+`row-clicked(int)` — 点击数据行后触发, 参数为行下标。
+
+相关结构: `TTableColumn { title: string, width: length = 0px, min-width: length = 0px,
+align: TTableAlign = TTableAlign.left, sortable: bool = false }`, `width: 0px` 为弹性列;
+`TTableRow { cells: [string] }`。
+相关枚举: `TTableAlign { left, center, right }`, `TTableSortDirection { none, ascending, descending }`。
+
+已知限制: 列宽不可拖拽; 不支持多列排序与单元格自定义内容。表高由宿主给定
+(`preferred-height` 默认 5 行)。
 
 ---
 
@@ -1348,6 +1377,7 @@ PanelLeftClose, PanelLeftOpen, FlaskConical, Inbox, Square, Copy。
 | TResultStatus | TResult | info, success, warning, error |
 | TCollapseItem | TCollapse | label, content, disabled |
 | TCarouselSlide | TCarousel | image |
+| TTableColumn / TTableRow / TTableAlign / TTableSortDirection | TTable | title, width, min-width, align, sortable / cells / left, center, right / none, ascending, descending |
 | TNavItem | TNavBar | label, value |
 | TSideNavMode / TSideNavTogglePosition | TSideNav | icon-text, text, icon / top, bottom |
 | TSideNavItem | TSideNav | label, value, icon, disabled |
