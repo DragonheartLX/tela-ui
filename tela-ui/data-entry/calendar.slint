@@ -1,0 +1,308 @@
+// Tela UI — TCalendar
+//
+// Month panel: header navigation, weekday row and a 6x7 day grid.
+// Month arithmetic (leap years, month lengths, first weekday) is done in
+// Slint; the host supplies `today` because Slint exposes no public date API.
+// `value` is the single-selection result; `range` switches the panel to
+// start/end selection. Dates are `TDate` structs (year/month/day).
+
+import { TTheme } from "../theme.slint";
+import { TText } from "../base/typography.slint";
+import { TButton, TButtonVariant, TButtonShape } from "../base/button.slint";
+import { TIconSet } from "../base/icon/data.slint";
+import { TSize } from "../structs/enums.slint";
+
+export struct TDate {
+    year: int = 0,
+    month: int = 0,
+    day: int = 0,
+}
+
+export component TCalendar inherits Rectangle {
+    // Displayed month; hosts set these (and may use `<=>`).
+    in-out property <int> year: 2026;
+    in-out property <int> month: 1;
+    // Single selection. `year == 0` means none.
+    in-out property <TDate> value: { year: 0, month: 0, day: 0 };
+    // Range selection; complete when both endpoints are valid.
+    in property <bool> range: false;
+    in-out property <TDate> range-start: { year: 0, month: 0, day: 0 };
+    in-out property <TDate> range-end: { year: 0, month: 0, day: 0 };
+    // Highlighted day; supplied by the host.
+    in property <TDate> today: { year: 0, month: 0, day: 0 };
+    in property <length> cell-size: TTheme.spacing-12;
+
+    callback selected(TDate);
+    callback changed(TDate);
+    callback range-changed(TDate, TDate);
+    callback month-changed(int, int);
+
+    private property <length> pad: TTheme.spacing-5;
+    private property <length> header-height: TTheme.height-l;
+    private property <length> weekday-height: TTheme.height-m;
+    private property <length> panel-width: 7 * root.cell-size + 2 * root.pad;
+    private property <length> panel-height:
+        root.pad + root.header-height + root.weekday-height + 6 * root.cell-size + root.pad;
+    private property <bool> can-prev: root.year > 1 || root.month > 1;
+
+    width: root.panel-width;
+    height: root.panel-height;
+    background: TTheme.bg-color-container;
+
+    pure function floor-div(a: int, b: int) -> int {
+        return Math.floor(a / b);
+    }
+
+    pure function leap(y: int) -> bool {
+        return Math.mod(y, 4) == 0 && (Math.mod(y, 100) != 0 || Math.mod(y, 400) == 0);
+    }
+
+    pure function days-in-month(y: int, m: int) -> int {
+        if (m == 2) {
+            return root.leap(y) ? 29 : 28;
+        }
+        return m == 4 || m == 6 || m == 9 || m == 11 ? 30 : 31;
+    }
+
+    // Sakamoto: 0 = Sunday.
+    pure function weekday(y: int, m: int, d: int) -> int {
+        let t = [0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4];
+        // Sakamoto treats January/February as months 13/14 of the previous year.
+        let yy = m < 3 ? y - 1 : y;
+        return Math.mod(yy + root.floor-div(yy, 4) - root.floor-div(yy, 100)
+            + root.floor-div(yy, 400) + t[m - 1] + d, 7);
+    }
+
+    pure function valid-date(d: TDate) -> bool {
+        return d.year > 0 && d.month >= 1 && d.month <= 12
+            && d.day >= 1 && d.day <= root.days-in-month(d.year, d.month);
+    }
+
+    pure function same-date(a: TDate, b: TDate) -> bool {
+        return a.year == b.year && a.month == b.month && a.day == b.day;
+    }
+
+    pure function before(a: TDate, b: TDate) -> bool {
+        return a.year < b.year
+            || (a.year == b.year && (a.month < b.month
+                || (a.month == b.month && a.day < b.day)));
+    }
+
+    pure function pad2(n: int) -> string {
+        return n < 10 ? "0\{n}" : "\{n}";
+    }
+
+    pure function date-label(d: TDate) -> string {
+        return "\{d.year}-\{root.pad2(d.month)}-\{root.pad2(d.day)}";
+    }
+
+    // The 42 cells include the previous/next month's tail, so the grid is
+    // always full and every cell is a real date.
+    pure function cell-date(i: int) -> TDate {
+        let lead = root.weekday(root.year, root.month, 1);
+        let dim = root.days-in-month(root.year, root.month);
+        let d = i - lead + 1;
+        if (d < 1) {
+            let pm = root.month == 1 ? 12 : root.month - 1;
+            let py = root.month == 1 ? root.year - 1 : root.year;
+            return { year: py, month: pm, day: root.days-in-month(py, pm) + d };
+        }
+        if (d > dim) {
+            let nm = root.month == 12 ? 1 : root.month + 1;
+            let ny = root.month == 12 ? root.year + 1 : root.year;
+            return { year: ny, month: nm, day: d - dim };
+        }
+        return { year: root.year, month: root.month, day: d };
+    }
+
+    pure function endpoint(d: TDate) -> bool {
+        if (!root.valid-date(d)) {
+            return false;
+        }
+        return root.range
+            ? (root.valid-date(root.range-start) && root.same-date(d, root.range-start))
+                || (root.valid-date(root.range-end) && root.same-date(d, root.range-end))
+            : root.valid-date(root.value) && root.same-date(d, root.value);
+    }
+
+    pure function in-range(d: TDate) -> bool {
+        return root.range && root.valid-date(root.range-start) && root.valid-date(root.range-end)
+            && !root.before(d, root.range-start) && !root.before(root.range-end, d);
+    }
+
+    function shift-month(delta: int) {
+        if (root.year <= 1 && root.month <= 1 && delta < 0) {
+            return;
+        }
+        let index = root.year * 12 + root.month - 1 + delta;
+        let ny = root.floor-div(index, 12);
+        let nm = Math.mod(index, 12) + 1;
+        root.year = ny;
+        root.month = nm;
+        root.month-changed(ny, nm);
+    }
+
+    function select-date(d: TDate) {
+        if (!root.valid-date(d)) {
+            return;
+        }
+        root.selected(d);
+        if (root.range) {
+            if (!root.valid-date(root.range-start) || root.valid-date(root.range-end)) {
+                root.range-start = d;
+                root.range-end = { year: 0, month: 0, day: 0 };
+                root.changed(d);
+                return;
+            }
+            if (root.before(d, root.range-start)) {
+                root.range-end = root.range-start;
+                root.range-start = d;
+            } else {
+                root.range-end = d;
+            }
+            root.range-changed(root.range-start, root.range-end);
+            root.changed(d);
+        } else if (!root.same-date(root.value, d)) {
+            root.value = d;
+            root.changed(d);
+        }
+    }
+
+    public function show-date(d: TDate) {
+        if (root.valid-date(d)) {
+            root.year = d.year;
+            root.month = d.month;
+        }
+    }
+
+    // Header ------------------------------------------------------------
+    Rectangle {
+        x: root.pad;
+        y: root.pad;
+        width: parent.width - 2 * root.pad;
+        height: root.header-height;
+
+        HorizontalLayout {
+            y: (parent.height - self.height) / 2;
+            width: parent.width;
+            height: TTheme.height-m;
+            spacing: TTheme.spacing-2;
+
+            TButton {
+                variant: TButtonVariant.text;
+                shape: TButtonShape.square;
+                size: TSize.medium;
+                icon: TIconSet.ChevronLeft;
+                disabled: !root.can-prev;
+                accessible-label: "上个月";
+                clicked => {
+                    root.shift-month(-1);
+                }
+            }
+
+            TText {
+                text: "\{root.year} 年 \{root.month} 月";
+                font-size: TTheme.font-size-m;
+                line-height: TTheme.line-height-m;
+                font-weight: TTheme.font-weight-medium;
+                horizontal-alignment: center;
+                vertical-alignment: center;
+                horizontal-stretch: 1;
+                overflow: elide;
+            }
+
+            TButton {
+                variant: TButtonVariant.text;
+                shape: TButtonShape.square;
+                size: TSize.medium;
+                icon: TIconSet.ChevronRight;
+                accessible-label: "下个月";
+                clicked => {
+                    root.shift-month(1);
+                }
+            }
+        }
+    }
+
+    // Weekdays ----------------------------------------------------------
+    HorizontalLayout {
+        x: root.pad;
+        y: root.pad + root.header-height;
+        width: parent.width - 2 * root.pad;
+        height: root.weekday-height;
+
+        for label in ["日", "一", "二", "三", "四", "五", "六"]: TText {
+            text: label;
+            font-size: TTheme.font-size-s;
+            line-height: TTheme.line-height-s;
+            color: TTheme.text-color-secondary;
+            horizontal-alignment: center;
+            vertical-alignment: center;
+            horizontal-stretch: 1;
+        }
+    }
+
+    // 6x7 grid ----------------------------------------------------------
+    for i in 42: cell := Rectangle {
+        property <TDate> d: root.cell-date(i);
+        private property <bool> in-month: d.year == root.year && d.month == root.month;
+        private property <bool> selected: root.endpoint(d);
+        private property <bool> middle: root.in-range(d);
+        private property <bool> is-today: root.same-date(d, root.today);
+
+        x: root.pad + Math.mod(i, 7) * root.cell-size;
+        y: root.pad + root.header-height + root.weekday-height + root.floor-div(i, 7) * root.cell-size;
+        width: root.cell-size;
+        height: root.cell-size;
+        // Connected range band behind the endpoint circles.
+        background: cell.middle ? TTheme.brand-color-light : transparent;
+
+        // Day circle / selection / today outline.
+        Rectangle {
+            x: TTheme.spacing-2;
+            y: TTheme.spacing-2;
+            width: parent.width - 2 * TTheme.spacing-2;
+            height: parent.height - 2 * TTheme.spacing-2;
+            border-radius: TTheme.radius-round;
+            background: cell.selected ? TTheme.brand-color : transparent;
+            border-width: cell.is-today && !cell.selected ? 1px : 0;
+            border-color: TTheme.brand-color;
+            animate background { duration: TTheme.duration-fast; }
+
+            states [
+                hovered when day-touch.has-hover && !cell.selected: {
+                    background: TTheme.bg-color-container-hover;
+                }
+            ]
+        }
+
+        TText {
+            text: "\{d.day}";
+            font-size: TTheme.font-size-m;
+            line-height: TTheme.line-height-m;
+            color: cell.selected ? TTheme.text-color-anti
+                : cell.middle || cell.is-today ? TTheme.brand-color
+                : cell.in-month ? TTheme.text-color-primary : TTheme.text-color-disabled;
+            horizontal-alignment: center;
+            vertical-alignment: center;
+            width: parent.width;
+            height: parent.height;
+        }
+
+        day-touch := TouchArea {
+            width: root.cell-size;
+            height: root.cell-size;
+            mouse-cursor: MouseCursor.pointer;
+            accessible-role: AccessibleRole.button;
+            accessible-label: root.date-label(d);
+            accessible-checked: cell.selected;
+
+            clicked => {
+                root.select-date(d);
+            }
+        }
+    }
+
+    accessible-role: AccessibleRole.groupbox;
+    accessible-label: "\{root.year} 年 \{root.month} 月";
+}

@@ -47,6 +47,7 @@ Slint 组件为单继承 (`inherits`), 子类可直接使用基类的全部属�
 - TLoading = TLoadingSpinner
 - TDialog = TModalSurface (遮罩基类) + TButton x2 (确认/取消)
 - TTable = ListView (行) + TEmpty (空态)
+- TDatePicker = TInput (只读触发器) + TPopupSurface + TCalendar
 - TActionSheetOverlay = TBottomSheet (底部弹层基类) + 自绘整行取消块 (`TButton` 无法横向撑满自身, 见 `docs/slint-semantics.md` 第 23 条)
 - TImageViewerOverlay = TModalSurface + 私有 TViewerButton x6 (上一张/下一张/缩小/放大/适应窗口/关闭) + TViewerChip x4 (计数/缩放组/关闭/缩略图条) + 窗口宽的图片轨道
 - TCommandPaletteOverlay = TModalSurface + TDivider + TIcon + ScrollView (列表)
@@ -247,7 +248,7 @@ TText { font-size: TTheme.size-font(size); line-height: TTheme.size-line-height(
 ## 数据录入 data-entry
 
 ```slint
-import { TInput, TTextArea, TInputNumber, TSelect, TCheckBox, TRadioGroup, TSwitch, TSlider, TRate, TSegmented } from "@tela-ui/data-entry.slint";
+import { TInput, TTextArea, TInputNumber, TSelect, TCheckBox, TRadioGroup, TSwitch, TSlider, TRate, TSegmented, TCalendar, TDate, TDatePicker } from "@tela-ui/data-entry.slint";
 ```
 
 ### TInput / TTextArea
@@ -447,6 +448,62 @@ TRadioGroup 参数:
 | disabled | `bool` | `false` | 禁用态 |
 
 回调: `changed(int)` — 选中下标变化时触发。
+
+### TCalendar
+
+日历面板。表头月份导航 + 星期行 + 6x7 日期网格; 相邻月份日期填满网格并灰显,
+支持单选与区间。月历运算 (闰年, 大小月, 首日星期) 在 Slint 内完成;
+`today` 与初始显示月份由宿主传入 (Slint 不暴露当前日期)。星期从周日开始。
+
+继承: `Rectangle` (内部 42 个日期单元, 无私有组件)。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| year | `int` (in-out) | `2026` | 显示年份; 上下月切换时组件自写 |
+| month | `int` (in-out) | `1` | 显示月份 1..12; 上下月切换时组件自写 |
+| value | `TDate` (in-out) | `{ year: 0, month: 0, day: 0 }` | 单选结果; `year == 0` 表示未选 |
+| range | `bool` | `false` | 区间模式 |
+| range-start / range-end | `TDate` (in-out) | `{ year: 0, month: 0, day: 0 }` | 区间端点, 两端都有效时区间完整 |
+| today | `TDate` | `{ year: 0, month: 0, day: 0 }` | 高亮日期, 由宿主传入 |
+| cell-size | `length` | `TTheme.spacing-12` (40px) | 日期格边长 |
+
+回调: `selected(TDate)` — 每次点击有效日期都触发, 即使该日期已选中;
+`changed(TDate)` — 选中结果真正变化后触发 (单选重复点击同一天不触发);
+`range-changed(TDate, TDate)` — 区间两个端点都确定后触发, 起点晚于终点时自动交换;
+`month-changed(int, int)` — 上下月切换完成后触发新 `(year, month)`。
+
+公开函数: `show-date(TDate)` — 把面板切到该日期所在月。
+
+相关结构: `TDate { year: int, month: int, day: int }`, 全 0 表示未选。
+
+注意: 区间完成后再次点击会以该日为新区间起点; 相邻月份的灰色日期同样可选。
+`year` / `month` 组件会写入, 宿主需要持续同步时用 `<=>`。暂无键盘导航。
+
+### TDatePicker
+
+日期选择器。只读触发器 + 锚定 `TCalendar`; 点击展开, 单选后关闭, 区间选完关闭。
+
+继承: `Rectangle`。内部组合 TInput, TPopupSurface 与 TCalendar。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| size | `TSize` | `TSize.medium` | 触发器高度与字号 |
+| placement | `TPopupPlacement` | `TPopupPlacement.bottom-start` | 弹层方向; 靠近窗口底部时改用 `top-start` |
+| placeholder-text | `string` | `"请选择日期"` | 未选时占位文字 |
+| disabled | `bool` | `false` | 禁用触发器 |
+| range | `bool` | `false` | 区间模式 |
+| value | `TDate` (in-out) | `{ year: 0, month: 0, day: 0 }` | 单选结果 |
+| range-start / range-end | `TDate` (in-out) | `{ year: 0, month: 0, day: 0 }` | 区间端点 |
+| today | `TDate` | `{ year: 0, month: 0, day: 0 }` | 日历高亮日期 |
+
+只读输出: `is-open` (`bool`) — 弹层是否展开。
+
+回调: `changed(TDate)` — 选中结果变化后; `range-changed(TDate, TDate)` — 区间完成时。
+
+公开函数: `show()`, `close()`, `toggle()`。
+
+已知限制: 触发器只读, 不支持手工输入与字符串解析; `today` 由宿主传入;
+弹层高度约 338px, 靠近窗口底部时请设置 `placement: TPopupPlacement.top-start`。
 
 
 ## 数据展示 data-display
@@ -1377,6 +1434,7 @@ PanelLeftClose, PanelLeftOpen, FlaskConical, Inbox, Square, Copy。
 | TResultStatus | TResult | info, success, warning, error |
 | TCollapseItem | TCollapse | label, content, disabled |
 | TCarouselSlide | TCarousel | image |
+| TDate | TCalendar, TDatePicker | year, month, day (全 0 = 未选) |
 | TTableColumn / TTableRow / TTableAlign / TTableSortDirection | TTable | title, width, min-width, align, sortable / cells / left, center, right / none, ascending, descending |
 | TNavItem | TNavBar | label, value |
 | TSideNavMode / TSideNavTogglePosition | TSideNav | icon-text, text, icon / top, bottom |

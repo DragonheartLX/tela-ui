@@ -8,6 +8,7 @@
 - **TTabs 的无障碍模型是 tab-list + 每列一个 tab (2026-10-18)** — 根是容器角色, 各列承担 `tab` 角色/标签/禁用态与默认动作, 与 TNavBar/TBreadcrumb 的行级 role 写法一致。
 - **TTable 横向滚动用 ListView 自带轴 (2026-10-20)** — `content-width` 设为列固有宽度, 行宽同值, 表头绑 `content-x` 跟随; 不套第二层横向 ScrollView, 避免横竖两个滚动容器抢滚轮与拖拽 (机制见 `slint-semantics.md` 第 27 条)。
 - **TTable 排序只上报 (2026-10-20)** — 1.18 语言内没有循环语句, 组件无法重排模型; 保持 `sort-changed`, 行重排由宿主完成 (见 `slint-semantics.md` 第 21 条)。
+- **TDatePicker 触发器只读, today 由宿主传入 (2026-10-20)** — Slint 1.18 不向普通组件暴露当前日期与字符串切片, 所以不做手工输入/字符串解析; `TCalendar.today` 与初始显示月份由宿主提供, 组件只负责月历运算与选择。
 - **主题令牌表结构冻结** — 103 个字段在两套预设里重复、以及 151 个顶层转发, 是刻意对齐 TDesign 令牌清单的结果, 不做嵌套/合并重构。
 - **字体走令牌 + 统一 `TText`, 不用 `Window.default-font-family`** — 未设 `font-family` 的 `Text` 只落到宿主窗口默认字体, 再落到渲染器通用族(实测 Arial), 主题字体失效; 库内文本一律经 `TText`(TDesign `body-medium`: 14px/22px), 覆盖字号时给 `line-height` 令牌, 系数由 `TText` 按自身字号换算。
 - **`line-height-headline-s/m/l` 已顶层转发 (2026-10-18)** — THeading 各级行盒直接读它们, 不再是预留令牌。

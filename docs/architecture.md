@@ -11,8 +11,8 @@
 
 ## 统计 (2026-10-20)
 
-- 79 个 `.slint` / 10,626 行: `tela-ui/` 70 个 8,845 行, `ui/` 9 个 1,781 行。
-- 66 个导出组件 = 53 个 UI 组件 (含私有 TNavLabel) + 8 个服务 overlay + 5 个库内基类 (TStrokedShape / TInputFrame / TModalSurface / TPopupSurface / TPopupStackLayer)。
+- 81 个 `.slint` / 11,175 行: `tela-ui/` 72 个 9,320 行, `ui/` 9 个 1,855 行。
+- 68 个导出组件 = 55 个 UI 组件 (含私有 TNavLabel) + 8 个服务 overlay + 5 个库内基类 (TStrokedShape / TInputFrame / TModalSurface / TPopupSurface / TPopupStackLayer)。
 - 设计令牌: `TTheme` 151 个顶层转发 → `TAppThemeConfig` 103 字段; 色板在 `colors.slint` (亮/暗两套 ramp); `TIconSet` 43 个字形。
 - 浮层体系: `TPopupSurface` 锚定弹层 + `TPopupStack` 层计数与 ESC + z 序令牌 (`z-popup` / `z-modal` / `z-message`) + 服务型 global (`TDialogService` / `TLoadingService` / `TMessage` / `TNotification` / `TTooltip` / `TImageViewerService` / `TActionSheetService` / `TCommandPaletteService`)。
 

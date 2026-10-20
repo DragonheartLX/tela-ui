@@ -1,0 +1,164 @@
+// Tela UI — TDatePicker
+//
+// Trigger input plus an anchored TCalendar. The trigger is read-only: the
+// panel is the only way to change the date (Slint has no string-slicing API,
+// so free-form date parsing is out of scope). Single and range modes share
+// the same calendar.
+
+import { TTheme } from "../theme.slint";
+import { TInput } from "input.slint";
+import { TCalendar, TDate } from "calendar.slint";
+import { TPopupSurface } from "../popup-surface.slint";
+import { TPopupPlacement, TSize } from "../structs/enums.slint";
+import { TIconSet } from "../base/icon/data.slint";
+
+export component TDatePicker inherits Rectangle {
+    in property <TSize> size: TSize.medium;
+    in property <TPopupPlacement> placement: TPopupPlacement.bottom-start;
+    in property <string> placeholder-text: "请选择日期";
+    in property <bool> disabled: false;
+    in property <bool> range: false;
+    in-out property <TDate> value: { year: 0, month: 0, day: 0 };
+    in-out property <TDate> range-start: { year: 0, month: 0, day: 0 };
+    in-out property <TDate> range-end: { year: 0, month: 0, day: 0 };
+    in property <TDate> today: { year: 0, month: 0, day: 0 };
+
+    callback changed(TDate);
+    callback range-changed(TDate, TDate);
+
+    out property <bool> is-open: surface.is-open;
+
+    private property <length> h: TTheme.size-height(root.size);
+    // Displayed month. The calendar writes these through the two-way
+    // bindings below; `changed value` pulls the view to a new selection.
+    private property <int> view-year: 2026;
+    private property <int> view-month: 1;
+    // Same metrics TCalendar defaults to; the popup cannot read the inlined
+    // calendar's width/height, so the panel size is mirrored here.
+    private property <length> cal-cell: TTheme.spacing-12;
+    private property <length> cal-pad: TTheme.spacing-5;
+    private property <length> cal-width: 7 * root.cal-cell + 2 * root.cal-pad;
+    private property <length> cal-height:
+        root.cal-pad + TTheme.height-l + TTheme.height-m + 6 * root.cal-cell + root.cal-pad;
+
+    height: root.h;
+
+    pure function pad2(n: int) -> string {
+        return n < 10 ? "0\{n}" : "\{n}";
+    }
+
+    pure function date-label(d: TDate) -> string {
+        return "\{d.year}-\{root.pad2(d.month)}-\{root.pad2(d.day)}";
+    }
+
+    private property <string> display-text:
+        root.range
+            ? (root.range-start.year > 0
+                ? root.date-label(root.range-start)
+                    + (root.range-end.year > 0 ? " ~ " + root.date-label(root.range-end) : " ~")
+                : "")
+            : (root.value.year > 0 ? root.date-label(root.value) : "");
+
+    function sync-view() {
+        if (root.range && root.range-start.year > 0) {
+            root.view-year = root.range-start.year;
+            root.view-month = root.range-start.month;
+        } else if (root.value.year > 0) {
+            root.view-year = root.value.year;
+            root.view-month = root.value.month;
+        } else if (root.range-start.year > 0) {
+            root.view-year = root.range-start.year;
+            root.view-month = root.range-start.month;
+        } else if (root.today.year > 0) {
+            root.view-year = root.today.year;
+            root.view-month = root.today.month;
+        }
+    }
+
+    init => {
+        root.sync-view();
+    }
+
+    changed value => { root.sync-view(); }
+    changed range-start => { root.sync-view(); }
+    changed today => { root.sync-view(); }
+    changed range => { root.sync-view(); }
+    changed disabled => {
+        if (root.disabled) {
+            surface.close();
+        }
+    }
+
+    public function show() {
+        surface.show();
+    }
+
+    public function close() {
+        surface.close();
+    }
+
+    public function toggle() {
+        surface.toggle();
+    }
+
+    TInput {
+        x: 0;
+        y: 0;
+        width: parent.width;
+        height: parent.height;
+        size: root.size;
+        text: root.display-text;
+        placeholder-text: root.placeholder-text;
+        read-only: true;
+        disabled: root.disabled;
+        suffix-icon: TIconSet.Calendar;
+        accessible-role: AccessibleRole.none;
+    }
+
+    picker-touch := TouchArea {
+        enabled: !root.disabled;
+        mouse-cursor: root.disabled ? MouseCursor.default : MouseCursor.pointer;
+        accessible-role: AccessibleRole.button;
+        accessible-label: root.display-text != "" ? root.display-text : root.placeholder-text;
+
+        clicked => {
+            surface.toggle();
+        }
+    }
+
+    surface := TPopupSurface {
+        anchor-width: root.width;
+        anchor-height: root.height;
+        placement: root.placement;
+        gap: 6px;
+        popup-width: root.cal-width + 2px;
+        popup-height: root.cal-height + 2px;
+        popup-max-width: root.cal-width + 2px;
+
+        calendar := TCalendar {
+            cell-size: root.cal-cell;
+            year <=> root.view-year;
+            month <=> root.view-month;
+            value <=> root.value;
+            range: root.range;
+            range-start <=> root.range-start;
+            range-end <=> root.range-end;
+            today: root.today;
+
+            selected(date) => {
+                if (!root.range) {
+                    surface.close();
+                }
+            }
+
+            changed(date) => {
+                root.changed(date);
+            }
+
+            range-changed(start, end) => {
+                root.range-changed(start, end);
+                surface.close();
+            }
+        }
+    }
+}
