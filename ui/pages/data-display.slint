@@ -1,9 +1,10 @@
 // Gallery section: 数据展示 (TTag / TBadge / TAvatar / TEmpty / TTimeline /
-// TDescriptions / TStatistic / TCollapse / Tooltip / TCarousel), 一个组件一张卡.
+// TDescriptions / TStatistic / TCollapse / TTable / Tooltip / TCarousel),
+// 一个组件一张卡.
 
 import { TTheme,  TThemeRole,  TSize } from "@tela-ui/theme.slint";
 import { TText, TIcon, TIconSet, TButton, TCaption } from "@tela-ui/base.slint";
-import { TTag, TTagVariant, TBadge, TAvatar, TAvatarSize, TAvatarShape, TEmpty, TTimeline, TDescriptions, TStatistic, TCollapse, TCarousel, TTooltipArea, TTooltipPlacement } from "@tela-ui/data-display.slint";
+import { TTag, TTagVariant, TBadge, TAvatar, TAvatarSize, TAvatarShape, TEmpty, TTimeline, TDescriptions, TStatistic, TCollapse, TTable, TTableAlign, TCarousel, TTooltipArea, TTooltipPlacement } from "@tela-ui/data-display.slint";
 import { GallerySection } from "../gallery-section.slint";
 
 export component DataDisplaySection inherits VerticalLayout {
@@ -201,6 +202,50 @@ export component DataDisplaySection inherits VerticalLayout {
                     { label: "面板二", content: "每个面板独立开关,展开收起带高度过渡动画。" },
                     { label: "禁用面板", content: "这一项不可展开。", disabled: true },
                 ];
+            }
+        }
+    }
+
+    // ========================= TTable =======================
+    GallerySection {
+        title: "表格 TTable";
+        code: "import { TTable, TTableAlign } from \"@tela-ui/data-display.slint\";\n\nTTable {\n    height: 360px;\n    columns: [\n        { title: \"组件\", width: 160px },\n        { title: \"行数\", width: 0px, align: TTableAlign.right, sortable: true },\n    ];\n    rows: [{ cells: [\"TButton\", \"42\"] }, …];\n    sort-changed(column, direction) => { /* 宿主重排 rows */ };\n}";
+
+        VerticalLayout {
+            spacing: 16px;
+
+            TTable {
+                height: 340px;
+                columns: [
+                    { title: "组件", width: 200px },
+                    { title: "类别", width: 140px },
+                    { title: "代码行数", width: 180px, align: TTableAlign.right, sortable: true },
+                    { title: "说明", width: 520px },
+                    { title: "维护", width: 160px },
+                ];
+                rows: [
+                    { cells: ["TButton", "基础", "155", "主要操作按钮", "基础组"] },
+                    { cells: ["TSelect", "数据录入", "195", "下拉选择器", "表单组"] },
+                    { cells: ["TTable", "数据展示", "240", "列定义 + 行模型, 表头排序", "展示组"] },
+                    { cells: ["TDialog", "反馈", "125", "模态对话框", "反馈组"] },
+                    { cells: ["TCarousel", "数据展示", "152", "走马灯", "展示组"] },
+                    { cells: ["TTooltipArea", "数据展示", "194", "悬停气泡", "展示组"] },
+                ];
+            }
+
+            TTable {
+                height: 160px;
+                columns: [
+                    { title: "任务", width: 0px },
+                    { title: "负责人", width: 120px },
+                    { title: "状态", width: 100px },
+                ];
+                empty-text: "暂无任务";
+            }
+
+            TCaption {
+                text: "点击可排序列切换升序 / 降序 / 取消, 行重排由宿主在 sort-changed 里完成; 列宽超出时拖动底部滚动条或横向滚轮, 表头同步。第二张表演示空态。";
+                wrap: word-wrap;
             }
         }
     }
