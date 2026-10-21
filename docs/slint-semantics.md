@@ -56,3 +56,5 @@
 26. **布局外的子元素默认在父级居中** — 没写 `x`/`y` 的子元素由 `passes/default_geometry.rs` 的 `maybe_center_in_parent` 按 `(父尺寸 - 自身尺寸) / 2` 定位, 不是左上角; 只有撑满父级 (默认 100%) 的那一轴不居中。实测 200x400 里的 40x40 红块落在 80..120 / 180..220; TTable 的表头 48px 矩形因此画在 y=176 并令表头点击全部落空, 显式 `y: 0` 后恢复。整屏覆盖层、整行条带这类非布局子元素必须显式给 `x`/`y`。
 
 27. **ListView 只自动算 `content-height`, 横向内容宽要自己给** — `Flickable` 对 `for` 循环生成的内容不会自动求 `content-width`(源码注明 issue #407), ListView 内部只维护纵向的 `content-height`; 要横向滚动就把 `content-width` 设成内容的固有宽度, 行元素显式给同一宽度, 表头绑 `content-x` 跟随。实测 TTable 1200px 固定列在 600px 视口里可横向滚动且表头同步, 纵向滚动与表头纵向固定不受影响。
+
+28. **ListView 的 `content-y` 归内部 Flickable 所有** — 外部给 `content-y` 写绑定或命令式赋值都留不住: 探针在 TTimeColumn 的 `init` 写入 192px/864px(视口高已就绪), 首帧后两条列都回到 0, 绑定也被那次内部写入解除; 换成 `Timer` 在打开后写同样被下一次布局复位。要做"数据整体滚动 + 选中值居中"的时间列, 不要在外面拨 ListView 的 `content-y`: 直接渲染整列、自己维护偏移量并 `animate` 它(TTimePicker 即整列数据 + 行内选中框), 或只渲染可见行而不滚动。

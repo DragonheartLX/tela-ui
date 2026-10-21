@@ -1,10 +1,10 @@
 // Gallery section: 数据录入 (TInput / TSelect / TTextArea / TCheckBox / TRadio /
 // TSwitch / TSlider / TInputNumber / TRate / TSegmented / TCalendar /
-// TDatePicker), 一个组件一张卡.
+// TDatePicker / TTimePicker), 一个组件一张卡.
 
 import { TThemeRole,  TSize } from "@tela-ui/theme.slint";
 import { TIconSet, TCaption } from "@tela-ui/base.slint";
-import { TInput, TTextArea, TSelect, TSelectItem, TCheckBox, TRadioGroup, TRadioItem, TSwitch, TSlider, TInputNumber, TRate, TSegmented, TCalendar, TDate, TDatePicker } from "@tela-ui/data-entry.slint";
+import { TInput, TTextArea, TSelect, TSelectItem, TCheckBox, TRadioGroup, TRadioItem, TSwitch, TSlider, TInputNumber, TRate, TSegmented, TCalendar, TDate, TDatePicker, TTimePicker, TTime } from "@tela-ui/data-entry.slint";
 import { GallerySection } from "../gallery-section.slint";
 
 export component FormSection inherits VerticalLayout {
@@ -41,6 +41,8 @@ export component FormSection inherits VerticalLayout {
     in-out property <TDate> picker-date: { year: 2026, month: 10, day: 20 };
     in-out property <TDate> picker-range-start: { year: 2026, month: 10, day: 6 };
     in-out property <TDate> picker-range-end: { year: 2026, month: 10, day: 16 };
+    in-out property <TTime> time-value: { hour: 9, minute: 30, second: 0 };
+    in-out property <TTime> time-seconds-value: { hour: 18, minute: 5, second: 42 };
 
     // ======================== TInput ========================
     GallerySection {
@@ -286,6 +288,35 @@ export component FormSection inherits VerticalLayout {
             }
 
             TCaption { text: "触发器只读; 点击展开日历, 单选即关, 区间选完结束关。"; wrap: word-wrap; }
+        }
+    }
+
+    // ======================== TTimePicker ===================
+    GallerySection {
+        title: "时间选择 TTimePicker";
+        code: "import { TTimePicker, TTime } from \"@tela-ui/data-entry.slint\";\n\nTTimePicker { width: 220px; value <=> time; }\nTTimePicker { width: 240px; show-seconds: true; value <=> precise; }";
+
+        VerticalLayout {
+            spacing: 16px;
+
+            HorizontalLayout {
+                spacing: 24px;
+
+                TTimePicker {
+                    width: 220px;
+                    value <=> root.time-value;
+                }
+
+                TTimePicker {
+                    width: 240px;
+                    show-seconds: true;
+                    value <=> root.time-seconds-value;
+                }
+
+                Rectangle { }
+            }
+
+            TCaption { text: "触发器只读; 整列数据带动画滚动, 选中框随选中行移动; 点击行或滚轮逐格改值, 无确认按钮。"; wrap: word-wrap; }
         }
     }
 }

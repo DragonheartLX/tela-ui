@@ -1,0 +1,281 @@
+// Tela UI — TTimePicker
+//
+// Trigger input plus an anchored time panel. The trigger is read-only for the
+// same reason as TDatePicker: Slint exposes no string slicing, so free-form
+// time parsing is out of scope. The panel stacks hour / minute (and optional
+// second) columns whose data scrolls under a selection box attached to the
+// selected row; closing is left to click-outside / ESC / the trigger.
+//
+// `TTime.hour < 0` means "not selected". All selected values are 24-hour.
+
+import { TTheme } from "../theme.slint";
+import { TText } from "../base/typography.slint";
+import { TInput } from "input.slint";
+import { TPopupSurface } from "../popup-surface.slint";
+import { TPopupPlacement, TSize } from "../structs/enums.slint";
+import { TIconSet } from "../base/icon/data.slint";
+
+export struct TTime {
+    // -1 means "no selection"; 0..23 is a valid hour.
+    hour: int = -1,
+    minute: int = 0,
+    second: int = 0,
+}
+
+// One column of the time panel. Slint's ListView hands content-y back to its
+// own flickable (it drops any external binding or write on the next layout),
+// so the whole value range is rendered and this component owns the animated
+// offset. The wheel moves the selection one row per notch.
+// Private: the panel layout lives in TTimePicker.
+component TTimeColumn inherits Rectangle {
+    in property <int> count: 24;
+    // Selected index; -1 highlights nothing.
+    in property <int> value: -1;
+    in property <string> label: "";
+    in property <length> item-height: TTheme.height-m;
+
+    callback picked(int);
+
+    private property <int> middle: 3;
+    // Content offset that puts the selected row on the middle band. It may be
+    // negative (blank rows above 00) or leave blanks below the last value, so
+    // the value is always centered — like the platform pickers.
+    private property <length> content-y:
+        root.middle * root.item-height - max(0, root.value) * root.item-height;
+    animate content-y { duration: TTheme.duration-fast; }
+
+    width: TTheme.spacing-14;
+    clip: true;
+
+    pure function pad2(n: int) -> string {
+        return n < 10 ? "0\{n}" : "\{n}";
+    }
+
+    function scroll-by(delta: length) {
+        if (delta == 0px) {
+            return;
+        }
+        // Unselected: the first notch jumps to the near end.
+        let current = root.value >= 0
+            ? root.value
+            : (delta > 0px ? -1 : root.count);
+        let next = max(0, min(root.count - 1, current + (delta > 0px ? 1 : -1)));
+        if (next != root.value) {
+            root.picked(next);
+        }
+    }
+
+    // Selection box lives on the selected row, so it travels with the data.
+
+    Rectangle {
+        y: root.content-y;
+        width: parent.width;
+        height: root.count * root.item-height;
+
+        for i in root.count: Rectangle {
+            y: i * root.item-height;
+            width: parent.width;
+            height: root.item-height;
+            border-radius: TTheme.radius-default;
+            background: i == root.value ? TTheme.brand-color-light : transparent;
+
+            states [
+                hovered when row-touch.has-hover && i != root.value: {
+                    background: TTheme.bg-color-container-hover;
+                }
+            ]
+
+            TText {
+                text: root.pad2(i);
+                font-size: TTheme.size-font(TSize.medium);
+                line-height: TTheme.size-line-height(TSize.medium);
+                color: i == root.value ? TTheme.brand-color : TTheme.text-color-primary;
+                horizontal-alignment: center;
+                vertical-alignment: center;
+                width: parent.width;
+                height: parent.height;
+            }
+
+            row-touch := TouchArea {
+                width: parent.width;
+                height: parent.height;
+                mouse-cursor: MouseCursor.pointer;
+                accessible-role: AccessibleRole.button;
+                accessible-label: "\{root.label} \{root.pad2(i)}";
+                accessible-checked: i == root.value;
+
+                scroll-event(event) => {
+                    root.scroll-by(event.delta-y);
+                    return accept;
+                }
+
+                clicked => {
+                    if (i != root.value) {
+                        root.picked(i);
+                    }
+                }
+            }
+        }
+    }
+}
+
+export component TTimePicker inherits Rectangle {
+    in property <TSize> size: TSize.medium;
+    in property <TPopupPlacement> placement: TPopupPlacement.bottom-start;
+    in property <string> placeholder-text: "请选择时间";
+    in property <bool> disabled: false;
+    // Adds the seconds column and the ":ss" suffix on the trigger.
+    in property <bool> show-seconds: false;
+    in-out property <TTime> value: { hour: -1, minute: 0, second: 0 };
+
+    // Fires on every column pick, after `value` has been updated.
+    callback changed(TTime);
+
+    out property <bool> is-open: surface.is-open;
+
+    private property <length> h: TTheme.size-height(root.size);
+    private property <length> item-h: TTheme.height-m;
+    private property <int> visible-rows: 7;
+    private property <length> pad: TTheme.spacing-2;
+    private property <int> col-count: root.show-seconds ? 3 : 2;
+    private property <length> panel-w:
+        2 * root.pad + root.col-count * TTheme.spacing-14
+            + (root.col-count - 1) * TTheme.spacing-2;
+    // Columns plus padding; no footer.
+    private property <length> panel-h:
+        2 * root.pad + root.visible-rows * root.item-h;
+
+    height: root.h;
+
+    pure function pad2(n: int) -> string {
+        return n < 10 ? "0\{n}" : "\{n}";
+    }
+
+    private property <string> display-text:
+        root.value.hour >= 0
+            ? "\{root.pad2(root.value.hour)}:\{root.pad2(root.value.minute)}"
+                + (root.show-seconds ? ":\{root.pad2(root.value.second)}" : "")
+            : "";
+
+    function pick-hour(h: int) {
+        if (root.value.hour != h) {
+            root.value = {
+                hour: h,
+                minute: root.value.minute >= 0 ? root.value.minute : 0,
+                second: root.value.second >= 0 ? root.value.second : 0,
+            };
+            root.changed(root.value);
+        }
+    }
+
+    function pick-minute(m: int) {
+        if (root.value.minute != m) {
+            root.value = {
+                hour: root.value.hour >= 0 ? root.value.hour : 0,
+                minute: m,
+                second: root.value.second >= 0 ? root.value.second : 0,
+            };
+            root.changed(root.value);
+        }
+    }
+
+    function pick-second(s: int) {
+        if (root.value.second != s) {
+            root.value = {
+                hour: root.value.hour >= 0 ? root.value.hour : 0,
+                minute: root.value.minute >= 0 ? root.value.minute : 0,
+                second: s,
+            };
+            root.changed(root.value);
+        }
+    }
+
+    changed disabled => {
+        if (root.disabled) {
+            surface.close();
+        }
+    }
+
+    public function show() {
+        surface.show();
+    }
+
+    public function close() {
+        surface.close();
+    }
+
+    public function toggle() {
+        surface.toggle();
+    }
+
+    TInput {
+        x: 0;
+        y: 0;
+        width: parent.width;
+        height: parent.height;
+        size: root.size;
+        text: root.display-text;
+        placeholder-text: root.placeholder-text;
+        read-only: true;
+        disabled: root.disabled;
+        suffix-icon: TIconSet.Clock;
+        accessible-role: AccessibleRole.none;
+    }
+
+    picker-touch := TouchArea {
+        enabled: !root.disabled;
+        mouse-cursor: root.disabled ? MouseCursor.default : MouseCursor.pointer;
+        accessible-role: AccessibleRole.button;
+        accessible-label: root.display-text != "" ? root.display-text : root.placeholder-text;
+        accessible-enabled: !root.disabled;
+
+        clicked => {
+            surface.toggle();
+        }
+    }
+
+    surface := TPopupSurface {
+        anchor-width: root.width;
+        anchor-height: root.height;
+        placement: root.placement;
+        gap: TTheme.spacing-3;
+        popup-width: root.panel-w + 2px;
+        popup-height: root.panel-h + 2px;
+        popup-max-width: root.panel-w + 2px;
+
+        Rectangle {
+            x: root.pad;
+            y: root.pad;
+            width: parent.width - 2 * root.pad;
+            height: root.visible-rows * root.item-h;
+
+            HorizontalLayout {
+                spacing: TTheme.spacing-2;
+
+                TTimeColumn {
+                    label: "时";
+                    count: 24;
+                    item-height: root.item-h;
+                    value: root.value.hour;
+                    picked(h) => { root.pick-hour(h); }
+                }
+
+                TTimeColumn {
+                    label: "分";
+                    count: 60;
+                    item-height: root.item-h;
+                    value: root.value.minute;
+                    picked(m) => { root.pick-minute(m); }
+                }
+
+                if root.show-seconds: TTimeColumn {
+                    label: "秒";
+                    count: 60;
+                    item-height: root.item-h;
+                    value: root.value.second;
+                    picked(s) => { root.pick-second(s); }
+                }
+            }
+        }
+    }
+}

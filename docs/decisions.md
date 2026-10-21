@@ -21,3 +21,4 @@
 - **TELA_THEME 精确匹配 (2026-10-18)** — 只认字面量 `light` / `dark`, 不做 trim 也不做小写化; 设了别的值一律报错退出(`src/lib.rs` 的 `theme_from_env`), 不静默跟随系统。
 - **启动失败只在没有控制台的构建里弹窗 (2026-10-18)** — `src/fatal.rs` 的 `MessageBoxW` 只在 Windows 且 `not(debug_assertions)` 时弹原生错误框; dev 只写 stderr, 否则自动化运行会被模态框卡住。panic 走同一通道, 因为 release 是 `panic = "abort"` 加 `windows_subsystem = "windows"`, 什么都不留。
 - **不做令牌漂移守卫 (2026-10-18)** — 两套预设里那 70 个字段重复是刻意对齐 TDesign 令牌清单的结果, 不加运行时断言也不建测试工程; 改 `theme.slint` 时人工比对两套预设。
+- **TTimePicker 用整列数据 + 行内选中框, 不套 ListView (2026-10-21)** — `ListView` 的 `content-y` 由内部 Flickable 接管, 按选中值定位会被下一次布局清回 0(见 `slint-semantics.md` 第 28 条), 所以时间列直接渲染整列(时 24 / 分秒 60 行), 自己维护偏移量并 `animate` 它: 选中框画在选中行上, 数据带动画滚动时它也一起移动, 点击或滚轮把新值送到中间。无确认按钮, 靠点击外部 / ESC 关闭。代价是没有虚拟化与惯性滚动; 换来真正的数据滚动与跟随数据的选中框。

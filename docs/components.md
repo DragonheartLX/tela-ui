@@ -48,6 +48,7 @@ Slint 组件为单继承 (`inherits`), 子类可直接使用基类的全部属�
 - TDialog = TModalSurface (遮罩基类) + TButton x2 (确认/取消)
 - TTable = ListView (行) + TEmpty (空态)
 - TDatePicker = TInput (只读触发器) + TPopupSurface + TCalendar
+- TTimePicker = TInput (只读触发器) + TPopupSurface + 私有 TTimeColumn x2/3 (整列时/分/秒数据 + 行内选中框)
 - TActionSheetOverlay = TBottomSheet (底部弹层基类) + 自绘整行取消块 (`TButton` 无法横向撑满自身, 见 `docs/slint-semantics.md` 第 23 条)
 - TImageViewerOverlay = TModalSurface + 私有 TViewerButton x6 (上一张/下一张/缩小/放大/适应窗口/关闭) + TViewerChip x4 (计数/缩放组/关闭/缩略图条) + 窗口宽的图片轨道
 - TCommandPaletteOverlay = TModalSurface + TDivider + TIcon + ScrollView (列表)
@@ -69,6 +70,7 @@ Slint 组件为单继承 (`inherits`), 子类可直接使用基类的全部属�
 `TNavLabel` (navigation/nav-label.slint),
 `TNavRow` (navigation/side-nav.slint),
 `TTableCell` (data-display/table.slint, 表头与数据单元格的文本、对齐与排序图标),
+`TTimeColumn` (data-entry/time-picker.slint, 时间面板的单列数据; 选中框画在选中行上并随数据滚动),
 `TWindowButton` (base/borderless-window.slint), `TPageBtn`
 (navigation/pagination.slint), `TPopupSurface` (popup-surface.slint,
 TDropdownMenu / TPopconfirm / TSelect 共用的锚定弹层骨架: 零尺寸锚定宿主 + placement
@@ -248,7 +250,7 @@ TText { font-size: TTheme.size-font(size); line-height: TTheme.size-line-height(
 ## 数据录入 data-entry
 
 ```slint
-import { TInput, TTextArea, TInputNumber, TSelect, TCheckBox, TRadioGroup, TSwitch, TSlider, TRate, TSegmented, TCalendar, TDate, TDatePicker } from "@tela-ui/data-entry.slint";
+import { TInput, TTextArea, TInputNumber, TSelect, TCheckBox, TRadioGroup, TSwitch, TSlider, TRate, TSegmented, TCalendar, TDate, TDatePicker, TTimePicker, TTime } from "@tela-ui/data-entry.slint";
 ```
 
 ### TInput / TTextArea
@@ -505,6 +507,35 @@ TRadioGroup 参数:
 已知限制: 触发器只读, 不支持手工输入与字符串解析; `today` 由宿主传入;
 弹层高度约 338px, 靠近窗口底部时请设置 `placement: TPopupPlacement.top-start`。
 
+### TTimePicker
+
+时间选择器。只读触发器 + 锚定时间面板; 面板为时/分(秒)三列, 选中框画在选中行上,
+整列数据带动画滚动并把选中行送到中间。点击行或滚轮逐格改值; 没有确认按钮,
+点击面板外、按 ESC 或再点触发器关闭。
+
+继承: `Rectangle`。内部组合 TInput, TPopupSurface 与私有 TTimeColumn。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| size | `TSize` | `TSize.medium` | 触发器高度与字号 |
+| placement | `TPopupPlacement` | `TPopupPlacement.bottom-start` | 弹层方向; 靠近窗口底部时改用 `top-start` |
+| placeholder-text | `string` | `"请选择时间"` | 未选时占位文字 |
+| disabled | `bool` | `false` | 禁用触发器, 并关闭已展开的面板 |
+| show-seconds | `bool` | `false` | 增加秒列, 触发器显示 `HH:mm:ss` |
+| value | `TTime` (in-out) | `{ hour: -1, minute: 0, second: 0 }` | 选中时间; `hour < 0` 表示未选 |
+
+只读输出: `is-open` (`bool`) — 弹层是否展开。
+
+回调: `changed(TTime)` — 点击行或滚轮改值后, `value` 已更新。
+
+公开函数: `show()`, `close()`, `toggle()`。
+
+相关结构: `TTime { hour: int, minute: int, second: int }`, 24 小时制;
+`hour < 0` 表示未选, 其余字段按 0..59 取值。
+
+已知限制: 触发器只读; 暂不支持键盘导航与手工输入; 滚轮直接修改 `value`
+(每次一格并触发 `changed`), 没有惯性滚动。弹层高约 234px, 靠近窗口底部时请设置
+`placement: TPopupPlacement.top-start`。
 
 ## 数据展示 data-display
 
@@ -1334,12 +1365,12 @@ import { TSkeleton } from "@tela-ui/experimental.slint";
 - `TIconPath { command: string, has_fill: bool }` — 单条路径
 - `TIconData { paths: [TIconPath] }` — 完整图标, 即各组件的图标参数类型
 
-内置 43 个字形, 以 `TIconSet.名称` 取用 (按源文件声明顺序):
+内置 44 个字形, 以 `TIconSet.名称` 取用 (按源文件声明顺序):
 
 X, Check, Minus, Plus, Search, ChevronDown, ChevronUp, ChevronLeft, ChevronRight,
-Menu, Info, CircleCheck, CircleX, CircleAlert, TriangleAlert, Eye, Calendar, User,
-LoaderCircle, Sun, Moon, Bell, House, Lock, Mail, Star, StarFill, Heart, Trash2, Pencil,
-Settings, Download, Upload, RefreshCw, Image, Ellipsis, LayoutDashboard,
+Menu, Info, CircleCheck, CircleX, CircleAlert, TriangleAlert, Eye, Calendar, Clock,
+User, LoaderCircle, Sun, Moon, Bell, House, Lock, Mail, Star, StarFill, Heart, Trash2,
+Pencil, Settings, Download, Upload, RefreshCw, Image, Ellipsis, LayoutDashboard,
 PanelLeftClose, PanelLeftOpen, FlaskConical, Inbox, Square, Copy。
 
 其中 `Square` / `Copy` 是窗口最大化键的两个字形 (最大化显示 `Square`, 已最大化显示
@@ -1435,6 +1466,7 @@ PanelLeftClose, PanelLeftOpen, FlaskConical, Inbox, Square, Copy。
 | TCollapseItem | TCollapse | label, content, disabled |
 | TCarouselSlide | TCarousel | image |
 | TDate | TCalendar, TDatePicker | year, month, day (全 0 = 未选) |
+| TTime | TTimePicker | hour, minute, second (hour < 0 = 未选) |
 | TTableColumn / TTableRow / TTableAlign / TTableSortDirection | TTable | title, width, min-width, align, sortable / cells / left, center, right / none, ascending, descending |
 | TNavItem | TNavBar | label, value |
 | TSideNavMode / TSideNavTogglePosition | TSideNav | icon-text, text, icon / top, bottom |
