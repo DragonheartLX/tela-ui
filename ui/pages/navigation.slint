@@ -4,7 +4,7 @@
 
 import { TTheme,  TThemeRole,  TSize, TPopupPlacement } from "@tela-ui/theme.slint";
 import { TText, TIconSet, TCaption, TButton, TButtonVariant, TParagraph } from "@tela-ui/base.slint";
-import { TMessage } from "@tela-ui/feedback.slint";
+import { TMessage } from "@tela-ui/notice.slint";
 import { TTabs, TPagination, TNavBar, TNavItem, TSideNav, TSideNavItem, TSideNavMode, TSideNavTogglePosition, TBreadcrumb, TCrumbItem, TSteps, TDropdownMenu, TDropdownMenuItem, TBackTop } from "@tela-ui/navigation.slint";
 import { GallerySection } from "../gallery-section.slint";
 import { ScrollView } from "std-widgets.slint";
@@ -38,12 +38,12 @@ export component NavigationSection inherits VerticalLayout {
     ];
     in property <[TSideNavItem]> side-nav-items: [
         { label: "仪表盘", value: "dash", icon: TIconSet.LayoutDashboard },
-        { label: "数据展示", value: "display", icon: TIconSet.Image },
-        { label: "数据录入", value: "form", icon: TIconSet.Pencil },
-        { label: "消息反馈", value: "feedback", icon: TIconSet.Bell, disabled: true },
+        { label: "输入", value: "input", icon: TIconSet.Pencil },
+        { label: "选择", value: "select", icon: TIconSet.Check },
+        { label: "提示", value: "notice", icon: TIconSet.Bell, disabled: true },
         { label: "系统设置", value: "settings", icon: TIconSet.Settings },
     ];
-    in-out property <string> side-nav-value: "display";
+    in-out property <string> side-nav-value: "input";
     in-out property <bool> side-collapsed: false;
 
     // ======================= TTabs =========================
@@ -173,7 +173,7 @@ export component NavigationSection inherits VerticalLayout {
                 Rectangle { }
             }
 
-            TParagraph { text: "左侧为可收起的图标+文本导航 (TSideNavMode.icon-text), 头部按钮切换收起, 收起后按钮自动居中, 宽度在 232px 与 64px 间平滑过渡; 中间为纯图标导航 (TSideNavMode.icon); 右侧为收起按钮置于底部的变体 (TSideNavTogglePosition.bottom)。三者共享 current-value, 选中项联动高亮; 消息反馈为 disabled 状态。"; }
+            TParagraph { text: "左侧为可收起的图标+文本导航 (TSideNavMode.icon-text), 头部按钮切换收起, 收起后按钮自动居中, 宽度在 232px 与 64px 间平滑过渡; 中间为纯图标导航 (TSideNavMode.icon); 右侧为收起按钮置于底部的变体 (TSideNavTogglePosition.bottom)。三者共享 current-value, 选中项联动高亮; 提示为 disabled 状态。"; }
         }
     }
 

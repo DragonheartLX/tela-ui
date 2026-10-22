@@ -1,0 +1,122 @@
+// Gallery section: 选择 (TSelect / TCheckBox / TRadio / TSwitch / TSegmented),
+// 一个组件一张卡.
+
+import { TSize } from "@tela-ui/theme.slint";
+import { TCaption } from "@tela-ui/base.slint";
+import { TSelect, TSelectItem, TCheckBox, TRadioGroup, TRadioItem, TSwitch, TSegmented } from "@tela-ui/select.slint";
+import { GallerySection } from "../gallery-section.slint";
+
+export component SelectSection inherits VerticalLayout {
+    spacing: 28px;
+
+    in-out property <string> city-value: "sh";
+    in property <[TSelectItem]> city-items: [
+        { label: "北京", value: "bj", disabled: false },
+        { label: "上海", value: "sh", disabled: false },
+        { label: "广州", value: "gz", disabled: false },
+        { label: "深圳", value: "sz", disabled: false },
+        { label: "杭州", value: "hz", disabled: true },
+        { label: "成都", value: "cd", disabled: false },
+    ];
+    in-out property <bool> check-a: true;
+    in-out property <bool> check-b: false;
+    in-out property <string> radio-value: "bj";
+    in property <[TRadioItem]> radio-items: [
+        { text: "北京", value: "bj" },
+        { text: "上海", value: "sh" },
+        { text: "广州", value: "gz" },
+    ];
+    in-out property <bool> switch-on: true;
+    in-out property <int> seg-index: 1;
+
+    // ======================== TSelect =======================
+    GallerySection {
+        title: "选择器 TSelect";
+        code: "import { TSelect } from \"@tela-ui/select.slint\";\n\nTSelect {\n    items: [{ label: \"北京\", value: \"bj\" }, …];\n    placeholder-text: \"请选择城市\";\n    current-value <=> city;\n}";
+
+        HorizontalLayout {
+            spacing: 24px;
+
+            TSelect {
+                width: 240px;
+                placeholder-text: "请选择城市";
+                items: root.city-items;
+                current-value <=> root.city-value;
+            }
+
+            TCaption { text: "选中: \{root.city-value}"; vertical-alignment: center; }
+            Rectangle { }
+        }
+    }
+
+    // ======================= TCheckBox ======================
+    GallerySection {
+        title: "复选框 TCheckBox";
+        code: "import { TCheckBox } from \"@tela-ui/select.slint\";\n\nTCheckBox { text: \"选项 A\"; checked <=> a; }\nTCheckBox { text: \"全选\"; indeterminate: a != b; }";
+
+        HorizontalLayout {
+            spacing: 24px;
+
+            TCheckBox { text: "全选"; indeterminate: root.check-a != root.check-b; checked: root.check-a && root.check-b;
+                changed(c) => { root.check-a = c; root.check-b = c; } }
+            TCheckBox { text: "选项 A"; checked <=> root.check-a; }
+            TCheckBox { text: "选项 B"; checked <=> root.check-b; }
+            TCheckBox { text: "禁用"; disabled: true; }
+            TCheckBox { text: "选中禁用"; checked: true; disabled: true; }
+            // Absorbs the leftover row space: with only fixed-width
+            // children the layout spreads the slack between the items
+            // and shoves the row against the card edge.
+            Rectangle { }
+        }
+    }
+
+    // ======================== TRadio ========================
+    GallerySection {
+        title: "单选框 TRadio";
+        code: "import { TRadioGroup } from \"@tela-ui/select.slint\";\n\nTRadioGroup {\n    items: [{ text: \"北京\", value: \"bj\" }, …];\n    value <=> city;\n}";
+
+        TRadioGroup {
+            items: root.radio-items;
+            value <=> root.radio-value;
+        }
+    }
+
+    // ======================== TSwitch =======================
+    GallerySection {
+        title: "开关 TSwitch";
+        code: "import { TSwitch } from \"@tela-ui/select.slint\";\n\nTSwitch { checked <=> on; }\nTSwitch { size: TSize.small; checked: true; }\nTSwitch { disabled: true; }";
+
+        HorizontalLayout {
+            spacing: 24px;
+
+            TSwitch { checked <=> root.switch-on; }
+            TSwitch { checked: false; }
+            TSwitch { checked: true; disabled: true; }
+            TSwitch { checked: false; disabled: true; }
+            TSwitch { size: TSize.small; checked: true; }
+            TSwitch { size: TSize.large; checked: false; }
+            Rectangle { }
+        }
+    }
+
+    // ====================== TSegmented =====================
+    GallerySection {
+        title: "分段控制器 TSegmented";
+        code: "import { TSegmented } from \"@tela-ui/select.slint\";\n\nRectangle {\n    max-width: 480px;\n    TSegmented { items: [\"日\", \"周\", \"月\", \"年\"]; current-index <=> i; }\n}";
+
+        VerticalLayout {
+            spacing: 12px;
+
+            Rectangle {
+                max-width: 480px;
+
+                TSegmented {
+                    items: ["日", "周", "月", "年"];
+                    current-index <=> root.seg-index;
+                }
+            }
+
+            TCaption { text: "当前选中下标: \{root.seg-index}"; }
+        }
+    }
+}

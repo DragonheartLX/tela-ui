@@ -1,0 +1,115 @@
+// Gallery section: 日期时间 (TCalendar / TDatePicker / TTimePicker),
+// 一个组件一张卡.
+
+import { TCaption } from "@tela-ui/base.slint";
+import { TCalendar, TDate, TDatePicker, TTimePicker, TTime } from "@tela-ui/date-time.slint";
+import { GallerySection } from "../gallery-section.slint";
+
+export component DateTimeSection inherits VerticalLayout {
+    spacing: 28px;
+
+    in property <TDate> demo-today: { year: 2026, month: 10, day: 20 };
+    in-out property <TDate> calendar-date: { year: 2026, month: 10, day: 20 };
+    in-out property <TDate> calendar-range-start: { year: 2026, month: 10, day: 6 };
+    in-out property <TDate> calendar-range-end: { year: 2026, month: 10, day: 16 };
+    in-out property <TDate> picker-date: { year: 2026, month: 10, day: 20 };
+    in-out property <TDate> picker-range-start: { year: 2026, month: 10, day: 6 };
+    in-out property <TDate> picker-range-end: { year: 2026, month: 10, day: 16 };
+    in-out property <TTime> time-value: { hour: 9, minute: 30, second: 0 };
+    in-out property <TTime> time-seconds-value: { hour: 18, minute: 5, second: 42 };
+
+    // ========================= TCalendar ====================
+    GallerySection {
+        title: "日历 TCalendar";
+        code: "import { TCalendar, TDate } from \"@tela-ui/date-time.slint\";\n\nTCalendar {\n    year: 2026; month: 10;\n    today: { year: 2026, month: 10, day: 20 };\n    value <=> date;\n}\n// 区间: range: true, range-start / range-end";
+
+        VerticalLayout {
+            spacing: 16px;
+
+            HorizontalLayout {
+                spacing: 24px;
+
+                TCalendar {
+                    year: 2026;
+                    month: 10;
+                    today: root.demo-today;
+                    value <=> root.calendar-date;
+                }
+
+                TCalendar {
+                    year: 2026;
+                    month: 10;
+                    range: true;
+                    today: root.demo-today;
+                    range-start <=> root.calendar-range-start;
+                    range-end <=> root.calendar-range-end;
+                }
+
+                Rectangle { }
+            }
+
+            TCaption { text: "左右箭头切换月份; 单选点击即回调, 区间选第二次点击完成。灰色日期属于相邻月份, 同样可选。"; wrap: word-wrap; }
+        }
+    }
+
+    // ======================== TDatePicker ===================
+    GallerySection {
+        title: "日期选择 TDatePicker";
+        code: "import { TDatePicker } from \"@tela-ui/date-time.slint\";\n\nTDatePicker { width: 240px; value <=> date; }\nTDatePicker { width: 260px; range: true; range-start <=> a; range-end <=> b; }";
+
+        VerticalLayout {
+            spacing: 16px;
+
+            HorizontalLayout {
+                spacing: 24px;
+
+                TDatePicker {
+                    width: 240px;
+                    today: root.demo-today;
+                    value <=> root.picker-date;
+                }
+
+                TDatePicker {
+                    width: 280px;
+                    range: true;
+                    today: root.demo-today;
+                    range-start <=> root.picker-range-start;
+                    range-end <=> root.picker-range-end;
+                }
+
+                Rectangle { }
+            }
+
+            TCaption { text: "触发器只读; 点击展开日历, 单选即关, 区间选完结束关。"; wrap: word-wrap; }
+        }
+    }
+
+    // ======================== TTimePicker ===================
+    GallerySection {
+        title: "时间选择 TTimePicker";
+        code: "import { TTimePicker, TTime } from \"@tela-ui/date-time.slint\";\n\nTTimePicker { width: 220px; value <=> time; }\nTTimePicker { width: 240px; show-seconds: true; value <=> precise; }";
+
+        VerticalLayout {
+            spacing: 16px;
+
+            HorizontalLayout {
+                spacing: 24px;
+
+                TTimePicker {
+                    width: 220px;
+                    value <=> root.time-value;
+                }
+
+                TTimePicker {
+                    width: 240px;
+                    show-seconds: true;
+                    value <=> root.time-seconds-value;
+                }
+
+                Rectangle { }
+            }
+
+            TCaption { text: "触发器只读; 整列数据带动画滚动, 选中框随选中行移动; 点击行或滚轮逐格改值, 无确认按钮。"; wrap: word-wrap; }
+        }
+    }
+}

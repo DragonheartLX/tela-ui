@@ -28,8 +28,9 @@ fn main() {
 import { TTheme, TThemeRole } from "@tela-ui/theme.slint";
 // 分类聚合导出 — 也可以直接从 "@tela-ui/base/button.slint" 等文件导入
 import { TButton, TButtonVariant, TIcon } from "@tela-ui/base.slint";
-import { TInput, TSelect } from "@tela-ui/data-entry.slint";
-import { TCard, TTag } from "@tela-ui/data-display.slint";
+import { TInput } from "@tela-ui/input.slint";
+import { TSelect } from "@tela-ui/select.slint";
+import { TCard, TTag } from "@tela-ui/display.slint";
 import { TSkeleton } from "@tela-ui/experimental.slint";
 
 export component MainWindow inherits Window {
@@ -88,7 +89,7 @@ TSwitch {
 }
 ```
 
-57 个组件 (基础 12 / 数据录入 15 / 数据展示 13 / 反馈 7 / 导航 9, 另有实验性 1; 导航 9 含私有 TNavLabel) 按类别聚合导出; 另有 8 个服务型浮层 (对话框 / 加载 / 消息 / 通知 / 图片预览 / 命令面板 / 动作面板 / 提示) 与主题、图标、浮层栈三个全局对象。`@tela-ui/common.slint` 保留为全量兼容出口, 完整参数说明见 [docs/components.md](docs/components.md)。
+57 个组件 (基础 12 / 输入 6 / 选择 7 / 日期时间 3 / 展示 8 / 内容 4 / 提示 3 / 浮层 4 / 导航 9, 另有实验性 1; 导航 9 含私有 TNavLabel) 按类别聚合导出; 另有 8 个服务型浮层 (对话框 / 加载 / 消息 / 通知 / 图片预览 / 命令面板 / 动作面板 / 提示) 与主题、图标、浮层栈三个全局对象。`@tela-ui/common.slint` 保留为全量兼容出口, 完整参数说明见 [docs/components.md](docs/components.md)。
 
 ## 致谢与说明
 

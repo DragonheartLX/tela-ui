@@ -14,6 +14,9 @@
 - `common.slint`: 补齐 `TTable` / `TSkeleton` / `TCalendar` / `TDatePicker` / `TTimePicker` / `TAutoComplete` 导出, 与分类聚合器保持一致。
 - 浮层体系: `TPopupSurface` 锚定弹层 + `TPopupStack` 层计数 / ESC / z 序令牌。
 - 设计令牌: `TTheme` global 151 个顶层转发, `TAppThemeConfig` 103 字段, 亮/暗两套色板 ramp。
-- gallery 程序 (bin `tela`): 7 个页面, 按 `if` 懒挂载, 亮/暗主题经 `TELA_THEME` 环境变量选择。
 - 无障碍: 可点击元素覆盖 `accessible-role` / `accessible-label`, 浮层文本带 `accessible-live-region`, 禁用态显式 `accessible-enabled` 并在动作回调自带守卫。
 - 自证工具链: `docs/harness.md` 的 `--check` 全量扫描与亮/暗渲染对照配方。
+- gallery 程序 (bin `tela`): 11 个页面 (10 个分类页 + 设置页), 按 `if` 懒挂载, 亮/暗主题经 `TELA_THEME` 环境变量选择。
+
+### Changed
+- **BREAKING**: 分类聚合器按交互类型拆分 — `data-entry.slint` → `input.slint` / `select.slint` / `date-time.slint`, `data-display.slint` → `display.slint` / `content.slint`, `feedback.slint` → `notice.slint` / `overlay.slint`; 组件文件移入对应目录, 旧聚合器删除, 导入路径改为 `@tela-ui/input.slint` 等; `@tela-ui/common.slint` 仍汇总全部导出。

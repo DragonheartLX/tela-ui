@@ -1,13 +1,15 @@
 # 组件文档
 
 本文档列出 tela-ui 的全部组件, 说明每个组件的继承关系, 参数, 参数类型与回调。
-组件按功能分为五类, 每类一个目录与聚合器: `base/` (基础), `data-entry/` (数据录入),
-`data-display/` (数据展示), `feedback/` (反馈), `navigation/` (导航), 另有
-`experimental/` (实验性); 分别由 `@tela-ui/base.slint`, `@tela-ui/data-entry.slint`,
-`@tela-ui/data-display.slint`, `@tela-ui/feedback.slint`, `@tela-ui/navigation.slint`,
-`@tela-ui/experimental.slint` 聚合导出, 也可以直接从组件文件导入
-(如 `@tela-ui/base/button.slint`)。`@tela-ui/common.slint` 保留为全量兼容出口,
-汇总全部类别。主题令牌统一从 `@tela-ui/theme.slint` 导入。
+组件按功能分为十类, 每类一个目录与聚合器: `base/` (基础), `input/` (输入),
+`select/` (选择), `date-time/` (日期时间), `display/` (展示), `content/` (内容),
+`notice/` (提示), `overlay/` (浮层), `navigation/` (导航), 另有 `experimental/`
+(实验性); 分别由 `@tela-ui/base.slint`, `@tela-ui/input.slint`,
+`@tela-ui/select.slint`, `@tela-ui/date-time.slint`, `@tela-ui/display.slint`,
+`@tela-ui/content.slint`, `@tela-ui/notice.slint`, `@tela-ui/overlay.slint`,
+`@tela-ui/navigation.slint`, `@tela-ui/experimental.slint` 聚合导出, 也可以直接从
+组件文件导入 (如 `@tela-ui/base/button.slint`)。`@tela-ui/common.slint` 保留为
+全量兼容出口, 汇总全部类别。主题令牌统一从 `@tela-ui/theme.slint` 导入。
 
 文中类型均按 Slint 类型书写。未标注读写的参数为 `in` (只读输入), `in-out` 表示
 可从外部读写, `out` 表示组件只写, 调用方只能读取。默认值一栏给出 Slint 默认绑定。
@@ -63,14 +65,14 @@ Slint 组件为单继承 (`inherits`), 子类可直接使用基类的全部属�
   (自定义主体), TDrawer (面板主体), TNavBar (右侧操作区), TEmpty (操作区),
   TTooltipArea (触发内容), TResult (操作区), TBorderlessWindow (窗口内容)
 
-私有组件 (仅供实现参考, 不经聚合器导出): `TInputFrame` (data-entry/input.slint,
+私有组件 (仅供实现参考, 不经聚合器导出): `TInputFrame` (input/input.slint,
 已对库内导出供 TInputNumber 复用), `TModalSurface` (modal-surface.slint, 已对库内
 导出供 TDialog/TDrawer/TBottomSheet/TImageViewerOverlay/TCommandPaletteOverlay 继承),
-`TViewerButton` / `TViewerChip` (feedback/image-viewer.slint, 遮罩上的圆形图标按钮与控件卡片),
+`TViewerButton` / `TViewerChip` (overlay/image-viewer.slint, 遮罩上的圆形图标按钮与控件卡片),
 `TNavLabel` (navigation/nav-label.slint),
 `TNavRow` (navigation/side-nav.slint),
-`TTableCell` (data-display/table.slint, 表头与数据单元格的文本、对齐与排序图标),
-`TTimeColumn` (data-entry/time-picker.slint, 时间面板的单列数据; 选中框画在选中行上并随数据滚动),
+`TTableCell` (content/table.slint, 表头与数据单元格的文本、对齐与排序图标),
+`TTimeColumn` (date-time/time-picker.slint, 时间面板的单列数据; 选中框画在选中行上并随数据滚动),
 `TWindowButton` (base/borderless-window.slint), `TPageBtn`
 (navigation/pagination.slint), `TPopupSurface` (popup-surface.slint,
 TDropdownMenu / TPopconfirm / TSelect 共用的锚定弹层骨架: 零尺寸锚定宿主 + placement
@@ -247,10 +249,10 @@ TText { font-size: TTheme.size-font(size); line-height: TTheme.size-line-height(
 | keys | `[string]` | `[]` | 组合键的各按键, 非空时优先于 `text`, 芯片之间自动插入 "+" |
 | size | `TSize` | `TSize.medium` | 键帽尺寸, 全部由令牌驱动: 高 `TTheme.size-height(size)` (24/32/40px), 字号 `TTheme.size-font(size)` (12/14/16px), 行盒 `TTheme.size-line-height(size)`, 左右内边距 `TTheme.size-padding(size)` (8/12/16px) |
 
-## 数据录入 data-entry
+## 输入 input
 
 ```slint
-import { TInput, TTextArea, TInputNumber, TSelect, TCheckBox, TRadioGroup, TSwitch, TSlider, TRate, TSegmented, TCalendar, TDate, TDatePicker, TTimePicker, TTime, TAutoComplete, TAutoCompleteItem } from "@tela-ui/data-entry.slint";
+import { TInput, TTextArea, TInputStatus, TInputNumber, TSlider, TRate, TAutoComplete, TAutoCompleteItem } from "@tela-ui/input.slint";
 ```
 
 ### TInput / TTextArea
@@ -320,6 +322,78 @@ TTextArea `changed(string)`。
 
 回调: `changed(float)` — 键入, 回车或步进后的新值。外部写入 value 时, 文本框
 在未聚焦状态下自动同步显示。
+
+### TAutoComplete
+
+输入联想。输入框 + 锚定建议列表: 聚焦输入框或键入文字时展开, 按标签做不区分大小写的
+子串过滤 (输入为空时列出全部); 高亮第一条可选匹配, 回车或点击选中, 选中后把
+`text` 设为该项 `label` 并关闭; 过滤后没有匹配项时列表显示 `empty-text` (`items` 为空则不展开)。
+
+继承: `Rectangle`。内部组合 TInput, TPopupSurface 与 ScrollView。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| items | `[TAutoCompleteItem]` | `[]` | 建议项; 过滤在组件内完成, 无需宿主重建模型 |
+| text | `string` (in-out) | `""` | 输入内容; 选中建议时被写为该项 `label` |
+| placeholder-text | `string` | `""` | 占位文字 |
+| disabled | `bool` | `false` | 禁用输入框, 并关闭已展开的列表 |
+| clearable | `bool` | `false` | 悬停且非空时显示清空钮 |
+| size | `TSize` | `TSize.medium` | 输入框高度与字号 |
+| max-rows | `int` | `6` | 列表最多显示行数, 超出后滚动 (至少按 1 行计算) |
+| empty-text | `string` | `"无匹配结果"` | 无匹配时的提示文字 |
+
+只读输出: `is-open` (`bool`) — 建议列表是否展开。
+
+回调: `changed(string)` — 键入或清空后的当前文字; `selected(int, string)` — 点击或回车
+选中建议, 参数为 (下标, value); `accepted(string)` — 无高亮建议时回车, 参数为输入文字。
+
+相关结构: `TAutoCompleteItem { label: string, value: string, disabled: bool }`;
+过滤只匹配 `label`, `disabled` 项可见但不可选、也不参与回车高亮。
+
+已知限制: 不支持上下方向键步进 (1.18 语言内没有循环语句, 组件无法扫描"下一条匹配");
+高亮停在第一条可选匹配或指针悬停项。列表随过滤结果伸缩, 最多 `max-rows` 行。
+
+### TSlider
+
+滑块。拖动与键盘 (方向键步进, Home/End 到端点) 均可调值。
+
+继承: `Rectangle`。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| minimum | `float` | `0` | 最小值 |
+| maximum | `float` | `100` | 最大值 |
+| step | `float` | `1` | 步长 |
+| disabled | `bool` | `false` | 禁用态 |
+| value | `float` (in-out) | `minimum` | 当前值, 始终落在步长刻度上 |
+
+回调: `changed(float)` (拖动中持续), `released(float)` (松开或按键释放)。
+
+公开函数: `set-value(float)` — 钳制到区间并按 step 取整后写入。
+
+### TRate
+
+星级评分。整数步进; 悬停预览目标分, 点击当前分清零。
+
+继承: `Rectangle`。内部组合 TIcon (StarFill 填充星)。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| max | `int` | `5` | 星星总数 |
+| value | `float` (in-out) | `0` | 当前分, 交互时组件内部自写, 请用双向绑定 |
+| read-only | `bool` | `false` | 只读 (正常配色, 不可交互) |
+| disabled | `bool` | `false` | 禁用 (整体灰化) |
+| allow-clear | `bool` | `true` | 点击当前分值清零 |
+| theme | `TThemeRole` | `TThemeRole.warning` | 选中星颜色 |
+| size | `TSize` | `TSize.medium` | 星星 16/20/24px |
+
+回调: `changed(float)` — 点击后的新分值。
+
+## 选择 select
+
+```slint
+import { TSelect, TSelectItem, TCheckBox, TRadio, TRadioGroup, TRadioItem, TSwitch, TSegmented } from "@tela-ui/select.slint";
+```
 
 ### TSelect
 
@@ -402,42 +476,6 @@ TRadioGroup 参数:
 
 回调: `changed(bool)` — 翻转后的开关值。
 
-### TSlider
-
-滑块。拖动与键盘 (方向键步进, Home/End 到端点) 均可调值。
-
-继承: `Rectangle`。
-
-| 参数 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| minimum | `float` | `0` | 最小值 |
-| maximum | `float` | `100` | 最大值 |
-| step | `float` | `1` | 步长 |
-| disabled | `bool` | `false` | 禁用态 |
-| value | `float` (in-out) | `minimum` | 当前值, 始终落在步长刻度上 |
-
-回调: `changed(float)` (拖动中持续), `released(float)` (松开或按键释放)。
-
-公开函数: `set-value(float)` — 钳制到区间并按 step 取整后写入。
-
-### TRate
-
-星级评分。整数步进; 悬停预览目标分, 点击当前分清零。
-
-继承: `Rectangle`。内部组合 TIcon (StarFill 填充星)。
-
-| 参数 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| max | `int` | `5` | 星星总数 |
-| value | `float` (in-out) | `0` | 当前分, 交互时组件内部自写, 请用双向绑定 |
-| read-only | `bool` | `false` | 只读 (正常配色, 不可交互) |
-| disabled | `bool` | `false` | 禁用 (整体灰化) |
-| allow-clear | `bool` | `true` | 点击当前分值清零 |
-| theme | `TThemeRole` | `TThemeRole.warning` | 选中星颜色 |
-| size | `TSize` | `TSize.medium` | 星星 16/20/24px |
-
-回调: `changed(float)` — 点击后的新分值。
-
 ### TSegmented
 
 分段控制器 (iOS 风格)。填满容器宽度, 各段等分, 选中段白底加投影;
@@ -453,6 +491,12 @@ TRadioGroup 参数:
 | disabled | `bool` | `false` | 禁用态 |
 
 回调: `changed(int)` — 选中下标变化时触发。
+
+## 日期时间 date-time
+
+```slint
+import { TCalendar, TDate, TDatePicker, TTimePicker, TTime } from "@tela-ui/date-time.slint";
+```
 
 ### TCalendar
 
@@ -540,40 +584,10 @@ TRadioGroup 参数:
 (每次一格并触发 `changed`), 没有惯性滚动。弹层高约 234px, 靠近窗口底部时请设置
 `placement: TPopupPlacement.top-start`。
 
-### TAutoComplete
-
-输入联想。输入框 + 锚定建议列表: 聚焦输入框或键入文字时展开, 按标签做不区分大小写的
-子串过滤 (输入为空时列出全部); 高亮第一条可选匹配, 回车或点击选中, 选中后把
-`text` 设为该项 `label` 并关闭; 过滤后没有匹配项时列表显示 `empty-text` (`items` 为空则不展开)。
-
-继承: `Rectangle`。内部组合 TInput, TPopupSurface 与 ScrollView。
-
-| 参数 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| items | `[TAutoCompleteItem]` | `[]` | 建议项; 过滤在组件内完成, 无需宿主重建模型 |
-| text | `string` (in-out) | `""` | 输入内容; 选中建议时被写为该项 `label` |
-| placeholder-text | `string` | `""` | 占位文字 |
-| disabled | `bool` | `false` | 禁用输入框, 并关闭已展开的列表 |
-| clearable | `bool` | `false` | 悬停且非空时显示清空钮 |
-| size | `TSize` | `TSize.medium` | 输入框高度与字号 |
-| max-rows | `int` | `6` | 列表最多显示行数, 超出后滚动 (至少按 1 行计算) |
-| empty-text | `string` | `"无匹配结果"` | 无匹配时的提示文字 |
-
-只读输出: `is-open` (`bool`) — 建议列表是否展开。
-
-回调: `changed(string)` — 键入或清空后的当前文字; `selected(int, string)` — 点击或回车
-选中建议, 参数为 (下标, value); `accepted(string)` — 无高亮建议时回车, 参数为输入文字。
-
-相关结构: `TAutoCompleteItem { label: string, value: string, disabled: bool }`;
-过滤只匹配 `label`, `disabled` 项可见但不可选、也不参与回车高亮。
-
-已知限制: 不支持上下方向键步进 (1.18 语言内没有循环语句, 组件无法扫描"下一条匹配");
-高亮停在第一条可选匹配或指针悬停项。列表随过滤结果伸缩, 最多 `max-rows` 行。
-
-## 数据展示 data-display
+## 展示 display
 
 ```slint
-import { TTag, TAvatar, TBadge, TCard, TEmpty, TDescriptions, TTimeline, TStatistic, TCollapse, TTable, TTableAlign, TTableSortDirection, TTooltipArea, TCarousel, TCodeBlock } from "@tela-ui/data-display.slint";
+import { TTag, TTagVariant, TAvatar, TAvatarSize, TAvatarShape, TBadge, TCard, TEmpty, TDescriptions, TDescriptionItem, TTimeline, TTimelineItem, TStatistic } from "@tela-ui/display.slint";
 ```
 
 ### TTag
@@ -707,6 +721,12 @@ import { TTag, TAvatar, TBadge, TCard, TEmpty, TDescriptions, TTimeline, TStatis
 | theme | `TThemeRole` | `TThemeRole.default` | 数值颜色 (default → 主文本色) |
 | loading | `bool` | `false` | 加载态 |
 
+## 内容 content
+
+```slint
+import { TCollapse, TCollapseItem, TCarousel, TCarouselSlide, TCodeBlock, TTable, TTableColumn, TTableRow, TTableAlign, TTableSortDirection } from "@tela-ui/content.slint";
+```
+
 ### TCollapse
 
 折叠面板。`accordion: true` 为手风琴模式 (单开, `current-index` 记录展开项,
@@ -725,61 +745,6 @@ import { TTag, TAvatar, TBadge, TCard, TEmpty, TDescriptions, TTimeline, TStatis
 `-1` 表示全部收起; 非手风琴模式不触发。
 
 相关结构: `TCollapseItem { label: string, content: string, disabled: bool }`。
-
-### Tooltip
-
-悬停提示气泡。渲染在窗口级 (参考 sleek-ui 的实现): 触发物通过 `TTooltip`
-全局上报几何, 窗口根部的 `TTooltipOverlay` 统一绘制气泡 — 不会被卡片或
-ScrollView 裁剪, 也没有包裹组件的尺寸问题。气泡延迟 250ms 出现 (可配),
-移开立即消失, 反色底配菱形箭头, 文本超宽自动换行。
-
-静态触发物用 `TTooltipArea` (自动充满父容器并接管悬停):
-
-```slint
-// 窗口根部放置一次:
-TTooltipOverlay { }
-
-TTooltipArea {
-    width: 120px; height: 32px;
-    text: "提示"; placement: TTooltipPlacement.top;
-    Text { text: "目标"; }
-}
-```
-
-交互式触发物 (TButton) 自行上报:
-
-```slint
-ta := TouchArea {
-    changed has-hover => {
-        TTooltip.show("提示", TTooltipPlacement.top,
-                         self.has-hover, self.absolute-position,
-                         self.width, self.height);
-    }
-}
-```
-
-`TTooltip` 全局函数: `show(text, placement, hovering, coords, width, height)`
-— coords 传触发物的 `absolute-position` (窗口坐标), hovering 为 false 时仅
-驱动隐藏, 不覆盖状态。
-
-`TTooltipArea` 参数:
-
-| 参数 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| text | `string` | `""` | 气泡文字 |
-| placement | `TTooltipPlacement` | `TTooltipPlacement.top` | 弹出方向 |
-
-插槽: 默认子元素为触发内容 (悬停层在其之上, 静态内容适用)。
-
-`TTooltipOverlay` 参数 (应用级配置):
-
-| 参数 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| delay | `duration` (in-out) | `250ms` | 显示延迟 |
-| wrap-width | `length` (in-out) | `240px` | 换行阈值 |
-| show-arrow | `bool` (in-out) | `true` | 菱形箭头 |
-
-相关枚举: `TTooltipPlacement { top, bottom, left, right }`。
 
 ### TCarousel
 
@@ -842,10 +807,10 @@ align: TTableAlign = TTableAlign.left, sortable: bool = false }`, `width: 0px` �
 
 ---
 
-## 反馈 feedback
+## 提示 notice
 
 ```slint
-import { TAlert, TDialog, TDialogService, TDialogServiceOverlay, TLoadingService, TLoadingServiceOverlay, TDrawer, TBottomSheet, TActionSheetService, TActionSheetOverlay, TActionSheetItem, TImageViewerService, TImageViewerOverlay, TCommandPaletteService, TCommandPaletteOverlay, TCommandItem, TPopconfirm, TMessage, TNotification, TProgress, TResult } from "@tela-ui/feedback.slint";
+import { TAlert, TMessage, TMessageOverlay, TMessageTheme, TMessagePlacement, TNotification, TNotificationOverlay, TNotificationTheme, TNotificationPlacement, TNotificationData, TProgress, TProgressVariant, TResult, TResultStatus } from "@tela-ui/notice.slint";
 ```
 
 ### TAlert
@@ -863,6 +828,94 @@ import { TAlert, TDialog, TDialogService, TDialogServiceOverlay, TLoadingService
 | open | `bool` (in-out) | `true` | 显示/隐藏 |
 
 回调: `closed()`。
+
+### Message (TMessage + TMessageOverlay)
+
+全局消息。任何代码 (Slint 或 Rust) 调用 `TMessage` 的函数弹消息, 窗口根部放
+一个 `TMessageOverlay` 负责渲染; 3 秒后自动隐藏, 无 TouchArea, 不拦截输入。
+
+`TMessage` 全局属性:
+
+| 属性 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| text | `string` (in-out) | `""` | 消息文字 |
+| theme | `TMessageTheme` (in-out) | `TMessageTheme.info` | 消息类型, 决定图标与颜色 |
+| visible | `bool` (in-out) | `false` | 显示状态, 由 show 函数与 Overlay 定时器维护 |
+| seq | `int` (out) | `0` | 每次 show 自增, Overlay 靠它重置 3 秒计时 |
+| placement | `TMessagePlacement` (in-out) | `TMessagePlacement.top-center` | 贴靠的窗口角落 |
+
+`TMessage` 函数: `info(string)`, `success(string)`, `warning(string)`,
+`error(string)`, 以及底层 `show(string, TMessageTheme)`。
+
+`TMessageOverlay` 组件无参数, 放置即可。
+
+相关枚举: `TMessageTheme { info, success, warning, error }`,
+`TMessagePlacement { top-left, top-center, top-right, bottom-left, bottom-center, bottom-right }`。
+
+### Notification (TNotification + TNotificationOverlay)
+
+全局通知。任何代码 (Slint 或 Rust) 调用 `TNotification` 的函数弹通知,
+窗口根部放一个 `TNotificationOverlay` 负责渲染; 右上角堆叠, 最多 4 条, 满员时
+挤掉最旧一条; 每条 4.5 秒后自动消失, 也可点击关闭; 无 TouchArea, 不拦截输入。
+内容文字按列宽自动换行。
+
+`TNotification` 全局属性:
+
+| 属性 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| items | `[TNotificationData]` (in-out) | `[]` | 变长队列, 下标 0 最旧; 用 Slint 1.18 的 array push/remove 维护, 最多 4 条 |
+| seq | `int` (out) | `0` | 每次 show 自增, 并作为 stamp 写进新条目 |
+| placement | `TNotificationPlacement` (in-out) | `TNotificationPlacement.top-right` | 贴靠的窗口角落 |
+
+`TNotification` 函数: `info(string, string)`, `success(…)`, `warning(…)`,
+`error(…)` (参数为 标题, 内容), 底层 `show(string, string, TNotificationTheme)`,
+以及 `close(int)` (按下标移除) 与 `clear()` (清空队列)。
+
+`TNotificationOverlay` 组件无参数, 放置即可。
+
+相关枚举/结构: `TNotificationTheme { info, success, warning, error }`,
+`TNotificationPlacement { top-left, top-right, bottom-left, bottom-right }`,
+`TNotificationData { title, content, theme, stamp }` (stamp 为 show() 单调
+序号, 供 Overlay 区分数据替换)。
+
+### TProgress
+
+进度条。线性或圆环;默认数值直通,`animated: true` 时按 `duration-base` 缓动。
+
+继承: `Rectangle`。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| variant | `TProgressVariant` | `TProgressVariant.line` | `line` / `circle` |
+| value | `float` | `0` | 0..100 |
+| theme | `TThemeRole` | `TThemeRole.primary` | 进度色 |
+| size | `TSize` | `TSize.medium` | 线粗 4/6/10px, 圆环直径 64/80/96px |
+| show-label | `bool` | `true` | 是否显示百分比文字 |
+| animated | `bool` | `false` | 数值变化带缓动 (200ms);给逐帧变化的值(拖动、轮询)保持默认即可 |
+
+相关枚举: `TProgressVariant { line, circle }`。
+
+### TResult
+
+结果页块: 大号状态图标 + 标题 + 描述 + 操作区, 整体在容器内居中。
+
+继承: `Rectangle`。内部组合 TIcon。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| status | `TResultStatus` | `TResultStatus.info` | 状态, 决定图标与颜色 |
+| title | `string` | `""` | 标题, 为空隐藏 |
+| description | `string` | `""` | 描述, 为空隐藏, 单行省略 |
+
+插槽: 默认子元素为操作区 (一行居中, 通常放按钮)。
+
+相关枚举: `TResultStatus { info, success, warning, error }`。
+
+## 浮层 overlay
+
+```slint
+import { TDialog, TDialogService, TDialogServiceOverlay, TDrawer, TDrawerPlacement, TBottomSheet, TActionSheetService, TActionSheetOverlay, TActionSheetItem, TImageViewerService, TImageViewerOverlay, TCommandPaletteService, TCommandPaletteOverlay, TCommandItem, TPopconfirm, TTooltipArea, TTooltipOverlay, TTooltipPlacement, TLoadingService, TLoadingServiceOverlay } from "@tela-ui/overlay.slint";
+```
 
 ### TDialog
 
@@ -912,24 +965,6 @@ import { TAlert, TDialog, TDialogService, TDialogServiceOverlay, TLoadingService
 
 监听结果: 用镜像属性 `private property <int> r: TDialogService.result-seq;`, 在
 `changed r` 里读 `TDialogService.accepted`。
-
-### TLoadingService (TLoadingService + TLoadingServiceOverlay)
-
-全局全屏加载遮罩。任何代码 (Slint 或 Rust) 调 `TLoadingService.show(text)` 开启,
-`hide()` 关闭; 窗口根部放一个 `TLoadingServiceOverlay` 负责渲染, 遮罩期间吞掉指针输入。
-
-`TLoadingService` 全局属性:
-
-| 属性 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| visible | `bool` (in-out) | `false` | 显示状态, 由 show/hide 维护 |
-| text | `string` (out) | `"加载中…"` | 卡片上的加载文字 |
-
-`TLoadingService` 函数: `show(string)`, `hide()`。
-
-`TLoadingServiceOverlay` 组件无参数, 放置在窗口根部即可; 层级在模态之上 (也盖住已打开
-的对话框), 淡出后隐藏且隐藏时不吞输入。它刻意不注册进 `TPopupStack` — 加载是状态,
-不该被 ESC 关掉。
 
 ### TDrawer
 
@@ -1105,88 +1140,78 @@ ESC, z-modal 与滑入动画全部复用。结果通过 `result-seq` / `selected
 回调: `confirm()`, `cancel()` (仅点击对应按钮时触发)。公开函数: `show()`,
 `close()`, `toggle()`。只读输出: `open` (`bool`)。
 
-### Message (TMessage + TMessageOverlay)
+### Tooltip
 
-全局消息。任何代码 (Slint 或 Rust) 调用 `TMessage` 的函数弹消息, 窗口根部放
-一个 `TMessageOverlay` 负责渲染; 3 秒后自动隐藏, 无 TouchArea, 不拦截输入。
+悬停提示气泡。渲染在窗口级 (参考 sleek-ui 的实现): 触发物通过 `TTooltip`
+全局上报几何, 窗口根部的 `TTooltipOverlay` 统一绘制气泡 — 不会被卡片或
+ScrollView 裁剪, 也没有包裹组件的尺寸问题。气泡延迟 250ms 出现 (可配),
+移开立即消失, 反色底配菱形箭头, 文本超宽自动换行。
 
-`TMessage` 全局属性:
+静态触发物用 `TTooltipArea` (自动充满父容器并接管悬停):
 
-| 属性 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| text | `string` (in-out) | `""` | 消息文字 |
-| theme | `TMessageTheme` (in-out) | `TMessageTheme.info` | 消息类型, 决定图标与颜色 |
-| visible | `bool` (in-out) | `false` | 显示状态, 由 show 函数与 Overlay 定时器维护 |
-| seq | `int` (out) | `0` | 每次 show 自增, Overlay 靠它重置 3 秒计时 |
-| placement | `TMessagePlacement` (in-out) | `TMessagePlacement.top-center` | 贴靠的窗口角落 |
+```slint
+// 窗口根部放置一次:
+TTooltipOverlay { }
 
-`TMessage` 函数: `info(string)`, `success(string)`, `warning(string)`,
-`error(string)`, 以及底层 `show(string, TMessageTheme)`。
+TTooltipArea {
+    width: 120px; height: 32px;
+    text: "提示"; placement: TTooltipPlacement.top;
+    Text { text: "目标"; }
+}
+```
 
-`TMessageOverlay` 组件无参数, 放置即可。
+交互式触发物 (TButton) 自行上报:
 
-相关枚举: `TMessageTheme { info, success, warning, error }`,
-`TMessagePlacement { top-left, top-center, top-right, bottom-left, bottom-center, bottom-right }`。
+```slint
+ta := TouchArea {
+    changed has-hover => {
+        TTooltip.show("提示", TTooltipPlacement.top,
+                         self.has-hover, self.absolute-position,
+                         self.width, self.height);
+    }
+}
+```
 
-### Notification (TNotification + TNotificationOverlay)
+`TTooltip` 全局函数: `show(text, placement, hovering, coords, width, height)`
+— coords 传触发物的 `absolute-position` (窗口坐标), hovering 为 false 时仅
+驱动隐藏, 不覆盖状态。
 
-全局通知。任何代码 (Slint 或 Rust) 调用 `TNotification` 的函数弹通知,
-窗口根部放一个 `TNotificationOverlay` 负责渲染; 右上角堆叠, 最多 4 条, 满员时
-挤掉最旧一条; 每条 4.5 秒后自动消失, 也可点击关闭; 无 TouchArea, 不拦截输入。
-内容文字按列宽自动换行。
-
-`TNotification` 全局属性:
-
-| 属性 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| items | `[TNotificationData]` (in-out) | `[]` | 变长队列, 下标 0 最旧; 用 Slint 1.18 的 array push/remove 维护, 最多 4 条 |
-| seq | `int` (out) | `0` | 每次 show 自增, 并作为 stamp 写进新条目 |
-| placement | `TNotificationPlacement` (in-out) | `TNotificationPlacement.top-right` | 贴靠的窗口角落 |
-
-`TNotification` 函数: `info(string, string)`, `success(…)`, `warning(…)`,
-`error(…)` (参数为 标题, 内容), 底层 `show(string, string, TNotificationTheme)`,
-以及 `close(int)` (按下标移除) 与 `clear()` (清空队列)。
-
-`TNotificationOverlay` 组件无参数, 放置即可。
-
-相关枚举/结构: `TNotificationTheme { info, success, warning, error }`,
-`TNotificationPlacement { top-left, top-right, bottom-left, bottom-right }`,
-`TNotificationData { title, content, theme, stamp }` (stamp 为 show() 单调
-序号, 供 Overlay 区分数据替换)。
-
-### TProgress
-
-进度条。线性或圆环;默认数值直通,`animated: true` 时按 `duration-base` 缓动。
-
-继承: `Rectangle`。
+`TTooltipArea` 参数:
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| variant | `TProgressVariant` | `TProgressVariant.line` | `line` / `circle` |
-| value | `float` | `0` | 0..100 |
-| theme | `TThemeRole` | `TThemeRole.primary` | 进度色 |
-| size | `TSize` | `TSize.medium` | 线粗 4/6/10px, 圆环直径 64/80/96px |
-| show-label | `bool` | `true` | 是否显示百分比文字 |
-| animated | `bool` | `false` | 数值变化带缓动 (200ms);给逐帧变化的值(拖动、轮询)保持默认即可 |
+| text | `string` | `""` | 气泡文字 |
+| placement | `TTooltipPlacement` | `TTooltipPlacement.top` | 弹出方向 |
 
-相关枚举: `TProgressVariant { line, circle }`。
+插槽: 默认子元素为触发内容 (悬停层在其之上, 静态内容适用)。
 
-### TResult
-
-结果页块: 大号状态图标 + 标题 + 描述 + 操作区, 整体在容器内居中。
-
-继承: `Rectangle`。内部组合 TIcon。
+`TTooltipOverlay` 参数 (应用级配置):
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| status | `TResultStatus` | `TResultStatus.info` | 状态, 决定图标与颜色 |
-| title | `string` | `""` | 标题, 为空隐藏 |
-| description | `string` | `""` | 描述, 为空隐藏, 单行省略 |
+| delay | `duration` (in-out) | `250ms` | 显示延迟 |
+| wrap-width | `length` (in-out) | `240px` | 换行阈值 |
+| show-arrow | `bool` (in-out) | `true` | 菱形箭头 |
 
-插槽: 默认子元素为操作区 (一行居中, 通常放按钮)。
+相关枚举: `TTooltipPlacement { top, bottom, left, right }`。
 
-相关枚举: `TResultStatus { info, success, warning, error }`。
+### TLoadingService (TLoadingService + TLoadingServiceOverlay)
 
+全局全屏加载遮罩。任何代码 (Slint 或 Rust) 调 `TLoadingService.show(text)` 开启,
+`hide()` 关闭; 窗口根部放一个 `TLoadingServiceOverlay` 负责渲染, 遮罩期间吞掉指针输入。
+
+`TLoadingService` 全局属性:
+
+| 属性 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| visible | `bool` (in-out) | `false` | 显示状态, 由 show/hide 维护 |
+| text | `string` (out) | `"加载中…"` | 卡片上的加载文字 |
+
+`TLoadingService` 函数: `show(string)`, `hide()`。
+
+`TLoadingServiceOverlay` 组件无参数, 放置在窗口根部即可; 层级在模态之上 (也盖住已打开
+的对话框), 淡出后隐藏且隐藏时不吞输入。它刻意不注册进 `TPopupStack` — 加载是状态,
+不该被 ESC 关掉。
 
 ## 导航 navigation
 
@@ -1341,7 +1366,6 @@ divider }` (icon 为 `TIconData` 默认空; divider 为 true 时渲染分隔线�
 
 回调: `clicked()` — 归零之外附加动作时使用。
 
-
 ## 实验性组件 experimental
 
 API 不稳定, 可能随版本调整或移除。
@@ -1349,7 +1373,6 @@ API 不稳定, 可能随版本调整或移除。
 ```slint
 import { TSkeleton } from "@tela-ui/experimental.slint";
 ```
-
 
 ## 全局对象
 

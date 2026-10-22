@@ -1,0 +1,178 @@
+// Gallery section: 展示 (TTag / TBadge / TAvatar / TEmpty / TTimeline /
+// TDescriptions / TStatistic), 一个组件一张卡.
+
+import { TTheme, TThemeRole, TSize } from "@tela-ui/theme.slint";
+import { TText, TIcon, TIconSet, TButton, TCaption } from "@tela-ui/base.slint";
+import { TTag, TTagVariant, TBadge, TAvatar, TAvatarSize, TAvatarShape, TEmpty, TTimeline, TDescriptions, TStatistic } from "@tela-ui/display.slint";
+import { GallerySection } from "../gallery-section.slint";
+
+export component DisplaySection inherits VerticalLayout {
+    spacing: 28px;
+
+    // ========================= TTag =========================
+    GallerySection {
+        title: "标签 TTag";
+        code: "import { TTag } from \"@tela-ui/display.slint\";\n\nTTag { text: \"主要\"; theme: TThemeRole.primary; }\nTTag { text: \"可关闭\"; theme: TThemeRole.primary; closable: true; }\nTTag { text: \"描边\"; variant: TTagVariant.outline; }";
+
+        HorizontalLayout {
+            spacing: 8px;
+            TTag { text: "默认"; }
+            TTag { theme: TThemeRole.primary; text: "主要"; }
+            TTag { theme: TThemeRole.success; text: "成功"; }
+            TTag { theme: TThemeRole.warning; text: "警告"; }
+            TTag { theme: TThemeRole.error; text: "危险"; }
+            TTag { theme: TThemeRole.primary; variant: TTagVariant.dark; text: "深色"; }
+            TTag { theme: TThemeRole.primary; variant: TTagVariant.outline; text: "描边"; }
+            TTag { theme: TThemeRole.primary; text: "可关闭"; closable: true; }
+            TTag { theme: TThemeRole.primary; size: TSize.small; text: "小"; }
+            TTag { theme: TThemeRole.primary; size: TSize.large; text: "大"; }
+            // Absorbs the leftover row space.
+            Rectangle { }
+        }
+    }
+
+    // ======================== TBadge ========================
+    GallerySection {
+        title: "徽标 TBadge";
+        code: "import { TBadge } from \"@tela-ui/display.slint\";\nimport { TIcon, TIconSet } from \"@tela-ui/base.slint\";\n\nTBadge { count: 6; TIcon { icon: TIconSet.Bell; } }\nTBadge { dot: true; TIcon { icon: TIconSet.Settings; } }";
+
+        HorizontalLayout {
+            spacing: 28px;
+
+            TBadge {
+                count: 6;
+                TIcon { icon: TIconSet.Bell; size: 24px; icon-color: TTheme.text-color-primary; }
+            }
+            TBadge {
+                count: 128;
+                TIcon { icon: TIconSet.Mail; size: 24px; icon-color: TTheme.text-color-primary; }
+            }
+            TBadge {
+                dot: true;
+                TIcon { icon: TIconSet.Settings; size: 24px; icon-color: TTheme.text-color-primary; }
+            }
+
+            // Absorbs the leftover row space.
+            Rectangle { }
+        }
+    }
+
+    // ======================== TAvatar =======================
+    GallerySection {
+        title: "头像 TAvatar";
+        code: "import { TAvatar } from \"@tela-ui/display.slint\";\n\nTAvatar { text: \"T\"; }\nTAvatar { size: TAvatarSize.large; shape: TAvatarShape.square; text: \"\"; }";
+
+        HorizontalLayout {
+            spacing: 24px;
+
+            TAvatar { text: "T"; }
+            TAvatar { size: TAvatarSize.small; text: "TD"; }
+            TAvatar { size: TAvatarSize.large; text: "龙"; }
+            TAvatar { size: TAvatarSize.extra-large; shape: TAvatarShape.square; text: ""; }
+
+            // Absorbs the leftover row space.
+            Rectangle { }
+        }
+    }
+
+    // ======================== TEmpty ========================
+    GallerySection {
+        title: "空状态 TEmpty";
+        code: "import { TEmpty } from \"@tela-ui/display.slint\";\n\nTEmpty { description: \"暂无数据\"; }\n\nTEmpty {\n    icon: TIconSet.Search;\n    description: \"未找到相关结果\";\n    TButton { text: \"立即创建\"; } // 子元素作为操作区\n}";
+
+        HorizontalLayout {
+            spacing: 24px;
+
+            Rectangle {
+                width: 240px;
+                height: 180px;
+                TEmpty { }
+            }
+
+            Rectangle {
+                width: 240px;
+                height: 180px;
+                TEmpty {
+                    description: "暂无订单数据";
+
+                    TButton {
+                        size: TSize.small;
+                        text: "立即创建";
+                    }
+                }
+            }
+
+            Rectangle {
+                width: 240px;
+                height: 180px;
+                TEmpty {
+                    icon: TIconSet.Search;
+                    description: "未找到相关结果";
+                }
+            }
+
+            // Absorbs the leftover row space.
+            Rectangle { }
+        }
+    }
+
+    // ======================= TTimeline ======================
+    GallerySection {
+        title: "时间线 TTimeline";
+        code: "import { TTimeline } from \"@tela-ui/display.slint\";\n\nTTimeline {\n    items: [\n        { label: \"创建订单\", content: \"…\", theme: TThemeRole.primary },\n        { label: \"支付完成\", content: \"…\", theme: TThemeRole.success },\n    ];\n}";
+
+        TTimeline {
+            items: [
+                { label: "创建订单", content: "用户提交了订单,等待支付。", theme: TThemeRole.primary },
+                { label: "支付完成", content: "微信支付 ¥199.00,交易号 202610070001。", theme: TThemeRole.success },
+                { label: "商品出库", content: "包裹已从杭州仓发出,预计明日送达。", theme: TThemeRole.default },
+                { label: "确认收货", content: "", theme: TThemeRole.default },
+            ];
+        }
+    }
+
+    // ===================== TDescriptions ====================
+    GallerySection {
+        title: "描述列表 TDescriptions";
+        code: "import { TDescriptions } from \"@tela-ui/display.slint\";\n\nTDescriptions {\n    bordered: true;\n    columns: 2;\n    items: [{ label: \"订单编号\", value: \"TD202610070001\" }, …];\n}";
+
+        VerticalLayout {
+            spacing: 16px;
+
+            TDescriptions {
+                bordered: true;
+                items: [
+                    { label: "订单编号", value: "TD202610070001" },
+                    { label: "支付方式", value: "微信支付" },
+                    { label: "配送方式", value: "顺丰速运" },
+                    { label: "收货地址", value: "浙江省杭州市西湖区某某街道 88 号" },
+                    { label: "商品数量", value: "3 件" },
+                    { label: "订单金额", value: "¥199.00" },
+                ];
+            }
+
+            TDescriptions {
+                columns: 1;
+                items: [
+                    { label: "订单编号", value: "TD202610070001" },
+                    { label: "订单金额", value: "¥199.00" },
+                ];
+            }
+        }
+    }
+
+    // ======================= TStatistic =====================
+    GallerySection {
+        title: "数值统计 TStatistic";
+        code: "import { TStatistic } from \"@tela-ui/display.slint\";\n\nTStatistic { title: \"总销售额\"; value: \"¥ 286,860\"; }\nTStatistic { title: \"在线人数\"; loading: true; }";
+
+        HorizontalLayout {
+            spacing: 48px;
+
+            TStatistic { title: "总销售额"; value: "¥ 286,860"; horizontal-stretch: 0; }
+            TStatistic { title: "下载量"; value: "12,930"; suffix: "次"; theme: TThemeRole.success; horizontal-stretch: 0; }
+            TStatistic { title: "在线人数"; loading: true; horizontal-stretch: 0; }
+            Rectangle { }
+        }
+    }
+}

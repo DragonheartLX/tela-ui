@@ -2,7 +2,8 @@
 // `title` and `code` feed the two; the children form the card body.
 // Keeps the 8px card-to-code gap uniform across every gallery page.
 
-import { TCard, TCodeBlock } from "@tela-ui/data-display.slint";
+import { TCard } from "@tela-ui/display.slint";
+import { TCodeBlock } from "@tela-ui/content.slint";
 
 export component GallerySection inherits VerticalLayout {
     in property <string> title;

@@ -1,0 +1,215 @@
+// Gallery section: 提示 (TAlert / Message / Notification / TProgress / TResult),
+// 一个组件一张卡.
+
+import { TTheme, TThemeRole } from "@tela-ui/theme.slint";
+import { TText, TButton, TButtonVariant, TCaption } from "@tela-ui/base.slint";
+import { TSelect, TSelectItem, TSwitch } from "@tela-ui/select.slint";
+import { TSlider } from "@tela-ui/input.slint";
+import { TAlert, TMessage, TMessagePlacement, TNotification, TResult, TResultStatus, TProgress, TProgressVariant } from "@tela-ui/notice.slint";
+import { GallerySection } from "../gallery-section.slint";
+
+export component NoticeSection inherits VerticalLayout {
+    spacing: 28px;
+
+    in-out property <float> progress-value: 40;
+    // Defaults to the component's own default (no easing), so the slider
+    // reads as the "live value" case until the switch is flipped.
+    in-out property <bool> progress-animated: false;
+    // TMessage.placement is a global while the section itself is rebuilt on
+    // every page switch, so the select index is derived from the global: a
+    // rebuilt section reads the same value back into the same index.
+    private property <int> placement-index:
+        TMessage.placement == TMessagePlacement.top-center ? 0
+        : TMessage.placement == TMessagePlacement.top-left ? 1
+        : TMessage.placement == TMessagePlacement.top-right ? 2
+        : TMessage.placement == TMessagePlacement.bottom-center ? 3
+        : TMessage.placement == TMessagePlacement.bottom-left ? 4
+        : 5;
+
+    in property <[TSelectItem]> placement-items: [
+        { label: "顶部居中", value: "top-center", disabled: false },
+        { label: "顶部居左", value: "top-left", disabled: false },
+        { label: "顶部居右", value: "top-right", disabled: false },
+        { label: "底部居中", value: "bottom-center", disabled: false },
+        { label: "底部居左", value: "bottom-left", disabled: false },
+        { label: "底部居右", value: "bottom-right", disabled: false },
+    ];
+    // Same order as `placement-items`.
+    in property <[TMessagePlacement]> message-placements: [
+        TMessagePlacement.top-center,
+        TMessagePlacement.top-left,
+        TMessagePlacement.top-right,
+        TMessagePlacement.bottom-center,
+        TMessagePlacement.bottom-left,
+        TMessagePlacement.bottom-right,
+    ];
+
+    // ======================== TAlert ========================
+    GallerySection {
+        title: "警告提示 TAlert";
+        code: "import { TAlert } from \"@tela-ui/notice.slint\";\n\nTAlert { theme: TThemeRole.success; title: \"操作成功\"; description: \"表单已成功提交。\"; closable: true; }";
+
+        VerticalLayout {
+            spacing: 12px;
+
+            TAlert { theme: TThemeRole.default; title: "信息提示"; description: "这是一条普通的信息提示,用于展示需要用户关注的内容。"; closable: true; }
+            TAlert { theme: TThemeRole.success; title: "操作成功"; description: "表单已成功提交。"; closable: true; }
+            TAlert { theme: TThemeRole.warning; title: "警告提示"; description: "磁盘剩余空间不足 10%,请及时清理。"; closable: true; }
+            TAlert { theme: TThemeRole.error; title: "错误提示"; description: "网络连接失败,请检查网络后重试。"; closable: true; }
+        }
+    }
+
+    // ======================== Message ======================
+    GallerySection {
+        title: "全局消息 Message";
+        code: "import { TMessage, TMessagePlacement } from \"@tela-ui/notice.slint\";\n\nTMessage.success(\"保存成功\");\nTMessage.placement = TMessagePlacement.bottom-right;";
+
+        VerticalLayout {
+            spacing: 12px;
+
+            HorizontalLayout {
+                spacing: 12px;
+
+                TText {
+                    text: "消息位置";
+                    font-size: TTheme.font-size-m;
+                    color: TTheme.text-color-secondary;
+                    vertical-alignment: center;
+                }
+
+                TSelect {
+                    width: 160px;
+                    items: root.placement-items;
+                    current-index <=> root.placement-index;
+                    selected(i, v) => {
+                        TMessage.placement = root.message-placements[i];
+                    }
+                }
+
+                // Absorbs the leftover row space.
+                Rectangle { }
+            }
+
+            HorizontalLayout {
+                spacing: 12px;
+
+                TButton { text: "信息"; clicked => { TMessage.info("这是一条信息消息"); } }
+                TButton { theme: TThemeRole.success; text: "成功"; clicked => { TMessage.success("保存成功"); } }
+                TButton { theme: TThemeRole.warning; text: "警告"; clicked => { TMessage.warning("请注意潜在风险"); } }
+                TButton { theme: TThemeRole.error; text: "错误"; clicked => { TMessage.error("操作失败,请重试"); } }
+                Rectangle { }
+            }
+        }
+    }
+
+    // ======================= Notification ==================
+    GallerySection {
+        title: "通知 Notification";
+        code: "import { TNotification, TNotificationOverlay } from \"@tela-ui/notice.slint\";\n\n// 窗口根部放置一次:\nTNotificationOverlay { }\n\n// 任意代码调用:\nTNotification.info(\"提示\", \"这是一条信息通知\");\nTNotification.success(\"操作成功\", \"数据已保存\");";
+
+        VerticalLayout {
+            spacing: 12px;
+
+            HorizontalLayout {
+                spacing: 12px;
+
+                TButton { text: "信息通知"; clicked => { TNotification.info("提示", "这是一条信息通知,右上角堆叠展示"); } }
+                TButton { theme: TThemeRole.success; text: "成功通知"; clicked => { TNotification.success("操作成功", "数据已保存"); } }
+                TButton { theme: TThemeRole.warning; text: "警告通知"; clicked => { TNotification.warning("空间不足", "磁盘剩余空间不足 10%,请及时清理,或考虑升级更大容量的磁盘以获得更好的使用体验。"); } }
+                TButton { theme: TThemeRole.error; text: "错误通知"; clicked => { TNotification.error("操作失败", "网络连接失败,请重试"); } }
+
+                // Absorbs the leftover row space.
+                Rectangle { }
+            }
+
+            TCaption { text: "通知显示在窗口右上角, 多条自动堆叠 (最多 4 条, 满员时挤掉最旧一条), 4.5 秒后自动消失, 也可点击关闭。窗口根部需要一个 TNotificationOverlay。"; wrap: word-wrap; }
+        }
+    }
+
+    // ======================== TProgress =====================
+    GallerySection {
+        title: "进度 TProgress(拖动滑块实时变化)";
+        code: "import { TProgress } from \"@tela-ui/notice.slint\";\n\nTProgress { value: 40; theme: TThemeRole.primary; }\nTProgress { value: 66; theme: TThemeRole.success; variant: TProgressVariant.circle; }\nTProgress { value: 90; theme: TThemeRole.error; show-label: false; }\n// 默认数值直通; 一次性跳变想要缓动就打开:\nTProgress { value: v; animated: true; }";
+
+        VerticalLayout {
+            spacing: 16px;
+
+            HorizontalLayout {
+                spacing: 32px;
+
+                TProgress { value: root.progress-value; theme: TThemeRole.primary; horizontal-stretch: 1; animated: root.progress-animated; }
+                TProgress { value: 66; theme: TThemeRole.success; horizontal-stretch: 1; }
+                TProgress { value: 30; theme: TThemeRole.warning; horizontal-stretch: 1; }
+                TProgress { value: 90; theme: TThemeRole.error; horizontal-stretch: 1; show-label: false; }
+            }
+
+            HorizontalLayout {
+                spacing: 32px;
+                TProgress { variant: TProgressVariant.circle; value: root.progress-value; theme: TThemeRole.primary; animated: root.progress-animated; }
+                TProgress { variant: TProgressVariant.circle; value: 66; theme: TThemeRole.success; }
+                TProgress { variant: TProgressVariant.circle; value: 30; theme: TThemeRole.warning; }
+                TProgress { variant: TProgressVariant.circle; value: 100; theme: TThemeRole.error; }
+                // Absorbs the leftover row space.
+                Rectangle { }
+            }
+
+            TSlider {
+                value <=> root.progress-value;
+            }
+
+            HorizontalLayout {
+                spacing: TTheme.spacing-4;
+
+                TSwitch {
+                    checked <=> root.progress-animated;
+                }
+
+                TCaption {
+                    vertical-alignment: center;
+                    text: "缓动动画 — 关 (默认) 时滑块拖到哪数值就到哪; 开时那两根进度按 200ms 缓动追上去。";
+                }
+            }
+        }
+    }
+
+    // ========================= TResult ======================
+    GallerySection {
+        title: "结果页 TResult";
+        code: "import { TResult } from \"@tela-ui/notice.slint\";\n\nTResult {\n    status: TResultStatus.success;\n    title: \"提交成功\";\n    description: \"表单已提交。\";\n    TButton { text: \"查看详情\"; } // 子元素作为操作区\n}";
+
+        HorizontalLayout {
+            spacing: 24px;
+
+            Rectangle {
+                width: 380px;
+                height: 260px;
+
+                TResult {
+                    status: TResultStatus.success;
+                    title: "提交成功";
+                    description: "表单已提交,审核结果将以消息通知。";
+
+                    TButton { text: "继续填写"; }
+                    TButton { theme: TThemeRole.primary; text: "查看详情"; }
+                }
+            }
+
+            Rectangle {
+                width: 380px;
+                height: 260px;
+
+                TResult {
+                    status: TResultStatus.error;
+                    title: "提交失败";
+                    description: "网络连接失败,请检查网络后重试。";
+
+                    TButton { variant: TButtonVariant.outline; text: "返回修改"; }
+                    TButton { theme: TThemeRole.error; text: "重新提交"; }
+                }
+            }
+
+            Rectangle { }
+        }
+    }
+
+}

@@ -1,0 +1,163 @@
+// Gallery section: 输入 (TInput / TTextArea / TInputNumber / TAutoComplete /
+// TSlider / TRate), 一个组件一张卡.
+
+import { TThemeRole, TSize } from "@tela-ui/theme.slint";
+import { TIconSet, TCaption } from "@tela-ui/base.slint";
+import { TInput, TTextArea, TInputNumber, TAutoComplete, TAutoCompleteItem, TSlider, TRate } from "@tela-ui/input.slint";
+import { GallerySection } from "../gallery-section.slint";
+
+export component InputSection inherits VerticalLayout {
+    spacing: 28px;
+
+    in-out property <string> input-text: "";
+    in-out property <string> textarea-text: "";
+    in-out property <float> num-value: 1;
+    in-out property <float> slider-value: 40;
+    in-out property <float> rate-value: 3;
+    in-out property <string> auto-text: "";
+    in-out property <string> auto-value: "";
+    in property <[TAutoCompleteItem]> auto-items: [
+        { label: "北京", value: "bj", disabled: false },
+        { label: "上海", value: "sh", disabled: false },
+        { label: "广州", value: "gz", disabled: false },
+        { label: "深圳", value: "sz", disabled: false },
+        { label: "杭州", value: "hz", disabled: false },
+        { label: "成都", value: "cd", disabled: false },
+        { label: "重庆", value: "cq", disabled: false },
+        { label: "武汉", value: "wh", disabled: false },
+        { label: "南京", value: "nj", disabled: false },
+        { label: "西安", value: "xa", disabled: true },
+    ];
+
+    // ======================== TInput ========================
+    GallerySection {
+        title: "输入框 TInput";
+        code: "import { TInput } from \"@tela-ui/input.slint\";\n\nTInput { placeholder-text: \"请输入内容\"; clearable: true; prefix-icon: TIconSet.Search; text <=> v; }\nTInput { placeholder-text: \"密码\"; input-type: password; }";
+
+        VerticalLayout {
+            spacing: 16px;
+
+            TInput {
+                placeholder-text: "请输入内容";
+                clearable: true;
+                prefix-icon: TIconSet.Search;
+                text <=> root.input-text;
+            }
+
+            HorizontalLayout {
+                spacing: 24px;
+
+                TInput {
+                    width: 240px;
+                    placeholder-text: "密码";
+                    input-type: password;
+                    clearable: false;
+                }
+                TInput { width: 240px; placeholder-text: "禁用状态"; disabled: true; }
+                TInput { width: 240px; text: "只读状态"; read-only: true; }
+                Rectangle { }
+            }
+        }
+    }
+
+    // ======================= TTextArea ======================
+    GallerySection {
+        title: "多行输入 TTextArea";
+        code: "import { TTextArea } from \"@tela-ui/input.slint\";\n\nTTextArea { rows: 3; placeholder-text: \"请输入描述…\"; text <=> v; }";
+
+        TTextArea {
+            rows: 3;
+            placeholder-text: "请输入描述…";
+            text <=> root.textarea-text;
+        }
+    }
+
+    // ====================== TInputNumber ====================
+    GallerySection {
+        title: "数字输入框 TInputNumber";
+        code: "import { TInputNumber } from \"@tela-ui/input.slint\";\n\nTInputNumber { min: 0; max: 10; step: 1; value <=> n; }\n// 文本框内 Up/Down 方向键也可步进; 到达边界时对应按钮禁用。";
+
+        HorizontalLayout {
+            spacing: 24px;
+
+            TInputNumber {
+                width: 160px;
+                min: 0;
+                max: 10;
+                value <=> root.num-value;
+            }
+            TInputNumber { width: 160px; value: 3.5; min: 0; max: 10; step: 0.5; editable: false; }
+            TInputNumber { width: 160px; value: 2; disabled: true; }
+            TCaption { text: "当前值: \{root.num-value}"; vertical-alignment: center; }
+            Rectangle { }
+        }
+    }
+
+    // ======================== TAutoComplete =================
+    GallerySection {
+        title: "自动补全 TAutoComplete";
+        code: "import { TAutoComplete, TAutoCompleteItem } from \"@tela-ui/input.slint\";\n\nTAutoComplete {\n    items: [{ label: \"北京\", value: \"bj\" }, …];\n    placeholder-text: \"输入城市名称\";\n    text <=> city-text;\n    selected(i, value) => { picked = value; }\n}";
+
+        VerticalLayout {
+            spacing: 16px;
+
+            HorizontalLayout {
+                spacing: 24px;
+
+                TAutoComplete {
+                    width: 240px;
+                    clearable: true;
+                    placeholder-text: "输入城市名称, 如 北";
+                    items: root.auto-items;
+                    text <=> root.auto-text;
+
+                    selected(i, value) => {
+                        root.auto-value = value;
+                    }
+                }
+
+                TAutoComplete {
+                    width: 240px;
+                    placeholder-text: "禁用状态";
+                    items: root.auto-items;
+                    disabled: true;
+                }
+
+                Rectangle { }
+            }
+
+            TCaption {
+                text: root.auto-value == ""
+                    ? "输入即过滤 (标签子串匹配, 不区分大小写); 高亮首条匹配, 回车或点击选中; 输入框为空时列出全部。"
+                    : "已选:" + root.auto-value;
+                wrap: word-wrap;
+            }
+        }
+    }
+
+    // ======================== TSlider =======================
+    GallerySection {
+        title: "滑块 TSlider";
+        code: "import { TSlider } from \"@tela-ui/input.slint\";\n\nTSlider { value <=> v; }";
+
+        TSlider {
+            value <=> root.slider-value;
+        }
+    }
+
+    // ========================= TRate ========================
+    GallerySection {
+        title: "评分 TRate";
+        code: "import { TRate } from \"@tela-ui/input.slint\";\n\nTRate { value <=> score; }\nTRate { value: 2; read-only: true; }\nTRate { theme: TThemeRole.primary; size: TSize.small; }";
+
+        HorizontalLayout {
+            spacing: 24px;
+
+            TRate { value <=> root.rate-value; }
+            TRate { value: 2; read-only: true; }
+            TRate { size: TSize.small; theme: TThemeRole.primary; value: 4; }
+            TRate { value: 3; disabled: true; }
+            Rectangle { }
+        }
+    }
+}

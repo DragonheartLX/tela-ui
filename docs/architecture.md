@@ -4,14 +4,14 @@
 
 ## 结构
 
-- `tela-ui/` — 组件库本体, `build.rs` 注册 `@tela-ui/...`; 按 `base/` `data-entry/` `data-display/` `feedback/` `navigation/` `experimental/` 分目录, 顶层同名聚合器导出; `common.slint` 仅作兼容出口。
+- `tela-ui/` — 组件库本体, `build.rs` 注册 `@tela-ui/...`; 按 `base/` `input/` `select/` `date-time/` `display/` `content/` `notice/` `overlay/` `navigation/` `experimental/` 分目录, 顶层同名聚合器导出; `common.slint` 仅作兼容出口。
 - `tela-ui/structs/` — 共享枚举与主题结构; `tela-ui/colors.slint` 是亮/暗色板。
-- `ui/` + `src/` — gallery (bin `tela`); `ui/MainWindow.slint` 用 `if` 懒挂 7 个页面。
+- `ui/` + `src/` — gallery (bin `tela`); `ui/MainWindow.slint` 用 `if` 懒挂 11 个页面 (10 个分类页 + 设置页)。
 - 构建: Slint 1.18.1 / edition 2024 / 样式 `fluent` / accessibility + backend-winit + renderer-skia/software。
 
 ## 统计 (2026-10-22)
 
-- 83 个 `.slint` / 11,894 行: `tela-ui/` 74 个 9,952 行, `ui/` 9 个 1,942 行。
+- 91 个 `.slint` / 12,046 行: `tela-ui/` 78 个 10,048 行, `ui/` 13 个 1,998 行。
 - 70 个导出组件 = 57 个 UI 组件 (含私有 TNavLabel) + 8 个服务 overlay + 5 个库内基类 (TStrokedShape / TInputFrame / TModalSurface / TPopupSurface / TPopupStackLayer)。
 - 设计令牌: `TTheme` 151 个顶层转发 → `TAppThemeConfig` 103 字段; 色板在 `colors.slint` (亮/暗两套 ramp); `TIconSet` 44 个字形。
 - 浮层体系: `TPopupSurface` 锚定弹层 + `TPopupStack` 层计数与 ESC + z 序令牌 (`z-popup` / `z-modal` / `z-message`) + 服务型 global (`TDialogService` / `TLoadingService` / `TMessage` / `TNotification` / `TTooltip` / `TImageViewerService` / `TActionSheetService` / `TCommandPaletteService`)。

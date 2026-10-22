@@ -6,15 +6,19 @@
 
 import { TTheme,  TThemePreference } from "@tela-ui/theme.slint";
 import { TBorderlessWindow, TIconSet, TParagraph, TButton, TButtonVariant } from "@tela-ui/base.slint";
-import { TTooltipOverlay } from "@tela-ui/data-display.slint";
-import { TDialog, TDialogService, TDialogServiceOverlay, TDrawer, TDrawerPlacement, TBottomSheet, TActionSheetOverlay, TActionSheetService, TImageViewerOverlay, TImageViewerService, TCommandPaletteOverlay, TCommandPaletteService, TMessageOverlay, TMessage, TNotificationOverlay, TLoadingService, TLoadingServiceOverlay } from "@tela-ui/feedback.slint";
+import { TTooltipOverlay, TDialog, TDialogService, TDialogServiceOverlay, TDrawer, TDrawerPlacement, TBottomSheet, TActionSheetOverlay, TActionSheetService, TImageViewerOverlay, TImageViewerService, TCommandPaletteOverlay, TCommandPaletteService, TLoadingService, TLoadingServiceOverlay } from "@tela-ui/overlay.slint";
+import { TMessageOverlay, TMessage, TNotificationOverlay } from "@tela-ui/notice.slint";
 import { TSideNav, TSideNavItem, TSideNavTogglePosition, TBackTop } from "@tela-ui/navigation.slint";
 import { ScrollView } from "std-widgets.slint";
 
 import { BasicsSection } from "pages/basics.slint";
-import { DataDisplaySection } from "pages/data-display.slint";
-import { FormSection } from "pages/form-section.slint";
-import { FeedbackSection } from "pages/feedback.slint";
+import { InputSection } from "pages/input-section.slint";
+import { SelectSection } from "pages/select-section.slint";
+import { DateTimeSection } from "pages/date-time-section.slint";
+import { DisplaySection } from "pages/display-section.slint";
+import { ContentSection } from "pages/content-section.slint";
+import { NoticeSection } from "pages/notice-section.slint";
+import { OverlaySection } from "pages/overlay-section.slint";
 import { NavigationSection } from "pages/navigation.slint";
 import { ExperimentalSection } from "pages/experimental.slint";
 import { SettingsSection } from "pages/settings.slint";
@@ -37,9 +41,13 @@ export component MainWindow inherits TBorderlessWindow {
     // ------------------------------------------------------------------
     in property <[TSideNavItem]> group-items: [
         { label: "基础组件", value: "basics", icon: TIconSet.LayoutDashboard },
-        { label: "数据展示", value: "display", icon: TIconSet.Image },
-        { label: "数据录入", value: "form", icon: TIconSet.Pencil },
-        { label: "反馈", value: "feedback", icon: TIconSet.Bell },
+        { label: "输入", value: "input", icon: TIconSet.Pencil },
+        { label: "选择", value: "select", icon: TIconSet.Check },
+        { label: "日期时间", value: "date-time", icon: TIconSet.Calendar },
+        { label: "展示", value: "display", icon: TIconSet.Image },
+        { label: "内容", value: "content", icon: TIconSet.Inbox },
+        { label: "提示", value: "notice", icon: TIconSet.Bell },
+        { label: "浮层", value: "overlay", icon: TIconSet.Copy },
         { label: "导航", value: "navigation", icon: TIconSet.Menu },
         { label: "实验性", value: "experimental", icon: TIconSet.FlaskConical },
     ];
@@ -88,9 +96,13 @@ export component MainWindow inherits TBorderlessWindow {
                         spacing: 28px;
 
                         if root.group-value == "basics": BasicsSection { vertical-stretch: 0; }
-                        if root.group-value == "display": DataDisplaySection { vertical-stretch: 0; }
-                        if root.group-value == "form": FormSection { vertical-stretch: 0; }
-                        if root.group-value == "feedback": FeedbackSection {
+                        if root.group-value == "input": InputSection { vertical-stretch: 0; }
+                        if root.group-value == "select": SelectSection { vertical-stretch: 0; }
+                        if root.group-value == "date-time": DateTimeSection { vertical-stretch: 0; }
+                        if root.group-value == "display": DisplaySection { vertical-stretch: 0; }
+                        if root.group-value == "content": ContentSection { vertical-stretch: 0; }
+                        if root.group-value == "notice": NoticeSection { vertical-stretch: 0; }
+                        if root.group-value == "overlay": OverlaySection {
                             vertical-stretch: 0;
                             dialog-open <=> root.dialog-open;
                             drawer-open <=> root.drawer-open;

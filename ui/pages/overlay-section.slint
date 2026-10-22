@@ -1,0 +1,314 @@
+// Gallery section: 浮层 (TDialog / TDrawer / TBottomSheet / TActionSheet /
+// TImageViewer / TCommandPalette / TPopconfirm / Tooltip), 一个组件一张卡.
+// The dialog and drawer overlays live at window level in MainWindow; this
+// section only hosts the trigger buttons via two-way bound properties.
+
+import { TTheme, TThemeRole, TPopupPlacement } from "@tela-ui/theme.slint";
+import { TText, TButton, TButtonVariant, TCaption } from "@tela-ui/base.slint";
+import { TSelect, TSelectItem } from "@tela-ui/select.slint";
+import { TMessage } from "@tela-ui/notice.slint";
+import { TDrawerPlacement, TPopconfirm, TDialogService, TLoadingService, TImageViewerService, TCommandPaletteService, TCommandItem, TActionSheetService, TActionSheetItem, TTooltipArea, TTooltipPlacement } from "@tela-ui/overlay.slint";
+import { GallerySection } from "../gallery-section.slint";
+
+export component OverlaySection inherits VerticalLayout {
+    spacing: 28px;
+
+    // Overlays owned by MainWindow.
+    in-out property <bool> dialog-open: false;
+    in-out property <bool> drawer-open: false;
+    in-out property <bool> sheet-open: false;
+    in-out property <TDrawerPlacement> drawer-placement: TDrawerPlacement.right;
+    // drawer-placement survives on MainWindow while this section is rebuilt
+    // on every page switch, so the select index is derived from it.
+    private property <int> drawer-side-index:
+        root.drawer-placement == TDrawerPlacement.right ? 0
+        : root.drawer-placement == TDrawerPlacement.left ? 1
+        : root.drawer-placement == TDrawerPlacement.top ? 2
+        : 3;
+
+    in property <[TSelectItem]> drawer-side-items: [
+        { label: "右侧", value: "right", disabled: false },
+        { label: "左侧", value: "left", disabled: false },
+        { label: "顶部", value: "top", disabled: false },
+        { label: "底部", value: "bottom", disabled: false },
+    ];
+    // Same order as `drawer-side-items`, so the TSelect index picks directly.
+    in property <[TDrawerPlacement]> drawer-placements: [
+        TDrawerPlacement.right,
+        TDrawerPlacement.left,
+        TDrawerPlacement.top,
+        TDrawerPlacement.bottom,
+    ];
+
+    // Service dialog outcome → toast, demonstrating result-seq listening.
+    private property <int> svc-dialog-result: TDialogService.result-seq;
+    changed svc-dialog-result => {
+        TMessage.info(TDialogService.accepted ? "服务框: 已确认" : "服务框: 已取消/关闭");
+    }
+
+    private property <[image]> viewer-images: [
+        @image-url("../assets/slide-1.svg"),
+        @image-url("../assets/slide-2.svg"),
+        @image-url("../assets/slide-3.svg"),
+    ];
+
+    private property <[TCommandItem]> palette-commands: [
+        { label: "打开设置", shortcut: "Ctrl+," },
+        { label: "切换深色模式", shortcut: "Ctrl+Shift+D" },
+        { label: "新建文件", shortcut: "Ctrl+N" },
+        { label: "打开文件", shortcut: "Ctrl+O" },
+        { label: "保存全部", shortcut: "Ctrl+Alt+S" },
+        { label: "查找替换", shortcut: "Ctrl+H" },
+        { label: "切换侧边栏", shortcut: "Ctrl+B" },
+        { label: "关闭当前标签", shortcut: "Ctrl+W" },
+    ];
+
+    // The palette is a window-level overlay, so its command list cannot ride on
+    // this lazily mounted page: hand the data to the service once on mount.
+    init => {
+        TCommandPaletteService.commands = root.palette-commands;
+    }
+
+    // Viewer navigation → toast, demonstrating change-seq listening.
+    private property <int> viewer-seq: TImageViewerService.change-seq;
+    changed viewer-seq => {
+        TMessage.info("图片预览: 第 " + (TImageViewerService.current-index + 1) + " / "
+            + TImageViewerService.urls.length + " 张");
+    }
+
+    // Action sheet outcome → toast; -1 is cancel / ESC / mask.
+    private property <int> sheet-seq: TActionSheetService.result-seq;
+    changed sheet-seq => {
+        TMessage.info(TActionSheetService.selected-index >= 0
+            ? "动作面板: " + TActionSheetService.actions[TActionSheetService.selected-index].label
+            : "动作面板: 已取消");
+    }
+
+    private property <int> palette-seq: TCommandPaletteService.run-seq;
+    changed palette-seq => {
+        TMessage.info(TCommandPaletteService.run-index >= 0
+            ? "命令面板: " + TCommandPaletteService.commands[TCommandPaletteService.run-index].label
+            : "命令面板: 已关闭");
+    }
+
+    private property <[TActionSheetItem]> sheet-actions: [
+        { label: "分享给同事", theme: TThemeRole.primary },
+        { label: "复制链接", theme: TThemeRole.default },
+        { label: "归档", theme: TThemeRole.warning },
+        { label: "删除", theme: TThemeRole.error, disabled: true },
+    ];
+
+    // ======================== TDialog =======================
+    GallerySection {
+        title: "对话框 TDialog";
+        code: "import { TDialog } from \"@tela-ui/overlay.slint\";\n\n// 窗口根部:\nTDialog {\n    open <=> open;\n    title: \"对话框标题\";\n    content: \"这是内容\";\n    accepted => { … }\n    canceled => { … }\n}";
+
+        HorizontalLayout {
+            spacing: 12px;
+
+            TButton { variant: TButtonVariant.outline; theme: TThemeRole.primary; text: "打开对话框"; clicked => { root.dialog-open = true; } }
+            TCaption { text: "对话框本体挂载在窗口根部 (MainWindow), 点击遮罩或按钮关闭。"; vertical-alignment: center; wrap: word-wrap; horizontal-stretch: 1; }
+        }
+    }
+
+    // ==================== TDialogService ====================
+    GallerySection {
+        title: "对话框服务 TDialogService";
+        code: "import { TDialogService, TDialogServiceOverlay } from \"@tela-ui/overlay.slint\";\n\n// 窗口根部放置一次:\nTDialogServiceOverlay { }\n\n// 任意代码调用:\nTDialogService.confirm(\"删除\", \"确认删除该项?\");\nTDialogService.alert(\"提示\", \"仅确认按钮\");\n\n// 结果监听 (result-seq + accepted):\nprivate property <int> r: TDialogService.result-seq;\nchanged r => { if (TDialogService.accepted) { /* 已确认 */ } }";
+
+        HorizontalLayout {
+            spacing: 12px;
+
+            TButton { variant: TButtonVariant.outline; theme: TThemeRole.primary; text: "服务式 confirm"; clicked => { TDialogService.confirm("服务式确认框", "深层组件代码或 Rust 皆可免接线直接调用, 结果经 result-seq 广播。"); } }
+            TButton { variant: TButtonVariant.outline; text: "服务式 alert"; clicked => { TDialogService.alert("服务式警示框", "alert() 只有确认按钮, 适合纯告知场景。"); } }
+            TCaption { text: "ESC / 遮罩 / 按钮三条关闭路径都算一次结果, 右上角 toast 展示结果。"; vertical-alignment: center; wrap: word-wrap; horizontal-stretch: 1; }
+        }
+    }
+
+    // ==================== TLoadingService ====================
+    GallerySection {
+        title: "加载服务 TLoadingService";
+        code: "import { TLoadingService, TLoadingServiceOverlay } from \"@tela-ui/overlay.slint\";\n\n// 窗口根部放置一次:\nTLoadingServiceOverlay { }\n\n// 任意代码调用:\nTLoadingService.show(\"保存中…\");\nTLoadingService.hide();";
+
+        HorizontalLayout {
+            spacing: 12px;
+
+            TButton { variant: TButtonVariant.outline; theme: TThemeRole.primary; text: "全屏加载 2 秒"; clicked => { TLoadingService.show("拼命加载中…"); load-timer.start(); } }
+            TCaption { text: "全屏遮罩阻断指针输入; 是状态而非浮层, ESC 不关闭。"; vertical-alignment: center; wrap: word-wrap; horizontal-stretch: 1; }
+        }
+    }
+
+    // ======================== TDrawer =======================
+    GallerySection {
+        title: "抽屉 TDrawer";
+        code: "import { TDrawer } from \"@tela-ui/overlay.slint\";\n\n// 窗口根部:\nTDrawer {\n    open <=> open;\n    placement: TDrawerPlacement.right;\n    title: \"抽屉标题\";\n    TParagraph { text: \"面板主体由子元素提供\"; }\n}";
+
+        HorizontalLayout {
+            spacing: 12px;
+
+            TSelect {
+                width: 120px;
+                items: root.drawer-side-items;
+                current-index <=> root.drawer-side-index;
+                selected(i, v) => {
+                    root.drawer-placement = root.drawer-placements[i];
+                }
+            }
+
+            TButton { variant: TButtonVariant.outline; theme: TThemeRole.primary; text: "打开抽屉"; clicked => { root.drawer-open = true; } }
+            TCaption { text: "抽屉本体挂载在窗口根部, 从指定边缘滑出。"; vertical-alignment: center; wrap: word-wrap; horizontal-stretch: 1; }
+        }
+    }
+
+    // ==================== TImageViewer ====================
+    GallerySection {
+        title: "图片预览 TImageViewer";
+        code: "import { TImageViewerService, TImageViewerOverlay } from \"@tela-ui/overlay.slint\";\n\n// 窗口根部放置一次:\nTImageViewerOverlay { max-zoom: 4; thumbnails: true; }\n\n// 任意代码调用:\nTImageViewerService.open([@image-url(\"a.svg\"), @image-url(\"b.svg\")], 0);\n\n// 切换监听 (change-seq + current-index):\nprivate property <int> n: TImageViewerService.change-seq;\nchanged n => { /* 第 current-index + 1 张 */ }";
+
+        HorizontalLayout {
+            spacing: 12px;
+
+            TButton { variant: TButtonVariant.outline; theme: TThemeRole.primary; text: "预览第 1 张"; clicked => { TImageViewerService.open(root.viewer-images, 0); } }
+            TButton { variant: TButtonVariant.outline; text: "预览第 3 张"; clicked => { TImageViewerService.open(root.viewer-images, 2); } }
+            TCaption { text: "全屏遮罩上按原图比例适配显示; 图片上左右拖拽切换 (首尾有阻力), 滚轮/双击缩放并可拖拽平移, 底部缩略图条直达任意一张; 点图片框以外的视口区域 / 关闭钮 / ESC 关闭, 索引变化经 change-seq 上报。"; vertical-alignment: center; wrap: word-wrap; horizontal-stretch: 1; }
+        }
+    }
+
+    // ==================== TCommandPalette ====================
+    GallerySection {
+        title: "命令面板 TCommandPalette";
+        code: "import { TCommandPaletteService, TCommandPaletteOverlay } from \"@tela-ui/overlay.slint\";\n\n// 窗口根部放置一次:\nTCommandPaletteOverlay { }\n\n// 命令表一次写入, 之后 open() 即可:\nTCommandPaletteService.commands = [ { label: \"打开设置\", shortcut: \"Ctrl+,\" } ];\nTCommandPaletteService.open();\n\n// 执行监听 (run-seq + run-index):\nprivate property <int> r: TCommandPaletteService.run-seq;\nchanged r => { /* run-index < 0 表示未执行任何命令 */ }";
+
+        HorizontalLayout {
+            spacing: 12px;
+
+            TButton { variant: TButtonVariant.outline; theme: TThemeRole.primary; text: "打开命令面板"; clicked => { TCommandPaletteService.open(); } }
+            TCaption { text: "输入即过滤 (子串匹配, 不区分大小写), 回车执行高亮的第一条, 点击列表项直接执行, ESC / 点遮罩关闭; 快捷键由宿主绑定 (KeyBinding 放窗口级 FocusScope 里)。"; vertical-alignment: center; wrap: word-wrap; horizontal-stretch: 1; }
+        }
+    }
+
+    // ==================== TBottomSheet / TActionSheet ====================
+    GallerySection {
+        title: "底部弹层 TBottomSheet / 动作面板 TActionSheet";
+        code: "import { TBottomSheet, TActionSheetService, TActionSheetOverlay } from \"@tela-ui/overlay.slint\";\n\n// 窗口根部:\nTBottomSheet {\n    open <=> sheet-open;\n    title: \"底部弹层标题\";\n    TParagraph { text: \"面板主体由子元素提供\"; }\n}\n\n// 全局动作面板, 一次调用即得结果:\nTActionSheetService.show(\"选择操作\", \"该操作不可撤销\", [\n    { label: \"分享\", theme: TThemeRole.primary },\n    { label: \"删除\", theme: TThemeRole.error, disabled: true },\n]);";
+
+        HorizontalLayout {
+            spacing: 12px;
+
+            TButton { variant: TButtonVariant.outline; theme: TThemeRole.primary; text: "打开底部弹层"; clicked => { root.sheet-open = true; } }
+            TButton { variant: TButtonVariant.outline; text: "打开动作面板"; clicked => { TActionSheetService.show("选择操作", "该操作不可撤销,请谨慎选择", root.sheet-actions); } }
+            TCaption { text: "两者都由 TModalSurface 提供遮罩 / ESC / z-modal; 动作面板的结果经 result-seq + selected-index 上报, -1 表示取消。"; vertical-alignment: center; wrap: word-wrap; horizontal-stretch: 1; }
+        }
+    }
+
+    // ======================= TPopconfirm ====================
+    GallerySection {
+        title: "气泡确认 TPopconfirm";
+        code: "import { TPopconfirm } from \"@tela-ui/overlay.slint\";\n\nTPopconfirm {\n    text: \"确定删除吗?\";\n    confirm => { … }\n    TButton { text: \"删除\"; clicked => pc.toggle(); } // auto-open: false\n}";
+
+        HorizontalLayout {
+            spacing: 24px;
+
+            // TPopconfirm on a TButton trigger: auto-open off, toggle from
+            // the button's clicked handler.
+            pc := TPopconfirm {
+                auto-open: false;
+                text: "确定删除这条数据吗?";
+                confirm => { TMessage.success("已删除"); }
+                cancel => { TMessage.info("已取消"); }
+
+                TButton {
+                    theme: TThemeRole.error;
+                    variant: TButtonVariant.outline;
+                    text: "删除";
+                    clicked => { pc.toggle(); }
+                }
+            }
+
+            // TPopconfirm on a static trigger: auto-open handles it.
+            TPopconfirm {
+                text: "确认提交表单吗?";
+                placement: TPopupPlacement.bottom-start;
+
+                Rectangle {
+                    width: 120px;
+                    height: TTheme.height-m;
+                    background: TTheme.bg-color-secondarycontainer;
+                    border-radius: TTheme.radius-default;
+
+                    TText {
+                        text: "点击确认";
+                        font-size: TTheme.font-size-m;
+                        color: TTheme.text-color-secondary;
+                        horizontal-alignment: center;
+                        vertical-alignment: center;
+                    }
+                }
+            }
+
+            Rectangle { }
+        }
+    }
+    // ======================== Tooltip ======================
+    GallerySection {
+        title: "气泡提示 Tooltip";
+        code: "import { TTooltipArea, TTooltipOverlay } from \"@tela-ui/overlay.slint\";\n\n// 窗口根部放置一次:\nTTooltipOverlay { }\n\nTTooltipArea {\n    text: \"提示\"; placement: TTooltipPlacement.top;\n    Text { text: \"目标\"; }\n}";
+
+        HorizontalLayout {
+            spacing: 24px;
+
+            // TTooltipArea fills its parent, wires the hover and reports
+            // to the window-level overlay — no clipping worries.
+            TTooltipArea {
+                width: 120px;
+                height: TTheme.height-m;
+                background: TTheme.bg-color-secondarycontainer;
+                border-radius: TTheme.radius-default;
+                text: "我是 Tooltip, 鼠标移开即消失, 250ms 延迟出现";
+                placement: TTooltipPlacement.top;
+
+                TText {
+                    text: "上方提示";
+                    font-size: TTheme.font-size-m;
+                    color: TTheme.text-color-secondary;
+                    horizontal-alignment: center;
+                    vertical-alignment: center;
+                }
+            }
+
+            TTooltipArea {
+                width: 120px;
+                height: TTheme.height-m;
+                background: TTheme.bg-color-secondarycontainer;
+                border-radius: TTheme.radius-default;
+                text: "placement: TTooltipPlacement.bottom";
+                placement: TTooltipPlacement.bottom;
+
+                TText {
+                    text: "下方提示";
+                    font-size: TTheme.font-size-m;
+                    color: TTheme.text-color-secondary;
+                    horizontal-alignment: center;
+                    vertical-alignment: center;
+                }
+            }
+
+            TCaption { text: "渲染在窗口级 (TTooltipOverlay), 不受卡片或滚动容器裁剪; 亮暗均为深色气泡。"; vertical-alignment: center; wrap: word-wrap; horizontal-stretch: 1; }
+        }
+    }
+
+    // Auto-hide for the loading section: 2s after show.
+    // A bare Timer sits directly in the layout — it is layout-invisible in
+    // 1.18 (no slot, no spacing; probe-measured 40+28+40 with a Timer
+    // between), so placement does not affect the page.
+    load-timer := Timer {
+        interval: 2s;
+        // Default-running would keep the timer armed forever and burn
+        // cycles; restart() alone only restarts a previously started
+        // timer, so the click handler must start() it explicitly.
+        running: false;
+        triggered => {
+            TLoadingService.hide();
+        }
+    }
+}

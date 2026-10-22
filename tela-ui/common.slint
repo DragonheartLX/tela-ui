@@ -2,11 +2,15 @@
 //
 // Legacy umbrella aggregating EVERY category aggregator. Kept so existing
 // consumers of "@tela-ui/common.slint" keep working; new code can import
-// from the category files instead:
+// from the finer category files instead:
 //   @tela-ui/base.slint          基础组件
-//   @tela-ui/data-entry.slint    数据录入
-//   @tela-ui/data-display.slint  数据展示
-//   @tela-ui/feedback.slint      反馈
+//   @tela-ui/input.slint         输入
+//   @tela-ui/select.slint        选择
+//   @tela-ui/date-time.slint     日期时间
+//   @tela-ui/display.slint       展示
+//   @tela-ui/content.slint       内容
+//   @tela-ui/notice.slint        提示
+//   @tela-ui/overlay.slint       浮层
 //   @tela-ui/navigation.slint    导航
 //   @tela-ui/experimental.slint  实验性
 
@@ -20,47 +24,51 @@ export { TLoading, TLoadingSpinner } from "base.slint";
 export { TKbd } from "base.slint";
 export { TBorderlessWindow } from "base.slint";
 
-export { TInput, TTextArea, TInputStatus } from "data-entry.slint";
-export { TInputNumber } from "data-entry.slint";
-export { TSelect, TSelectItem } from "data-entry.slint";
-export { TCheckBox } from "data-entry.slint";
-export { TRadio, TRadioGroup, TRadioItem } from "data-entry.slint";
-export { TSwitch } from "data-entry.slint";
-export { TSlider } from "data-entry.slint";
-export { TRate } from "data-entry.slint";
-export { TSegmented } from "data-entry.slint";
-export { TCalendar, TDate, TDatePicker } from "data-entry.slint";
-export { TTimePicker, TTime } from "data-entry.slint";
-export { TAutoComplete, TAutoCompleteItem } from "data-entry.slint";
+export { TInput, TTextArea, TInputStatus } from "input.slint";
+export { TInputNumber } from "input.slint";
+export { TAutoComplete, TAutoCompleteItem } from "input.slint";
+export { TSlider } from "input.slint";
+export { TRate } from "input.slint";
 
-export { TTag, TTagVariant } from "data-display.slint";
-export { TAvatar, TAvatarSize, TAvatarShape } from "data-display.slint";
-export { TBadge } from "data-display.slint";
-export { TCard } from "data-display.slint";
-export { TEmpty } from "data-display.slint";
-export { TDescriptions, TDescriptionItem } from "data-display.slint";
-export { TTimeline, TTimelineItem } from "data-display.slint";
-export { TStatistic } from "data-display.slint";
-export { TCollapse, TCollapseItem } from "data-display.slint";
-export { TTooltipOverlay, TTooltip, TTooltipArea, TTooltipPlacement } from "data-display.slint";
-export { TCarousel, TCarouselSlide } from "data-display.slint";
-export { TCodeBlock } from "data-display.slint";
-export { TTable, TTableColumn, TTableRow, TTableAlign, TTableSortDirection } from "data-display.slint";
+export { TSelect, TSelectItem } from "select.slint";
+export { TCheckBox } from "select.slint";
+export { TRadio, TRadioGroup, TRadioItem } from "select.slint";
+export { TSwitch } from "select.slint";
+export { TSegmented } from "select.slint";
 
-export { TAlert } from "feedback.slint";
-export { TMessageOverlay, TMessage, TMessageTheme, TMessagePlacement } from "feedback.slint";
-export { TNotificationOverlay, TNotification, TNotificationTheme, TNotificationPlacement, TNotificationData } from "feedback.slint";
-export { TDialog } from "feedback.slint";
-export { TDialogServiceOverlay, TDialogService } from "feedback.slint";
-export { TLoadingServiceOverlay, TLoadingService } from "feedback.slint";
-export { TDrawer, TDrawerPlacement } from "feedback.slint";
-export { TBottomSheet } from "feedback.slint";
-export { TActionSheetOverlay, TActionSheetService, TActionSheetItem } from "feedback.slint";
-export { TImageViewerOverlay, TImageViewerService } from "feedback.slint";
-export { TCommandPaletteOverlay, TCommandPaletteService, TCommandItem } from "feedback.slint";
-export { TPopconfirm } from "feedback.slint";
-export { TProgress, TProgressVariant } from "feedback.slint";
-export { TResult, TResultStatus } from "feedback.slint";
+export { TCalendar, TDate, TDatePicker } from "date-time.slint";
+export { TTimePicker, TTime } from "date-time.slint";
+
+export { TTag, TTagVariant } from "display.slint";
+export { TAvatar, TAvatarSize, TAvatarShape } from "display.slint";
+export { TBadge } from "display.slint";
+export { TCard } from "display.slint";
+export { TEmpty } from "display.slint";
+export { TDescriptions, TDescriptionItem } from "display.slint";
+export { TTimeline, TTimelineItem } from "display.slint";
+export { TStatistic } from "display.slint";
+
+export { TCollapse, TCollapseItem } from "content.slint";
+export { TCarousel, TCarouselSlide } from "content.slint";
+export { TCodeBlock } from "content.slint";
+export { TTable, TTableColumn, TTableRow, TTableAlign, TTableSortDirection } from "content.slint";
+
+export { TAlert } from "notice.slint";
+export { TMessageOverlay, TMessage, TMessageTheme, TMessagePlacement } from "notice.slint";
+export { TNotificationOverlay, TNotification, TNotificationTheme, TNotificationPlacement, TNotificationData } from "notice.slint";
+export { TProgress, TProgressVariant } from "notice.slint";
+export { TResult, TResultStatus } from "notice.slint";
+
+export { TDialog } from "overlay.slint";
+export { TDialogServiceOverlay, TDialogService } from "overlay.slint";
+export { TDrawer, TDrawerPlacement } from "overlay.slint";
+export { TBottomSheet } from "overlay.slint";
+export { TActionSheetOverlay, TActionSheetService, TActionSheetItem } from "overlay.slint";
+export { TImageViewerOverlay, TImageViewerService } from "overlay.slint";
+export { TCommandPaletteOverlay, TCommandPaletteService, TCommandItem } from "overlay.slint";
+export { TPopconfirm } from "overlay.slint";
+export { TTooltipOverlay, TTooltip, TTooltipArea, TTooltipPlacement } from "overlay.slint";
+export { TLoadingServiceOverlay, TLoadingService } from "overlay.slint";
 
 export { TTabs } from "navigation.slint";
 export { TPagination } from "navigation.slint";
