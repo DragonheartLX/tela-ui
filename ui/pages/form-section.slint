@@ -1,10 +1,10 @@
 // Gallery section: 数据录入 (TInput / TSelect / TTextArea / TCheckBox / TRadio /
 // TSwitch / TSlider / TInputNumber / TRate / TSegmented / TCalendar /
-// TDatePicker / TTimePicker), 一个组件一张卡.
+// TDatePicker / TTimePicker / TAutoComplete), 一个组件一张卡.
 
 import { TThemeRole,  TSize } from "@tela-ui/theme.slint";
 import { TIconSet, TCaption } from "@tela-ui/base.slint";
-import { TInput, TTextArea, TSelect, TSelectItem, TCheckBox, TRadioGroup, TRadioItem, TSwitch, TSlider, TInputNumber, TRate, TSegmented, TCalendar, TDate, TDatePicker, TTimePicker, TTime } from "@tela-ui/data-entry.slint";
+import { TInput, TTextArea, TSelect, TSelectItem, TCheckBox, TRadioGroup, TRadioItem, TSwitch, TSlider, TInputNumber, TRate, TSegmented, TCalendar, TDate, TDatePicker, TTimePicker, TTime, TAutoComplete, TAutoCompleteItem } from "@tela-ui/data-entry.slint";
 import { GallerySection } from "../gallery-section.slint";
 
 export component FormSection inherits VerticalLayout {
@@ -43,6 +43,20 @@ export component FormSection inherits VerticalLayout {
     in-out property <TDate> picker-range-end: { year: 2026, month: 10, day: 16 };
     in-out property <TTime> time-value: { hour: 9, minute: 30, second: 0 };
     in-out property <TTime> time-seconds-value: { hour: 18, minute: 5, second: 42 };
+    in-out property <string> auto-text: "";
+    in-out property <string> auto-value: "";
+    in property <[TAutoCompleteItem]> auto-items: [
+        { label: "北京", value: "bj", disabled: false },
+        { label: "上海", value: "sh", disabled: false },
+        { label: "广州", value: "gz", disabled: false },
+        { label: "深圳", value: "sz", disabled: false },
+        { label: "杭州", value: "hz", disabled: false },
+        { label: "成都", value: "cd", disabled: false },
+        { label: "重庆", value: "cq", disabled: false },
+        { label: "武汉", value: "wh", disabled: false },
+        { label: "南京", value: "nj", disabled: false },
+        { label: "西安", value: "xa", disabled: true },
+    ];
 
     // ======================== TInput ========================
     GallerySection {
@@ -317,6 +331,48 @@ export component FormSection inherits VerticalLayout {
             }
 
             TCaption { text: "触发器只读; 整列数据带动画滚动, 选中框随选中行移动; 点击行或滚轮逐格改值, 无确认按钮。"; wrap: word-wrap; }
+        }
+    }
+
+    // ======================== TAutoComplete =================
+    GallerySection {
+        title: "自动补全 TAutoComplete";
+        code: "import { TAutoComplete, TAutoCompleteItem } from \"@tela-ui/data-entry.slint\";\n\nTAutoComplete {\n    items: [{ label: \"北京\", value: \"bj\" }, …];\n    placeholder-text: \"输入城市名称\";\n    text <=> city-text;\n    selected(i, value) => { picked = value; }\n}";
+
+        VerticalLayout {
+            spacing: 16px;
+
+            HorizontalLayout {
+                spacing: 24px;
+
+                TAutoComplete {
+                    width: 240px;
+                    clearable: true;
+                    placeholder-text: "输入城市名称, 如 北";
+                    items: root.auto-items;
+                    text <=> root.auto-text;
+
+                    selected(i, value) => {
+                        root.auto-value = value;
+                    }
+                }
+
+                TAutoComplete {
+                    width: 240px;
+                    placeholder-text: "禁用状态";
+                    items: root.auto-items;
+                    disabled: true;
+                }
+
+                Rectangle { }
+            }
+
+            TCaption {
+                text: root.auto-value == ""
+                    ? "输入即过滤 (标签子串匹配, 不区分大小写); 高亮首条匹配, 回车或点击选中; 输入框为空时列出全部。"
+                    : "已选:" + root.auto-value;
+                wrap: word-wrap;
+            }
         }
     }
 }

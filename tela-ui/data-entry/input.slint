@@ -81,6 +81,14 @@ export component TInput inherits TInputFrame {
     callback changed(string);
     callback cleared();
 
+    // Moves the caret to the end of the text and clears any selection.
+    // A host that writes `text` would otherwise leave the caret at its old
+    // byte offset, so the next keystroke lands inside the value.
+    public function move-caret-to-end() {
+        // The builtin clamps to the text length, so the offset can be huge.
+        ti.set-selection-offsets(2147483647, 2147483647);
+    }
+
     private property <length> h: TTheme.size-height(size);
     private property <length> fs: TTheme.size-font(size);
     private property <length> line: TTheme.size-line-height(size);

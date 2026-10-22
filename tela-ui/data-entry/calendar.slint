@@ -249,13 +249,73 @@ export component TCalendar inherits Rectangle {
         private property <bool> selected: root.endpoint(d);
         private property <bool> middle: root.in-range(d);
         private property <bool> is-today: root.same-date(d, root.today);
+        // Range ends only count once both endpoints exist (`middle`), so the
+        // first click still shows just the day circle.
+        private property <bool> start-day: cell.middle && root.valid-date(root.range-start)
+            && root.same-date(d, root.range-start);
+        private property <bool> end-day: cell.middle && root.valid-date(root.range-end)
+            && root.same-date(d, root.range-end);
 
         x: root.pad + Math.mod(i, 7) * root.cell-size;
         y: root.pad + root.header-height + root.weekday-height + root.floor-div(i, 7) * root.cell-size;
         width: root.cell-size;
         height: root.cell-size;
-        // Connected range band behind the endpoint circles.
-        background: cell.middle ? TTheme.brand-color-light : transparent;
+        background: transparent;
+
+        // Range band behind the day circle. Middle cells are plain squares so
+        // neighbours join seamlessly; the range ends are rounded with 50%
+        // (TDesign), built from a full-height circle plus a half-width square
+        // because Slint has no per-corner radius. A one-day range is a circle.
+        if cell.middle && !cell.start-day && !cell.end-day: Rectangle {
+            x: 0;
+            y: 0;
+            width: parent.width;
+            height: parent.height;
+            background: TTheme.brand-color-light;
+        }
+
+        if cell.middle && cell.start-day && cell.end-day: Rectangle {
+            x: 0;
+            y: 0;
+            width: parent.width;
+            height: parent.height;
+            border-radius: TTheme.radius-round;
+            background: TTheme.brand-color-light;
+        }
+
+        if cell.middle && cell.start-day && !cell.end-day: Rectangle {
+            x: 0;
+            y: 0;
+            width: parent.height;
+            height: parent.height;
+            border-radius: TTheme.radius-round;
+            background: TTheme.brand-color-light;
+        }
+
+        if cell.middle && cell.start-day && !cell.end-day: Rectangle {
+            x: parent.height / 2;
+            y: 0;
+            width: parent.width - parent.height / 2;
+            height: parent.height;
+            background: TTheme.brand-color-light;
+        }
+
+        if cell.middle && cell.end-day && !cell.start-day: Rectangle {
+            x: 0;
+            y: 0;
+            width: parent.width - parent.height / 2;
+            height: parent.height;
+            background: TTheme.brand-color-light;
+        }
+
+        if cell.middle && cell.end-day && !cell.start-day: Rectangle {
+            x: parent.width - parent.height;
+            y: 0;
+            width: parent.height;
+            height: parent.height;
+            border-radius: TTheme.radius-round;
+            background: TTheme.brand-color-light;
+        }
 
         // Day circle / selection / today outline.
         Rectangle {

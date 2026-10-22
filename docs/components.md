@@ -250,7 +250,7 @@ TText { font-size: TTheme.size-font(size); line-height: TTheme.size-line-height(
 ## 数据录入 data-entry
 
 ```slint
-import { TInput, TTextArea, TInputNumber, TSelect, TCheckBox, TRadioGroup, TSwitch, TSlider, TRate, TSegmented, TCalendar, TDate, TDatePicker, TTimePicker, TTime } from "@tela-ui/data-entry.slint";
+import { TInput, TTextArea, TInputNumber, TSelect, TCheckBox, TRadioGroup, TSwitch, TSlider, TRate, TSegmented, TCalendar, TDate, TDatePicker, TTimePicker, TTime, TAutoComplete, TAutoCompleteItem } from "@tela-ui/data-entry.slint";
 ```
 
 ### TInput / TTextArea
@@ -291,6 +291,9 @@ TTextArea 参数:
 
 回调: TInput `accepted(string)` (回车), `changed(string)` (每次输入), `cleared()`;
 TTextArea `changed(string)`。
+
+公开函数 (TInput): `move-caret-to-end()` — 把光标移到文本末尾并清除选区; 宿主写入
+`text` 后调用, 否则下一次键入会落在旧光标位置。
 
 只读输出 (来自 TInputFrame): `frame-hovered` (`bool`, 边框悬停态)。
 
@@ -536,6 +539,36 @@ TRadioGroup 参数:
 已知限制: 触发器只读; 暂不支持键盘导航与手工输入; 滚轮直接修改 `value`
 (每次一格并触发 `changed`), 没有惯性滚动。弹层高约 234px, 靠近窗口底部时请设置
 `placement: TPopupPlacement.top-start`。
+
+### TAutoComplete
+
+输入联想。输入框 + 锚定建议列表: 聚焦输入框或键入文字时展开, 按标签做不区分大小写的
+子串过滤 (输入为空时列出全部); 高亮第一条可选匹配, 回车或点击选中, 选中后把
+`text` 设为该项 `label` 并关闭; 过滤后没有匹配项时列表显示 `empty-text` (`items` 为空则不展开)。
+
+继承: `Rectangle`。内部组合 TInput, TPopupSurface 与 ScrollView。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| items | `[TAutoCompleteItem]` | `[]` | 建议项; 过滤在组件内完成, 无需宿主重建模型 |
+| text | `string` (in-out) | `""` | 输入内容; 选中建议时被写为该项 `label` |
+| placeholder-text | `string` | `""` | 占位文字 |
+| disabled | `bool` | `false` | 禁用输入框, 并关闭已展开的列表 |
+| clearable | `bool` | `false` | 悬停且非空时显示清空钮 |
+| size | `TSize` | `TSize.medium` | 输入框高度与字号 |
+| max-rows | `int` | `6` | 列表最多显示行数, 超出后滚动 (至少按 1 行计算) |
+| empty-text | `string` | `"无匹配结果"` | 无匹配时的提示文字 |
+
+只读输出: `is-open` (`bool`) — 建议列表是否展开。
+
+回调: `changed(string)` — 键入或清空后的当前文字; `selected(int, string)` — 点击或回车
+选中建议, 参数为 (下标, value); `accepted(string)` — 无高亮建议时回车, 参数为输入文字。
+
+相关结构: `TAutoCompleteItem { label: string, value: string, disabled: bool }`;
+过滤只匹配 `label`, `disabled` 项可见但不可选、也不参与回车高亮。
+
+已知限制: 不支持上下方向键步进 (1.18 语言内没有循环语句, 组件无法扫描"下一条匹配");
+高亮停在第一条可选匹配或指针悬停项。列表随过滤结果伸缩, 最多 `max-rows` 行。
 
 ## 数据展示 data-display
 
@@ -1467,6 +1500,7 @@ PanelLeftClose, PanelLeftOpen, FlaskConical, Inbox, Square, Copy。
 | TCarouselSlide | TCarousel | image |
 | TDate | TCalendar, TDatePicker | year, month, day (全 0 = 未选) |
 | TTime | TTimePicker | hour, minute, second (hour < 0 = 未选) |
+| TAutoCompleteItem | TAutoComplete | label, value, disabled |
 | TTableColumn / TTableRow / TTableAlign / TTableSortDirection | TTable | title, width, min-width, align, sortable / cells / left, center, right / none, ascending, descending |
 | TNavItem | TNavBar | label, value |
 | TSideNavMode / TSideNavTogglePosition | TSideNav | icon-text, text, icon / top, bottom |

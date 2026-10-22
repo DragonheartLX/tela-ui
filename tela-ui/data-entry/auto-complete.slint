@@ -1,0 +1,332 @@
+// Tela UI — TAutoComplete
+//
+// Type-ahead input: a TInput plus an anchored suggestion list.
+// Matching runs in the component, not in the model: every item keeps its row
+// and a miss collapses to zero height, so nothing rebuilds the array or remaps
+// indices (the TCommandPalette technique). The highlight is the first enabled
+// match — each row reports itself on a filter change and the smallest index
+// wins, so handler order cannot change the result.
+//
+// Typing (and focusing the field) opens the list; Enter picks the highlighted
+// item, or reports `accepted` with the typed text when nothing matches.
+// Arrow-key stepping is not included: 1.18 has no loop statements, so a
+// component cannot scan for "the next match" (see README 已知限制).
+
+import { TTheme } from "../theme.slint";
+import { TText } from "../base/typography.slint";
+import { TInput } from "input.slint";
+import { TPopupSurface } from "../popup-surface.slint";
+import { TSize } from "../structs/enums.slint";
+import { ScrollView } from "std-widgets.slint";
+
+export struct TAutoCompleteItem {
+    label: string,
+    value: string,
+    disabled: bool = false,
+}
+
+export component TAutoComplete inherits Rectangle {
+    in property <[TAutoCompleteItem]> items;
+    in-out property <string> text <=> trigger.text;
+    in property <string> placeholder-text;
+    in property <bool> disabled: false;
+    in property <bool> clearable: false;
+    in property <TSize> size: TSize.medium;
+    // Suggestions shown before the list scrolls.
+    in property <int> max-rows: 6;
+    in property <string> empty-text: "无匹配结果";
+
+    // Typed text after every edit, and after the clear button.
+    callback changed(string);
+    // Enter while no suggestion is highlighted.
+    callback accepted(string);
+    // Suggestion picked by click or Enter; (index, value).
+    callback selected(int, string);
+
+    out property <bool> is-open: surface.is-open;
+
+    private property <length> h: TTheme.size-height(root.size);
+    private property <length> row-h: TTheme.height-m;
+    private property <length> pad: TTheme.spacing-2;
+    private property <length> cap:
+        2 * root.pad + max(1, root.max-rows) * root.row-h;
+    // Filtered row count. The popup depth cannot read the rows directly —
+    // @children content is inlined into the PopupWindow — so every row reports
+    // its match on a filter change and this mirrors the visible rows.
+    private property <int> match-count: 0;
+    // Grows with the filtered list, stops at `max-rows` and scrolls from
+    // there. Zero matches still reserve the empty-text row.
+    private property <length> content-h:
+        2 * root.pad + max(1, root.match-count) * root.row-h;
+
+    // Committed filter; `text` can also change from the host, so matching
+    // reads this copy instead of the live field.
+    private property <string> keyword: "";
+    // Bumped on every filter change; rows report their match on it, which
+    // also covers "keyword unchanged, highlight reset".
+    private property <int> filter-seq: 0;
+    private property <int> active-index: -1;
+
+    // Case-insensitive substring match on the label; an empty filter matches
+    // everything. `replace-all` is the only substring test 1.18 offers — a hit
+    // leaves the string changed, a miss returns it unchanged.
+    // Deliberately not `pure`: with `pure`, calls made from the popup's
+    // @children rows read the wrong root and every row missed (observed: the
+    // count stayed 0 and no highlight appeared).
+    function hit(it: TAutoCompleteItem) -> bool {
+        let q = root.keyword.to-lowercase();
+        return q == ""
+            || it.label.to-lowercase().replace-all(q, "") != it.label.to-lowercase();
+    }
+
+    function set-keyword(text: string) {
+        // Reset first: rows report while `keyword`/`filter-seq` are written,
+        // and a highlight from the previous filter must not survive.
+        root.active-index = -1;
+        root.match-count = 0;
+        root.keyword = text;
+        root.filter-seq += 1;
+    }
+
+    // Called by every row on creation and on a filter change; the smallest
+    // match wins, so handler order cannot change the highlight.
+    function report(index: int, it: TAutoCompleteItem) {
+        if (root.hit(it)) {
+            root.match-count += 1;
+            if (!it.disabled) {
+                root.consider(index);
+            }
+        }
+    }
+
+    // A whole-array write rebuilds the rows (private state included). Bumping
+    // `filter-seq` here would make the old instances report once more before
+    // they are dropped, so the count is reset without the bump and the new
+    // rows report from `init`.
+    function reset-model() {
+        root.active-index = -1;
+        root.match-count = 0;
+        root.keyword = root.text;
+    }
+
+    function open-suggestions() {
+        if (root.disabled || root.items.length == 0) {
+            return;
+        }
+        root.set-keyword(root.text);
+        surface.show();
+        // Showing a PopupWindow takes the keyboard focus away from the field
+        // (`WindowInner::show_popup` calls `take_focus_item`), which would
+        // swallow the next keystroke. Hand it back: popups in this backend are
+        // child windows, so the focus stays inside the same window.
+        trigger.focus();
+    }
+
+    function consider(index: int) {
+        if (root.active-index < 0 || index < root.active-index) {
+            root.active-index = index;
+        }
+    }
+
+    // A stale highlight (an item the current filter hides) picks nothing.
+    function pick(index: int) -> bool {
+        if index < 0 || index >= root.items.length
+            || root.items[index].disabled || !root.hit(root.items[index]) {
+            return false;
+        }
+        root.text = root.items[index].label;
+        // The caret keeps its old offset across the write; put it at the end
+        // so the next keystroke appends instead of landing mid-label.
+        trigger.move-caret-to-end();
+        root.selected(index, root.items[index].value);
+        surface.close();
+        return true;
+    }
+
+    height: root.h;
+    min-width: 160px;
+
+    trigger := TInput {
+        x: 0;
+        y: 0;
+        width: parent.width;
+        height: parent.height;
+        size: root.size;
+        placeholder-text: root.placeholder-text;
+        clearable: root.clearable;
+        disabled: root.disabled;
+
+        changed(text) => {
+            root.changed(text);
+            if (!surface.is-open) {
+                root.open-suggestions();
+            }
+        }
+
+        // Enter with a highlighted item picks it; otherwise the typed text is
+        // reported and the list closes.
+        accepted(text) => {
+            if (!root.pick(root.active-index)) {
+                surface.close();
+                root.accepted(text);
+            }
+        }
+
+        cleared => {
+            // The field is already empty here; report it as a real change.
+            root.changed("");
+            if (!surface.is-open) {
+                root.open-suggestions();
+            }
+        }
+    }
+
+    // Mirrors TInput's focus so a change handler can watch it.
+    private property <bool> focused: trigger.focused;
+
+    // Focus is the click path as well: TInput takes the caret on a frame
+    // click, so the list opens whenever the field gains focus. The `is-open`
+    // guard keeps the re-focus issued by `open-suggestions` from re-entering.
+    changed focused => {
+        if (root.focused && !surface.is-open) {
+            root.open-suggestions();
+        }
+    }
+
+    // Host writes and typed edits both land here; matching follows the value.
+    changed text => {
+        root.set-keyword(root.text);
+    }
+
+    changed items => {
+        root.reset-model();
+    }
+
+    changed disabled => {
+        if (root.disabled) {
+            surface.close();
+        }
+    }
+
+    surface := TPopupSurface {
+        anchor-width: root.width;
+        anchor-height: root.height;
+        gap: root.pad;
+        popup-width: max(root.width, 160px);
+        popup-max-width: max(root.width, 160px);
+        popup-height: min(root.content-h, root.cap);
+
+        // Content height is pinned explicitly: the stock ScrollView would
+        // otherwise keep its own content-size bookkeeping.
+        ScrollView {
+            content-height: root.content-h;
+
+            VerticalLayout {
+                padding: root.pad;
+                // Gaps are baked into the rows; layout spacing would also
+                // apply between collapsed zero-height rows (see
+                // docs/slint-semantics.md 第 20 条).
+                spacing: 0px;
+
+                for it[i] in root.items: Rectangle {
+                    // Outer box: a miss collapses to zero height and `clip`
+                    // keeps its content from painting outside the 0px box.
+                    height: root.hit(it) ? root.row-h : 0px;
+                    clip: true;
+
+                    // Reports on every filter change (the popup content is
+                    // created when it is shown, i.e. after `set-keyword`
+                    // already bumped the sequence, so `init` reports the
+                    // initial model as well).
+                    private property <int> seq: root.filter-seq;
+                    changed seq => {
+                        root.report(i, it);
+                    }
+                    init => {
+                        root.report(i, it);
+                    }
+
+                    // Inner box carries the skin, so the highlight stops at
+                    // the row.
+                    Rectangle {
+                        width: parent.width;
+                        height: root.row-h;
+                        border-radius: TTheme.radius-default;
+                        background: transparent;
+                        animate background { duration: TTheme.duration-fast; }
+
+                        states [
+                            hovered when row-ta.has-hover && !it.disabled: {
+                                background: TTheme.bg-color-container-hover;
+                            }
+                            // Later states win: the highlight paints over hover.
+                            highlighted when i == root.active-index: {
+                                background: TTheme.brand-color-light;
+                            }
+                        ]
+
+                        HorizontalLayout {
+                            width: parent.width;
+                            height: parent.height;
+                            padding-left: TTheme.spacing-2;
+                            padding-right: TTheme.spacing-2;
+
+                            TText {
+                                text: it.label;
+                                font-size: TTheme.size-font(root.size);
+                                line-height: TTheme.size-line-height(root.size);
+                                vertical-alignment: center;
+                                horizontal-stretch: 1;
+                                overflow: elide;
+
+                                states [
+                                    active when i == root.active-index: {
+                                        color: TTheme.brand-color;
+                                    }
+                                    disabled when it.disabled: {
+                                        color: TTheme.text-color-disabled;
+                                    }
+                                ]
+                            }
+                        }
+
+                        row-ta := TouchArea {
+                            enabled: !it.disabled;
+                            mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;
+                            accessible-role: AccessibleRole.button;
+                            accessible-label: it.label;
+                            accessible-enabled: !it.disabled;
+                            accessible-checked: i == root.active-index;
+
+                            changed has-hover => {
+                                if (self.has-hover && !it.disabled) {
+                                    root.active-index = i;
+                                }
+                            }
+
+                            clicked => {
+                                root.pick(i);
+                            }
+                        }
+                    }
+                }
+
+                // Zero matches: the filter hides every row (the count cannot
+                // go negative).
+                if root.match-count == 0: Rectangle {
+                    height: root.row-h;
+
+                    TText {
+                        text: root.empty-text;
+                        font-size: TTheme.size-font(root.size);
+                        line-height: TTheme.size-line-height(root.size);
+                        color: TTheme.text-color-placeholder;
+                        horizontal-alignment: center;
+                        vertical-alignment: center;
+                        overflow: elide;
+                    }
+                }
+            }
+        }
+    }
+}
