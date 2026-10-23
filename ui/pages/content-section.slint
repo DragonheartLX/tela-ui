@@ -1,8 +1,8 @@
 // Gallery section: 内容 (TCollapse / TTable / TCarousel), 一个组件一张卡.
 
 import { TTheme, TThemeRole } from "@tela-ui/theme.slint";
-import { TButton, TCaption } from "@tela-ui/base.slint";
-import { TCollapse, TCarousel, TTable, TTableAlign } from "@tela-ui/content.slint";
+import { TIconSet, TCaption } from "@tela-ui/base.slint";
+import { TCollapse, TCarousel, TTable, TTree, TTreeItem, TTreeBranch, TTableAlign } from "@tela-ui/content.slint";
 import { GallerySection } from "../gallery-section.slint";
 
 export component ContentSection inherits VerticalLayout {
@@ -95,6 +95,48 @@ export component ContentSection inherits VerticalLayout {
                 { image: @image-url("../assets/slide-2.svg") },
                 { image: @image-url("../assets/slide-3.svg") },
             ];
+        }
+    }
+    // ========================= TTree ========================
+    GallerySection {
+        title: "树形控件 TTree";
+        code: "import { TTree, TTreeBranch, TTreeItem, TTreeLogic } from \"@tela-ui/content.slint\";\n\n// 嵌套声明: 分支自带折叠 (clip + 高度动画), 子节点经 @children 放入。\n// 选中值放在 TTreeLogic 全局, 树里不写模型。\nTTree {\n    TTreeItem { label: \"概览\"; value: \"overview\"; }\n\n    TTreeBranch {\n        label: \"文件\";\n        opened: true;\n        TTreeItem { label: \"文件 1.txt\"; value: \"f1\"; }\n    }\n}\n\n// 读/写选中:\n// TTreeLogic.current-value = \"overview\";";
+
+        HorizontalLayout {
+            spacing: 24px;
+
+            TTree {
+                width: 220px;
+
+                TTreeItem { label: "概览"; value: "overview"; }
+                TTreeItem { label: "统计"; value: "stats"; }
+
+                TTreeBranch {
+                    label: "文件";
+                    opened: true;
+                    TTreeItem { label: "文件 1.txt"; value: "file-1"; icon: TIconSet.File; }
+                    TTreeItem { label: "文件 2.txt"; value: "file-2"; icon: TIconSet.File; }
+
+                    TTreeBranch {
+                        label: "子文件夹";
+                        opened: true;
+                        TTreeItem { label: "文件 3.txt"; value: "file-3"; icon: TIconSet.File; }
+                    }
+                }
+
+                TTreeBranch {
+                    label: "设置";
+                    TTreeItem { label: "外观"; value: "appearance"; }
+                    TTreeItem { label: "禁用项"; value: "disabled-node"; enabled: false; }
+                }
+
+                TTreeItem { label: "关于"; value: "about"; }
+            }
+        }
+
+        TCaption {
+            text: "节点嵌套声明, 深度不限 (分支用 @children 承载子节点); 点分支行折叠/展开, 折叠靠裁剪高度并带动画; 点叶子节点选中, 选中值经 TTreeLogic 全局共享 (一个窗口只维护一份选中态); disabled 节点不响应点击且不高亮。";
+            wrap: word-wrap;
         }
     }
 }

@@ -40,7 +40,7 @@ Slint 组件为单继承 (`inherits`), 子类可直接使用基类的全部属�
 | TText | `Text` | 主题字体 + TDesign 正文样式 (14px/22px); 库内所有文本的基类 |
 | THeading, TParagraph, TCaption | `TText` | 依次覆盖字号与行高, 保留 `text`, `color`, `wrap` 等全部内建属性 |
 | TRadioGroup, TLoading | `HorizontalLayout` | 本身就是一行布局 |
-| TTimeline, TStatistic, TCollapse | `VerticalLayout` | 本身即纵向布局, 首选尺寸随内容 |
+| TTimeline, TStatistic, TCollapse, TTree, TTreeBranch | `VerticalLayout` | 本身即纵向布局, 首选尺寸随内容 |
 | 其余全部组件 | `Rectangle` | 基础容器 |
 
 组合关系 (has-a, 内部使用的组件):
@@ -60,10 +60,11 @@ Slint 组件为单继承 (`inherits`), 子类可直接使用基类的全部属�
 - TSideNav = 私有 TNavRow xN (菜单行, 底部行与收起行共用)
 - TTag, TCheckBox, TAlert, TMessageOverlay, TNotificationOverlay, TNavBar, TSideNav,
   TSelect, TPagination, TAvatar, TDropdownMenu, TRate, TEmpty, TResult,
-  TCollapse, TTable, TBorderlessWindow 内部均使用 TIcon 渲染字形
+  TCollapse, TTable, TBorderlessWindow, TTree 内部均使用 TIcon 渲染字形
 - 提供 `@children` 插槽的组件: TBadge (被标记内容), TCard (卡片主体), TDialog
   (自定义主体), TDrawer (面板主体), TNavBar (右侧操作区), TEmpty (操作区),
-  TTooltipArea (触发内容), TResult (操作区), TBorderlessWindow (窗口内容)
+  TTooltipArea (触发内容), TResult (操作区), TBorderlessWindow (窗口内容),
+  TTree (节点列表), TTreeBranch (子节点, 放进折叠盒)
 
 私有组件 (仅供实现参考, 不经聚合器导出): `TInputFrame` (input/input.slint,
 已对库内导出供 TInputNumber 复用), `TModalSurface` (modal-surface.slint, 已对库内
@@ -73,6 +74,7 @@ Slint 组件为单继承 (`inherits`), 子类可直接使用基类的全部属�
 `TNavRow` (navigation/side-nav.slint),
 `TTableCell` (content/table.slint, 表头与数据单元格的文本、对齐与排序图标),
 `TTimeColumn` (date-time/time-picker.slint, 时间面板的单列数据; 选中框画在选中行上并随数据滚动),
+`TreeRow` (content/tree.slint, 树的单行: 箭头槽 + 可选字形 + 文本区, TTreeItem 与 TTreeBranch 的头部共用),
 `TWindowButton` (base/borderless-window.slint), `TPageBtn`
 (navigation/pagination.slint), `TPopupSurface` (popup-surface.slint,
 TDropdownMenu / TPopconfirm / TSelect 共用的锚定弹层骨架: 零尺寸锚定宿主 + placement
@@ -724,7 +726,7 @@ import { TTag, TTagVariant, TAvatar, TAvatarSize, TAvatarShape, TBadge, TCard, T
 ## 内容 content
 
 ```slint
-import { TCollapse, TCollapseItem, TCarousel, TCarouselSlide, TCodeBlock, TTable, TTableColumn, TTableRow, TTableAlign, TTableSortDirection } from "@tela-ui/content.slint";
+import { TCollapse, TCollapseItem, TCarousel, TCarouselSlide, TCodeBlock, TTable, TTableColumn, TTableRow, TTableAlign, TTableSortDirection, TTree, TTreeItem, TTreeBranch, TTreeLogic } from "@tela-ui/content.slint";
 ```
 
 ### TCollapse
@@ -804,6 +806,40 @@ align: TTableAlign = TTableAlign.left, sortable: bool = false }`, `width: 0px` �
 
 已知限制: 列宽不可拖拽; 不支持多列排序与单元格自定义内容。表高由宿主给定
 (`preferred-height` 默认 5 行)。
+
+### TTree
+
+树形控件。嵌套声明式结构 (参考 sleek-ui 的 `UMenu`): 宿主在 `TTree` 里直接摆
+`TTreeItem` / `TTreeBranch`, 分支用 `@children` 承载自己的子节点, 深度不限且不需要
+组件递归, 也不需要扁平行模型。分支自带折叠: 子节点放在 `clip: true` 的盒子里,
+高度在 `preferred-height` 与 `0px` 之间动画, 收起时子节点仍保留实例 (焦点与状态不丢)。
+
+继承: `TTree` 为 `VerticalLayout` (spacing 0), `TTreeBranch` 为 `VerticalLayout`
+(行 + 折叠盒), `TTreeItem` 为私有 `TreeRow` (Rectangle: 箭头槽 + 可选字形 + 文本区)。
+
+| 组件 | 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- | --- |
+| TTree | — | — | — | 仅作容器与间距 (spacing 0); 选中值走 `TTreeLogic` |
+| TTreeItem | value | `string` | — | 选中标识 |
+| TTreeItem | label | `string` | — | 行文本 |
+| TTreeItem | icon | `TIconData` | 空 | 行首字形, 空则不绘制 |
+| TTreeItem | enabled | `bool` | `true` | 禁用后不响应点击且不高亮 |
+| TTreeBranch | label | `string` | — | 分支行文本 |
+| TTreeBranch | icon | `TIconData` | 空 | 行首字形 |
+| TTreeBranch | opened | `bool` (in-out) | `false` | 折叠态; 收起时子节点高度归零 |
+| TTreeBranch | enabled | `bool` | `true` | 禁用后不响应点击 |
+
+回调: `TTreeItem.activated()` — 叶子被选中; `TTreeBranch.opened-changed(bool)` —
+折叠态翻转 (折叠时同样触发, 无需额外属性)。
+
+全局: `TTreeLogic { current-value: string }` — 选中值存放处 (对应 sleek-ui 的
+`UMenuLogic.current-link`)。叶子点击写入它, 所有行的选中高亮都从它派生; 宿主与 Rust
+侧也直接读它。
+
+已知限制: Slint 没有实例级 global, 一份 `TTreeLogic` 服务窗口内所有 TTree —— 同屏
+多个树会共享选中态, 与 sleek-ui 的 "同一时刻只能显示一个 menu" 是同一条约束。
+折叠态是分支自己的 `opened` 属性, 宿主不写回模型; 分支行在展开期间保持高亮 (当前路径),
+不做滚动的祖先联动。无内置空态, 需要时用 `TEmpty` 与 `if` 自行切换。
 
 ---
 
@@ -1525,6 +1561,7 @@ PanelLeftClose, PanelLeftOpen, FlaskConical, Inbox, Square, Copy。
 | TTime | TTimePicker | hour, minute, second (hour < 0 = 未选) |
 | TAutoCompleteItem | TAutoComplete | label, value, disabled |
 | TTableColumn / TTableRow / TTableAlign / TTableSortDirection | TTable | title, width, min-width, align, sortable / cells / left, center, right / none, ascending, descending |
+| TTreeLogic | TTree | current-value (全局选中值, 服务窗口内所有树) |
 | TNavItem | TNavBar | label, value |
 | TSideNavMode / TSideNavTogglePosition | TSideNav | icon-text, text, icon / top, bottom |
 | TSideNavItem | TSideNav | label, value, icon, disabled |

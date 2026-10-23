@@ -1,0 +1,182 @@
+// Tela UI — TTree
+//
+// Declarative tree, modelled on sleek-ui's `UMenu` widget family: nest
+// `TTreeBranch` / `TTreeItem` in the host file, each branch renders its own
+// fold (clipped height) and takes its children through `@children`, so any
+// depth works without a flattened model and without component recursion.
+//
+// Selection is shared through `TTreeLogic` (sleek-ui's `UMenuLogic` does the
+// same with `current-link`). Slint has no per-instance global, so one
+// selection store serves every tree in the window — see docs/components.md.
+
+import { TTheme } from "../theme.slint";
+import { TText } from "../base/typography.slint";
+import { TIcon } from "../base/icon/icon.slint";
+import { TIconData, TIconSet } from "../base/icon/data.slint";
+
+export global TTreeLogic {
+    // Value of the selected node; "" = no selection.
+    in-out property <string> current-value;
+}
+
+// One row: optional chevron (branches), optional glyph, label, hover and
+// selection paint. Clicking is reported through `clicked`; the owner decides
+// whether that flips a fold or changes the selection.
+component TreeRow inherits Rectangle {
+    in property <string> label;
+    in property <TIconData> icon;
+    in property <bool> enabled: true;
+    in property <bool> selected: false;
+    // Branch rows render the chevron and report their fold state.
+    in property <bool> branch: false;
+    in property <bool> open: false;
+
+    callback clicked();
+
+    height: TTheme.height-m;
+    background: transparent;
+    animate background { duration: TTheme.duration-fast; }
+
+    states [
+        hovered when ta.has-hover && root.enabled && !root.selected: {
+            background: TTheme.bg-color-container-hover;
+        }
+        selected when root.selected && root.enabled: {
+            background: TTheme.brand-color-light;
+        }
+    ]
+
+    HorizontalLayout {
+        x: 0;
+        y: 0;
+        width: parent.width;
+        height: parent.height;
+        padding-left: TTheme.spacing-2;
+        padding-right: TTheme.spacing-2;
+        spacing: TTheme.spacing-2;
+
+        if root.branch: TIcon {
+            y: (parent.height - self.height) / 2;
+            width: 16px;
+            icon: TIconSet.ChevronRight;
+            size: 16px;
+            icon-color: !root.enabled ? TTheme.text-color-disabled
+                : root.selected ? TTheme.brand-color
+                : TTheme.text-color-secondary;
+            transform-rotation: root.open ? 90deg : 0deg;
+            transform-origin: { x: self.width / 2, y: self.height / 2 };
+            animate transform-rotation { duration: TTheme.duration-fast; }
+        }
+
+        if !root.branch && root.icon.paths.length > 0: TIcon {
+            y: (parent.height - self.height) / 2;
+            icon: root.icon;
+            size: 16px;
+            icon-color: !root.enabled ? TTheme.text-color-disabled
+                : root.selected ? TTheme.brand-color
+                : TTheme.text-color-secondary;
+        }
+
+        TText {
+            text: root.label;
+            font-size: TTheme.font-size-m;
+            line-height: TTheme.line-height-m;
+            vertical-alignment: center;
+            horizontal-stretch: 1;
+            overflow: elide;
+            color: !root.enabled ? TTheme.text-color-disabled
+                : root.selected ? TTheme.brand-color
+                : TTheme.text-color-primary;
+        }
+    }
+
+    ta := TouchArea {
+        enabled: root.enabled;
+        mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;
+        accessible-role: AccessibleRole.list-item;
+        accessible-label: root.label;
+        accessible-enabled: root.enabled;
+        accessible-expanded: root.branch ? root.open : false;
+        accessible-action-default => {
+            if (root.enabled) {
+                root.clicked();
+            }
+        }
+
+        clicked => {
+            if (root.enabled) {
+                root.clicked();
+            }
+        }
+    }
+}
+
+// Leaf node. Clicking selects it (the model stays clean because the
+// selection lives in `TTreeLogic`).
+export component TTreeItem inherits TreeRow {
+    in property <string> value;
+
+    out property <bool> is-selected:
+        TTreeLogic.current-value != "" && TTreeLogic.current-value == root.value;
+    callback activated();
+
+    selected: root.is-selected;
+
+    clicked => {
+        if (!root.is-selected) {
+            TTreeLogic.current-value = root.value;
+            root.activated();
+        }
+    }
+}
+
+// Parent node: a row plus a clipped fold holding its children.
+export component TTreeBranch inherits VerticalLayout {
+    in-out property <bool> opened: false;
+    in property <bool> enabled: true;
+    in property <string> label;
+    in property <TIconData> icon;
+
+    callback opened-changed(bool);
+
+    spacing: 0px;
+
+    TreeRow {
+        label: root.label;
+        icon: root.icon;
+        enabled: root.enabled;
+        branch: true;
+        open: root.opened;
+        // A branch stays highlighted while its fold is open, so the current
+        // path is visible without scanning descendants.
+        selected: root.opened;
+
+        clicked => {
+            root.opened = !root.opened;
+            root.opened-changed(root.opened);
+        }
+    }
+
+    // Folds by height instead of mount/unmount: the children keep their
+    // instances (and any focus) while the fold is closed.
+    Rectangle {
+        clip: true;
+        height: root.opened ? body.preferred-height : 0px;
+        animate height { duration: TTheme.duration-base; }
+
+        body := VerticalLayout {
+            padding-left: TTheme.padding-lr-l;
+            spacing: 0px;
+
+            @children
+        }
+    }
+}
+
+// Tree root. Nest `TTreeItem` / `TTreeBranch` directly as children.
+// Selection is read and written through `TTreeLogic.current-value`; there is
+// deliberately no per-tree mirror property, because a host binding on one
+// would replace the two-way sync and freeze the highlighting.
+export component TTree inherits VerticalLayout {
+    spacing: 0px;
+}

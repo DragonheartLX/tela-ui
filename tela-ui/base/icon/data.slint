@@ -16,7 +16,7 @@
 // TriangleAlert, Eye, Calendar, Clock, User, LoaderCircle, Sun, Moon, Bell, House,
 // Lock, Mail, Star, StarFill, Heart, Trash2, Pencil, Settings, Download,
 // Upload, RefreshCw, Image, Ellipsis, LayoutDashboard,
-// PanelLeftClose/PanelLeftOpen, FlaskConical, Inbox, Square, Copy.
+// PanelLeftClose/PanelLeftOpen, FlaskConical, Inbox, Square, Copy, Folder, File.
 // Copy (two offset squares) doubles as the window "restore" glyph.
 
 export struct TIconPath {
@@ -429,6 +429,25 @@ export global TIconSet {
                 has_fill: false,
             },{
                 command: "M 4 16 C 2.9 16 2 15.1 2 14 L 2 4 C 2 2.9 2.9 2 4 2 L 14 2 C 15.1 2 16 2.9 16 4",
+                has_fill: false,
+            }
+        ],
+    };
+    out property <TIconData> Folder: {
+        paths: [
+            {
+                command: "M 20 20 C 21.10457 20 22 19.10457 22 18 L 22 8 C 22 6.8954306 21.10457 6 20 6 L 12.1 6 C 11.277 6 10.503 5.552 10.06 4.83 L 9.6 3.9 C 9.16 3.18 8.385 3 7.93 3 L 4 3 C 2.8954306 3 2 3.8954306 2 5 L 2 18 C 2 19.10457 2.8954306 20 4 20 L 20 20",
+                has_fill: false,
+            }
+        ],
+    };
+    out property <TIconData> File: {
+        paths: [
+            {
+                command: "M 14 2 L 4 2 C 2.8954306 2 2 2.8954306 2 4 L 2 20 C 2 21.10457 2.8954306 22 4 22 L 20 22 C 21.10457 22 22 21.10457 22 20 L 22 8 L 14 8 L 14 2",
+                has_fill: false,
+            },{
+                command: "M 14 2 L 14 8 L 22 8",
                 has_fill: false,
             }
         ],

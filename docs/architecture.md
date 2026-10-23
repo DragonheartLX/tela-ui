@@ -9,11 +9,11 @@
 - `ui/` + `src/` — gallery (bin `tela`); `ui/MainWindow.slint` 用 `if` 懒挂 11 个页面 (10 个分类页 + 设置页)。
 - 构建: Slint 1.18.1 / edition 2024 / 样式 `fluent` / accessibility + backend-winit + renderer-skia/software。
 
-## 统计 (2026-10-22)
+## 统计 (2026-10-23)
 
-- 91 个 `.slint` / 12,046 行: `tela-ui/` 78 个 10,048 行, `ui/` 13 个 1,998 行。
-- 70 个导出组件 = 57 个 UI 组件 (含私有 TNavLabel) + 8 个服务 overlay + 5 个库内基类 (TStrokedShape / TInputFrame / TModalSurface / TPopupSurface / TPopupStackLayer)。
-- 设计令牌: `TTheme` 151 个顶层转发 → `TAppThemeConfig` 103 字段; 色板在 `colors.slint` (亮/暗两套 ramp); `TIconSet` 44 个字形。
+- 92 个 `.slint` / 12,291 行: `tela-ui/` 79 个 10,251 行, `ui/` 13 个 2,040 行。
+- 73 个导出组件 = 60 个 UI 组件 (含私有 TNavLabel) + 8 个服务 overlay + 5 个库内基类 (TStrokedShape / TInputFrame / TModalSurface / TPopupSurface / TPopupStackLayer)。
+- 设计令牌: `TTheme` 151 个顶层转发 → `TAppThemeConfig` 103 字段; 色板在 `colors.slint` (亮/暗两套 ramp); `TIconSet` 46 个字形。
 - 浮层体系: `TPopupSurface` 锚定弹层 + `TPopupStack` 层计数与 ESC + z 序令牌 (`z-popup` / `z-modal` / `z-message`) + 服务型 global (`TDialogService` / `TLoadingService` / `TMessage` / `TNotification` / `TTooltip` / `TImageViewerService` / `TActionSheetService` / `TCommandPaletteService`)。
 
 ## 相关文档

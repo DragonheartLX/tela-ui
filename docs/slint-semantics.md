@@ -58,3 +58,5 @@
 27. **ListView 只自动算 `content-height`, 横向内容宽要自己给** — `Flickable` 对 `for` 循环生成的内容不会自动求 `content-width`(源码注明 issue #407), ListView 内部只维护纵向的 `content-height`; 要横向滚动就把 `content-width` 设成内容的固有宽度, 行元素显式给同一宽度, 表头绑 `content-x` 跟随。实测 TTable 1200px 固定列在 600px 视口里可横向滚动且表头同步, 纵向滚动与表头纵向固定不受影响。
 
 28. **ListView 的 `content-y` 归内部 Flickable 所有** — 外部给 `content-y` 写绑定或命令式赋值都留不住: 探针在 TTimeColumn 的 `init` 写入 192px/864px(视口高已就绪), 首帧后两条列都回到 0, 绑定也被那次内部写入解除; 换成 `Timer` 在打开后写同样被下一次布局复位。要做"数据整体滚动 + 选中值居中"的时间列, 不要在外面拨 ListView 的 `content-y`: 直接渲染整列、自己维护偏移量并 `animate` 它(TTimePicker 即整列数据 + 行内选中框), 或只渲染可见行而不滚动。
+
+29. **`for it[i] in model` 里写 `it.field = v` 会写回模型, 即使模型属性是 `in`** — 探针用一个 `in property <[MutRow]> rows` 加 `out property <bool> f0: rows[0].flag`, 点击行内 `TouchArea` 执行 `it.flag = !it.flag`: 点击前 `f0=false`, 点击后 `f0=true`, 说明循环变量对数组项是引用而非拷贝, 写入穿透到模型; 编译期也不把这种写入当"改 `in` 属性"拦下。所以扁平模型组件在回调里改行字段是可行的 —— TTree 最初"点了收不起来"不是写入被丢弃, 而是组件没有任何把子行藏起来的机制 (子行是否出现取决于宿主重建 `rows`), 最终改用嵌套声明 (见 `decisions.md`)。反过来, 依赖"改字段就能重绘"的说法未单独取像素证据, 需要时按本仓 `docs/harness.md` 的截图配方另测。
