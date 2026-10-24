@@ -15,6 +15,7 @@ import { TPopupPlacement } from "../structs/enums.slint";
 import { TIcon } from "../base/icon/icon.slint";
 import { TIconData } from "../base/icon/data.slint";
 import { TPopupSurface } from "../popup-surface.slint";
+import { TScrollBar } from "../scroll-bar.slint";
 import { ScrollView } from "std-widgets.slint";
 
 export struct TDropdownMenuItem {
@@ -96,7 +97,12 @@ export component TDropdownMenu inherits Rectangle {
         // the list layout's 2 × 4px padding.
         popup-height: min(root.rows-h, root.max-visible-items * root.item-height) + 8px;
 
-        ScrollView {
+        Rectangle {
+        sv := ScrollView {
+            width: parent.width;
+            height: parent.height;
+            vertical-scrollbar-policy: ScrollBarPolicy.always-off;
+
             rows := VerticalLayout {
                 padding: 4px;
 
@@ -166,6 +172,17 @@ export component TDropdownMenu inherits Rectangle {
                     }
                 }
             }
+        }
+
+        TScrollBar {
+            width: 6px;
+            x: parent.width - self.width;
+            y: 0;
+            height: parent.height;
+            content-length: sv.content-height;
+            viewport-length: sv.visible-height;
+            content-offset <=> sv.content-y;
+        }
         }
     }
 

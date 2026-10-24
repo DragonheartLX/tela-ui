@@ -9,6 +9,7 @@ import { TBorderlessWindow, TIconSet, TParagraph, TButton, TButtonVariant } from
 import { TTooltipOverlay, TDialog, TDialogService, TDialogServiceOverlay, TDrawer, TDrawerPlacement, TBottomSheet, TActionSheetOverlay, TActionSheetService, TImageViewerOverlay, TImageViewerService, TCommandPaletteOverlay, TCommandPaletteService, TLoadingService, TLoadingServiceOverlay } from "@tela-ui/overlay.slint";
 import { TMessageOverlay, TMessage, TNotificationOverlay } from "@tela-ui/notice.slint";
 import { TSideNav, TSideNavItem, TSideNavTogglePosition, TBackTop } from "@tela-ui/navigation.slint";
+import { TScrollBar } from "@tela-ui/scroll-bar.slint";
 import { ScrollView } from "std-widgets.slint";
 
 import { BasicsSection } from "pages/basics.slint";
@@ -86,6 +87,10 @@ export component MainWindow inherits TBorderlessWindow {
                 vertical-stretch: 1;
 
                 page-scroll := ScrollView {
+                    // The overlay TScrollBar below replaces the fluent
+                    // native one (same wiring as every library surface).
+                    vertical-scrollbar-policy: ScrollBarPolicy.always-off;
+
                     VerticalLayout {
                         // Top is 16px, tighter than the 32px page gutters —
                         // the window header already separates the content.
@@ -117,6 +122,16 @@ export component MainWindow inherits TBorderlessWindow {
                         // viewport is taller than the content.
                         Rectangle { vertical-stretch: 1; }
                     }
+                }
+
+                TScrollBar {
+                    width: 6px;
+                    x: parent.width - self.width;
+                    y: 0;
+                    height: parent.height;
+                    content-length: page-scroll.content-height;
+                    viewport-length: page-scroll.visible-height;
+                    content-offset <=> page-scroll.content-y;
                 }
 
                 // Page-level back-to-top: appears once the gallery page is

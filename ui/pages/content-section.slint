@@ -1,14 +1,16 @@
-// Gallery section: 内容 (TCollapse / TTable / TCarousel / TTree / TSplitter), 一个组件一张卡.
+// Gallery section: 内容 (TCollapse / TTable / TCarousel / TTree / TList /
+// TSplitter), 一个组件一张卡.
 
 import { TTheme, TThemeRole } from "@tela-ui/theme.slint";
 import { TIconSet, TCaption, TText } from "@tela-ui/base.slint";
-import { TCollapse, TCarousel, TTable, TTree, TTreeItem, TTreeBranch, TSplitter, TSplitterVertical, TSplitterPane, TSplitterPanePrimary, TSplitterPanePrimaryVertical, TTableAlign } from "@tela-ui/content.slint";
+import { TCollapse, TCarousel, TTable, TTree, TTreeItem, TTreeBranch, TSplitter, TSplitterVertical, TSplitterPane, TSplitterPanePrimary, TSplitterPanePrimaryVertical, TTableAlign, TList, TListItem } from "@tela-ui/content.slint";
 import { GallerySection } from "../gallery-section.slint";
 
 export component ContentSection inherits VerticalLayout {
     spacing: 28px;
 
     in-out property <string> pane-size: "240px";
+    in-out property <int> list-index: -1;
 
     // ======================== TCollapse =====================
     GallerySection {
@@ -139,6 +141,51 @@ export component ContentSection inherits VerticalLayout {
         TCaption {
             text: "节点嵌套声明, 深度不限 (分支用 @children 承载子节点); 点分支行折叠/展开, 折叠靠裁剪高度并带动画; 点叶子节点选中, 选中值经 TTreeLogic 全局共享 (一个窗口只维护一份选中态); disabled 节点不响应点击且不高亮。";
             wrap: word-wrap;
+        }
+    }
+
+    // ========================= TList ========================
+    GallerySection {
+        title: "列表 TList";
+        code: "import { TList } from \"@tela-ui/content.slint\";\n\nTList {\n    height: 240px;          // 固定视口, 行回收由 ListView 完成\n    selectable: true;\n    current-index <=> i;\n    items: [{ text: \"标题\", description: \"说明\", icon: … }, …];\n    row-clicked(i) => { … }\n}";
+
+        VerticalLayout {
+            spacing: 16px;
+
+            HorizontalLayout {
+                spacing: 24px;
+
+                TList {
+                    width: 320px;
+                    height: 240px;
+                    selectable: true;
+                    current-index <=> root.list-index;
+                    items: [
+                        { text: "收件箱", description: "12 封未读" },
+                        { text: "已加星标", description: "3 封" },
+                        { text: "已发送", icon: TIconSet.Mail },
+                        { text: "草稿箱", description: "1 封", disabled: true },
+                        { text: "垃圾邮件" },
+                        { text: "已删除" },
+                        { text: "归档" },
+                    ];
+                }
+
+                TList {
+                    width: 320px;
+                    height: 144px;
+                    items: [
+                        { text: "暂无描述的列表" },
+                        { text: "只有标题也可以" },
+                        { text: "空态看另一个" },
+                    ];
+                    empty-text: "列表为空";
+                }
+
+                Rectangle { }
+            }
+
+            TCaption { text: "行虚拟化由 ListView 提供 (只实例化可见行); selectable 时点行高亮并回调 changed, row-clicked 每次点击都报; 行高默认 48px 可覆盖。"; wrap: word-wrap; }
         }
     }
 

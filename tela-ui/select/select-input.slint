@@ -1,0 +1,318 @@
+// Tela UI — TSelectInput
+//
+// Filterable select: TSelect's trigger/popup semantics on a TAutoComplete
+// input. Matching runs in the component (the TCommandPalette technique):
+// every item keeps its row and a miss collapses to zero height, so no model
+// is rebuilt and no index remapped. Picking sets `current-index` and fills
+// the field with the label; typing again filters without clearing the
+// selection.
+//
+// The highlight prefers the current selection, then the first enabled match
+// (each row reports itself on a filter change; the smallest index wins).
+// Arrow-key stepping is not included: 1.18 has no loop statements (see
+// TAutoComplete / README 已知限制).
+
+import { TTheme } from "../theme.slint";
+import { TText } from "../base/typography.slint";
+import { TInput } from "../input/input.slint";
+import { TPopupSurface } from "../popup-surface.slint";
+import { TScrollBar } from "../scroll-bar.slint";
+import { TSize } from "../structs/enums.slint";
+import { TIcon } from "../base/icon/icon.slint";
+import { TIconSet } from "../base/icon/data.slint";
+import { TSelectItem } from "select.slint";
+import { ScrollView } from "std-widgets.slint";
+
+export component TSelectInput inherits Rectangle {
+    in property <[TSelectItem]> items;
+    in-out property <string> text <=> trigger.text;
+    // current-index drives the visuals; current-value is derived from it so
+    // the two can never disagree. Hosts may bind either one two-way.
+    in-out property <int> current-index: -1;
+    in-out property <string> current-value:
+        current-index >= 0 && current-index < items.length ? items[current-index].value : "";
+    in property <string> placeholder-text;
+    in property <bool> disabled: false;
+    in property <bool> clearable: false;
+    in property <TSize> size: TSize.medium;
+    // Suggestions shown before the list scrolls.
+    in property <int> max-rows: 6;
+    in property <string> empty-text: "无匹配结果";
+
+    callback changed(string);
+    // Enter while nothing is highlighted.
+    callback accepted(string);
+    callback selected(int, string);
+
+    out property <bool> is-open: surface.is-open;
+
+    private property <length> h: TTheme.size-height(root.size);
+    private property <length> row-h: TTheme.height-m;
+    private property <length> pad: TTheme.spacing-2;
+    private property <length> cap:
+        2 * root.pad + max(1, root.max-rows) * root.row-h;
+    private property <int> match-count: 0;
+    private property <length> content-h:
+        2 * root.pad + max(1, root.match-count) * root.row-h;
+    private property <string> keyword: "";
+    private property <int> filter-seq: 0;
+    private property <int> active-index: -1;
+    private property <bool> has-selection: current-index >= 0 && current-index < items.length;
+
+    // Case-insensitive substring match on the label (the TAutoComplete
+    // replace-all trick). Deliberately not `pure`: with `pure`, calls made
+    // from the popup's @children rows read the wrong root and every row
+    // missed.
+    function hit(it: TSelectItem) -> bool {
+        let q = root.keyword.to-lowercase();
+        return q == ""
+            || it.label.to-lowercase().replace-all(q, "") != it.label.to-lowercase();
+    }
+
+    function set-keyword(text: string) {
+        root.active-index = -1;
+        root.match-count = 0;
+        root.keyword = text;
+        root.filter-seq += 1;
+    }
+
+    function report(index: int, it: TSelectItem) {
+        if (root.hit(it)) {
+            root.match-count += 1;
+            if (!it.disabled) {
+                root.consider(index);
+            }
+        }
+    }
+
+    function reset-model() {
+        root.active-index = -1;
+        root.match-count = 0;
+        root.keyword = root.text;
+    }
+
+    function open-suggestions() {
+        if (root.disabled || root.items.length == 0) {
+            return;
+        }
+        root.set-keyword(root.text);
+        surface.show();
+        // Showing a PopupWindow takes the keyboard focus from the field; hand
+        // it back (the TAutoComplete workaround).
+        trigger.focus();
+    }
+
+    function consider(index: int) {
+        if (index == root.current-index
+            || root.active-index < 0 || index < root.active-index) {
+            root.active-index = index;
+        }
+    }
+
+    function pick(index: int) -> bool {
+        if index < 0 || index >= root.items.length
+            || root.items[index].disabled || !root.hit(root.items[index]) {
+            return false;
+        }
+        root.current-index = index;
+        root.text = root.items[index].label;
+        trigger.move-caret-to-end();
+        root.selected(index, root.items[index].value);
+        surface.close();
+        return true;
+    }
+
+    height: root.h;
+    min-width: 160px;
+
+    trigger := TInput {
+        x: 0;
+        y: 0;
+        width: parent.width;
+        height: parent.height;
+        size: root.size;
+        placeholder-text: root.placeholder-text;
+        clearable: root.clearable;
+        disabled: root.disabled;
+
+        changed(text) => {
+            root.changed(text);
+            if (!surface.is-open) {
+                root.open-suggestions();
+            }
+        }
+
+        accepted(text) => {
+            if (!root.pick(root.active-index)) {
+                surface.close();
+                root.accepted(text);
+            }
+        }
+
+        cleared => {
+            root.changed("");
+            if (!surface.is-open) {
+                root.open-suggestions();
+            }
+        }
+    }
+
+    private property <bool> focused: trigger.focused;
+
+    changed focused => {
+        if (root.focused && !surface.is-open) {
+            root.open-suggestions();
+        }
+    }
+
+    changed text => {
+        root.set-keyword(root.text);
+    }
+
+    changed items => {
+        root.reset-model();
+    }
+
+    changed disabled => {
+        if (root.disabled) {
+            surface.close();
+        }
+    }
+
+    surface := TPopupSurface {
+        anchor-width: root.width;
+        anchor-height: root.height;
+        gap: root.pad;
+        popup-width: max(root.width, 160px);
+        popup-max-width: max(root.width, 160px);
+        popup-height: min(root.content-h, root.cap);
+
+        Rectangle {
+            sv := ScrollView {
+                width: parent.width;
+                height: parent.height;
+                vertical-scrollbar-policy: ScrollBarPolicy.always-off;
+                // Content height is pinned explicitly: the stock ScrollView
+                // would otherwise keep its own content-size bookkeeping.
+                content-height: root.content-h;
+
+                VerticalLayout {
+                    padding: root.pad;
+                    // Gaps are baked into the rows; layout spacing would also
+                    // apply between collapsed zero-height rows.
+                    spacing: 0px;
+
+                    for it[i] in root.items: Rectangle {
+                        height: root.hit(it) ? root.row-h : 0px;
+                        clip: true;
+
+                        private property <int> seq: root.filter-seq;
+                        changed seq => {
+                            root.report(i, it);
+                        }
+                        init => {
+                            root.report(i, it);
+                        }
+
+                        Rectangle {
+                            width: parent.width;
+                            height: root.row-h;
+                            border-radius: TTheme.radius-default;
+                            background: transparent;
+                            animate background { duration: TTheme.duration-fast; }
+
+                            states [
+                                hovered when row-ta.has-hover && !it.disabled: {
+                                    background: TTheme.bg-color-container-hover;
+                                }
+                                // Later states win: highlight paints over hover.
+                                highlighted when i == root.active-index: {
+                                    background: TTheme.brand-color-light;
+                                }
+                            ]
+
+                            HorizontalLayout {
+                                width: parent.width;
+                                height: parent.height;
+                                padding-left: TTheme.spacing-2;
+                                padding-right: TTheme.spacing-2;
+                                spacing: TTheme.spacing-2;
+
+                                TText {
+                                    text: it.label;
+                                    font-size: TTheme.size-font(root.size);
+                                    line-height: TTheme.size-line-height(root.size);
+                                    vertical-alignment: center;
+                                    horizontal-stretch: 1;
+                                    overflow: elide;
+
+                                    states [
+                                        active when i == root.active-index: {
+                                            color: TTheme.brand-color;
+                                        }
+                                        disabled when it.disabled: {
+                                            color: TTheme.text-color-disabled;
+                                        }
+                                    ]
+                                }
+
+                                if i == root.current-index: TIcon {
+                                    y: (parent.height - self.height) / 2;
+                                    icon: TIconSet.Check;
+                                    size: TTheme.size-font(root.size);
+                                    icon-color: TTheme.brand-color;
+                                }
+                            }
+
+                            row-ta := TouchArea {
+                                enabled: !it.disabled;
+                                mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;
+                                accessible-role: AccessibleRole.button;
+                                accessible-label: it.label;
+                                accessible-enabled: !it.disabled;
+                                accessible-checked: i == root.active-index;
+
+                                changed has-hover => {
+                                    if (self.has-hover && !it.disabled) {
+                                        root.active-index = i;
+                                    }
+                                }
+
+                                clicked => {
+                                    root.pick(i);
+                                }
+                            }
+                        }
+                    }
+
+                    if root.match-count == 0: Rectangle {
+                        height: root.row-h;
+
+                        TText {
+                            text: root.empty-text;
+                            font-size: TTheme.size-font(root.size);
+                            line-height: TTheme.size-line-height(root.size);
+                            color: TTheme.text-color-placeholder;
+                            horizontal-alignment: center;
+                            vertical-alignment: center;
+                            overflow: elide;
+                        }
+                    }
+                }
+            }
+
+            TScrollBar {
+                width: 6px;
+                x: parent.width - self.width;
+                y: 0;
+                height: parent.height;
+                content-length: sv.content-height;
+                viewport-length: sv.visible-height;
+                content-offset <=> sv.content-y;
+            }
+        }
+    }
+
+    accessible-role: AccessibleRole.text-input;
+    accessible-label: root.has-selection ? root.current-value : root.placeholder-text;
+}

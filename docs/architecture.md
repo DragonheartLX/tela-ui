@@ -9,11 +9,12 @@
 - `ui/` + `src/` — gallery (bin `tela`); `ui/MainWindow.slint` 用 `if` 懒挂 11 个页面 (10 个分类页 + 设置页)。
 - 构建: Slint 1.18.1 / edition 2024 / 样式 `fluent` / accessibility + backend-winit + renderer-skia/software。
 
-## 统计 (2026-10-24)
+## 统计 (2026-10-24, 第二批落地后)
 
-- 98 个 `.slint` / 13,462 行: `tela-ui/` 85 个 11,102 行, `ui/` 13 个 2,360 行。
-- 84 个导出组件 = 71 个 UI 组件 (含私有 TNavLabel) + 8 个服务 overlay + 5 个库内基类 (TStrokedShape / TInputFrame / TModalSurface / TPopupSurface / TPopupStackLayer)。
+- 109 个 `.slint` / 16,151 行: `tela-ui/` 96 个 13,367 行, `ui/` 13 个 2,784 行。
+- 95 个导出组件 = 82 个 UI 组件 (含私有 TNavLabel) + 8 个服务 overlay + 5 个库内基类 (TStrokedShape / TInputFrame / TModalSurface / TPopupSurface / TPopupStackLayer)。
 - 设计令牌: `TTheme` 151 个顶层转发 → `TAppThemeConfig` 103 字段; 色板在 `colors.slint` (亮/暗两套 ramp); `TIconSet` 46 个字形。
+- 滚动条: 内部 `TScrollBar` (scroll-bar.slint, 与 TPopupSurface 同级的脚手架) 替换 fluent 原生滚动条 — 原生滑块 2px 且贴右缘不居中、颜色为 border 级对比不足; 各滚动面 (TList / TTable / 六个下拉弹层 / 两个菜单 / 命令面板 / gallery 页面滚动) 关原生条 (`vertical-scrollbar-policy: always-off`) 后叠 6px 灰阶胶囊滑块, `content-y` 双向绑定 (Flickable 仍持有所有权)。
 - 浮层体系: `TPopupSurface` 锚定弹层 + `TPopupStack` 层计数与 ESC + z 序令牌 (`z-popup` / `z-modal` / `z-message`) + 服务型 global (`TDialogService` / `TLoadingService` / `TMessage` / `TNotification` / `TTooltip` / `TImageViewerService` / `TActionSheetService` / `TCommandPaletteService`)。
 
 ## 相关文档

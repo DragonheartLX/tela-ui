@@ -1,0 +1,162 @@
+// Tela UI — TList
+//
+// Generic virtualized list. The body reuses the TTable technique: a std
+// ListView with fixed row heights, so only visible rows are instantiated.
+// Rows carry an icon, a title and an optional description — custom row
+// rendering is not offered (the ListView rows are model-driven).
+//
+// With `selectable` the list highlights the current row and reports
+// `changed(index)`; `row-clicked(index)` fires on every click either way.
+
+import { TTheme } from "../theme.slint";
+import { TText } from "../base/typography.slint";
+import { TIcon } from "../base/icon/icon.slint";
+import { TIconData } from "../base/icon/data.slint";
+import { TEmpty } from "../display/empty.slint";
+import { TScrollBar } from "../scroll-bar.slint";
+import { ListView } from "std-widgets.slint";
+
+export struct TListItem {
+    text: string,
+    description: string = "",
+    icon: TIconData,
+    disabled: bool = false,
+}
+
+export component TList inherits Rectangle {
+    in property <[TListItem]> items;
+    in property <bool> selectable: false;
+    in-out property <int> current-index: -1;
+    // TDesign medium row height (height-l + spacing-4), same as TTable.
+    in property <length> row-height: TTheme.height-l + TTheme.spacing-4;
+    in property <string> empty-text: "暂无数据";
+
+    callback row-clicked(int);
+    // Selection moved; only fires when `selectable` is on.
+    callback changed(int);
+
+    clip: true;
+    // Content-sized by default; hosts override for a fixed viewport.
+    min-height: root.row-height;
+    preferred-height: Math.max(root.items.length, 0) * root.row-height;
+
+    if root.items.length == 0: Rectangle {
+        width: parent.width;
+        height: parent.height;
+        background: TTheme.bg-color-container;
+
+        TEmpty {
+            width: parent.width;
+            height: parent.height;
+            description: root.empty-text;
+        }
+    }
+
+    body := ListView {
+        width: parent.width;
+        height: parent.height;
+        // The fluent native scrollbar is replaced by the overlay TScrollBar.
+        vertical-scrollbar-policy: ScrollBarPolicy.always-off;
+
+        for it[i] in root.items: Rectangle {
+            width: parent.width;
+            height: root.row-height;
+            background: TTheme.bg-color-container;
+            animate background { duration: TTheme.duration-fast; }
+
+            states [
+                hovered when row-touch.has-hover && !it.disabled: {
+                    background: TTheme.bg-color-container-hover;
+                }
+                selected when root.selectable && i == root.current-index: {
+                    background: TTheme.brand-color-light;
+                }
+            ]
+
+            HorizontalLayout {
+                padding-left: TTheme.padding-lr-m;
+                padding-right: TTheme.padding-lr-m;
+                spacing: TTheme.spacing-2;
+
+                if it.icon.paths.length > 0: TIcon {
+                    y: (parent.height - self.height) / 2;
+                    icon: it.icon;
+                    size: 16px;
+                    icon-color: it.disabled ? TTheme.text-color-disabled
+                        : root.selectable && i == root.current-index ? TTheme.brand-color
+                        : TTheme.text-color-secondary;
+                }
+
+                // Text block centered by hand: layouts have no cross-axis
+                // alignment, so the title (and optional description) get an
+                // explicit y from the block height.
+                Rectangle {
+                    title-text := TText {
+                        y: (root.row-height
+                            - (it.description != ""
+                                ? TTheme.line-height-m + TTheme.spacing-1 + TTheme.line-height-s
+                                : TTheme.line-height-m)) / 2;
+                        width: parent.width;
+                        height: TTheme.line-height-m;
+                        text: it.text;
+                        font-size: TTheme.font-size-m;
+                        line-height: TTheme.line-height-m;
+                        color: it.disabled ? TTheme.text-color-disabled
+                            : root.selectable && i == root.current-index ? TTheme.brand-color
+                            : TTheme.text-color-primary;
+                        overflow: elide;
+                    }
+
+                    if it.description != "": TText {
+                        y: (root.row-height
+                            - (TTheme.line-height-m + TTheme.spacing-1 + TTheme.line-height-s)) / 2
+                            + TTheme.line-height-m + TTheme.spacing-1;
+                        width: parent.width;
+                        height: TTheme.line-height-s;
+                        text: it.description;
+                        font-size: TTheme.font-size-s;
+                        line-height: TTheme.line-height-s;
+                        color: it.disabled ? TTheme.text-color-disabled : TTheme.text-color-secondary;
+                        overflow: elide;
+                    }
+                }
+            }
+
+            Rectangle {
+                y: parent.height - self.height;
+                width: parent.width;
+                height: 1px;
+                background: TTheme.component-stroke;
+            }
+
+            row-touch := TouchArea {
+                enabled: !it.disabled;
+                mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;
+                accessible-role: AccessibleRole.list-item;
+                accessible-label: it.text;
+                accessible-enabled: !it.disabled;
+
+                clicked => {
+                    if (root.selectable && i != root.current-index) {
+                        root.current-index = i;
+                        root.changed(i);
+                    }
+                    root.row-clicked(i);
+                }
+            }
+        }
+    }
+
+    // Overlay scrollbar (replaces the fluent native one).
+    TScrollBar {
+        width: 6px;
+        x: parent.width - self.width;
+        y: 0;
+        height: parent.height;
+        content-length: body.content-height;
+        viewport-length: body.visible-height;
+        content-offset <=> body.content-y;
+    }
+
+    accessible-role: AccessibleRole.list;
+}

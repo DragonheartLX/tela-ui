@@ -1,0 +1,187 @@
+// Tela UI — TPicker
+//
+// Generic multi-column wheel picker panel (like the platform pickers). The
+// host embeds it (TDatePicker-style) or builds its own trigger around it;
+// there is deliberately no trigger here — the joined display text of N
+// columns cannot be assembled in-language (no loops, no string splicing).
+//
+// Each column renders its full option range under an animated offset with
+// the selection box attached to the selected row (the TTimePicker scheme —
+// std ListView's content-y is owned by its internal Flickable, see
+// docs/slint-semantics.md 第 28 条). Columns are independent; linked columns
+// (province/city) are not offered.
+//
+// `value` is per-column option indexes (-1 = unset); it is in-out so the
+// component can write a picked index back — bind it two-way.
+
+import { TTheme, TSize } from "../theme.slint";
+import { TText } from "../base/typography.slint";
+
+export struct TPickerColumn {
+    // Caption above the column; "" renders no caption.
+    label: string = "",
+    options: [string],
+}
+
+// One wheel column (the TTimeColumn scheme, options-driven). Private: the
+// panel layout lives in TPicker.
+component TPickerWheel inherits Rectangle {
+    in property <[string]> options;
+    // Selected index; -1 highlights nothing.
+    in property <int> value: -1;
+    in property <length> item-height: TTheme.height-m;
+
+    callback picked(int);
+
+    private property <int> middle: 3;
+    private property <length> content-y:
+        root.middle * root.item-height - max(0, root.value) * root.item-height;
+    animate content-y { duration: TTheme.duration-fast; }
+
+    width: TTheme.spacing-14;
+    clip: true;
+
+    function scroll-by(delta: length) {
+        if (delta == 0px || root.options.length == 0) {
+            return;
+        }
+        // Unselected: the first notch jumps to the near end.
+        let current = root.value >= 0
+            ? root.value
+            : (delta > 0px ? -1 : root.options.length);
+        let next = max(0, min(root.options.length - 1, current + (delta > 0px ? 1 : -1)));
+        if (next != root.value) {
+            root.picked(next);
+        }
+    }
+
+    Rectangle {
+        y: root.content-y;
+        width: parent.width;
+        height: root.options.length * root.item-height;
+
+        for opt[i] in root.options: Rectangle {
+            y: i * root.item-height;
+            width: parent.width;
+            height: root.item-height;
+            border-radius: TTheme.radius-default;
+            background: i == root.value ? TTheme.brand-color-light : transparent;
+
+            states [
+                hovered when row-touch.has-hover && i != root.value: {
+                    background: TTheme.bg-color-container-hover;
+                }
+            ]
+
+            TText {
+                text: opt;
+                font-size: TTheme.size-font(TSize.medium);
+                line-height: TTheme.size-line-height(TSize.medium);
+                color: i == root.value ? TTheme.brand-color : TTheme.text-color-primary;
+                horizontal-alignment: center;
+                vertical-alignment: center;
+                width: parent.width;
+                height: parent.height;
+                overflow: elide;
+            }
+
+            row-touch := TouchArea {
+                width: parent.width;
+                height: parent.height;
+                mouse-cursor: MouseCursor.pointer;
+                accessible-role: AccessibleRole.button;
+                accessible-label: opt;
+                accessible-checked: i == root.value;
+
+                scroll-event(event) => {
+                    root.scroll-by(event.delta-y);
+                    return accept;
+                }
+
+                clicked => {
+                    if (i != root.value) {
+                        root.picked(i);
+                    }
+                }
+            }
+        }
+    }
+}
+
+export component TPicker inherits Rectangle {
+    in property <[TPickerColumn]> columns;
+    // Per-column option index; -1 = unset. The component writes picked
+    // indexes back, so bind two-way.
+    in-out property <[int]> value;
+    in property <length> item-height: TTheme.height-m;
+    in property <int> visible-rows: 7;
+
+    // Fires after `value` has been updated (host reads the array).
+    callback changed();
+
+    private property <length> pad: TTheme.spacing-2;
+    private property <int> col-count: root.columns.length;
+    private property <length> panel-w:
+        2 * root.pad + root.col-count * TTheme.spacing-14
+            + max(0, root.col-count - 1) * TTheme.spacing-2;
+    private property <length> panel-h:
+        2 * root.pad + root.visible-rows * root.item-height;
+
+    width: root.panel-w;
+    height: root.panel-h;
+    background: transparent;
+    clip: true;
+
+    public function set-value(col: int, idx: int) {
+        // Guarded model write; out-of-range picks are ignored.
+        if col < 0 || col >= root.columns.length
+            || idx < 0 || idx >= root.columns[col].options.length {
+            return;
+        }
+        // A host model shorter than `columns` cannot be written past its end;
+        // grow it by one when the pick fills the next slot. A gap (col beyond
+        // length + 1) needs the host to pass a full-length model.
+        if (col < root.value.length) {
+            root.value[col] = idx;
+        } else if (col == root.value.length) {
+            root.value.push(idx);
+        } else {
+            return;
+        }
+        root.changed();
+    }
+
+    Rectangle {
+        x: root.pad;
+        y: root.pad;
+        width: parent.width - 2 * root.pad;
+        height: root.visible-rows * root.item-height;
+
+        HorizontalLayout {
+            spacing: TTheme.spacing-2;
+
+            for col[c] in root.columns: VerticalLayout {
+                spacing: TTheme.spacing-1;
+
+                if col.label != "": TText {
+                    text: col.label;
+                    font-size: TTheme.font-size-s;
+                    line-height: TTheme.line-height-s;
+                    color: TTheme.text-color-secondary;
+                    horizontal-alignment: center;
+                    height: TTheme.line-height-s;
+                }
+
+                TPickerWheel {
+                    options: col.options;
+                    item-height: root.item-height;
+                    value: c < root.value.length ? root.value[c] : -1;
+
+                    picked(idx) => {
+                        root.set-value(c, idx);
+                    }
+                }
+            }
+        }
+    }
+}

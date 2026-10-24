@@ -7,6 +7,7 @@ import { TText, TIconSet, TCaption, TButton, TButtonVariant, TParagraph } from "
 import { TMessage } from "@tela-ui/notice.slint";
 import { TTabs, TPagination, TNavBar, TNavItem, TSideNav, TSideNavItem, TSideNavMode, TSideNavTogglePosition, TBreadcrumb, TCrumbItem, TSteps, TDropdownMenu, TDropdownMenuItem, TContextMenu, TBackTop } from "@tela-ui/navigation.slint";
 import { GallerySection } from "../gallery-section.slint";
+import { TScrollBar } from "@tela-ui/scroll-bar.slint";
 import { ScrollView } from "std-widgets.slint";
 
 export component NavigationSection inherits VerticalLayout {
@@ -305,12 +306,24 @@ export component NavigationSection inherits VerticalLayout {
             clip: true;
 
             sv := ScrollView {
+                vertical-scrollbar-policy: ScrollBarPolicy.always-off;
+
                 VerticalLayout {
                     padding: TTheme.padding-lr-l;
                     spacing: TTheme.spacing-3;
 
                     for i in 24: TParagraph { text: "滚动内容第 \{i + 1} 行,滚动超过阈值后右下角出现回到顶部按钮。"; }
                 }
+            }
+
+            TScrollBar {
+                width: 6px;
+                x: parent.width - self.width;
+                y: 0;
+                height: parent.height;
+                content-length: sv.content-height;
+                viewport-length: sv.visible-height;
+                content-offset <=> sv.content-y;
             }
 
             TBackTop {

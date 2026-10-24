@@ -1,0 +1,99 @@
+// Tela UI — TAvatarGroup
+//
+// Stacked avatar row with an overflow "+N" tile. Overlap is constant
+// (TTheme.spacing-4) and later items paint above earlier ones, matching the
+// platform avatar-group convention.
+//
+// `max-count: 0` means "show everything"; a positive value caps the shown
+// avatars and renders the rest as a "+N" tile that fires `overflow-clicked`.
+// Avatars fire `clicked(index)`; the tile click is separate.
+
+import { TTheme } from "../theme.slint";
+import { TAvatar, TAvatarSize, TAvatarShape } from "avatar.slint";
+import { TThemeRole } from "../structs/enums.slint";
+
+export struct TAvatarGroupItem {
+    text: string,
+    source: image,
+}
+
+export component TAvatarGroup inherits Rectangle {
+    in property <[TAvatarGroupItem]> items;
+    in property <TAvatarSize> size: TAvatarSize.medium;
+    in property <TAvatarShape> shape: TAvatarShape.circle;
+    in property <TThemeRole> theme: TThemeRole.primary;
+    // 0 = no cap; positive caps the shown avatars and renders "+N".
+    in property <int> max-count: 0;
+
+    callback clicked(int);
+    callback overflow-clicked();
+
+    private property <length> d: size == TAvatarSize.small ? 32px
+        : size == TAvatarSize.large ? 48px
+        : size == TAvatarSize.extra-large ? 64px : 40px;
+    private property <length> overlap: TTheme.spacing-4;
+    private property <int> shown: max-count > 0 ? Math.min(max-count, items.length) : items.length;
+    private property <int> overflow-count: items.length - shown;
+    private property <length> total-w: shown > 0 ? (shown - 1) * (d - overlap) + d : 0px;
+
+    width: total-w;
+    height: d;
+
+    for it[i] in root.items: Rectangle {
+        // Slot box; hidden items leave an empty (and invisible) slot behind.
+        x: i * (root.d - root.overlap);
+        y: 0;
+        width: root.d;
+        height: root.d;
+
+        if i < shown: Rectangle {
+            width: parent.width;
+            height: parent.height;
+
+            TAvatar {
+                width: parent.width;
+                height: parent.height;
+                size: root.size;
+                text: it.text;
+                source: it.source;
+                shape: root.shape;
+                theme: root.theme;
+            }
+
+            avatar-touch := TouchArea {
+                mouse-cursor: MouseCursor.pointer;
+                accessible-role: AccessibleRole.button;
+                accessible-label: it.text;
+                clicked => {
+                    root.clicked(i);
+                }
+            }
+        }
+    }
+
+    if root.overflow-count > 0: Rectangle {
+        x: (root.shown - 1) * (root.d - root.overlap);
+        y: 0;
+        width: root.d;
+        height: root.d;
+
+        TAvatar {
+            width: parent.width;
+            height: parent.height;
+            size: root.size;
+            shape: root.shape;
+            theme: root.theme;
+            // "+N" always renders as text; source is deliberately unset.
+            text: "+\{root.overflow-count}";
+        }
+
+        overflow-touch := TouchArea {
+            mouse-cursor: MouseCursor.pointer;
+            accessible-role: AccessibleRole.button;
+            accessible-label: "还有 \{root.overflow-count} 个成员";
+            clicked => {
+                root.overflow-clicked();
+            }
+        }
+    }
+}

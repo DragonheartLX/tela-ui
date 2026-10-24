@@ -1,0 +1,164 @@
+// Tela UI — TOtpInput
+//
+// Segmented code input (OTP / activation codes) with auto-advance. Degraded
+// form, documented: Slint 1.18 has no max-length on TextInput and no string
+// slicing, so a segment cannot be capped to one character and a pasted
+// string cannot be split across segments in-language. Every segment reports
+// its full buffer through `changed(index, text)`; overflow handling and
+// paste distribution are the host's job (rewrite `values`).
+//
+// What the component does on its own: auto-advance to the next segment once
+// a buffer becomes non-empty, Backspace on an empty buffer walks back one
+// segment, `filled-count`/`completed()` fire when every segment holds text.
+// Host-written `values` sync into the segments; the filled count only
+// recounts on segment edits.
+
+import { TTheme } from "../theme.slint";
+import { TSize } from "../structs/enums.slint";
+
+export component TOtpInput inherits Rectangle {
+    // Segment count; model writes rebuild the segments.
+    in property <int> length: 4;
+    in property <bool> masked: false;
+    in property <bool> disabled: false;
+    in property <TSize> size: TSize.medium;
+    // Per-segment buffers. The component writes edited segments back; the
+    // host may rewrite the whole array (e.g. paste distribution).
+    in-out property <[string]> values;
+
+    // A segment's buffer after every edit; (index, text).
+    callback changed(int, string);
+    // Every segment holds text.
+    callback completed();
+
+    private property <length> h: TTheme.size-height(size);
+    private property <length> fs: TTheme.size-font(size);
+    // Focus requests ride a counter: the target index plus a bump so the
+    // same target can be re-requested. Each segment watches the bump and
+    // focuses itself when it is the target.
+    private property <int> focus-target: 0;
+    private property <int> focus-seq: 0;
+    private property <int> filled-count: 0;
+
+    width: root.length * root.h + max(0, root.length - 1) * TTheme.spacing-2;
+    height: root.h;
+
+    function request-focus(index: int) {
+        root.focus-target = index;
+        root.focus-seq += 1;
+    }
+
+    // Programmatic focus for hosts (auto-advance uses the same machinery);
+    // index is clamped. Clicking a segment focuses it natively.
+    public function focus-segment(index: int) {
+        root.request-focus(Math.max(0, Math.min(root.length - 1, index)));
+    }
+
+    for i in root.length: Rectangle {
+        y: 0;
+        x: i * (root.h + TTheme.spacing-2);
+        width: root.h;
+        height: root.h;
+        border-width: 1px;
+        border-radius: TTheme.radius-default;
+        background: TTheme.bg-color-specialcomponent;
+        border-color: seg.has-focus ? TTheme.brand-color : TTheme.component-border;
+        animate border-color { duration: TTheme.duration-fast; }
+
+        states [
+            disabled when root.disabled: {
+                border-color: TTheme.border-level-1-color;
+                background: TTheme.bg-color-component-disabled;
+            }
+        ]
+
+        seg := TextInput {
+            x: (parent.width - self.width) / 2;
+            y: 0;
+            width: parent.width - 2px;
+            height: parent.height;
+            horizontal-alignment: center;
+            vertical-alignment: center;
+            single-line: true;
+            input-type: root.masked ? InputType.password : InputType.text;
+            color: root.disabled ? TTheme.text-color-disabled : TTheme.text-color-primary;
+            font-size: root.fs;
+            font-family: TTheme.font-family;
+            selection-background-color: TTheme.brand-color-light;
+            selection-foreground-color: TTheme.text-color-primary;
+            enabled: !root.disabled;
+            accessible-role: AccessibleRole.text-input;
+            accessible-label: "第 \{i + 1} 位";
+
+            private property <int> seq: root.focus-seq;
+            changed seq => {
+                if (root.focus-target == i) {
+                    self.focus();
+                }
+            }
+
+            // The caret keeps its old offset across a focus move; put it at
+            // the end so Backspace clears the buffer. Runs once focus is
+            // actually established (a call inside `changed seq` is too early
+            // and silently ignored).
+            changed has-focus => {
+                if (self.has-focus) {
+                    self.set-selection-offsets(2147483647, 2147483647);
+                }
+            }
+
+            init => {
+                if i < root.values.length {
+                    self.text = root.values[i];
+                    if (self.text != "") {
+                        root.filled-count += 1;
+                    }
+                }
+                // Deliberately no auto-focus on mount: the component must not
+                // steal focus on first render. Clicking a segment focuses it
+                // natively; `request-focus` below serves auto-advance only.
+            }
+
+            edited => {
+                let prev = i < root.values.length ? root.values[i] : "";
+                if (i < root.values.length) {
+                    root.values[i] = self.text;
+                }
+                if (prev == "" && self.text != "") {
+                    root.filled-count += 1;
+                } else if (prev != "" && self.text == "") {
+                    root.filled-count -= 1;
+                }
+                root.changed(i, self.text);
+                if (self.text != "" && i < root.length - 1) {
+                    root.request-focus(i + 1);
+                }
+                if (root.filled-count == root.length) {
+                    root.completed();
+                }
+            }
+
+            key-pressed(event) => {
+                if event.text == Key.Backspace && self.text == "" && i > 0 {
+                    root.request-focus(i - 1);
+                    return accept;
+                }
+                // A filled segment swallows further typing: the buffer cannot
+                // be trimmed (no max-length), so replacing a digit requires
+                // clearing it first. Editing, navigation and clipboard keys
+                // pass (Backspace must reach the TextInput to clear it).
+                if self.text != "" && event.text != ""
+                    && !event.modifiers.control
+                    && event.text != Key.Backspace && event.text != Key.Delete
+                    && event.text != Key.LeftArrow && event.text != Key.RightArrow
+                    && event.text != Key.UpArrow && event.text != Key.DownArrow
+                    && event.text != Key.Home && event.text != Key.End {
+                    return accept;
+                }
+                reject
+            }
+        }
+    }
+
+    accessible-role: AccessibleRole.groupbox;
+}

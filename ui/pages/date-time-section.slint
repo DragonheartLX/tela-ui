@@ -1,8 +1,8 @@
-// Gallery section: 日期时间 (TCalendar / TDatePicker / TTimePicker),
-// 一个组件一张卡.
+// Gallery section: 日期时间 (TCalendar / TDatePicker / TTimePicker / TPicker /
+// TDateTimePicker), 一个组件一张卡.
 
 import { TCaption } from "@tela-ui/base.slint";
-import { TCalendar, TDate, TDatePicker, TTimePicker, TTime } from "@tela-ui/date-time.slint";
+import { TCalendar, TDate, TDatePicker, TTimePicker, TTime, TPicker, TDateTimePicker, TDateTime } from "@tela-ui/date-time.slint";
 import { GallerySection } from "../gallery-section.slint";
 
 export component DateTimeSection inherits VerticalLayout {
@@ -17,6 +17,12 @@ export component DateTimeSection inherits VerticalLayout {
     in-out property <TDate> picker-range-end: { year: 2026, month: 10, day: 16 };
     in-out property <TTime> time-value: { hour: 9, minute: 30, second: 0 };
     in-out property <TTime> time-seconds-value: { hour: 18, minute: 5, second: 42 };
+    in-out property <[int]> picker-values: [0, 1, 2];
+    in-out property <TDateTime> datetime-value: {
+        date: { year: 2026, month: 10, day: 20 },
+        hour: 9,
+        minute: 30,
+    };
 
     // ========================= TCalendar ====================
     GallerySection {
@@ -110,6 +116,66 @@ export component DateTimeSection inherits VerticalLayout {
             }
 
             TCaption { text: "触发器只读; 整列数据带动画滚动, 选中框随选中行移动; 点击行或滚轮逐格改值, 无确认按钮。"; wrap: word-wrap; }
+        }
+    }
+
+    // ========================= TPicker ======================
+    GallerySection {
+        title: "滚轮选择面板 TPicker";
+        code: "import { TPicker } from \"@tela-ui/date-time.slint\";\n\n// 纯面板组件 (无触发器): 联合显示文本要宿主拼\nTPicker {\n    columns: [\n        { label: \"省\", options: [\"浙江省\", \"江苏省\"] },\n        { label: \"市\", options: [\"杭州市\", \"宁波市\"] },\n    ];\n    value <=> idx;   // 每列选中下标, 需与列数等长\n    changed() => { … }\n}";
+
+        VerticalLayout {
+            spacing: 16px;
+
+            HorizontalLayout {
+                spacing: 24px;
+
+                TPicker {
+                    columns: [
+                        { label: "省", options: ["浙江省", "江苏省", "广东省"] },
+                        { label: "市", options: ["杭州市", "宁波市", "南京市", "苏州市"] },
+                        { label: "运营商", options: ["移动", "联通", "电信"] },
+                    ];
+                    value <=> root.picker-values;
+                }
+
+                Rectangle { }
+            }
+
+            TCaption { text: "每列独立取值, 点行或滚轮逐格滚动; 选中下标存于 value 数组, 请初始化成与列数等长 (短模型只有恰好填到末位的拾取能追加, 中间留空的列写不进); 无触发器与确认按钮, 联动列由宿主在 changed 里重建 options。"; wrap: word-wrap; }
+        }
+    }
+
+    // ====================== TDateTimePicker =================
+    GallerySection {
+        title: "日期时间选择 TDateTimePicker";
+        code: "import { TDateTimePicker, TDateTime } from \"@tela-ui/date-time.slint\";\n\nTDateTimePicker {\n    width: 280px;\n    start-year: 2000; end-year: 2100;\n    value <=> dt;    // { date: TDate, hour, minute }\n    changed(v) => { … }\n}";
+
+        VerticalLayout {
+            spacing: 16px;
+
+            HorizontalLayout {
+                spacing: 24px;
+
+                TDateTimePicker {
+                    width: 300px;
+                    value <=> root.datetime-value;
+                }
+
+                TDateTimePicker {
+                    width: 300px;
+                    disabled: true;
+                    value: {
+                        date: { year: 2026, month: 10, day: 20 },
+                        hour: 9,
+                        minute: 30,
+                    };
+                }
+
+                Rectangle { }
+            }
+
+            TCaption { text: "年/月/日/时/分五列滚轮; 日列随年月自动收放 (闰月长度用 TCalendar 同款运算); hour < 0 表示未选时间, 拾取任一列会把其余列补成有效零值。"; wrap: word-wrap; }
         }
     }
 }

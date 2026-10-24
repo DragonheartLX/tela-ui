@@ -89,7 +89,7 @@ TSwitch {
 }
 ```
 
-71 个组件 (基础 12 / 输入 10 / 选择 7 / 日期时间 3 / 展示 8 / 内容 12 / 提示 3 / 浮层 5 / 导航 10, 另有实验性 1; 导航 10 含私有 TNavLabel) 按类别聚合导出; 另有 8 个服务型浮层 (对话框 / 加载 / 消息 / 通知 / 图片预览 / 命令面板 / 动作面板 / 提示) 与主题、图标、浮层栈三个全局对象。`@tela-ui/common.slint` 保留为全量兼容出口, 完整参数说明见 [docs/components.md](docs/components.md)。
+82 个组件 (基础 12 / 输入 14 / 选择 10 / 日期时间 5 / 展示 9 / 内容 13 / 提示 3 / 浮层 5 / 导航 10, 另有实验性 1; 导航 10 含私有 TNavLabel) 按类别聚合导出; 另有 8 个服务型浮层 (对话框 / 加载 / 消息 / 通知 / 图片预览 / 命令面板 / 动作面板 / 提示) 与主题、图标、浮层栈三个全局对象。`@tela-ui/common.slint` 保留为全量兼容出口, 完整参数说明见 [docs/components.md](docs/components.md)。
 
 ## 致谢与说明
 
@@ -98,6 +98,7 @@ TSwitch {
 - 已知限制:
     - 按钮无虚线变体 (Slint 边框仅支持实线)。
     - TSelect 与 TDropdownMenu 暂无键盘导航; TCommandPalette 的列表不支持上下方向键步进 (1.18 语言内没有循环语句, 组件层无法扫描匹配项 —— 高亮停在第一条匹配项, 回车执行它或点击列表项)。
+    - TSelectInput / TTreeSelect / TCascader 暂无键盘导航 (对齐 TSelect); TTreeSelect 的选中值经 `TTreeLogic` 全局共享 (同 TTree); TCascader 面板为单列逐级展开, 触发器只回显叶子 label, 完整路径回显暂不支持 (声明式嵌套下叶子拿不到祖先 label)。
     - TTextArea 暂无 maxLength 字数统计。
     - 对话框 / 通知 / 底部弹层正文超过窗口高度时按上限裁剪 (无滚动容器)。
     - TImageViewer 无旋转与图片说明文字。
@@ -106,6 +107,12 @@ TSwitch {
     - TCalendar / TDatePicker 暂无键盘导航 (方向键切换日期、回车确认)。
     - TTimePicker 触发器只读, 滚轮逐格改值并直接触发 `changed`, 无确认按钮 (点击外部或 ESC 关闭), 暂无键盘导航。
     - TAutoComplete 暂无上下方向键步进 (高亮停在第一条可选匹配或悬停项); 过滤只匹配 `label` 子串, 不区分大小写。
+    - TTagInput 单行不换行, 重复校验由宿主完成; 删除只上报 (下标 + 标签), 模型增删由宿主执行。
+    - TOtpInput 无 `max-length` (Slint 1.18 未提供), 段内溢出清理与整段粘贴分发由宿主改写 `values` 完成; 已填段吞掉后续可打印键, 换字符需先退格清除。
+    - TMention 的 `@` 触发解析与选中文本拼接由宿主完成 (1.18 无字符串切片); 建议面板锚输入框而非光标。
+    - TPicker 无触发器 (多列联合显示文本无法在语言内拼接) 与联动列, 列宽固定 56px; `value` 请初始化成与列数等长 (短模型只有恰好补到末位的拾取能追加, 中间留空的列写不进)。
+    - TDateTimePicker 触发器只读, 年列范围由宿主给定 (整列渲染), 无"此刻"高亮。
+    - TList 行结构固定 (图标/标题/说明), 不支持宿主自定义行渲染 (ListView 行是模型驱动)。
     - TTree 用嵌套声明 + `@children`, 选中态存在 `TTreeLogic` 全局里 (Slint 无实例级 global), 同屏多个树共享一份选中值; 折叠态是分支自己的 `opened`, 不写回模型。
     - TContextMenu 弹层在窗口边缘会被裁剪; 默认触发区会吞掉左键, 交互式触发内容需设 `auto-area: false` 并自行调用 `open-at()`。
     - TSplitter 第二栏无最小尺寸约束, 可被拖到 0; 主栏折叠无过渡动画。

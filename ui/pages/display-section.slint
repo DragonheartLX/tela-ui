@@ -1,9 +1,10 @@
-// Gallery section: 展示 (TTag / TBadge / TAvatar / TEmpty / TTimeline /
-// TDescriptions / TStatistic), 一个组件一张卡.
+// Gallery section: 展示 (TTag / TBadge / TAvatar / TAvatarGroup / TEmpty /
+// TTimeline / TDescriptions / TStatistic), 一个组件一张卡.
 
 import { TTheme, TThemeRole, TSize } from "@tela-ui/theme.slint";
 import { TText, TIcon, TIconSet, TButton, TCaption } from "@tela-ui/base.slint";
-import { TTag, TTagVariant, TBadge, TAvatar, TAvatarSize, TAvatarShape, TEmpty, TTimeline, TDescriptions, TStatistic } from "@tela-ui/display.slint";
+import { TTag, TTagVariant, TBadge, TAvatar, TAvatarSize, TAvatarShape, TAvatarGroup, TAvatarGroupItem, TEmpty, TTimeline, TDescriptions, TStatistic } from "@tela-ui/display.slint";
+import { TMessage } from "@tela-ui/notice.slint";
 import { GallerySection } from "../gallery-section.slint";
 
 export component DisplaySection inherits VerticalLayout {
@@ -72,6 +73,59 @@ export component DisplaySection inherits VerticalLayout {
 
             // Absorbs the leftover row space.
             Rectangle { }
+        }
+    }
+
+    // ====================== TAvatarGroup ====================
+    GallerySection {
+        title: "头像组 TAvatarGroup";
+        code: "import { TAvatarGroup } from \"@tela-ui/display.slint\";\n\nTAvatarGroup {\n    items: [{ text: \"龙\" }, { source: … }, …];\n    max-count: 4;   // 超出渲染 +N 尾像, 点击报 overflow-clicked\n    clicked(i) => { … }\n}";
+
+        VerticalLayout {
+            spacing: 16px;
+
+            HorizontalLayout {
+                spacing: 24px;
+
+                TAvatarGroup {
+                    items: [
+                        { text: "龙" },
+                        { text: "T" },
+                        { text: "UI" },
+                        { text: "D" },
+                    ];
+                }
+
+                TAvatarGroup {
+                    max-count: 3;
+                    items: [
+                        { text: "A" },
+                        { text: "B" },
+                        { text: "C" },
+                        { text: "D" },
+                        { text: "E" },
+                        { text: "F" },
+                    ];
+
+                    overflow-clicked => {
+                        TMessage.info("还有 3 个成员");
+                    }
+                }
+
+                TAvatarGroup {
+                    size: TAvatarSize.small;
+                    shape: TAvatarShape.square;
+                    items: [
+                        { text: "S" },
+                        { text: "Q" },
+                        { text: "R" },
+                    ];
+                }
+
+                Rectangle { }
+            }
+
+            TCaption { text: "成员按声明顺序叠放 (后者在上), 重叠量固定 spacing-4; max-count 截断并渲染 +N 尾像。"; wrap: word-wrap; }
         }
     }
 

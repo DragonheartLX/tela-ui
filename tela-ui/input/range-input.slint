@@ -1,0 +1,227 @@
+// Tela UI — TRangeInput
+//
+// Numeric range input: two decimal fields (min / max) separated by a "~"
+// glyph, sharing one status frame so the pair reads as a single control.
+// Each side follows the TInputNumber buffer semantics: an empty buffer is
+// "not entered" and never fires `changed`; leaving the field reformats the
+// buffer from the stored value.
+//
+// Cross-clamp: an edit to one side clamps the other side into the new range
+// (min-value can never exceed max-value); the merged result is reported as
+// one `changed(min-value, max-value)`.
+
+import { TTheme } from "../theme.slint";
+import { TText } from "../base/typography.slint";
+import { TSize } from "../structs/enums.slint";
+import { TInputFrame } from "input.slint";
+
+export component TRangeInput inherits TInputFrame {
+    in property <TSize> size: TSize.medium;
+    in-out property <float> min-value: 0;
+    in-out property <float> max-value: 100;
+    in property <float> min: 0;
+    in property <float> max: 100;
+    in property <float> step: 1;
+    in property <string> placeholder-min-text;
+    in property <string> placeholder-max-text;
+
+    // Fires after both sides have settled (the far side may have been
+    // clamped by this edit).
+    callback changed(float, float);
+
+    private property <length> h: TTheme.size-height(size);
+    private property <length> fs: TTheme.size-font(size);
+    private property <length> line: TTheme.size-line-height(size);
+
+    focused: ti-min.has-focus || ti-max.has-focus;
+    focus-request => {
+        ti-min.focus();
+    }
+
+    // Trim float noise to two decimals for display (TInputNumber's format).
+    public pure function format(v: float) -> string {
+        return "\{Math.round(v * 100) / 100}";
+    }
+
+    public pure function clamp-v(v: float) -> float {
+        return Math.max(root.min, Math.min(root.max, v));
+    }
+
+    height: h;
+    clip: true;
+
+    init => {
+        // Out-of-range initial values snap into bounds.
+        root.min-value = root.clamp-v(root.min-value);
+        root.max-value = root.clamp-v(root.max-value);
+        ti-min.text = root.format(root.min-value);
+        ti-max.text = root.format(root.max-value);
+    }
+
+    // Host writes (and the cross-clamp) resync the unfocused field; the
+    // focused buffer keeps the user's in-progress text.
+    changed min-value => {
+        if (!ti-min.has-focus) {
+            ti-min.text = root.format(root.min-value);
+        }
+    }
+
+    changed max-value => {
+        if (!ti-max.has-focus) {
+            ti-max.text = root.format(root.max-value);
+        }
+    }
+
+    HorizontalLayout {
+        x: parent.border-width;
+        y: parent.border-width;
+        width: parent.width - parent.border-width * 2;
+        height: parent.height - parent.border-width * 2;
+        padding-left: TTheme.spacing-2;
+        padding-right: TTheme.spacing-2;
+        spacing: TTheme.spacing-2;
+
+        ti-min := TextInput {
+            horizontal-alignment: center;
+            vertical-alignment: center;
+            single-line: true;
+            input-type: InputType.decimal;
+            color: root.disabled ? TTheme.text-color-disabled : TTheme.text-color-primary;
+            font-size: root.fs;
+            font-family: TTheme.font-family;
+            selection-background-color: TTheme.brand-color-light;
+            selection-foreground-color: TTheme.text-color-primary;
+            enabled: !root.disabled;
+            horizontal-stretch: 1;
+            accessible-role: AccessibleRole.text-input;
+            accessible-label: root.placeholder-min-text != "" ? root.placeholder-min-text : "最小值";
+
+            // Leaving the field reformats the buffer from the clamped value.
+            changed has-focus => {
+                if (!self.has-focus) {
+                    self.text = root.format(root.min-value);
+                }
+            }
+
+            // Empty means "not entered" (TInputNumber's rule); the edit also
+            // drags max-value up so the pair stays ordered.
+            edited => {
+                if self.text != "" && self.text != "." {
+                    let nv = root.clamp-v(self.text.to-float());
+                    if (nv != root.min-value) {
+                        root.min-value = nv;
+                        if (root.max-value < nv) {
+                            root.max-value = nv;
+                        }
+                        root.changed(root.min-value, root.max-value);
+                    }
+                }
+            }
+
+            accepted => {
+                if self.text != "" && root.clamp-v(self.text.to-float()) != root.min-value {
+                    root.min-value = root.clamp-v(self.text.to-float());
+                    if (root.max-value < root.min-value) {
+                        root.max-value = root.min-value;
+                    }
+                    root.changed(root.min-value, root.max-value);
+                }
+                self.text = root.format(root.min-value);
+            }
+
+            key-pressed(event) => {
+                if event.text == Key.UpArrow {
+                    root.min-value = root.clamp-v(root.min-value + root.step);
+                    if (root.max-value < root.min-value) {
+                        root.max-value = root.min-value;
+                    }
+                    self.text = root.format(root.min-value);
+                    root.changed(root.min-value, root.max-value);
+                    return accept;
+                } else if event.text == Key.DownArrow {
+                    root.min-value = root.clamp-v(root.min-value - root.step);
+                    self.text = root.format(root.min-value);
+                    root.changed(root.min-value, root.max-value);
+                    return accept;
+                }
+                reject
+            }
+        }
+
+        TText {
+            text: "~";
+            font-size: root.fs;
+            line-height: root.line;
+            color: root.disabled ? TTheme.text-color-disabled : TTheme.text-color-placeholder;
+            vertical-alignment: center;
+        }
+
+        ti-max := TextInput {
+            horizontal-alignment: center;
+            vertical-alignment: center;
+            single-line: true;
+            input-type: InputType.decimal;
+            color: root.disabled ? TTheme.text-color-disabled : TTheme.text-color-primary;
+            font-size: root.fs;
+            font-family: TTheme.font-family;
+            selection-background-color: TTheme.brand-color-light;
+            selection-foreground-color: TTheme.text-color-primary;
+            enabled: !root.disabled;
+            horizontal-stretch: 1;
+            accessible-role: AccessibleRole.text-input;
+            accessible-label: root.placeholder-max-text != "" ? root.placeholder-max-text : "最大值";
+
+            changed has-focus => {
+                if (!self.has-focus) {
+                    self.text = root.format(root.max-value);
+                }
+            }
+
+            // The edit drags min-value down so the pair stays ordered.
+            edited => {
+                if self.text != "" && self.text != "." {
+                    let nv = root.clamp-v(self.text.to-float());
+                    if (nv != root.max-value) {
+                        root.max-value = nv;
+                        if (root.min-value > nv) {
+                            root.min-value = nv;
+                        }
+                        root.changed(root.min-value, root.max-value);
+                    }
+                }
+            }
+
+            accepted => {
+                if self.text != "" && root.clamp-v(self.text.to-float()) != root.max-value {
+                    root.max-value = root.clamp-v(self.text.to-float());
+                    if (root.min-value > root.max-value) {
+                        root.min-value = root.max-value;
+                    }
+                    root.changed(root.min-value, root.max-value);
+                }
+                self.text = root.format(root.max-value);
+            }
+
+            key-pressed(event) => {
+                if event.text == Key.UpArrow {
+                    root.max-value = root.clamp-v(root.max-value + root.step);
+                    self.text = root.format(root.max-value);
+                    root.changed(root.min-value, root.max-value);
+                    return accept;
+                } else if event.text == Key.DownArrow {
+                    root.max-value = root.clamp-v(root.max-value - root.step);
+                    if (root.min-value > root.max-value) {
+                        root.min-value = root.max-value;
+                    }
+                    self.text = root.format(root.max-value);
+                    root.changed(root.min-value, root.max-value);
+                    return accept;
+                }
+                reject
+            }
+        }
+    }
+
+    accessible-role: AccessibleRole.groupbox;
+    accessible-label: "数值区间";
+}

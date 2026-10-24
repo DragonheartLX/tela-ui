@@ -13,6 +13,7 @@ import { TText } from "../base/typography.slint";
 import { TIcon } from "../base/icon/icon.slint";
 import { TIconSet } from "../base/icon/data.slint";
 import { TEmpty } from "../display/empty.slint";
+import { TScrollBar } from "../scroll-bar.slint";
 import { ListView } from "std-widgets.slint";
 
 export enum TTableAlign {
@@ -195,6 +196,9 @@ export component TTable inherits Rectangle {
         y: root.header-height;
         height: parent.height - root.header-height;
         content-width: root.table-width;
+        // Both native fluent scrollbars are replaced by overlay TScrollBars.
+        vertical-scrollbar-policy: ScrollBarPolicy.always-off;
+        horizontal-scrollbar-policy: ScrollBarPolicy.always-off;
 
         for row[i] in root.rows: Rectangle {
             width: root.table-width;
@@ -234,6 +238,28 @@ export component TTable inherits Rectangle {
                 }
             }
         }
+    }
+
+    // Overlay scrollbars (replace the fluent native ones).
+    TScrollBar {
+        width: 6px;
+        x: parent.width - self.width;
+        y: root.header-height;
+        height: parent.height - root.header-height;
+        content-length: body.content-height;
+        viewport-length: body.visible-height;
+        content-offset <=> body.content-y;
+    }
+
+    TScrollBar {
+        height: 6px;
+        horizontal: true;
+        x: 0;
+        y: parent.height - self.height;
+        width: parent.width;
+        content-length: body.content-width;
+        viewport-length: body.visible-width;
+        content-offset <=> body.content-x;
     }
 
     accessible-role: AccessibleRole.table;

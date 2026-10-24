@@ -1,0 +1,209 @@
+// Tela UI — TMention
+//
+// Mention input: a TInput plus a suggestion list the host drives. Slint 1.18
+// has no string slicing, so the component cannot find the "@" (or the word
+// before the caret) itself: it reports every edit through `changed(text)`,
+// the host parses, fills `suggestions` and calls `show-suggestions()`.
+// Picking a suggestion reports `selected(index, value)`; splicing it into
+// the text is the host's job too (it owns the string).
+//
+// The panel anchors to the input, not the caret — TextInput does not expose
+// caret geometry.
+
+import { TTheme } from "../theme.slint";
+import { TText } from "../base/typography.slint";
+import { TInput } from "input.slint";
+import { TPopupSurface } from "../popup-surface.slint";
+import { TScrollBar } from "../scroll-bar.slint";
+import { TSize } from "../structs/enums.slint";
+import { TAutoCompleteItem } from "auto-complete.slint";
+import { ScrollView } from "std-widgets.slint";
+
+export component TMention inherits Rectangle {
+    in property <[TAutoCompleteItem]> suggestions;
+    in-out property <string> text <=> trigger.text;
+    in property <string> placeholder-text;
+    in property <bool> disabled: false;
+    in property <TSize> size: TSize.medium;
+    // Suggestions shown before the list scrolls.
+    in property <int> max-rows: 6;
+
+    // Typed text after every edit.
+    callback changed(string);
+    // Suggestion picked; (index, value). The host rewrites the text.
+    callback selected(int, string);
+
+    out property <bool> is-open: surface.is-open;
+
+    private property <length> h: TTheme.size-height(root.size);
+    private property <length> row-h: TTheme.height-m;
+    private property <length> pad: TTheme.spacing-2;
+    private property <length> cap:
+        2 * root.pad + max(1, root.max-rows) * root.row-h;
+    private property <length> content-h:
+        2 * root.pad + max(1, root.suggestions.length) * root.row-h;
+    private property <int> active-index: -1;
+
+    public function show-suggestions() {
+        if (root.disabled || root.suggestions.length == 0) {
+            return;
+        }
+        root.active-index = 0;
+        surface.show();
+        // Showing a PopupWindow takes the keyboard focus from the field; hand
+        // it back (the TAutoComplete workaround).
+        trigger.focus();
+    }
+
+    public function close-suggestions() {
+        surface.close();
+    }
+
+    // Caret fix-up for hosts that rewrite the whole text (the mention splice
+    // puts the caret at the end so the next keystroke appends).
+    public function move-caret-to-end() {
+        trigger.move-caret-to-end();
+    }
+
+    height: root.h;
+    min-width: 160px;
+
+    trigger := TInput {
+        x: 0;
+        y: 0;
+        width: parent.width;
+        height: parent.height;
+        size: root.size;
+        placeholder-text: root.placeholder-text;
+        disabled: root.disabled;
+
+        changed(text) => {
+            root.changed(text);
+        }
+    }
+
+    changed disabled => {
+        if (root.disabled) {
+            surface.close();
+        }
+    }
+
+    changed suggestions => {
+        root.active-index = root.suggestions.length > 0 ? 0 : -1;
+    }
+
+    surface := TPopupSurface {
+        anchor-width: root.width;
+        anchor-height: root.height;
+        gap: root.pad;
+        popup-width: max(root.width, 160px);
+        popup-max-width: max(root.width, 160px);
+        popup-height: min(root.content-h, root.cap);
+
+        Rectangle {
+        sv := ScrollView {
+            width: parent.width;
+            height: parent.height;
+            vertical-scrollbar-policy: ScrollBarPolicy.always-off;
+            content-height: root.content-h;
+
+            VerticalLayout {
+                padding: root.pad;
+                spacing: 0px;
+
+                for it[i] in root.suggestions: Rectangle {
+                    height: root.row-h;
+
+                    Rectangle {
+                        width: parent.width;
+                        height: root.row-h;
+                        border-radius: TTheme.radius-default;
+                        background: transparent;
+                        animate background { duration: TTheme.duration-fast; }
+
+                        states [
+                            hovered when row-ta.has-hover && !it.disabled: {
+                                background: TTheme.bg-color-container-hover;
+                            }
+                            highlighted when i == root.active-index: {
+                                background: TTheme.brand-color-light;
+                            }
+                        ]
+
+                        HorizontalLayout {
+                            width: parent.width;
+                            height: parent.height;
+                            padding-left: TTheme.spacing-2;
+                            padding-right: TTheme.spacing-2;
+
+                            TText {
+                                text: it.label;
+                                font-size: TTheme.size-font(root.size);
+                                line-height: TTheme.size-line-height(root.size);
+                                vertical-alignment: center;
+                                horizontal-stretch: 1;
+                                overflow: elide;
+
+                                states [
+                                    active when i == root.active-index: {
+                                        color: TTheme.brand-color;
+                                    }
+                                    disabled when it.disabled: {
+                                        color: TTheme.text-color-disabled;
+                                    }
+                                ]
+                            }
+                        }
+
+                        row-ta := TouchArea {
+                            enabled: !it.disabled;
+                            mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;
+                            accessible-role: AccessibleRole.button;
+                            accessible-label: it.label;
+                            accessible-enabled: !it.disabled;
+
+                            changed has-hover => {
+                                if (self.has-hover && !it.disabled) {
+                                    root.active-index = i;
+                                }
+                            }
+
+                            clicked => {
+                                root.selected(i, it.value);
+                                surface.close();
+                            }
+                        }
+                    }
+                }
+
+                if root.suggestions.length == 0: Rectangle {
+                    height: root.row-h;
+
+                    TText {
+                        text: "无匹配结果";
+                        font-size: TTheme.size-font(root.size);
+                        line-height: TTheme.size-line-height(root.size);
+                        color: TTheme.text-color-placeholder;
+                        horizontal-alignment: center;
+                        vertical-alignment: center;
+                        overflow: elide;
+                    }
+                }
+            }
+        }
+
+        TScrollBar {
+            width: 6px;
+            x: parent.width - self.width;
+            y: 0;
+            height: parent.height;
+            content-length: sv.content-height;
+            viewport-length: sv.visible-height;
+            content-offset <=> sv.content-y;
+        }
+        }
+    }
+
+    accessible-role: AccessibleRole.text-input;
+    accessible-label: root.placeholder-text;
+}

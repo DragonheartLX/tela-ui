@@ -1,9 +1,10 @@
-// Gallery section: 选择 (TSelect / TCheckBox / TRadio / TSwitch / TSegmented),
-// 一个组件一张卡.
+// Gallery section: 选择 (TSelect / TCheckBox / TRadio / TSwitch / TSegmented /
+// TSelectInput / TTreeSelect / TCascader), 一个组件一张卡.
 
 import { TSize } from "@tela-ui/theme.slint";
 import { TCaption } from "@tela-ui/base.slint";
-import { TSelect, TSelectItem, TCheckBox, TRadioGroup, TRadioItem, TSwitch, TSegmented } from "@tela-ui/select.slint";
+import { TSelect, TSelectItem, TCheckBox, TRadioGroup, TRadioItem, TSwitch, TSegmented, TSelectInput, TTreeSelect, TCascader, TCascaderItem, TCascaderBranch, TCascaderLogic } from "@tela-ui/select.slint";
+import { TTreeItem, TTreeBranch } from "@tela-ui/content.slint";
 import { GallerySection } from "../gallery-section.slint";
 
 export component SelectSection inherits VerticalLayout {
@@ -28,6 +29,10 @@ export component SelectSection inherits VerticalLayout {
     ];
     in-out property <bool> switch-on: true;
     in-out property <int> seg-index: 1;
+    in-out property <int> select-input-index: -1;
+    in-out property <string> select-input-text: "";
+    in-out property <string> tree-select-value: "";
+    in-out property <string> cascader-value: "";
 
     // ======================== TSelect =======================
     GallerySection {
@@ -117,6 +122,119 @@ export component SelectSection inherits VerticalLayout {
             }
 
             TCaption { text: "当前选中下标: \{root.seg-index}"; }
+        }
+    }
+
+    // ====================== TSelectInput ====================
+    GallerySection {
+        title: "可输入筛选选择 TSelectInput";
+        code: "import { TSelectInput } from \"@tela-ui/select.slint\";\n\nTSelectInput {\n    items: [{ label: \"北京\", value: \"bj\" }, …];\n    placeholder-text: \"输入或选择城市\";\n    text <=> text;       // 输入态文本\n    current-index <=> i; // 选中下标\n    selected(i, value) => { … }\n}";
+
+        VerticalLayout {
+            spacing: 16px;
+
+            HorizontalLayout {
+                spacing: 24px;
+
+                TSelectInput {
+                    width: 240px;
+                    placeholder-text: "输入或选择城市";
+                    items: root.city-items;
+                    text <=> root.select-input-text;
+                    current-index <=> root.select-input-index;
+                }
+
+                TSelectInput {
+                    width: 240px;
+                    placeholder-text: "禁用状态";
+                    items: root.city-items;
+                    disabled: true;
+                }
+
+                Rectangle { }
+            }
+
+            TCaption { text: "聚焦即列出全部, 键入按标签子串过滤 (不区分大小写); 选中项带 ✓, 回车或点击选中; 再次键入继续过滤, 不清空已选。"; wrap: word-wrap; }
+        }
+    }
+
+    // ======================= TTreeSelect ====================
+    GallerySection {
+        title: "树选择 TTreeSelect";
+        code: "import { TTreeSelect, TTreeItem, TTreeBranch } from \"@tela-ui/select.slint\";\n\nTTreeSelect {\n    placeholder-text: \"请选择节点\";\n    selected(value) => { … }\n\n    // 子节点声明在这里, 进入下拉面板:\n    TTreeItem { label: \"概览\"; value: \"overview\"; }\n    TTreeBranch { label: \"文件\"; TTreeItem { label: \"a.txt\"; value: \"a\"; } }\n}";
+
+        VerticalLayout {
+            spacing: 16px;
+
+            TTreeSelect {
+                width: 240px;
+                placeholder-text: "请选择节点";
+
+                selected(v) => {
+                    root.tree-select-value = v;
+                }
+
+                TTreeItem { label: "概览"; value: "overview"; }
+                TTreeItem { label: "统计"; value: "stats"; }
+
+                TTreeBranch {
+                    label: "文件";
+                    opened: true;
+                    TTreeItem { label: "文件 1.txt"; value: "file-1"; }
+                    TTreeItem { label: "文件 2.txt"; value: "file-2"; }
+                }
+
+                TTreeBranch {
+                    label: "设置";
+                    TTreeItem { label: "外观"; value: "appearance"; }
+                    TTreeItem { label: "禁用项"; value: "disabled-node"; enabled: false; }
+                }
+            }
+
+            TCaption { text: "选中值: \{root.tree-select-value} — 树节点嵌套声明, 经 @children 进入下拉; 选中值经 TTreeLogic 全局共享, 点叶子选中并回填触发器。"; wrap: word-wrap; }
+        }
+    }
+
+    // ======================== TCascader =====================
+    GallerySection {
+        title: "级联选择 TCascader";
+        code: "import { TCascader, TCascaderItem, TCascaderBranch, TCascaderLogic } from \"@tela-ui/select.slint\";\n\nTCascader {\n    placeholder-text: \"请选择地区\";\n    selected(value) => { … }\n\n    TCascaderBranch { label: \"浙江省\"; TCascaderBranch { label: \"杭州市\";\n        TCascaderItem { label: \"西湖区\"; value: \"xihu\"; } } }\n    TCascaderBranch { label: \"江苏省\"; TCascaderItem { label: \"南京市\"; value: \"nanjing\"; } }\n}\n\n// 读选中: TCascaderLogic.current-value";
+
+        VerticalLayout {
+            spacing: 16px;
+
+            TCascader {
+                width: 240px;
+                placeholder-text: "请选择地区";
+
+                selected(v) => {
+                    root.cascader-value = v;
+                }
+
+                TCascaderBranch {
+                    label: "浙江省";
+                    opened: true;
+
+                    TCascaderBranch {
+                        label: "杭州市";
+                        TCascaderItem { label: "西湖区"; value: "xihu"; }
+                        TCascaderItem { label: "余杭区"; value: "yuhang"; }
+                    }
+
+                    TCascaderBranch {
+                        label: "宁波市";
+                        TCascaderItem { label: "海曙区"; value: "haishu"; }
+                    }
+                }
+
+                TCascaderBranch {
+                    label: "江苏省";
+                    TCascaderItem { label: "南京市"; value: "nanjing"; }
+                    TCascaderItem { label: "苏州市"; value: "suzhou"; }
+                }
+            }
+
+            TCaption { text: "选中值: \{root.cascader-value} — 单列逐级展开 (点分支行折叠/展开), 点叶子选中并关闭面板; 触发器回显叶子 label, 完整路径回显暂不支持 (见已知限制)。"; wrap: word-wrap; }
         }
     }
 }

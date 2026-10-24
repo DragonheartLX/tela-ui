@@ -1,0 +1,341 @@
+// Tela UI — T Cascader
+//
+// Cascading selector, declarative like TTree: nest `TCascaderBranch` /
+// `TCascaderItem` as children of `TCascader`, they land in the popup through
+// `@children`. The panel is a single column that expands levels in place
+// (the TTreeBranch clip-fold) — a multi-column panel needs a flattened model
+// and would break the declarative structure.
+//
+// Only leaves select. The reported value is the leaf's `value`; the trigger
+// shows the leaf `label`. A full "a/b/c" path readout needs ancestor labels
+// at the leaf, which the declarative nesting does not convey (no per-instance
+// globals); reporting the leaf alone is the documented v1 behaviour.
+//
+// Selection rides the TCascaderLogic global, same trade-off as TTreeLogic.
+
+import { TTheme } from "../theme.slint";
+import { TText } from "../base/typography.slint";
+import { TSize, TPopupPlacement } from "../structs/enums.slint";
+import { TIcon } from "../base/icon/icon.slint";
+import { TIconData, TIconSet } from "../base/icon/data.slint";
+import { TPopupSurface } from "../popup-surface.slint";
+import { TScrollBar } from "../scroll-bar.slint";
+import { ScrollView } from "std-widgets.slint";
+
+export global TCascaderLogic {
+    // Value of the selected leaf; "" = no selection.
+    in-out property <string> current-value;
+}
+
+// One row (private copy of TTree's TreeRow: the row visual is deliberately
+// per-file so icon data and accents stay independently replaceable).
+component CascaderRow inherits Rectangle {
+    in property <string> label;
+    in property <TIconData> icon;
+    in property <bool> enabled: true;
+    in property <bool> selected: false;
+    in property <bool> branch: false;
+    in property <bool> open: false;
+
+    callback clicked();
+
+    height: TTheme.height-m;
+    background: transparent;
+    animate background { duration: TTheme.duration-fast; }
+
+    states [
+        hovered when ta.has-hover && root.enabled && !root.selected: {
+            background: TTheme.bg-color-container-hover;
+        }
+        selected when root.selected && root.enabled: {
+            background: TTheme.brand-color-light;
+        }
+    ]
+
+    HorizontalLayout {
+        x: 0;
+        y: 0;
+        width: parent.width;
+        height: parent.height;
+        padding-left: TTheme.spacing-2;
+        padding-right: TTheme.spacing-2;
+        spacing: TTheme.spacing-2;
+
+        if root.branch: TIcon {
+            y: (parent.height - self.height) / 2;
+            width: 16px;
+            icon: TIconSet.ChevronRight;
+            size: 16px;
+            icon-color: !root.enabled ? TTheme.text-color-disabled
+                : root.selected ? TTheme.brand-color
+                : TTheme.text-color-secondary;
+            transform-rotation: root.open ? 90deg : 0deg;
+            transform-origin: { x: self.width / 2, y: self.height / 2 };
+            animate transform-rotation { duration: TTheme.duration-fast; }
+        }
+
+        if !root.branch && root.icon.paths.length > 0: TIcon {
+            y: (parent.height - self.height) / 2;
+            icon: root.icon;
+            size: 16px;
+            icon-color: !root.enabled ? TTheme.text-color-disabled
+                : root.selected ? TTheme.brand-color
+                : TTheme.text-color-secondary;
+        }
+
+        TText {
+            text: root.label;
+            font-size: TTheme.font-size-m;
+            line-height: TTheme.line-height-m;
+            vertical-alignment: center;
+            horizontal-stretch: 1;
+            overflow: elide;
+            color: !root.enabled ? TTheme.text-color-disabled
+                : root.selected ? TTheme.brand-color
+                : TTheme.text-color-primary;
+        }
+    }
+
+    ta := TouchArea {
+        enabled: root.enabled;
+        mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;
+        accessible-role: AccessibleRole.list-item;
+        accessible-label: root.label;
+        accessible-enabled: root.enabled;
+        accessible-expanded: root.branch ? root.open : false;
+        accessible-action-default => {
+            if (root.enabled) {
+                root.clicked();
+            }
+        }
+
+        clicked => {
+            if (root.enabled) {
+                root.clicked();
+            }
+        }
+    }
+}
+
+// Leaf: clicking selects it (via the TCascaderLogic store).
+export component TCascaderItem inherits CascaderRow {
+    in property <string> value;
+
+    out property <bool> is-selected:
+        TCascaderLogic.current-value != "" && TCascaderLogic.current-value == root.value;
+    callback activated();
+
+    selected: root.is-selected;
+
+    clicked => {
+        if (!root.is-selected) {
+            TCascaderLogic.current-value = root.value;
+            root.activated();
+        }
+    }
+}
+
+// Parent node: a row plus a clipped fold holding its children.
+export component TCascaderBranch inherits VerticalLayout {
+    in-out property <bool> opened: false;
+    in property <bool> enabled: true;
+    in property <string> label;
+    in property <TIconData> icon;
+
+    callback opened-changed(bool);
+
+    spacing: 0px;
+
+    // The fold animates only this branch's own open/close toggle: while
+    // open, the height tracks content changes instantly, so a nested fold's
+    // animation is not chased by every ancestor (which read as a slow
+    // stair-step). A plain `animate height` would retarget every frame.
+    private property <length> fold-h: 0px;
+
+    CascaderRow {
+        label: root.label;
+        icon: root.icon;
+        enabled: root.enabled;
+        branch: true;
+        open: root.opened;
+        // Keep the open path visible (TTreeBranch behaviour).
+        selected: root.opened;
+
+        clicked => {
+            root.opened = !root.opened;
+            root.opened-changed(root.opened);
+        }
+    }
+
+    Rectangle {
+        clip: true;
+        height: fold-h;
+
+        body := VerticalLayout {
+            padding-left: TTheme.padding-lr-l;
+            spacing: 0px;
+
+            @children
+        }
+    }
+
+    states [
+        opened when root.opened: {
+            fold-h: body.preferred-height;
+            in {
+                animate fold-h { duration: TTheme.duration-base; }
+            }
+        }
+        closed when !root.opened: {
+            fold-h: 0px;
+            in {
+                animate fold-h { duration: TTheme.duration-base; }
+            }
+        }
+    ]
+}
+
+export component TCascader inherits Rectangle {
+    in property <string> placeholder-text;
+    in property <bool> disabled;
+    in property <TSize> size: TSize.medium;
+    in property <TPopupPlacement> placement: TPopupPlacement.bottom-start;
+    // The popup cannot take its height from the content: the PopupWindow
+    // reads the ScrollView's preferred height (not the children's), which
+    // collapses to nothing. Pin it; taller trees scroll.
+    in property <length> panel-height: 8 * TTheme.height-m + 8px;
+
+    callback selected(string);
+
+    out property <bool> is-open: surface.is-open;
+
+    public function show() {
+        surface.show();
+    }
+
+    public function close() {
+        surface.close();
+    }
+
+    public function toggle() {
+        surface.toggle();
+    }
+
+    private property <length> h: TTheme.size-height(size);
+    private property <length> fs: TTheme.size-font(size);
+    private property <length> line: TTheme.size-line-height(size);
+    // `changed` cannot attach to a global property directly; mirror it first.
+    private property <string> selected-value: TCascaderLogic.current-value;
+
+    height: h;
+    min-width: 160px;
+    background: TTheme.bg-color-specialcomponent;
+    border-width: 1px;
+    border-color: TTheme.component-border;
+    border-radius: TTheme.radius-default;
+    animate border-color { duration: TTheme.duration-fast; }
+
+    states [
+        hovered when touch.has-hover && !root.disabled: {
+            border-color: TTheme.border-level-2-color;
+        }
+        disabled when root.disabled: {
+            border-color: TTheme.border-level-1-color;
+        }
+    ]
+
+    touch := TouchArea {
+        enabled: !root.disabled;
+        mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;
+        clicked => {
+            surface.toggle();
+        }
+    }
+
+    HorizontalLayout {
+        x: 0;
+        y: 0;
+        width: parent.width;
+        height: parent.height;
+        padding-left: TTheme.spacing-2;
+        padding-right: TTheme.spacing-2;
+        spacing: TTheme.spacing-2;
+
+        TText {
+            text: TCascaderLogic.current-value != "" ? TCascaderLogic.current-value : root.placeholder-text;
+            font-size: root.fs;
+            line-height: root.line;
+            color: TCascaderLogic.current-value != "" ? TTheme.text-color-primary : TTheme.text-color-placeholder;
+            vertical-alignment: center;
+            horizontal-stretch: 1;
+            overflow: elide;
+
+            states [
+                disabled when root.disabled: {
+                    color: TTheme.text-color-disabled;
+                }
+            ]
+        }
+
+        TIcon {
+            y: (parent.height - self.height) / 2;
+            icon: TIconSet.ChevronDown;
+            size: root.fs;
+            icon-color: root.disabled ? TTheme.text-color-disabled : TTheme.text-color-secondary;
+            transform-rotation: surface.is-open ? 180deg : 0deg;
+            transform-origin: { x: self.width / 2, y: self.height / 2 };
+            animate transform-rotation { duration: TTheme.duration-fast; }
+        }
+    }
+
+    surface := TPopupSurface {
+        anchor-width: root.width;
+        anchor-height: root.height;
+        placement: root.placement;
+        gap: 4px;
+        popup-width: max(root.width, 200px);
+        popup-max-width: max(root.width, 280px);
+        popup-height: root.panel-height;
+
+        Rectangle {
+            sv := ScrollView {
+                width: parent.width;
+                height: parent.height;
+                vertical-scrollbar-policy: ScrollBarPolicy.always-off;
+
+                VerticalLayout {
+                    padding: 4px;
+                    spacing: 0px;
+
+                    @children
+                }
+            }
+
+            TScrollBar {
+                width: 6px;
+                x: parent.width - self.width;
+                y: 0;
+                height: parent.height;
+                content-length: sv.content-height;
+                viewport-length: sv.visible-height;
+                content-offset <=> sv.content-y;
+            }
+        }
+    }
+
+    changed selected-value => {
+        if (surface.is-open) {
+            root.selected(selected-value);
+            surface.close();
+        }
+    }
+
+    changed disabled => {
+        if (root.disabled) {
+            surface.close();
+        }
+    }
+
+    accessible-role: AccessibleRole.button;
+    accessible-label: TCascaderLogic.current-value;
+}

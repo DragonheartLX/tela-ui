@@ -30,6 +30,7 @@ import { TIconSet } from "../base/icon/data.slint";
 import { TDivider } from "../base/divider.slint";
 import { TModalSurface } from "../modal-surface.slint";
 import { TPopupStack } from "../popup-stack.slint";
+import { TScrollBar } from "../scroll-bar.slint";
 import { ScrollView } from "std-widgets.slint";
 
 export struct TCommandItem {
@@ -263,99 +264,117 @@ export component TCommandPaletteOverlay inherits TModalSurface {
 
             TDivider { }
 
-            ScrollView {
+            Rectangle {
                 visible: root.list-visible;
-                enabled: root.open;
-                // Grows with the filtered list, stops at max-rows and scrolls
-                // from there. The rows are fixed height, so the inner layout's
-                // preferred height never depends on this height.
-                height: min(root.list-h, root.list-cap);
-                content-height: root.list-h;
+                // The overlay TScrollBar below replaces the fluent native one;
+                // explicit bounds keep the wrapper out of the layout's preferred
+                // size (the ScrollView reads parent.height).
+                max-height: min(root.list-h, root.list-cap);
+                sv := ScrollView {
+                    width: parent.width;
+                    height: parent.height;
+                    vertical-scrollbar-policy: ScrollBarPolicy.always-off;
+                    enabled: root.open;
+                    // Grows with the filtered list, stops at max-rows and scrolls
+                    // from there. The rows are fixed height, so the inner layout's
+                    // preferred height never depends on this height.
+                    content-height: root.list-h;
 
-                list := VerticalLayout {
-                    padding-top: TTheme.spacing-2;
-                    padding-bottom: TTheme.spacing-2;
-                    // Gap is baked into each row so a collapsed row leaves no
-                    // spacing behind: layout spacing is applied per child even
-                    // when the child is zero sized.
-                    spacing: 0px;
+                    list := VerticalLayout {
+                        padding-top: TTheme.spacing-2;
+                        padding-bottom: TTheme.spacing-2;
+                        // Gap is baked into each row so a collapsed row leaves no
+                        // spacing behind: layout spacing is applied per child even
+                        // when the child is zero sized.
+                        spacing: 0px;
 
-                    for it[i] in TCommandPaletteService.commands: Rectangle {
-                        // Outer box: fixed height + baked gap.
-                        // A miss collapses to zero height; clip keeps its
-                        // content from painting outside the 0px box.
-                        height: TCommandPaletteService.hit(it) ? root.row-h + root.row-gap : 0px;
-                        clip: true;
+                        for it[i] in TCommandPaletteService.commands: Rectangle {
+                            // Outer box: fixed height + baked gap.
+                            // A miss collapses to zero height; clip keeps its
+                            // content from painting outside the 0px box.
+                            height: TCommandPaletteService.hit(it) ? root.row-h + root.row-gap : 0px;
+                            clip: true;
 
-                        // Every row reports its own match; the smallest index
-                        // wins, so handler order cannot change the result.
-                        private property <string> kw: TCommandPaletteService.keyword;
-                        changed kw => {
-                            if (TCommandPaletteService.hit(it)) {
-                                TCommandPaletteService.consider(i);
+                            // Every row reports its own match; the smallest index
+                            // wins, so handler order cannot change the result.
+                            private property <string> kw: TCommandPaletteService.keyword;
+                            changed kw => {
+                                if (TCommandPaletteService.hit(it)) {
+                                    TCommandPaletteService.consider(i);
+                                }
                             }
-                        }
 
-                        // Inner box carries the skin, so the highlight and the
-                        // hover fill stop at the row instead of bleeding into
-                        // the gap below it.
-                        Rectangle {
-                            width: parent.width;
-                            height: root.row-h;
-                            border-radius: TTheme.radius-default;
-                            background: transparent;
-                            animate background { duration: TTheme.duration-fast; }
-
-                            states [
-                                hovered when row-ta.has-hover: {
-                                    background: TTheme.bg-color-container-hover;
-                                }
-                                // Later states win: the highlight paints over hover.
-                                highlighted when i == TCommandPaletteService.active-index: {
-                                    background: TTheme.bg-color-secondarycontainer;
-                                }
-                            ]
-
-                            HorizontalLayout {
+                            // Inner box carries the skin, so the highlight and the
+                            // hover fill stop at the row instead of bleeding into
+                            // the gap below it.
+                            Rectangle {
                                 width: parent.width;
-                                height: parent.height;
-                                padding-left: TTheme.padding-lr-m;
-                                padding-right: TTheme.padding-lr-m;
-                                spacing: TTheme.spacing-4;
+                                height: root.row-h;
+                                border-radius: TTheme.radius-default;
+                                background: transparent;
+                                animate background { duration: TTheme.duration-fast; }
 
-                                TText {
-                                    text: it.label;
-                                    vertical-alignment: center;
-                                    horizontal-stretch: 1;
-                                    overflow: elide;
-                                    color: i == TCommandPaletteService.active-index
-                                        ? TTheme.brand-color
-                                        : TTheme.text-color-primary;
+                                states [
+                                    hovered when row-ta.has-hover: {
+                                        background: TTheme.bg-color-container-hover;
+                                    }
+                                    // Later states win: the highlight paints over hover.
+                                    highlighted when i == TCommandPaletteService.active-index: {
+                                        background: TTheme.bg-color-secondarycontainer;
+                                    }
+                                ]
+
+                                HorizontalLayout {
+                                    width: parent.width;
+                                    height: parent.height;
+                                    padding-left: TTheme.padding-lr-m;
+                                    padding-right: TTheme.padding-lr-m;
+                                    spacing: TTheme.spacing-4;
+
+                                    TText {
+                                        text: it.label;
+                                        vertical-alignment: center;
+                                        horizontal-stretch: 1;
+                                        overflow: elide;
+                                        color: i == TCommandPaletteService.active-index
+                                            ? TTheme.brand-color
+                                            : TTheme.text-color-primary;
+                                    }
+
+                                    if it.shortcut != "": TText {
+                                        text: it.shortcut;
+                                        font-size: TTheme.font-size-s;
+                                        line-height: TTheme.line-height-s;
+                                        color: TTheme.text-color-placeholder;
+                                        vertical-alignment: center;
+                                    }
                                 }
 
-                                if it.shortcut != "": TText {
-                                    text: it.shortcut;
-                                    font-size: TTheme.font-size-s;
-                                    line-height: TTheme.line-height-s;
-                                    color: TTheme.text-color-placeholder;
-                                    vertical-alignment: center;
-                                }
-                            }
-
-                            row-ta := TouchArea {
-                                enabled: root.open && TCommandPaletteService.hit(it);
-                                mouse-cursor: MouseCursor.pointer;
-                                clicked => {
-                                    TCommandPaletteService.run(i);
-                                }
-                                changed has-hover => {
-                                    if (self.has-hover) {
-                                        TCommandPaletteService.highlight(i);
+                                row-ta := TouchArea {
+                                    enabled: root.open && TCommandPaletteService.hit(it);
+                                    mouse-cursor: MouseCursor.pointer;
+                                    clicked => {
+                                        TCommandPaletteService.run(i);
+                                    }
+                                    changed has-hover => {
+                                        if (self.has-hover) {
+                                            TCommandPaletteService.highlight(i);
+                                        }
                                     }
                                 }
                             }
                         }
                     }
+                }
+
+                TScrollBar {
+                    width: 6px;
+                    x: parent.width - self.width;
+                    y: 0;
+                    height: parent.height;
+                    content-length: sv.content-height;
+                    viewport-length: sv.visible-height;
+                    content-offset <=> sv.content-y;
                 }
             }
 

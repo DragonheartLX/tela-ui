@@ -141,6 +141,12 @@ export component TTreeBranch inherits VerticalLayout {
 
     spacing: 0px;
 
+    // The fold animates only this branch's own open/close toggle: while
+    // open, the height tracks content changes instantly, so a nested fold's
+    // animation is not chased by every ancestor (which read as a slow
+    // stair-step). A plain `animate height` would retarget every frame.
+    private property <length> fold-h: 0px;
+
     TreeRow {
         label: root.label;
         icon: root.icon;
@@ -157,12 +163,9 @@ export component TTreeBranch inherits VerticalLayout {
         }
     }
 
-    // Folds by height instead of mount/unmount: the children keep their
-    // instances (and any focus) while the fold is closed.
     Rectangle {
         clip: true;
-        height: root.opened ? body.preferred-height : 0px;
-        animate height { duration: TTheme.duration-base; }
+        height: fold-h;
 
         body := VerticalLayout {
             padding-left: TTheme.padding-lr-l;
@@ -171,6 +174,21 @@ export component TTreeBranch inherits VerticalLayout {
             @children
         }
     }
+
+    states [
+        opened when root.opened: {
+            fold-h: body.preferred-height;
+            in {
+                animate fold-h { duration: TTheme.duration-base; }
+            }
+        }
+        closed when !root.opened: {
+            fold-h: 0px;
+            in {
+                animate fold-h { duration: TTheme.duration-base; }
+            }
+        }
+    ]
 }
 
 // Tree root. Nest `TTreeItem` / `TTreeBranch` directly as children.

@@ -49,8 +49,11 @@ Slint 组件为单继承 (`inherits`), 子类可直接使用基类的全部属�
 - TLoading = TLoadingSpinner
 - TDialog = TModalSurface (遮罩基类) + TButton x2 (确认/取消)
 - TTable = ListView (行) + TEmpty (空态)
+- TList = ListView (行) + TEmpty (空态)
 - TDatePicker = TInput (只读触发器) + TPopupSurface + TCalendar
 - TTimePicker = TInput (只读触发器) + TPopupSurface + 私有 TTimeColumn x2/3 (整列时/分/秒数据 + 行内选中框)
+- TPicker = 私有 TPickerWheel x N (整列选项数据 + 行内选中框)
+- TDateTimePicker = TInput (只读触发器) + TPopupSurface + 私有 TNumericWheel x5 (年/月/日/时/分, 日列行数随年月收放)
 - TActionSheetOverlay = TBottomSheet (底部弹层基类) + 自绘整行取消块 (`TButton` 无法横向撑满自身, 见 `docs/slint-semantics.md` 第 23 条)
 - TImageViewerOverlay = TModalSurface + 私有 TViewerButton x6 (上一张/下一张/缩小/放大/适应窗口/关闭) + TViewerChip x4 (计数/缩放组/关闭/缩略图条) + 窗口宽的图片轨道
 - TCommandPaletteOverlay = TModalSurface + TDivider + TIcon + ScrollView (列表)
@@ -259,7 +262,7 @@ TText { font-size: TTheme.size-font(size); line-height: TTheme.size-line-height(
 ## 输入 input
 
 ```slint
-import { TInput, TTextArea, TInputStatus, TInputNumber, TAutoComplete, TAutoCompleteItem, TSearch, TInputAdornment, TForm, TFormItem, TSlider, TRate } from "@tela-ui/input.slint";
+import { TInput, TTextArea, TInputStatus, TInputNumber, TAutoComplete, TAutoCompleteItem, TSearch, TInputAdornment, TForm, TFormItem, TSlider, TRate, TTagInput, TRangeInput, TOtpInput, TMention } from "@tela-ui/input.slint";
 ```
 
 ### TInput / TTextArea
@@ -461,10 +464,109 @@ TFormItem 继承: `VerticalLayout` (控件行 + 帮助行)。
 
 回调: `changed(float)` — 点击后的新分值。
 
+### TTagInput
+
+标签录入。模型 `tags` 渲染成一排可关闭的 TTag, 行尾是输入格: 回车把缓冲添加为
+新标签, 空缓冲按退格删除末位标签。删除是只上报 (TTag `closed` 同款语义):
+宿主收到 (下标, 标签) 后自己改模型, 组件不写 `in` 模型。
+
+继承: `TInputFrame` (状态边框/聚焦色与 TInput 同源)。内部组合 TTag 与 TextInput。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| tags | `[string]` (in) | `[]` | 标签模型; 组件只发事件, 增删由宿主执行 |
+| text | `string` (in-out) | `""` | 输入格缓冲 |
+| placeholder-text | `string` | `""` | 仅当没有任何标签时显示 |
+| size | `TSize` | `TSize.medium` | 控件高度, 标签同档 (20/24/28px) |
+
+回调: `tag-added(string)` — 回车提交的缓冲 (可能为任意非空串, 去重/裁剪在宿主);
+`tag-removed(int, string)` — 标签 x 或空缓冲退格, 参数为 (下标, 标签);
+`changed(string)` — 输入格每次编辑后的文本。
+
+已知限制: 单行 + 裁剪, 标签不换行; 重复校验在宿主侧做 (1.18 无循环语句, 组件无法
+扫描模型)。
+
+### TRangeInput
+
+数值区间输入。两个 decimal 输入格共享一套状态边框, 中缝 `~` 分隔; 每侧沿用
+TInputNumber 的缓冲语义 (空缓冲 = 未输入, 不触发 changed; 失焦按存值重排文本)。
+一侧变更会把另一侧夹进新区间 (min-value 永不大于 max-value), 合并只发一次
+`changed`。Up/Down 方向键按 `step` 步进当前聚焦侧。
+
+继承: `TInputFrame`。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| min-value | `float` (in-out) | `0` | 区间下界 |
+| max-value | `float` (in-out) | `100` | 区间上界 |
+| min | `float` | `0` | 允许的最小值 |
+| max | `float` | `100` | 允许的最大值 |
+| step | `float` | `1` | 方向键步进量 |
+| placeholder-min-text | `string` | `""` | 左格占位文字 |
+| placeholder-max-text | `string` | `""` | 右格占位文字 |
+| size / disabled / status | 同 TInputFrame | — | 高度、禁用与状态边框 |
+
+回调: `changed(float, float)` — (min-value, max-value), 双侧已按本次编辑夹紧。
+
+### TOtpInput
+
+分段验证码输入。N 个等宽方格, 输入后自动跳下一格, 空格退格回上一格, 全部填满
+触发 `completed`。降级形态 (Slint 1.18 无 `max-length`、无字符串切片): 每段
+缓冲全文上报, 段内溢出清理与整段粘贴分发由宿主改写 `values` 完成。
+
+继承: `Rectangle`。每段为独立 TextInput (非 TInputFrame)。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| length | `int` | `4` | 段数, 驱动整体宽度 |
+| masked | `bool` | `false` | 密文显示 (InputType.password) |
+| disabled | `bool` | `false` | 禁用全部段 |
+| size | `TSize` | `TSize.medium` | 段尺寸与字号 |
+| values | `[string]` (in-out) | `[]` | 每段缓冲; 组件回写编辑段, 宿主可整体改写 |
+
+回调: `changed(int, string)` — (段下标, 该段全文), 每次编辑后触发;
+`completed()` — 所有段非空时触发。
+
+行为细节: 首次渲染不抢焦点, 点击某段即聚焦; 段内输入后自动跳下一格, 空段退格
+回上一格; 已填段吞掉后续可打印键 (换字符需先退格清除), 方向键/Home/End/Delete
+与 Ctrl 组合键照常透传; 聚焦移动时光标自动落到段末 (Backspace 可直接清段)。
+
+公开函数: `focus-segment(index)` — 编程聚焦某段 (下标夹紧)。
+
+已知限制: 段内不限制字符数; 宿主整体改写 `values` 后, 已填段计数要到下一次
+编辑才重算。
+
+### TMention
+
+提及输入。TInput + 建议列表, 建议由宿主驱动: 组件没有字符串切片, 无法自己找
+`@` 触发符 — 它把每次编辑经 `changed(text)` 上报, 宿主解析后填 `suggestions`
+并调 `show-suggestions()`; 点选建议上报 `selected(index, value)`, 把选中值拼回
+文本由宿主完成 (组件提供 `move-caret-to-end()` 修光标)。
+
+继承: `Rectangle`。内部组合 TInput, TPopupSurface 与 ScrollView。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| suggestions | `[TAutoCompleteItem]` | `[]` | 当前建议; 建议变化时重置高亮到首条 |
+| text | `string` (in-out) | `""` | 输入内容 |
+| placeholder-text | `string` | `""` | 占位文字 |
+| disabled | `bool` | `false` | 禁用输入框并关闭面板 |
+| size | `TSize` | `TSize.medium` | 高度与字号 |
+| max-rows | `int` | `6` | 列表最多显示行数 |
+
+只读输出: `is-open` (`bool`)。
+
+回调: `changed(string)`; `selected(int, string)` — 点选建议, 参数为 (下标, value)。
+
+公开函数: `show-suggestions()`, `close-suggestions()`, `move-caret-to-end()`。
+
+已知限制: 面板锚输入框而不是光标 (TextInput 不暴露光标几何); 无匹配时列表显示
+"无匹配结果" 占位行, 过滤/触发逻辑全部在宿主。
+
 ## 选择 select
 
 ```slint
-import { TSelect, TSelectItem, TCheckBox, TRadio, TRadioGroup, TRadioItem, TSwitch, TSegmented } from "@tela-ui/select.slint";
+import { TSelect, TSelectItem, TCheckBox, TRadio, TRadioGroup, TRadioItem, TSwitch, TSegmented, TSelectInput, TTreeSelect, TCascader, TCascaderItem, TCascaderBranch, TCascaderLogic } from "@tela-ui/select.slint";
 ```
 
 ### TSelect
@@ -564,10 +666,88 @@ TRadioGroup 参数:
 
 回调: `changed(int)` — 选中下标变化时触发。
 
+### TSelectInput
+
+可输入筛选的下拉选择。TSelect 的语义搬到 TAutoComplete 的输入态: 聚焦即列出
+全部, 键入按标签子串过滤 (行内塌陷, 不重建模型); 选中项带 ✓ 并回填 `text`,
+再次键入继续过滤但不清空已选。过滤机制与已知限制同 TAutoComplete。
+
+继承: `Rectangle`。内部组合 TInput, TPopupSurface, TIcon 与 ScrollView。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| items | `[TSelectItem]` | `[]` | 选项列表 |
+| text | `string` (in-out) | `""` | 输入态文本; 选中后为该项 label |
+| current-index | `int` (in-out) | `-1` | 选中下标, -1 为未选择 |
+| current-value | `string` (in-out) | 由 current-index 派生 | 选中项 value; 建议只绑 current-index |
+| placeholder-text | `string` | `""` | 占位文字 |
+| disabled / clearable / size | 同 TInput | — | — |
+| max-rows | `int` | `6` | 列表最多显示行数 |
+| empty-text | `string` | `"无匹配结果"` | 无匹配提示 |
+
+只读输出: `is-open` (`bool`)。
+
+回调: `changed(string)`; `selected(int, string)` — (下标, value);
+`accepted(string)` — 无高亮建议时回车。
+
+### TTreeSelect
+
+树选择下拉。TSelect 式触发器 + 弹层内放 TTree: 把 `TTreeItem` / `TTreeBranch`
+直接声明为 `TTreeSelect` 的子节点, 经 `@children` 进入下拉面板。叶子点击写入
+`TTreeLogic.current-value`, 组件监听该全局并在面板打开期间上报 `selected` 后
+关闭面板 (点已选叶子是 TTreeItem 内的 no-op, 不触发)。
+
+继承: `Rectangle`。内部组合 TIcon, TPopupSurface, TTree 与 ScrollView。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| display-text | `string` | `""` | 触发器回显; 空串时回显 TTreeLogic.current-value |
+| placeholder-text | `string` | `""` | 未选择时的占位文字 |
+| disabled | `bool` | `false` | 禁用态 |
+| prefix-icon | `TIconData` | 空 | 前缀图标 |
+| size | `TSize` | `TSize.medium` | 高度与字号 |
+| placement | `TPopupPlacement` | `TPopupPlacement.bottom-start` | 弹层方向 |
+| panel-height | `length` | `8 * TTheme.height-m + 8px` | 弹层固定高度; 弹层高度不能取自内容 (PopupWindow 读到的是 ScrollView 的首选高度而非树的), 超高内容面板内滚动 |
+
+只读输出: `is-open` (`bool`)。公开函数: `show()`, `close()`, `toggle()`。
+
+回调: `selected(string)` — 选中叶子的 value。
+
+已知限制: 选中值经 TTreeLogic 全局共享, 同窗口多树/树选择互相可见 (TTree 同款);
+暂无键盘导航; 弹层高度固定为 `panel-height`, 树更高时面板内滚动。
+
+### TCascader
+
+级联选择, 嵌套声明式 (TTree 同构): `TCascader` + `TCascaderItem` (叶子) +
+`TCascaderBranch` (带子级), 子节点经 `@children` 进入弹层。面板为单列逐级原位
+展开 (分支行 clip 折叠 + 高度动画), 只有叶子触发选中: 叶子点击写入
+`TCascaderLogic.current-value`, 组件在面板打开期间上报 `selected` 后关闭。
+
+继承: `Rectangle`。行样式为文件内私有 CascaderRow (TTree 的 TreeRow 同构)。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| placeholder-text | `string` | `""` | 未选择时的占位文字 |
+| disabled | `bool` | `false` | 禁用态 |
+| size | `TSize` | `TSize.medium` | 高度与字号 |
+| placement | `TPopupPlacement` | `TPopupPlacement.bottom-start` | 弹层方向 |
+| panel-height | `length` | `8 * TTheme.height-m + 8px` | 弹层固定高度; 不能取自内容 (同 TTreeSelect), 超高内容面板内滚动 |
+
+只读输出: `is-open` (`bool`)。公开函数: `show()`, `close()`, `toggle()`。
+
+回调: `selected(string)` — 选中叶子的 value; `TCascaderItem` 另有 `activated()`;
+`TCascaderBranch` 另有 `opened-changed(bool)`。
+
+全局: `TCascaderLogic.current-value` (`string`) — 选中叶子 value, "" 为未选。
+
+已知限制: 触发器回显叶子 label, 完整 "a/b/c" 路径回显暂不支持 (声明式嵌套下
+叶子拿不到祖先 label); 面板不做多列横排 (多列需要扁平模型, 与嵌套声明冲突);
+暂无键盘导航。
+
 ## 日期时间 date-time
 
 ```slint
-import { TCalendar, TDate, TDatePicker, TTimePicker, TTime } from "@tela-ui/date-time.slint";
+import { TCalendar, TDate, TDatePicker, TTimePicker, TTime, TPicker, TPickerColumn, TDateTimePicker, TDateTime } from "@tela-ui/date-time.slint";
 ```
 
 ### TCalendar
@@ -656,10 +836,68 @@ import { TCalendar, TDate, TDatePicker, TTimePicker, TTime } from "@tela-ui/date
 (每次一格并触发 `changed`), 没有惯性滚动。弹层高约 234px, 靠近窗口底部时请设置
 `placement: TPopupPlacement.top-start`。
 
+### TPicker
+
+通用滚轮多列选择面板 (平台选择器风格)。纯面板组件, 无触发器 — N 列联合显示
+文本在语言内拼不出来 (无循环、无字符串拼接), 触发器由宿主自建。每列整列渲染
+选项并带动画偏移, 选中框画在选中行上 (TTimePicker 同款, 不套 ListView)。
+
+继承: `Rectangle`。内部为私有 TPickerWheel 列。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| columns | `[TPickerColumn]` | `[]` | 列定义 |
+| value | `[int]` (in-out) | `[]` | 每列选中下标, -1 为未选; 组件回写, 请双向绑定 |
+| item-height | `length` | `TTheme.height-m` | 行高 |
+| visible-rows | `int` | `7` | 可见行数 (选中行停在第 4 行) |
+
+回调: `changed()` — 任一列拾取后, `value` 已更新 (读数组取结果)。
+
+公开函数: `set-value(col, idx)` — 编程写入某列 (越界忽略); 宿主模型比列数短时,
+只有恰好补到末位的拾取能追加写入, 中间留空的列写不进 — 请把 `value` 初始化成
+与列数等长。
+
+相关结构: `TPickerColumn { label: string, options: [string] }`; `label` 为列标题,
+空串不渲染。
+
+已知限制: 各列独立取值, 联动列 (省市区) 由宿主在 `changed` 里重建 `options`;
+列宽固定 spacing-14 (56px), 长选项省略号截断。
+
+### TDateTimePicker
+
+日期时间选择。只读触发器 + 锚定面板, 年/月/日/时/分五列滚轮 (TTimePicker 的
+整列渲染 + 选中框随行方案); 日列行数随年月自动收放 (闰年/大小月用 TCalendar
+同款运算)。`hour < 0` 表示未选时间; 拾取任一列会把其余未选列补成有效零值
+(TTimePicker 同款)。
+
+继承: `Rectangle`。内部组合 TInput, TPopupSurface 与私有 TNumericWheel。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| size | `TSize` | `TSize.medium` | 触发器高度与字号 |
+| placement | `TPopupPlacement` | `TPopupPlacement.bottom-start` | 弹层方向 |
+| placeholder-text | `string` | `"请选择日期时间"` | 未选时占位文字 |
+| disabled | `bool` | `false` | 禁用触发器并关闭面板 |
+| start-year | `int` | `2000` | 年列起点 (整列渲染, 范围请收敛) |
+| end-year | `int` | `2100` | 年列终点 |
+| value | `TDateTime` (in-out) | `{ date: {year:0,...}, hour: -1, minute: 0 }` | 选中值; `date.year == 0` 为未选日期 |
+
+只读输出: `is-open` (`bool`)。
+
+回调: `changed(TDateTime)` — 每次列拾取后, `value` 已更新。
+
+公开函数: `show()`, `close()`, `toggle()`。
+
+相关结构: `TDateTime { date: TDate, hour: int, minute: int }`;
+触发器显示 `YYYY-MM-DD` (选了时间再拼 ` HH:mm`)。
+
+已知限制: 触发器只读; 无"此刻"高亮与键盘导航; 年列范围由宿主给定, 悬空日期
+(如 2 月 30 日) 在切换年/月时被夹紧到当月天数。
+
 ## 展示 display
 
 ```slint
-import { TTag, TTagVariant, TAvatar, TAvatarSize, TAvatarShape, TBadge, TCard, TEmpty, TDescriptions, TDescriptionItem, TTimeline, TTimelineItem, TStatistic } from "@tela-ui/display.slint";
+import { TTag, TTagVariant, TAvatar, TAvatarSize, TAvatarShape, TAvatarGroup, TAvatarGroupItem, TBadge, TCard, TEmpty, TDescriptions, TDescriptionItem, TTimeline, TTimelineItem, TStatistic } from "@tela-ui/display.slint";
 ```
 
 ### TTag
@@ -685,7 +923,8 @@ import { TTag, TTagVariant, TAvatar, TAvatarSize, TAvatarShape, TBadge, TCard, T
 
 ### TAvatar
 
-头像。图片, 文字或默认人形图标的圆形/圆角方形占位。
+头像。图片, 文字或默认人形图标的圆形/圆角方形占位; 带 1px hairline 边框
+(component-border), 图片头像与叠放头像 (TAvatarGroup) 借此与页面底色区分。
 
 继承: `Rectangle`。内部组合 TIcon (默认人形)。
 
@@ -701,6 +940,25 @@ import { TTag, TTagVariant, TAvatar, TAvatarSize, TAvatarShape, TBadge, TCard, T
 
 相关枚举: `TAvatarSize { small, medium, large, extra-large }`,
 `TAvatarShape { circle, square }`。
+
+### TAvatarGroup
+
+头像组。成员按声明顺序叠放 (后者在上), 重叠量固定 spacing-4 (8px);
+`max-count > 0` 时截断渲染并把余量画成 `+N` 尾像, 尾像点击报 `overflow-clicked`。
+
+继承: `Rectangle`。内部组合 TAvatar。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| items | `[TAvatarGroupItem]` | `[]` | 成员; 无图成员显示 `text` |
+| size | `TAvatarSize` | `TAvatarSize.medium` | 直径 32/40/48/64px |
+| shape | `TAvatarShape` | `TAvatarShape.circle` | `circle` / `square` |
+| theme | `TThemeRole` | `TThemeRole.primary` | 底色与文字色 |
+| max-count | `int` | `0` | 0 = 全部显示; 正数截断并渲染 +N |
+
+回调: `clicked(int)` — 成员点击, 参数为下标; `overflow-clicked()` — +N 尾像点击。
+
+相关结构: `TAvatarGroupItem { text: string, source: image }`。
 
 ### TBadge
 
@@ -796,7 +1054,7 @@ import { TTag, TTagVariant, TAvatar, TAvatarSize, TAvatarShape, TBadge, TCard, T
 ## 内容 content
 
 ```slint
-import { TCollapse, TCollapseItem, TCarousel, TCarouselSlide, TCodeBlock, TTable, TTableColumn, TTableRow, TTableAlign, TTableSortDirection, TTree, TTreeItem, TTreeBranch, TSplitter, TSplitterVertical, TSplitterPane, TSplitterPanePrimary, TSplitterPanePrimaryVertical } from "@tela-ui/content.slint";
+import { TCollapse, TCollapseItem, TCarousel, TCarouselSlide, TCodeBlock, TTable, TTableColumn, TTableRow, TTableAlign, TTableSortDirection, TTree, TTreeItem, TTreeBranch, TList, TListItem, TSplitter, TSplitterVertical, TSplitterPane, TSplitterPanePrimary, TSplitterPanePrimaryVertical } from "@tela-ui/content.slint";
 ```
 
 ### TCollapse
@@ -847,6 +1105,96 @@ Monospace 代码面板 (次级容器底色, Consolas, 不换行)。代码是只�
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | code | `string` | `""` | 代码文本, 换行用换行符 |
+
+### TTable
+
+数据表格。列定义 + 行模型, 表头可排序列点击循环 升序 → 降序 → 取消;
+行虚拟化由 ListView 提供 (只实例化可见行), 行高默认 48px。列宽超出视口时
+横向滚动且表头跟随 `content-x`。
+
+继承: `Rectangle`。内部组合 TText, TIcon, TEmpty 与 std ListView。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| columns | `[TTableColumn]` | `[]` | 列定义 |
+| rows | `[TTableRow]` | `[]` | 行模型, 每行 `cells: [string]` |
+| sort-column | `int` (in-out) | `-1` | 当前排序列, -1 为未排序 |
+| sort-direction | `TTableSortDirection` (in-out) | `none` | 当前排序方向 |
+| row-height | `length` | `TTheme.height-l + TTheme.spacing-4` (48px) | 行高 |
+| empty-text | `string` | `"暂无数据"` | 空态描述 |
+
+回调: `sort-changed(int, TTableSortDirection)` — 排序只上报, 行重排由宿主完成
+(1.18 无循环语句, 组件无法重排模型); `row-clicked(int)`。
+
+相关结构: `TTableColumn { title, width: 0px=弹性, min-width, align, sortable }`,
+`TTableRow { cells: [string] }`; 枚举 `TTableAlign { left, center, right }`,
+`TTableSortDirection { none, ascending, descending }`。
+
+已知限制: 列宽不可拖拽; 不支持多列排序; 单元格仅文本。
+
+### TTree
+
+树形控件, 嵌套声明式: `TTree` + `TTreeItem` (叶子) + `TTreeBranch` (带子级),
+分支用 `@children` 承载子节点, 深度不限、无需组件递归; 分支折叠靠 clip +
+高度动画, 收起后子节点保留实例。叶子点击写入 `TTreeLogic.current-value`。
+
+继承: 各件均为 `VerticalLayout` / `Rectangle`。
+
+| 组件 | 关键参数 | 说明 |
+| --- | --- | --- |
+| TTree | (无) | 空壳布局, 子节点直接声明 |
+| TTreeItem | `label`, `value`, `icon`, `enabled` | 叶子; 回调 `activated()`; 只读输出 `is-selected` |
+| TTreeBranch | `label`, `icon`, `enabled`, `opened` (in-out) | 分支行 + 折叠盒; 回调 `opened-changed(bool)` |
+
+全局: `TTreeLogic.current-value` (`string`) — 选中叶子 value, "" 为未选;
+Slint 无实例级 global, 一个窗口的所有树共享这一份选中值。
+
+已知限制: 无键盘导航; 折叠态是分支自己的 `opened`, 不写回宿主模型。
+
+### TList
+
+通用虚拟滚动列表。行模型驱动 (图标 + 标题 + 可选说明), 行回收由 ListView
+完成 (TTable 同款), 行高默认 48px, 底部 1px 分隔线, 空态 TEmpty。
+
+继承: `Rectangle`。内部组合 TIcon, TText, TEmpty 与 std ListView。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| items | `[TListItem]` | `[]` | 行模型 |
+| selectable | `bool` | `false` | 开启行选中高亮 |
+| current-index | `int` (in-out) | `-1` | 选中行下标, 仅 `selectable` 时有视觉意义 |
+| row-height | `length` | `TTheme.height-l + TTheme.spacing-4` (48px) | 行高 |
+| empty-text | `string` | `"暂无数据"` | 空态描述 |
+
+回调: `row-clicked(int)` — 每次行点击; `changed(int)` — 仅 `selectable` 且
+下标真正变化时触发 (先自更新再回调)。
+
+相关结构: `TListItem { text, description: "" , icon, disabled: false }`;
+首选高度为行数 × 行高 (内容自适应), 固定视口请显式给 `height`。
+
+已知限制: 行结构固定 (图标/标题/说明), 不支持宿主自定义行渲染 (ListView 行是
+模型驱动的 for); 组件不重排/过滤模型。
+
+### TSplitter
+
+可拖拽分栏。`TSplitter` / `TSplitterVertical` 是横向/纵向布局壳; 第一栏用
+`TSplitterPanePrimary` / `TSplitterPanePrimaryVertical` (自带拖拽条与折叠钮),
+其余栏用 `TSplitterPane` 填满剩余空间。
+
+继承: 布局壳为 `HorizontalLayout` / `VerticalLayout`; 窗格为 `Rectangle`。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| size | `length` (in-out) | `200px` | 主栏尺寸, 拖拽夹紧 `min-size` |
+| min-size | `length` | `48px` | 主栏下限 |
+| collapsible | `bool` | `false` | 是否显示折叠钮 |
+| disabled | `bool` | `false` | 禁用拖拽 |
+| vertical | `bool` | `false` | (由垂直变体自动设置) |
+
+回调: `changed(length)` — 主栏尺寸变化; 只读输出 `collapsed` / `vis-size`;
+公开函数 `toggle-collapse()`。
+
+已知限制: 第二栏无最小尺寸约束, 可拖到 0; 主栏折叠无过渡动画。
 
 ---
 
@@ -1610,6 +1958,10 @@ PanelLeftClose, PanelLeftOpen, FlaskConical, Inbox, Square, Copy。
 | TTime | TTimePicker | hour, minute, second (hour < 0 = 未选) |
 | TAutoCompleteItem | TAutoComplete | label, value, disabled |
 | TTableColumn / TTableRow / TTableAlign / TTableSortDirection | TTable | title, width, min-width, align, sortable / cells / left, center, right / none, ascending, descending |
+| TListItem | TList | text, description, icon, disabled |
+| TPickerColumn | TPicker | label, options |
+| TDateTime | TDateTimePicker | date (TDate), hour, minute |
+| TAvatarGroupItem | TAvatarGroup | text, source |
 | TTreeLogic | TTree | current-value (全局选中值, 服务窗口内所有树) |
 | TNavItem | TNavBar | label, value |
 | TSideNavMode / TSideNavTogglePosition | TSideNav | icon-text, text, icon / top, bottom |

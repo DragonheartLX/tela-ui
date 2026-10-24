@@ -1,0 +1,82 @@
+// Tela UI — TScrollBar (internal scaffolding)
+//
+// Overlay scrollbar for the library's own ScrollView / ListView surfaces.
+// The fluent-style native scrollbar draws a 2px thumb pinned 4px off the
+// track edge (never centered) with a border-grade color — not tunable from
+// consumer code, so every scrolling surface hides it
+// (`vertical-scrollbar-policy: always-off`) and overlays this one instead.
+//
+// The bar is an overlay: a transparent track with a full-width capsule thumb
+// (centered by construction, gray-6 rest / gray-7 pressed for contrast).
+// `content-offset` follows the Slint content-y convention (0 .. -max) and is
+// meant to be two-way bound to the scroller's `content-y` — the same wiring
+// the native bar uses internally, so the Flickable stays the owner.
+//
+// Consumers pin the long axis and the 6px thickness (width for vertical
+// bars, height for horizontal ones). Wheel events are deliberately not
+// handled: they fall through to the scroller underneath.
+
+import { TTheme } from "./theme.slint";
+
+export component TScrollBar inherits Rectangle {
+    in property <bool> horizontal: false;
+    // Content size and visible size along the scroll axis.
+    in property <length> content-length;
+    in property <length> viewport-length;
+    // 0 .. -(content-length - viewport-length).
+    in-out property <length> content-offset;
+
+    private property <length> max-scroll: Math.max(0px, content-length - viewport-length);
+    private property <length> track-l: (horizontal ? root.width : root.height) - 2 * TTheme.spacing-1;
+    private property <length> thumb-l: max-scroll <= 0px ? 0px
+        : max(24px, track-l * viewport-length / content-length);
+    private property <length> thumb-pos: max-scroll <= 0px ? TTheme.spacing-1
+        : TTheme.spacing-1 + (track-l - thumb-l) * (-content-offset / max-scroll);
+
+    visible: max-scroll > 1px;
+    clip: true;
+
+
+    thumb := Rectangle {
+        x: horizontal ? thumb-pos : 0px;
+        y: horizontal ? 0px : thumb-pos;
+        width: horizontal ? thumb-l : parent.width;
+        height: horizontal ? parent.height : thumb-l;
+        border-radius: TTheme.radius-round;
+        // Idle is the most prominent state; hover / press lighten
+        // progressively so the content under the bar shows through.
+        background: ta.pressed ? TTheme.gray-5
+            : ta.has-hover ? TTheme.gray-6
+            : TTheme.gray-7;
+        animate background { duration: TTheme.duration-fast; }
+    }
+
+    ta := TouchArea {
+        // Drag baseline, captured on press.
+        private property <length> pressed-offset;
+        private property <length> pressed-mouse;
+
+        pointer-event(e) => {
+            if (e.button == PointerEventButton.left && e.kind == PointerEventKind.down) {
+                // Click-to-jump: center the thumb under the pointer, then
+                // drag from there.
+                let target = (horizontal ? self.mouse-x : self.mouse-y)
+                    - TTheme.spacing-1 - thumb-l / 2;
+                let ratio = max-scroll > 0px
+                    ? max-scroll / Math.max(1px, track-l - thumb-l) : 0;
+                content-offset = -Math.max(0px, Math.min(max-scroll, target * ratio));
+                self.pressed-offset = -content-offset;
+                self.pressed-mouse = horizontal ? self.mouse-x : self.mouse-y;
+            }
+        }
+
+        moved => {
+            if (self.pressed) {
+                let delta = (horizontal ? self.mouse-x : self.mouse-y) - self.pressed-mouse;
+                let ratio = max-scroll > 0px
+                    ? max-scroll / Math.max(1px, track-l - thumb-l) : 0;
+                content-offset = -Math.max(0px, Math.min(max-scroll, pressed-offset + delta * ratio));
+            }
+        }
+    }
+}

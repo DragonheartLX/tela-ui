@@ -1,0 +1,125 @@
+// Tela UI — TTagInput
+//
+// Tag entry field: the model `tags` is rendered as closable TTags, the
+// trailing input adds a tag on Enter and Backspace on an empty buffer drops
+// the last one. Like TTag's `closed`, removal is fire-only: the host drops
+// the entry from the model (the component cannot rewrite an `in` model).
+// Duplicate checking is the host's job too — 1.18 has no loops, so the
+// component cannot scan the model.
+//
+// Single row with clipping; tags do not wrap.
+
+import { TTheme } from "../theme.slint";
+import { TText } from "../base/typography.slint";
+import { TSize } from "../structs/enums.slint";
+import { TInputFrame } from "input.slint";
+import { TTag } from "../display/tag.slint";
+
+export component TTagInput inherits TInputFrame {
+    in property <[string]> tags;
+    in-out property <string> text <=> ti.text;
+    in property <string> placeholder-text;
+    in property <TSize> size: TSize.medium;
+
+    // Enter adds a tag; (index, tag) reports a dropped one.
+    callback tag-added(string);
+    callback tag-removed(int, string);
+    // Typed text after every edit (including the clear that follows an add).
+    callback changed(string);
+
+    private property <length> h: TTheme.size-height(size);
+    private property <length> fs: TTheme.size-font(size);
+    private property <length> line: TTheme.size-line-height(size);
+    // Tag size rides on the control size (20/24/28px).
+    private property <TSize> tag-size:
+        size == TSize.small ? TSize.small
+        : size == TSize.large ? TSize.large
+        : TSize.medium;
+
+    height: h;
+    clip: true;
+    forward-focus: ti;
+    focused: ti.has-focus;
+    focus-request => {
+        ti.focus();
+    }
+
+    HorizontalLayout {
+        x: parent.border-width;
+        y: parent.border-width;
+        width: parent.width - parent.border-width * 2;
+        height: parent.height - parent.border-width * 2;
+        padding-left: TTheme.spacing-2;
+        padding-right: TTheme.spacing-2;
+        spacing: TTheme.spacing-1;
+
+        for t[i] in root.tags: TTag {
+            y: (parent.height - self.height) / 2;
+            text: t;
+            size: root.tag-size;
+            closable: !root.disabled;
+            disabled: root.disabled;
+
+            closed => {
+                root.tag-removed(i, t);
+            }
+        }
+
+        ti := TextInput {
+            // The entry point keeps a visible width even when many tags crowd
+            // the row.
+            min-width: TTheme.spacing-11;
+            vertical-alignment: center;
+            single-line: true;
+            color: root.disabled ? TTheme.text-color-disabled : TTheme.text-color-primary;
+            font-size: root.fs;
+            font-family: TTheme.font-family;
+            selection-background-color: TTheme.brand-color-light;
+            selection-foreground-color: TTheme.text-color-primary;
+            enabled: !root.disabled;
+            horizontal-stretch: 1;
+            accessible-role: AccessibleRole.text-input;
+            accessible-label: root.placeholder-text;
+
+            edited => {
+                root.changed(self.text);
+            }
+
+            accepted => {
+                if (self.text != "") {
+                    root.tag-added(self.text);
+                    self.text = "";
+                    root.changed("");
+                }
+            }
+
+            // Backspace on an empty buffer walks the caret back to the last
+            // tag: drop it (fire-only; the host rewrites the model).
+            key-pressed(event) => {
+                if event.text == Key.Backspace && self.text == "" && root.tags.length > 0 {
+                    root.tag-removed(root.tags.length - 1, root.tags[root.tags.length - 1]);
+                    return accept;
+                }
+                reject
+            }
+        }
+    }
+
+    // Placeholder only when there is nothing on the row yet; with tags
+    // present the entry point is too narrow to carry it.
+    placeholder := TText {
+        x: (parent.border-width + TTheme.spacing-2);
+        y: 0;
+        height: parent.height;
+        text: (root.tags.length == 0 && root.text == "" && ti.preedit-text == "")
+            ? root.placeholder-text : "";
+        font-size: root.fs;
+        line-height: root.line;
+        color: root.disabled ? TTheme.text-color-disabled : TTheme.text-color-placeholder;
+        vertical-alignment: center;
+        overflow: elide;
+        width: parent.width - self.x - TTheme.spacing-2 - parent.border-width;
+    }
+
+    accessible-role: AccessibleRole.groupbox;
+}

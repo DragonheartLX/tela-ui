@@ -1,10 +1,11 @@
 // Gallery section: 输入 (TInput / TTextArea / TInputNumber / TAutoComplete /
-// TSearch / TInputAdornment / TForm / TSlider / TRate), 一个组件一张卡.
+// TSearch / TInputAdornment / TForm / TSlider / TRate / TTagInput /
+// TRangeInput / TOtpInput / TMention), 一个组件一张卡.
 
 import { TThemeRole, TSize } from "@tela-ui/theme.slint";
 import { TIconSet, TCaption } from "@tela-ui/base.slint";
 import { TMessage } from "@tela-ui/notice.slint";
-import { TInput, TTextArea, TInputNumber, TAutoComplete, TAutoCompleteItem, TSearch, TInputAdornment, TForm, TFormItem, TSlider, TRate } from "@tela-ui/input.slint";
+import { TInput, TTextArea, TInputNumber, TAutoComplete, TAutoCompleteItem, TSearch, TInputAdornment, TForm, TFormItem, TSlider, TRate, TTagInput, TRangeInput, TOtpInput, TMention } from "@tela-ui/input.slint";
 import { GallerySection } from "../gallery-section.slint";
 
 export component InputSection inherits VerticalLayout {
@@ -19,6 +20,11 @@ export component InputSection inherits VerticalLayout {
     in-out property <string> auto-value: "";
     in-out property <string> search-text: "";
     in-out property <string> search-result: "";
+    in-out property <[string]> tag-values: ["Slint", "TDesign"];
+    in-out property <float> range-min: 10;
+    in-out property <float> range-max: 80;
+    in-out property <[string]> otp-values: ["", "", "", "", "", ""];
+    in-out property <string> mention-text: "";
     in property <[TAutoCompleteItem]> auto-items: [
         { label: "北京", value: "bj", disabled: false },
         { label: "上海", value: "sh", disabled: false },
@@ -287,6 +293,144 @@ export component InputSection inherits VerticalLayout {
             TRate { size: TSize.small; theme: TThemeRole.primary; value: 4; }
             TRate { value: 3; disabled: true; }
             Rectangle { }
+        }
+    }
+
+    // ======================== TTagInput =====================
+    GallerySection {
+        title: "标签输入 TTagInput";
+        code: "import { TTagInput } from \"@tela-ui/input.slint\";\n\nTTagInput {\n    tags <=> model;            // 宿主模型, 组件只发事件\n    placeholder-text: \"回车添加标签\";\n    tag-added(t) => { model.push(t); }\n    tag-removed(i, t) => { model.remove(i); }\n}";
+
+        VerticalLayout {
+            spacing: 16px;
+
+            HorizontalLayout {
+                spacing: 24px;
+
+                TTagInput {
+                    width: 320px;
+                    tags <=> root.tag-values;
+                    placeholder-text: "回车添加标签";
+
+                    tag-added(t) => {
+                        root.tag-values.push(t);
+                    }
+                    tag-removed(i, t) => {
+                        root.tag-values.remove(i);
+                    }
+                }
+
+                TTagInput {
+                    width: 240px;
+                    tags: ["只读", "禁用"];
+                    disabled: true;
+                }
+
+                Rectangle { }
+            }
+
+            TCaption { text: "回车添加, 空文本退格删除末位; 点标签 x 删除 (索引与标签一起上报, 模型由宿主删除); 标签不换行, 重复校验在宿主侧做。"; wrap: word-wrap; }
+        }
+    }
+
+    // ======================= TRangeInput ====================
+    GallerySection {
+        title: "区间输入 TRangeInput";
+        code: "import { TRangeInput } from \"@tela-ui/input.slint\";\n\nTRangeInput {\n    min: 0; max: 100; step: 1;\n    min-value <=> lo;   // 一侧变更会把另一侧夹进新区间\n    max-value <=> hi;\n    changed(lo, hi) => { … }\n}";
+
+        VerticalLayout {
+            spacing: 16px;
+
+            HorizontalLayout {
+                spacing: 24px;
+
+                TRangeInput {
+                    width: 240px;
+                    placeholder-min-text: "最低价";
+                    placeholder-max-text: "最高价";
+                    min: 0;
+                    max: 100;
+                    min-value <=> root.range-min;
+                    max-value <=> root.range-max;
+                }
+
+                TRangeInput {
+                    width: 240px;
+                    min: 0;
+                    max: 100;
+                    disabled: true;
+                    min-value: 20;
+                    max-value: 60;
+                }
+
+                Rectangle { }
+            }
+
+            TCaption { text: "两侧数值区间 (当前 \{round(root.range-min)} ~ \{round(root.range-max)}); 一侧变更会拖动另一侧保持有序, 空缓冲视为未输入不触发 changed, 失焦按存值重排文本。"; wrap: word-wrap; }
+        }
+    }
+
+    // ======================== TOtpInput =====================
+    GallerySection {
+        title: "分段输入 TOtpInput";
+        code: "import { TOtpInput } from \"@tela-ui/input.slint\";\n\nTOtpInput {\n    length: 6;\n    masked: false;\n    values <=> codes;   // 每段全文上报\n    changed(i, text) => { … }\n    completed() => { … }\n}\n// 已知限制: 无 max-length, 段内溢出与整段粘贴分发由宿主处理";
+
+        VerticalLayout {
+            spacing: 16px;
+
+            HorizontalLayout {
+                spacing: 24px;
+
+                TOtpInput {
+                    length: 6;
+                    values <=> root.otp-values;
+                }
+
+                TOtpInput {
+                    length: 4;
+                    masked: true;
+                }
+
+                Rectangle { }
+            }
+
+            TCaption { text: "输完一段自动跳下一格, 空段退格回上一格; 全部填满触发 completed。每段缓冲全文上报 changed(i, text), 溢出/粘贴分发由宿主改写 values。"; wrap: word-wrap; }
+        }
+    }
+
+    // ========================= TMention =====================
+    GallerySection {
+        title: "提及输入 TMention";
+        code: "import { TMention, TAutoCompleteItem } from \"@tela-ui/input.slint\";\n\nTMention {\n    text <=> content;\n    suggestions <=> candidates;   // 宿主解析 @ 后填充\n    changed(t) => { if (t == \"@\") { mention.show-suggestions(); } }\n    selected(i, value) => { /* 宿主把 value 拼回文本 */ }\n}";
+
+        VerticalLayout {
+            spacing: 16px;
+
+            mention-input := TMention {
+                width: 320px;
+                text <=> root.mention-text;
+                suggestions: [
+                    { label: "张三", value: "zhangsan" },
+                    { label: "李四", value: "lisi" },
+                    { label: "王五", value: "wangwu" },
+                ];
+
+                changed(t) => {
+                    // 触发符解析在宿主: 组件侧没有字符串切片; 演示里
+                    // 键入单独一个 @ 即触发。
+                    if (t == "@") {
+                        mention-input.show-suggestions();
+                    }
+                }
+
+                selected(i, value) => {
+                    // 拼接在宿主: 把选中值替换 @ 后的占位。
+                    mention-input.text = "@" + value + " ";
+                    mention-input.move-caret-to-end();
+                }
+            }
+
+            TCaption { text: "输入 @ 触发建议 (演示为示意): 触发解析、建议填充 (suggestions) 与选中文本拼接都在宿主侧; 面板锚输入框而非光标 (TextInput 不暴露光标几何)。"; wrap: word-wrap; }
         }
     }
 }
