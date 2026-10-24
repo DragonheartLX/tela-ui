@@ -1,0 +1,228 @@
+// Tela UI — TSplitter
+//
+// Draggable two-pane split. Compose the panes yourself inside the splitter
+// layout — the FIRST pane is a primary pane (drives the divider), the second
+// is a plain `TSplitterPane` and just fills the rest:
+//
+//   TSplitter {
+//       TSplitterPanePrimary { size: 220px; collapsible: true;
+//           Rectangle { ... }   // 左栏内容
+//       }
+//       TSplitterPane {
+//           Rectangle { ... }   // 右栏内容
+//       }
+//   }
+//
+// Dragging the strip at the primary pane's trailing edge resizes it (clamped
+// to `min-size` and to the splitter's own extent); the chevron toggles
+// collapse. Sizes live on the primary
+// pane itself, so several splitters can coexist in one window. There is no
+// constraint for the second pane — dragging can squeeze it to zero.
+//
+// The main-axis binding must be static (width for the horizontal variant,
+// height for the vertical one), so the two axes are two exported subclasses
+// of one private base; each pins the base's `vertical` flag to match. Do not
+// override `vertical` at the instantiation site.
+//
+// The strip is a drag affordance only (no slider role); the chevron button
+// is the keyboard-reachable path.
+
+import { TTheme } from "../theme.slint";
+import { TIcon } from "../base/icon/icon.slint";
+import { TIconSet } from "../base/icon/data.slint";
+
+// Horizontal split: panes side by side.
+export component TSplitter inherits HorizontalLayout {
+    spacing: 0px;
+
+    @children
+}
+
+// Vertical split: panes stacked.
+export component TSplitterVertical inherits VerticalLayout {
+    spacing: 0px;
+
+    @children
+}
+
+// Plain filler pane for the second position. The explicit stretch keeps the
+// splitter's total stretch above zero no matter what the pane hosts: a
+// content-derived stretch of 0 would make the layout engine treat every pane
+// as stretch 1 and share the leftover space equally.
+export component TSplitterPane inherits Rectangle {
+    horizontal-stretch: 1;
+    vertical-stretch: 1;
+
+    @children
+}
+
+// Shared drag / collapse logic. The cross axis is left unbound so the
+// layout fills it; the subclasses bind the main axis and pin `vertical`.
+component SplitterPaneBase inherits Rectangle {
+    // Axis flag; pinned by the subclasses, not meant for hosts.
+    in property <bool> vertical: false;
+    // Current main-axis size; hosts can bind it two-way.
+    in-out property <length> size: 200px;
+    // Drag lower bound for `size`.
+    in property <length> min-size: 48px;
+    in property <bool> collapsible: false;
+    in property <bool> disabled: false;
+
+    callback changed(length);
+
+    out property <bool> collapsed: false;
+
+    // Hit strip and collapsed width.
+    private property <length> strip: 16px;
+    // Visible main-axis size: collapses to the strip width. Subclasses bind
+    // their main axis to this, so it is library-visible on purpose.
+    out property <length> vis-size: self.collapsed ? root.strip : root.size;
+    private property <length> last-pos: 0px;
+    private property <bool> collapsible-on: root.collapsible && !root.disabled;
+
+    public function toggle-collapse() {
+        if (!root.collapsible-on) {
+            return;
+        }
+        if (self.collapsed) {
+            self.collapsed = false;
+            root.set-size(root.size);
+        } else {
+            self.collapsed = true;
+            root.changed(root.strip);
+        }
+    }
+
+    function set-size(raw: length) {
+        let clamped = max(root.min-size, raw);
+        if (root.size == clamped) {
+            return;
+        }
+        root.size = clamped;
+        root.changed(clamped);
+    }
+
+    clip: true;
+
+    // Pane content; the trailing strip covers the last `strip` px of the
+    // main axis. Collapsed hides it outright (`visible`, not opacity) so no
+    // sliver of it survives inside the strip. The clip on the base root
+    // keeps content with fixed-size children from painting into the strip.
+    HorizontalLayout {
+        x: 0;
+        y: 0;
+        visible: !root.collapsed;
+        width: root.vertical ? parent.width : parent.width - root.strip;
+        height: root.vertical ? parent.height - root.strip : parent.height;
+
+        @children
+    }
+
+    // Drag strip along the trailing edge; the hairline sits mid-strip.
+    // The TouchArea is declared first so the hairline can read its hover.
+    Rectangle {
+        x: root.vertical ? 0 : parent.width - root.strip;
+        y: root.vertical ? parent.height - root.strip : 0;
+        horizontal-stretch: 0;
+        vertical-stretch: 0;
+        width: root.vertical ? parent.width : root.strip;
+        height: root.vertical ? root.strip : parent.height;
+
+        strip-ta := TouchArea {
+            enabled: !root.disabled && !root.collapsed;
+            mouse-cursor: !root.disabled
+                ? (root.vertical ? MouseCursor.ns-resize : MouseCursor.ew-resize)
+                : MouseCursor.default;
+            pointer-event(event) => {
+                if (event.kind == PointerEventKind.down) {
+                    // Track the pointer in window coordinates: the strip
+                    // itself moves with every resize, so its local
+                    // mouse-x / mouse-y stay constant during the drag.
+                    root.last-pos = root.vertical
+                        ? self.absolute-position.y + self.mouse-y
+                        : self.absolute-position.x + self.mouse-x;
+                }
+            }
+            moved => {
+                let pos = root.vertical
+                    ? self.absolute-position.y + self.mouse-y
+                    : self.absolute-position.x + self.mouse-x;
+                let delta = pos - root.last-pos;
+                root.last-pos = pos;
+                // Base the step on the DISPLAYED size: when the layout has
+                // clamped the pane to the container, `size` runs ahead of the
+                // visible width and sizing from it would make the drag-back
+                // feel dead until `size` fell below the clamp.
+                root.set-size((root.vertical ? root.height : root.width) + delta);
+            }
+        }
+
+        Rectangle {
+            x: root.vertical ? 0 : parent.width / 2 - self.width / 2;
+            y: root.vertical ? parent.height / 2 - self.height / 2 : 0;
+            width: root.vertical ? parent.width : strip-ta.has-hover ? 3px : 1px;
+            height: root.vertical ? strip-ta.has-hover ? 3px : 1px : parent.height;
+            background: strip-ta.has-hover && !root.disabled
+                ? TTheme.brand-color : TTheme.component-border;
+            animate width { duration: TTheme.duration-fast; }
+            animate height { duration: TTheme.duration-fast; }
+            animate background { duration: TTheme.duration-fast; }
+        }
+
+        if root.collapsible: Rectangle {
+            x: (parent.width - self.width) / 2;
+            y: (parent.height - self.height) / 2;
+            width: root.strip;
+            height: root.strip;
+            border-radius: self.width / 2;
+            background: chev-ta.has-hover && root.collapsible-on
+                ? TTheme.bg-color-component-hover : TTheme.bg-color-container;
+            border-width: 1px;
+            border-color: TTheme.component-border;
+            animate background { duration: TTheme.duration-fast; }
+
+            TIcon {
+                x: (parent.width - self.width) / 2;
+                y: (parent.height - self.height) / 2;
+                icon: TIconSet.ChevronLeft;
+                size: 10px;
+                icon-color: root.disabled ? TTheme.text-color-disabled : TTheme.text-color-secondary;
+                transform-rotation:
+                    root.vertical ? (root.collapsed ? -90deg : 90deg)
+                    : (root.collapsed ? 180deg : 0deg);
+                transform-origin: { x: self.width / 2, y: self.height / 2 };
+                animate transform-rotation { duration: TTheme.duration-fast; }
+            }
+
+            chev-ta := TouchArea {
+                enabled: root.collapsible-on;
+                mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;
+                accessible-role: AccessibleRole.button;
+                accessible-label: root.collapsed ? "展开" : "折叠";
+                accessible-enabled: self.enabled;
+                accessible-action-default => {
+                    if (self.enabled) { root.toggle-collapse(); }
+                }
+                clicked => {
+                    if (self.enabled) { root.toggle-collapse(); }
+                }
+            }
+        }
+    }
+}
+
+// Primary (first) pane of a horizontal TSplitter: width is draggable.
+export component TSplitterPanePrimary inherits SplitterPaneBase {
+    vertical: false;
+    preferred-width: root.vis-size;
+    min-width: 0px;
+    horizontal-stretch: 0;
+}
+
+// Primary (first) pane of a vertical TSplitterVertical: height is draggable.
+export component TSplitterPanePrimaryVertical inherits SplitterPaneBase {
+    vertical: true;
+    preferred-height: root.vis-size;
+    min-height: 0px;
+    vertical-stretch: 0;
+}

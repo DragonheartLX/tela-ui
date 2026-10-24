@@ -40,7 +40,7 @@ Slint 组件为单继承 (`inherits`), 子类可直接使用基类的全部属�
 | TText | `Text` | 主题字体 + TDesign 正文样式 (14px/22px); 库内所有文本的基类 |
 | THeading, TParagraph, TCaption | `TText` | 依次覆盖字号与行高, 保留 `text`, `color`, `wrap` 等全部内建属性 |
 | TRadioGroup, TLoading | `HorizontalLayout` | 本身就是一行布局 |
-| TTimeline, TStatistic, TCollapse, TTree, TTreeBranch | `VerticalLayout` | 本身即纵向布局, 首选尺寸随内容 |
+| TTimeline, TStatistic, TCollapse, TTree, TTreeBranch, TForm, TFormItem, TSplitter, TSplitterVertical | `VerticalLayout` / `HorizontalLayout` | 本身即布局, 首选尺寸随内容 |
 | 其余全部组件 | `Rectangle` | 基础容器 |
 
 组合关系 (has-a, 内部使用的组件):
@@ -56,6 +56,8 @@ Slint 组件为单继承 (`inherits`), 子类可直接使用基类的全部属�
 - TCommandPaletteOverlay = TModalSurface + TDivider + TIcon + ScrollView (列表)
 - TNavBar, TTabs, TBreadcrumb = 私有 TNavLabel xN (文本行悬停/选中态与点击共享)
 - TPopconfirm = TButton x2 (取消/确认)
+- TSearch = TInput 的预设 (内置搜索图标 + 默认可清空)
+- TInputAdornment = 统一状态边框 + addon 盒 xN + TInput (去边框内嵌)
 - TRadioGroup = TRadio xN
 - TSideNav = 私有 TNavRow xN (菜单行, 底部行与收起行共用)
 - TTag, TCheckBox, TAlert, TMessageOverlay, TNotificationOverlay, TNavBar, TSideNav,
@@ -64,7 +66,9 @@ Slint 组件为单继承 (`inherits`), 子类可直接使用基类的全部属�
 - 提供 `@children` 插槽的组件: TBadge (被标记内容), TCard (卡片主体), TDialog
   (自定义主体), TDrawer (面板主体), TNavBar (右侧操作区), TEmpty (操作区),
   TTooltipArea (触发内容), TResult (操作区), TBorderlessWindow (窗口内容),
-  TTree (节点列表), TTreeBranch (子节点, 放进折叠盒)
+  TTree (节点列表), TTreeBranch (子节点, 放进折叠盒), TForm (表单项), TFormItem
+  (控件行), TSplitter / TSplitterVertical (窗格), TSplitterPane (窗格内容),
+  TSplitterPanePrimary / TSplitterPanePrimaryVertical (窗格内容)
 
 私有组件 (仅供实现参考, 不经聚合器导出): `TInputFrame` (input/input.slint,
 已对库内导出供 TInputNumber 复用), `TModalSurface` (modal-surface.slint, 已对库内
@@ -79,7 +83,8 @@ Slint 组件为单继承 (`inherits`), 子类可直接使用基类的全部属�
 (navigation/pagination.slint), `TPopupSurface` (popup-surface.slint,
 TDropdownMenu / TPopconfirm / TSelect 共用的锚定弹层骨架: 零尺寸锚定宿主 + placement
 定位 + 弹层皮肤), `TPopupStackLayer` (popup-stack.slint, 覆盖层的入栈/深度重排/ESC
-焦点壳, 由 TModalSurface 复用), `TStrokedShape` (base/stroked-shape.slint, 共享 24
+焦点壳, 由 TModalSurface 复用), `SplitterPaneBase` (content/splitter.slint,
+拖拽/折叠逻辑基座, 主轴绑定在两个导出子类上), `TStrokedShape` (base/stroked-shape.slint, 共享 24
 网格描边模型: `size`, `stroke-width` 按 size 缩放或 `absolute-stroke-width` 取原始
 像素, 以及只读 `computed-stroke-width`; TIcon 与 TLoadingSpinner 都继承它)。
 
@@ -254,7 +259,7 @@ TText { font-size: TTheme.size-font(size); line-height: TTheme.size-line-height(
 ## 输入 input
 
 ```slint
-import { TInput, TTextArea, TInputStatus, TInputNumber, TSlider, TRate, TAutoComplete, TAutoCompleteItem } from "@tela-ui/input.slint";
+import { TInput, TTextArea, TInputStatus, TInputNumber, TAutoComplete, TAutoCompleteItem, TSearch, TInputAdornment, TForm, TFormItem, TSlider, TRate } from "@tela-ui/input.slint";
 ```
 
 ### TInput / TTextArea
@@ -273,6 +278,10 @@ TInput 参数:
 | read-only | `bool` (in-out) | `false` | 只读 (可聚焦可复制, 不可编辑) |
 | prefix-icon | `TIconData` | 空 | 前缀图标 |
 | suffix-icon | `TIconData` | 空 | 后缀图标 (显示清空钮时被隐藏) |
+| prefix-text | `string` | `""` | 框内前缀文字 (与 prefix-icon 可同用) |
+| suffix-text | `string` | `""` | 框内后缀文字 |
+| suffix-clickable | `bool` | `false` | 后缀文字渲染成贴右缘的内嵌芯片 (次级底色 + 左侧细线, TInputNumber 步进器同款; 芯片贴住边框内缘, 边框保持完整), 品牌色可点击 (禁用态守卫) |
+| always-clearable | `bool` | `false` | 有文本即常显清空钮, 不等悬停 |
 | clearable | `bool` | `false` | 悬停且非空时显示清空钮 |
 | input-type | `InputType` (Slint 内建) | `InputType.text` | `password` 等输入类型 |
 
@@ -293,8 +302,8 @@ TTextArea 参数:
 | disabled | `bool` | `false` | 禁用态 |
 | radius | `length` | `TTheme.radius-default` | 圆角 (TTextArea 固定为 `radius-medium`) |
 
-回调: TInput `accepted(string)` (回车), `changed(string)` (每次输入), `cleared()`;
-TTextArea `changed(string)`。
+回调: TInput `accepted(string)` (回车), `changed(string)` (每次输入), `cleared()`,
+`suffix-clicked()` (可点击后缀); TTextArea `changed(string)`。
 
 公开函数 (TInput): `move-caret-to-end()` — 把光标移到文本末尾并清除选区; 宿主写入
 `text` 后调用, 否则下一次键入会落在旧光标位置。
@@ -354,6 +363,67 @@ TTextArea `changed(string)`。
 
 已知限制: 不支持上下方向键步进 (1.18 语言内没有循环语句, 组件无法扫描"下一条匹配");
 高亮停在第一条可选匹配或指针悬停项。列表随过滤结果伸缩, 最多 `max-rows` 行。
+
+### TSearch
+
+搜索框。TInput 的搜索预设: 内置搜索图标, 默认可清空 — 悬停时输入框右缘的 x 图标即
+清空 (取消) 入口 — 经 `always-clearable` 在有文本时常显, 回车触发 `accepted`。
+
+继承: `TInput` (参数与回调全部沿用: `text` / `placeholder-text` / `size` / `status` /
+`disabled` / `read-only` / `input-type` / `accepted` / `changed` / `cleared` /
+`suffix-clicked` …)。
+
+预设绑定 (实例化处可覆写): `prefix-icon: TIconSet.Search`, `clearable: true`。
+
+### TInputAdornment
+
+输入装饰。`addon-before` / `addon-after` 附着段包在输入框前后, 与输入框共用一套
+状态边框 (统一由包装层绘制, 内层 TInput 去边框), 分段间 1px 细线分隔。框内文字装饰
+(前缀 `https://` 类) 直接用 TInput 的 `prefix-text` / `suffix-text`, 不必套本组件。
+
+继承: `Rectangle` (统一边框), 内嵌 TInput。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| addon-before | `string` | `""` | 前置附着段文字, 空串不渲染 |
+| addon-after | `string` | `""` | 后置附着段文字, 空串不渲染 |
+| size | `TSize` | `TSize.medium` | 高度与字号 |
+| placeholder-text | `string` | `""` | 占位文字 |
+| text | `string` (in-out) | `""` | 输入内容 |
+| read-only | `bool` (in-out) | `false` | 只读 |
+| disabled | `bool` | `false` | 禁用态 (附着段文字一并变灰) |
+| clearable | `bool` | `false` | 悬停清空钮 |
+| status | `TInputStatus` | `TInputStatus.default` | 边框色 |
+| prefix-text / suffix-text | `string` | `""` | 转发给内层 TInput |
+| suffix-clickable | `bool` | `false` | 转发给内层 TInput |
+
+回调: `changed(string)`, `accepted(string)`, `cleared()`, `suffix-clicked()`。
+只读输出: `focused` (`bool`, 内层输入框焦点态)。
+
+### TForm / TFormItem
+
+轻量表单脚手架。TForm 只提供条目间距; TFormItem 一行 = 标签列 (必填星标) + 控件行
+(`@children`), 下方可选 help / error 行。无校验引擎: 校验在 Rust 侧回调里做, 结果
+写进 `error-text` (非空时覆盖 `help-text` 并染红); 控件本身的状态色由宿主设置。
+
+TForm 继承: `VerticalLayout`。
+
+| TForm 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| item-gap | `length` | `TTheme.spacing-6` | 条目纵向间距 |
+
+TFormItem 继承: `VerticalLayout` (控件行 + 帮助行)。
+
+| TFormItem 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| label | `string` | `""` | 标签文字, 空串不渲染标签列 |
+| required | `bool` | `false` | 标签前渲染错误色星号 |
+| help-text | `string` | `""` | 控件行下方帮助文字 |
+| error-text | `string` | `""` | 错误文字, 非空覆盖 `help-text` 并染红 |
+| label-width | `length` | `0px` | 固定标签列宽, 0 随标签内容; 固定时帮助行缩进对齐控件列 |
+| size | `TSize` | `TSize.medium` | 标签/帮助字号, 与控件一致 |
+
+回调: 无 (纯状态呈现)。
 
 ### TSlider
 
@@ -726,7 +796,7 @@ import { TTag, TTagVariant, TAvatar, TAvatarSize, TAvatarShape, TBadge, TCard, T
 ## 内容 content
 
 ```slint
-import { TCollapse, TCollapseItem, TCarousel, TCarouselSlide, TCodeBlock, TTable, TTableColumn, TTableRow, TTableAlign, TTableSortDirection, TTree, TTreeItem, TTreeBranch, TTreeLogic } from "@tela-ui/content.slint";
+import { TCollapse, TCollapseItem, TCarousel, TCarouselSlide, TCodeBlock, TTable, TTableColumn, TTableRow, TTableAlign, TTableSortDirection, TTree, TTreeItem, TTreeBranch, TSplitter, TSplitterVertical, TSplitterPane, TSplitterPanePrimary, TSplitterPanePrimaryVertical } from "@tela-ui/content.slint";
 ```
 
 ### TCollapse
@@ -769,77 +839,14 @@ import { TCollapse, TCollapseItem, TCarousel, TCarouselSlide, TCodeBlock, TTable
 
 ### TCodeBlock
 
-代码块。主题化底色的等宽字体面板 (固定 Consolas), 带 1px `component-border` 描边,
-不换行, 高度随内容自适应。
+Monospace 代码面板 (次级容器底色, Consolas, 不换行)。代码是只读 TextInput:
+鼠标划选后 Ctrl+C 复制 (Slint 未暴露应用层剪贴板写入, 纯 Slint 做不了复制按钮)。
 
 继承: `Rectangle`。
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| code | `string` | `""` | 代码文本 |
-
-### TTable
-
-数据表格。表头 + ListView 行 (只实例化可见行); 弹性列均分剩余宽度, 固定列按给定宽度;
-固定列宽总和超出表宽时表体出现底部横向滚动条, 表头随表体同步水平滚动并保持纵向固定;
-可排序列点击循环 升序 → 降序 → 取消; 模型为空时显示空态。
-排序只上报, 行重排由宿主在 `sort-changed` 里完成 (Slint 无循环语句, 组件内无法扫描模型)。
-
-继承: `Rectangle`。内部组合 ListView 与 TEmpty。
-
-| 参数 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| columns | `[TTableColumn]` | `[]` | 列定义 |
-| rows | `[TTableRow]` | `[]` | 行模型, 单元格文本按列下标对应 |
-| sort-column | `int` (in-out) | `-1` | 当前排序列, -1 为无 |
-| sort-direction | `TTableSortDirection` (in-out) | `TTableSortDirection.none` | 当前排序方向 |
-| row-height | `length` | `TTheme.height-l + TTheme.spacing-4` (48px) | 表头与数据行高 |
-| empty-text | `string` | `"暂无数据"` | 空态描述 |
-
-回调: `sort-changed(int, TTableSortDirection)` — 点击可排序表头后触发, 参数为当前排序列与方向;
-`row-clicked(int)` — 点击数据行后触发, 参数为行下标。
-
-相关结构: `TTableColumn { title: string, width: length = 0px, min-width: length = 0px,
-align: TTableAlign = TTableAlign.left, sortable: bool = false }`, `width: 0px` 为弹性列;
-`TTableRow { cells: [string] }`。
-相关枚举: `TTableAlign { left, center, right }`, `TTableSortDirection { none, ascending, descending }`。
-
-已知限制: 列宽不可拖拽; 不支持多列排序与单元格自定义内容。表高由宿主给定
-(`preferred-height` 默认 5 行)。
-
-### TTree
-
-树形控件。嵌套声明式结构 (参考 sleek-ui 的 `UMenu`): 宿主在 `TTree` 里直接摆
-`TTreeItem` / `TTreeBranch`, 分支用 `@children` 承载自己的子节点, 深度不限且不需要
-组件递归, 也不需要扁平行模型。分支自带折叠: 子节点放在 `clip: true` 的盒子里,
-高度在 `preferred-height` 与 `0px` 之间动画, 收起时子节点仍保留实例 (焦点与状态不丢)。
-
-继承: `TTree` 为 `VerticalLayout` (spacing 0), `TTreeBranch` 为 `VerticalLayout`
-(行 + 折叠盒), `TTreeItem` 为私有 `TreeRow` (Rectangle: 箭头槽 + 可选字形 + 文本区)。
-
-| 组件 | 参数 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- | --- |
-| TTree | — | — | — | 仅作容器与间距 (spacing 0); 选中值走 `TTreeLogic` |
-| TTreeItem | value | `string` | — | 选中标识 |
-| TTreeItem | label | `string` | — | 行文本 |
-| TTreeItem | icon | `TIconData` | 空 | 行首字形, 空则不绘制 |
-| TTreeItem | enabled | `bool` | `true` | 禁用后不响应点击且不高亮 |
-| TTreeBranch | label | `string` | — | 分支行文本 |
-| TTreeBranch | icon | `TIconData` | 空 | 行首字形 |
-| TTreeBranch | opened | `bool` (in-out) | `false` | 折叠态; 收起时子节点高度归零 |
-| TTreeBranch | enabled | `bool` | `true` | 禁用后不响应点击 |
-
-回调: `TTreeItem.activated()` — 叶子被选中; `TTreeBranch.opened-changed(bool)` —
-折叠态翻转 (折叠时同样触发, 无需额外属性)。
-
-全局: `TTreeLogic { current-value: string }` — 选中值存放处 (对应 sleek-ui 的
-`UMenuLogic.current-link`)。叶子点击写入它, 所有行的选中高亮都从它派生; 宿主与 Rust
-侧也直接读它。
-
-已知限制: Slint 没有实例级 global, 一份 `TTreeLogic` 服务窗口内所有 TTree —— 同屏
-多个树会共享选中态, 与 sleek-ui 的 "同一时刻只能显示一个 menu" 是同一条约束。
-折叠态是分支自己的 `opened` 属性, 宿主不写回模型; 分支行在展开期间保持高亮 (当前路径),
-不做滚动的祖先联动。无内置空态, 需要时用 `TEmpty` 与 `if` 自行切换。
+| code | `string` | `""` | 代码文本, 换行用换行符 |
 
 ---
 
@@ -950,7 +957,7 @@ import { TAlert, TMessage, TMessageOverlay, TMessageTheme, TMessagePlacement, TN
 ## 浮层 overlay
 
 ```slint
-import { TDialog, TDialogService, TDialogServiceOverlay, TDrawer, TDrawerPlacement, TBottomSheet, TActionSheetService, TActionSheetOverlay, TActionSheetItem, TImageViewerService, TImageViewerOverlay, TCommandPaletteService, TCommandPaletteOverlay, TCommandItem, TPopconfirm, TTooltipArea, TTooltipOverlay, TTooltipPlacement, TLoadingService, TLoadingServiceOverlay } from "@tela-ui/overlay.slint";
+import { TDialog, TDialogService, TDialogServiceOverlay, TDrawer, TDrawerPlacement, TBottomSheet, TActionSheetService, TActionSheetOverlay, TActionSheetItem, TImageViewerService, TImageViewerOverlay, TCommandPaletteService, TCommandPaletteOverlay, TCommandItem, TPopconfirm, TPopover, TTooltipArea, TTooltipOverlay, TTooltipPlacement, TLoadingService, TLoadingServiceOverlay } from "@tela-ui/overlay.slint";
 ```
 
 ### TDialog
@@ -1176,6 +1183,27 @@ ESC, z-modal 与滑入动画全部复用。结果通过 `result-seq` / `selected
 回调: `confirm()`, `cancel()` (仅点击对应按钮时触发)。公开函数: `show()`,
 `close()`, `toggle()`。只读输出: `open` (`bool`)。
 
+### TPopover
+
+点击触发的富内容气泡 (标题 + 正文)。与悬停型 TTooltipArea 区分: 气泡停留到点击
+外部 / ESC 才关闭。锚定与开合同 TDropdownMenu / TPopconfirm (`TPopupSurface` 四角
+placement); `auto-open` (默认) 覆盖一层 TouchArea 点按开合, 仅适合非交互触发内容,
+TButton 触发器设 `auto-open: false` 并在 `clicked` 里调 `toggle()`。主体是
+`title` + `text` 两段文本, 完全自定义主体用 `TPopupSurface` 自建。
+
+继承: `Rectangle`。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| title | `string` | `""` | 标题, 空串不渲染 |
+| text | `string` | `""` | 正文, 自动换行 |
+| placement | `TPopupPlacement` | `TPopupPlacement.bottom-start` | 四角锚定 |
+| auto-open | `bool` | `true` | 自动点击开合层 |
+| popup-width | `length` | `220px` | 气泡宽度 |
+
+回调: 无 (纯展示)。只读输出: `open` (`bool`)。公开函数: `show()` / `close()` /
+`toggle()`。
+
 ### Tooltip
 
 悬停提示气泡。渲染在窗口级 (参考 sleek-ui 的实现): 触发物通过 `TTooltip`
@@ -1252,7 +1280,7 @@ ta := TouchArea {
 ## 导航 navigation
 
 ```slint
-import { TTabs, TPagination, TNavBar, TSideNav, TBreadcrumb, TSteps, TDropdownMenu, TBackTop } from "@tela-ui/navigation.slint";
+import { TTabs, TPagination, TNavBar, TSideNav, TBreadcrumb, TSteps, TDropdownMenu, TContextMenu, TBackTop } from "@tela-ui/navigation.slint";
 ```
 
 ### TTabs
@@ -1386,6 +1414,27 @@ import { TTabs, TPagination, TNavBar, TSideNav, TBreadcrumb, TSteps, TDropdownMe
 divider }` (icon 为 `TIconData` 默认空; divider 为 true 时渲染分隔线并忽略
 其余字段); `TPopupPlacement { bottom-start, bottom-end, top-start, top-end }`
 与 TPopconfirm 共用。
+
+### TContextMenu
+
+右键菜单。菜单行样式与 TDropdownMenu 一致 (图标 / 禁用 / 危险项 / 分隔线), 但弹层
+在右键按下位置打开 (TPopupSurface 的 `popup-x` / `popup-y` 显式定位)。点击外部、
+ESC 或选中后关闭。`auto-area` (默认) 在触发内容上覆盖一层右键触控区 —— 它也会吞掉
+左键, 交互式触发器设 `auto-area: false`, 在自己的 TouchArea 里调
+`open-at(self.mouse-x, self.mouse-y)`。弹层在窗口边缘会被裁剪。
+
+继承: `Rectangle`。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| items | `[TDropdownMenuItem]` | 空 | 菜单项, 结构同 TDropdownMenu |
+| auto-area | `bool` | `true` | 自动右键触控层 |
+| item-height | `length` | `TTheme.height-m` | 行高 |
+| max-visible-items | `int` | `8` | 超出后弹层内滚动 |
+| popup-width | `length` | `180px` | 弹层宽度 (下限 140px) |
+
+回调: `selected(int, string)` (索引, value)。只读输出: `open` (`bool`)。公开函数:
+`open-at(x, y)` (组件局部坐标) / `close()`。
 
 ### TBackTop
 

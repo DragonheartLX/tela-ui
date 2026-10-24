@@ -1,12 +1,14 @@
-// Gallery section: 内容 (TCollapse / TTable / TCarousel), 一个组件一张卡.
+// Gallery section: 内容 (TCollapse / TTable / TCarousel / TTree / TSplitter), 一个组件一张卡.
 
 import { TTheme, TThemeRole } from "@tela-ui/theme.slint";
-import { TIconSet, TCaption } from "@tela-ui/base.slint";
-import { TCollapse, TCarousel, TTable, TTree, TTreeItem, TTreeBranch, TTableAlign } from "@tela-ui/content.slint";
+import { TIconSet, TCaption, TText } from "@tela-ui/base.slint";
+import { TCollapse, TCarousel, TTable, TTree, TTreeItem, TTreeBranch, TSplitter, TSplitterVertical, TSplitterPane, TSplitterPanePrimary, TSplitterPanePrimaryVertical, TTableAlign } from "@tela-ui/content.slint";
 import { GallerySection } from "../gallery-section.slint";
 
 export component ContentSection inherits VerticalLayout {
     spacing: 28px;
+
+    in-out property <string> pane-size: "240px";
 
     // ======================== TCollapse =====================
     GallerySection {
@@ -137,6 +139,107 @@ export component ContentSection inherits VerticalLayout {
         TCaption {
             text: "节点嵌套声明, 深度不限 (分支用 @children 承载子节点); 点分支行折叠/展开, 折叠靠裁剪高度并带动画; 点叶子节点选中, 选中值经 TTreeLogic 全局共享 (一个窗口只维护一份选中态); disabled 节点不响应点击且不高亮。";
             wrap: word-wrap;
+        }
+    }
+
+    // ======================= TSplitter =======================
+    GallerySection {
+        title: "分栏 TSplitter";
+        code: "import { TSplitter, TSplitterPane, TSplitterPanePrimary } from \"@tela-ui/content.slint\";\n\nTSplitter {\n    height: 220px;\n    TSplitterPanePrimary {   // 第一栏: 自带拖拽条与折叠钮\n        size: 240px; min-size: 120px; collapsible: true;\n        changed(s) => { … }\n        Rectangle { … }\n    }\n    TSplitterPane { Rectangle { … } } // 第二栏: 填满剩余\n}\n// 垂直分栏: TSplitterVertical + TSplitterPanePrimaryVertical";
+
+        VerticalLayout {
+            spacing: 16px;
+
+            HorizontalLayout {
+                height: 220px;
+                spacing: 24px;
+
+                TSplitter {
+                    horizontal-stretch: 1;
+
+                    TSplitterPanePrimary {
+                        size: 240px;
+                        min-size: 120px;
+                        collapsible: true;
+
+                        changed(s) => {
+                            root.pane-size = "\{round(s / 1px)}px";
+                        }
+
+                        Rectangle {
+                            background: TTheme.bg-color-secondarycontainer;
+                            border-radius: TTheme.radius-medium;
+
+                            TText {
+                                text: "第一栏\n拖边缘 / 点圆钮折叠";
+                                color: TTheme.text-color-secondary;
+                                horizontal-alignment: center;
+                                vertical-alignment: center;
+                                wrap: word-wrap;
+                            }
+                        }
+                    }
+
+                    TSplitterPane {
+                        Rectangle {
+                            background: TTheme.bg-color-container;
+                            border-width: 1px;
+                            border-color: TTheme.component-stroke;
+                            border-radius: TTheme.radius-medium;
+
+                            TText {
+                                text: "第二栏 (填满剩余)";
+                                color: TTheme.text-color-secondary;
+                                horizontal-alignment: center;
+                                vertical-alignment: center;
+                            }
+                        }
+                    }
+                }
+
+                TSplitterVertical {
+                    width: 180px;
+
+                    TSplitterPanePrimaryVertical {
+                        size: 96px;
+                        min-size: 48px;
+                        collapsible: true;
+
+                        Rectangle {
+                            background: TTheme.bg-color-secondarycontainer;
+                            border-radius: TTheme.radius-medium;
+
+                            TText {
+                                text: "垂直第一栏";
+                                color: TTheme.text-color-secondary;
+                                horizontal-alignment: center;
+                                vertical-alignment: center;
+                            }
+                        }
+                    }
+
+                    TSplitterPane {
+                        Rectangle {
+                            background: TTheme.bg-color-container;
+                            border-width: 1px;
+                            border-color: TTheme.component-stroke;
+                            border-radius: TTheme.radius-medium;
+
+                            TText {
+                                text: "垂直第二栏";
+                                color: TTheme.text-color-secondary;
+                                horizontal-alignment: center;
+                                vertical-alignment: center;
+                            }
+                        }
+                    }
+                }
+            }
+
+            TCaption {
+                text: "第一栏宽度随拖拽变化 (当前 \{root.pane-size}, 下限 min-size), 圆形按钮折叠/展开, 尺寸由组件自己维护, 一个窗口可放多个分栏; 第二栏无下限, 可被拖到 0。";
+                wrap: word-wrap;
+            }
         }
     }
 }

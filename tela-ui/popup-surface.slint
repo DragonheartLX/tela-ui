@@ -20,6 +20,8 @@
 // `popup-width` / `popup-height` instead.
 // TSelect follows the trigger width, TDropdownMenu clamps to visible rows.
 // A negative value means "follow the content".
+// Positioning defaults to placement dispatch around the anchor box;
+// `popup-x` / `popup-y` (negative = off) override it outright.
 
 import { TTheme } from "./theme.slint";
 import { TPopupPlacement } from "./structs/enums.slint";
@@ -37,6 +39,11 @@ export component TPopupSurface inherits Rectangle {
     in property <length> popup-width: -1px;
     // < 0 means content-driven, the content preferred height.
     in property <length> popup-height: -1px;
+    // Explicit popup position, relative to the consumer's origin. < 0 falls
+    // back to placement dispatch around the anchor box. TContextMenu uses
+    // this to open at the pointer position.
+    in property <length> popup-x: -1px;
+    in property <length> popup-y: -1px;
     // Caps the skinned content so long elide labels stop at a sane width.
     in property <length> popup-max-width: 280px;
 
@@ -73,8 +80,10 @@ export component TPopupSurface inherits Rectangle {
     max-height: 0px;
 
     popup := PopupWindow {
-        x: root.to-end ? root.anchor-width - self.width : 0;
-        y: root.to-top ? -self.height - root.gap : root.anchor-height + root.gap;
+        x: root.popup-x >= 0px ? root.popup-x
+            : root.to-end ? root.anchor-width - self.width : 0;
+        y: root.popup-y >= 0px ? root.popup-y
+            : root.to-top ? -self.height - root.gap : root.anchor-height + root.gap;
         width: root.popup-width >= 0px
             ? root.popup-width
             : max(root.popup-min-width, content.preferred-width);

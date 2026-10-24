@@ -1,11 +1,11 @@
 // Gallery section: 导航 (TTabs / TPagination / TNavBar / TDropdownMenu /
-// TBreadcrumb / TSteps), 一个组件一张卡. The app's own top navigation bar is
+// TContextMenu / TBreadcrumb / TSteps), 一个组件一张卡. The app's own top navigation bar is
 // the live TNavBar; this section covers the rest.
 
 import { TTheme,  TThemeRole,  TSize, TPopupPlacement } from "@tela-ui/theme.slint";
 import { TText, TIconSet, TCaption, TButton, TButtonVariant, TParagraph } from "@tela-ui/base.slint";
 import { TMessage } from "@tela-ui/notice.slint";
-import { TTabs, TPagination, TNavBar, TNavItem, TSideNav, TSideNavItem, TSideNavMode, TSideNavTogglePosition, TBreadcrumb, TCrumbItem, TSteps, TDropdownMenu, TDropdownMenuItem, TBackTop } from "@tela-ui/navigation.slint";
+import { TTabs, TPagination, TNavBar, TNavItem, TSideNav, TSideNavItem, TSideNavMode, TSideNavTogglePosition, TBreadcrumb, TCrumbItem, TSteps, TDropdownMenu, TDropdownMenuItem, TContextMenu, TBackTop } from "@tela-ui/navigation.slint";
 import { GallerySection } from "../gallery-section.slint";
 import { ScrollView } from "std-widgets.slint";
 
@@ -233,6 +233,43 @@ export component NavigationSection inherits VerticalLayout {
             }
 
             TCaption { text: "按钮触发需设 auto-open: false 并在 clicked 中调用 toggle(); 静态内容由内部 TouchArea 自动开合。支持图标, 禁用, 危险项与分隔线; 点击外部或选中后关闭。"; wrap: word-wrap; }
+        }
+    }
+
+    // =================== TContextMenu ======================
+    GallerySection {
+        title: "右键菜单 TContextMenu";
+        code: "import { TContextMenu, TDropdownMenuItem } from \"@tela-ui/navigation.slint\";\n\ncm := TContextMenu {\n    items: [{ label: \"编辑\", value: \"edit\", icon: TIconSet.Pencil }, …];\n    selected(i, v) => { … }\n    Rectangle { width: 280px; height: 96px; } // 触发区 (非交互内容)\n}\n// 交互触发器: auto-area: false, 在自己的 TouchArea 里\n// cm.open-at(self.mouse-x, self.mouse-y);";
+
+        VerticalLayout {
+            spacing: 16px;
+
+            cm := TContextMenu {
+                items: root.menu-items;
+                selected(i, v) => {
+                    TMessage.info("右键选中: \{root.menu-items[i].label}");
+                }
+
+                Rectangle {
+                    width: 320px;
+                    height: 112px;
+                    background: TTheme.bg-color-secondarycontainer;
+                    border-radius: TTheme.radius-medium;
+
+                    TText {
+                        text: "在此区域点击鼠标右键";
+                        font-size: TTheme.font-size-m;
+                        color: TTheme.text-color-secondary;
+                        horizontal-alignment: center;
+                        vertical-alignment: center;
+                    }
+                }
+            }
+
+            TCaption {
+                text: "在鼠标位置弹出, 菜单样式与 TDropdownMenu 一致 (图标 / 禁用 / 危险项 / 分隔线); 点击外部、ESC 或选中后关闭。触发区会吞掉左键, 交互式触发内容需设 auto-area: false 并自行调 open-at()。弹层在窗口边缘会被裁剪。";
+                wrap: word-wrap;
+            }
         }
     }
 

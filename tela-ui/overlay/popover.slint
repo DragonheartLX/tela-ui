@@ -1,0 +1,84 @@
+// Tela UI — TPopover
+//
+// Click-triggered rich bubble: title + body text anchored to the trigger
+// content. Same anchoring as TDropdownMenu / TPopconfirm (`TPopupSurface`):
+// `auto-open` (default) layers a TouchArea over the trigger and toggles on
+// click — for non-interactive triggers; TButton triggers set `auto-open:
+// false` and call `toggle()` from `clicked`.
+// Unlike the hover-only TTooltipArea, the bubble stays open until the user
+// clicks outside / presses ESC, so it can carry interactive-looking rich
+// text. The body is title + text; a fully custom body needs TPopupSurface.
+
+import { TTheme } from "../theme.slint";
+import { TText } from "../base/typography.slint";
+import { TPopupPlacement } from "../structs/enums.slint";
+import { TPopupSurface } from "../popup-surface.slint";
+
+export component TPopover inherits Rectangle {
+    in property <string> title: "";
+    in property <string> text: "";
+    in property <TPopupPlacement> placement: TPopupPlacement.bottom-start;
+    in property <bool> auto-open: true;
+    // Body width; the text wraps inside it.
+    in property <length> popup-width: 220px;
+
+    out property <bool> open: surface.is-open;
+
+    public function show() {
+        surface.show();
+    }
+
+    public function close() {
+        surface.close();
+    }
+
+    public function toggle() {
+        surface.toggle();
+    }
+
+    // Trigger content hosted in a layout so the wrapper hugs it in parent
+    // layouts (a bare child would not feed the preferred size).
+    row := HorizontalLayout {
+        @children
+    }
+
+    // Layered OVER the trigger content (declared after the row) so static
+    // triggers click through to it; interactive triggers set
+    // `auto-open: false`, which removes the area entirely.
+    if root.auto-open: TouchArea {
+        mouse-cursor: MouseCursor.pointer;
+        clicked => {
+            root.toggle();
+        }
+    }
+
+    surface := TPopupSurface {
+        anchor-width: root.width;
+        anchor-height: root.height;
+        placement: root.placement;
+        popup-width: root.popup-width;
+        popup-max-width: root.popup-width;
+
+        VerticalLayout {
+            padding: TTheme.padding-lr-l;
+            spacing: TTheme.spacing-3;
+
+            if root.title != "": TText {
+                text: root.title;
+                font-size: TTheme.font-size-m;
+                line-height: TTheme.line-height-m;
+                font-weight: TTheme.font-weight-medium;
+                color: TTheme.text-color-primary;
+            }
+
+            TText {
+                text: root.text;
+                width: root.popup-width - TTheme.padding-lr-l * 2;
+                wrap: word-wrap;
+                color: TTheme.text-color-secondary;
+            }
+        }
+    }
+
+    accessible-role: AccessibleRole.button;
+}

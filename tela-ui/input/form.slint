@@ -1,0 +1,101 @@
+// Tela UI — TForm / TFormItem
+//
+// Lightweight form scaffolding. TForm is the vertical rhythm container;
+// TFormItem pairs a label (optional required mark) with the control(s) the
+// host puts into it, and renders help / error text under the row.
+// There is no rules engine: validation happens on the Rust side, the item
+// only presents state — write the error into `error-text` (it overrides
+// `help-text` and renders in the error color), or set `status` on the
+// control itself.
+//
+//   TForm {
+//       TFormItem { label: "用户名"; required: true;
+//           TInput { placeholder-text: "请输入用户名"; }
+//       }
+//   }
+//
+// Label width is per item (`label-width`, 0 hugs the label); TForm cannot
+// push the value down to items it does not instantiate.
+
+import { TTheme } from "../theme.slint";
+import { TText } from "../base/typography.slint";
+import { TSize } from "../structs/enums.slint";
+
+export component TForm inherits VerticalLayout {
+    // Vertical gap between items.
+    in property <length> item-gap: TTheme.spacing-6;
+
+    spacing: self.item-gap;
+
+    @children
+}
+
+export component TFormItem inherits VerticalLayout {
+    in property <string> label;
+    // Renders the error-colored asterisk before the label.
+    in property <bool> required: false;
+    // Hint line under the control row.
+    in property <string> help-text: "";
+    // Error line; non-empty overrides `help-text` and renders red.
+    in property <string> error-text: "";
+    // Fixed label column width; 0 hugs the label content.
+    in property <length> label-width: 0px;
+    // Drives label / help font metrics, matching the control's size.
+    in property <TSize> size: TSize.medium;
+
+    spacing: TTheme.spacing-2;
+
+    HorizontalLayout {
+        spacing: TTheme.spacing-3;
+
+        if root.label != "": HorizontalLayout {
+            width: root.label-width > 0px ? root.label-width : self.preferred-width;
+            spacing: TTheme.spacing-1;
+
+            if root.required: TText {
+                vertical-alignment: center;
+                text: "*";
+                font-size: TTheme.size-font(root.size);
+                line-height: TTheme.size-line-height(root.size);
+                color: TTheme.error-color;
+            }
+
+            TText {
+                vertical-alignment: center;
+                horizontal-stretch: 1;
+                text: root.label;
+                font-size: TTheme.size-font(root.size);
+                line-height: TTheme.size-line-height(root.size);
+                color: TTheme.text-color-secondary;
+                overflow: elide;
+            }
+        }
+
+        // Control row; the control keeps its natural size unless the host
+        // stretches it.
+        HorizontalLayout {
+            spacing: TTheme.spacing-2;
+
+            @children
+        }
+    }
+
+    // Help / error line, indented to the control column when the label
+    // column is fixed-width.
+    if root.error-text != "" || root.help-text != "": HorizontalLayout {
+        spacing: 0px;
+
+        if root.label != "" && root.label-width > 0px: Rectangle {
+            width: root.label-width + TTheme.spacing-3;
+        }
+
+        TText {
+            horizontal-stretch: 1;
+            text: root.error-text != "" ? root.error-text : root.help-text;
+            wrap: word-wrap;
+            font-size: TTheme.font-size-s;
+            line-height: TTheme.line-height-s;
+            color: root.error-text != "" ? TTheme.error-color : TTheme.text-color-placeholder;
+        }
+    }
+}

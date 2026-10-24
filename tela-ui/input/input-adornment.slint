@@ -1,0 +1,171 @@
+// Tela UI — TInputAdornment
+//
+// Input with attached addon segments before / after the field (e.g. URL
+// prefix, unit suffix). Text and button adornments INSIDE the frame are on
+// TInput itself (prefix-text / suffix-text / suffix-clickable); this wrapper
+// adds the attached boxes around it and draws one unified status frame so
+// addon and field read as a single control.
+//
+// The inner TInput is drawn borderless; the frame here copies TInputFrame's
+// status logic because the addons must live inside the same border.
+
+import { TTheme } from "../theme.slint";
+import { TText } from "../base/typography.slint";
+import { TSize } from "../structs/enums.slint";
+import { TInput, TInputStatus } from "input.slint";
+
+export component TInputAdornment inherits Rectangle {
+    // Attached segment labels; empty string renders no segment.
+    in property <string> addon-before: "";
+    in property <string> addon-after: "";
+    in property <TSize> size: TSize.medium;
+    in property <string> placeholder-text;
+    in-out property <string> text <=> field.text;
+    in property <bool> read-only <=> field.read-only;
+    in property <bool> disabled: false;
+    in property <bool> clearable: false;
+    in property <TInputStatus> status: TInputStatus.default;
+    // Forwarded to the inner TInput's in-frame adornments.
+    in property <string> prefix-text: "";
+    in property <string> suffix-text: "";
+    in property <bool> suffix-clickable: false;
+
+    callback changed(string);
+    callback accepted(string);
+    callback cleared();
+    callback suffix-clicked();
+
+    // Live focus state of the inner field, for hosts that need it.
+    out property <bool> focused: field.focused;
+
+    private property <length> h: TTheme.size-height(size);
+    private property <length> fs: TTheme.size-font(size);
+    private property <length> line: TTheme.size-line-height(size);
+
+    height: h;
+
+    // Same status frame as TInputFrame (rest / hover / focus / disabled).
+    private property <brush> border-c:
+        root.status == TInputStatus.error ? TTheme.error-color
+        : root.status == TInputStatus.warning ? TTheme.warning-color
+        : root.status == TInputStatus.success ? TTheme.success-color
+        : TTheme.component-border;
+
+    background: TTheme.bg-color-specialcomponent;
+    border-width: 1px;
+    border-color: border-c;
+    border-radius: TTheme.radius-default;
+    animate border-c { duration: TTheme.duration-fast; }
+
+    states [
+        hovered when field.frame-hovered && root.status == TInputStatus.default && !root.disabled: {
+            border-c: TTheme.border-level-2-color;
+        }
+        focused when field.focused && root.status == TInputStatus.default: {
+            border-c: TTheme.brand-color;
+        }
+        disabled when root.disabled: {
+            border-c: TTheme.border-level-1-color;
+        }
+    ]
+
+    // The row lives inside the frame's 1px border (children would paint
+    // over it otherwise), so it insets itself by one pixel all around.
+    HorizontalLayout {
+        x: 1px;
+        y: 1px;
+        width: parent.width - 2px;
+        height: parent.height - 2px;
+
+        if root.addon-before != "": Rectangle {
+            // Stretch 0: all leftover width goes to the field, the addon
+            // hugs its text.
+            horizontal-stretch: 0;
+            background: TTheme.bg-color-secondarycontainer;
+
+            // No explicit width here: binding it to parent.width would make
+            // the addon box's own preferred size circular (the outer layout
+            // measures the box through this layout) and collapse the segment.
+            HorizontalLayout {
+                padding-left: TTheme.padding-lr-m;
+                padding-right: TTheme.padding-lr-m;
+
+                TText {
+                    text: root.addon-before;
+                    font-size: root.fs;
+                    line-height: root.line;
+                    color: root.disabled ? TTheme.text-color-disabled : TTheme.text-color-secondary;
+                    vertical-alignment: center;
+                    overflow: elide;
+                }
+            }
+
+            // Hairline separating the segment from the field.
+            Rectangle {
+                x: parent.width - self.width;
+                y: 0;
+                width: 1px;
+                height: parent.height;
+                background: TTheme.component-border;
+            }
+        }
+
+        field := TInput {
+            border-width: 0px;
+            background: transparent;
+            radius: 0px;
+            horizontal-stretch: 1;
+            size: root.size;
+            placeholder-text: root.placeholder-text;
+            clearable: root.clearable;
+            disabled: root.disabled;
+            status: root.status;
+            prefix-text: root.prefix-text;
+            suffix-text: root.suffix-text;
+            suffix-clickable: root.suffix-clickable;
+
+            changed(text) => {
+                root.changed(text);
+            }
+            accepted(text) => {
+                root.accepted(text);
+            }
+            cleared => {
+                root.cleared();
+            }
+            suffix-clicked => {
+                root.suffix-clicked();
+            }
+        }
+
+        if root.addon-after != "": Rectangle {
+            horizontal-stretch: 0;
+            background: TTheme.bg-color-secondarycontainer;
+
+            // No explicit width here: binding it to parent.width would make
+            // the addon box's own preferred size circular (the outer layout
+            // measures the box through this layout) and collapse the segment.
+            HorizontalLayout {
+                padding-left: TTheme.padding-lr-m;
+                padding-right: TTheme.padding-lr-m;
+
+                TText {
+                    text: root.addon-after;
+                    font-size: root.fs;
+                    line-height: root.line;
+                    color: root.disabled ? TTheme.text-color-disabled : TTheme.text-color-secondary;
+                    vertical-alignment: center;
+                    overflow: elide;
+                }
+            }
+
+            Rectangle {
+                x: 0;
+                y: 0;
+                width: 1px;
+                height: parent.height;
+                background: TTheme.component-border;
+            }
+        }
+    }
+}

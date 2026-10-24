@@ -1,0 +1,165 @@
+// Tela UI — TContextMenu
+//
+// Right-click menu at the pointer position. Same item model and row styling
+// as TDropdownMenu, but the popup opens at the click point instead of
+// anchoring to the trigger box (TPopupSurface's explicit popup-x / popup-y).
+//
+// With `auto-area` (the default) a TouchArea layered over the trigger
+// content opens the menu on a right-button press. The area also swallows
+// left clicks, so trigger content must be non-interactive; interactive
+// triggers set `auto-area: false` and call `open-at(x, y)` from their own
+// TouchArea (`self.mouse-x` / `self.mouse-y`, component-local).
+// Closes on outside clicks / ESC, and after selecting an entry.
+//
+// Known limitation: the popup is clipped at the window edge — keep the
+// click point clear of the window border or supply a clamped position.
+
+import { TTheme } from "../theme.slint";
+import { TText } from "../base/typography.slint";
+import { TIcon } from "../base/icon/icon.slint";
+import { TIconData } from "../base/icon/data.slint";
+import { TPopupSurface } from "../popup-surface.slint";
+import { TDropdownMenuItem } from "dropdown-menu.slint";
+import { ScrollView } from "std-widgets.slint";
+
+export component TContextMenu inherits Rectangle {
+    in property <[TDropdownMenuItem]> items;
+    // Right-click TouchArea over the trigger content. Non-interactive
+    // triggers only (it swallows left clicks too).
+    in property <bool> auto-area: true;
+    in property <length> item-height: TTheme.height-m;
+    in property <int> max-visible-items: 8;
+    // Fixed popup width; the popup is clipped at the window edge.
+    in property <length> popup-width: 180px;
+
+    callback selected(int, string);
+
+    out property <bool> open: surface.is-open;
+
+    // Last right-click position, component-local; becomes the popup origin.
+    private property <length> menu-x: 0px;
+    private property <length> menu-y: 0px;
+
+    // Divider rows are compact (hairline + spacing-1 above and below), so
+    // the popup height cannot be derived from the item count alone. Every
+    // row reports its height on creation; a whole-model replacement rebuilds
+    // the rows, whose init re-reports over the reset total (the TAutoComplete
+    // reporting pattern, same as TDropdownMenu).
+    private property <length> divider-h: TTheme.spacing-1 * 2 + 1px;
+    private property <length> rows-h: 0px;
+    changed items => {
+        root.rows-h = 0px;
+    }
+
+    public function open-at(x: length, y: length) {
+        // The popup rows are (re)created on every open and report their
+        // heights from init, so the accumulator must start from zero.
+        root.rows-h = 0px;
+        self.menu-x = x;
+        self.menu-y = y;
+        surface.show();
+    }
+
+    public function close() {
+        surface.close();
+    }
+
+    // Trigger content hosted in a layout so the wrapper hugs it in parent
+    // layouts (a bare child would not feed the preferred size).
+    row := HorizontalLayout {
+        @children
+    }
+
+    if root.auto-area: TouchArea {
+        pointer-event(event) => {
+            if (event.kind == PointerEventKind.down && event.button == PointerEventButton.right) {
+                root.open-at(self.mouse-x, self.mouse-y);
+            }
+        }
+    }
+
+    surface := TPopupSurface {
+        anchor-width: root.width;
+        anchor-height: root.height;
+        popup-x: root.menu-x;
+        popup-y: root.menu-y;
+        gap: 0px;
+        popup-width: max(root.popup-width, 140px);
+        popup-max-width: max(root.popup-width, 140px);
+        // Reported row heights, capped at `max-visible-items` full rows plus
+        // the list layout's 2 × 4px padding.
+        popup-height: min(root.rows-h, root.max-visible-items * root.item-height) + 8px;
+
+        ScrollView {
+            VerticalLayout {
+                padding: 4px;
+
+                for it[i] in root.items: Rectangle {
+                    height: it.divider ? root.divider-h : root.item-height;
+                    border-radius: TTheme.radius-default;
+                    background: transparent;
+                    animate background { duration: TTheme.duration-fast; }
+
+                    init => {
+                        root.rows-h = root.rows-h + self.height;
+                    }
+
+                    // Per-entry label color, mirroring TDropdownMenu: danger
+                    // red beats the neutral primary, disabled grays out both.
+                    private property <color> label-c:
+                        it.disabled ? TTheme.text-color-disabled
+                        : it.danger ? TTheme.error-color
+                        : TTheme.text-color-primary;
+
+                    states [
+                        hovered when row-ta.has-hover && !it.disabled && !it.divider && !it.danger: {
+                            background: TTheme.bg-color-component-hover;
+                        }
+                        hovered-danger when row-ta.has-hover && !it.disabled && !it.divider && it.danger: {
+                            background: TTheme.error-color-light;
+                        }
+                    ]
+
+                    if !it.divider: HorizontalLayout {
+                        padding-left: TTheme.spacing-2;
+                        padding-right: TTheme.spacing-2;
+                        spacing: TTheme.spacing-2;
+
+                        if it.icon.paths.length > 0: TIcon {
+                            y: (parent.height - self.height) / 2;
+                            icon: it.icon;
+                            size: TTheme.font-size-m;
+                            icon-color: label-c;
+                        }
+
+                        TText {
+                            text: it.label;
+                            color: label-c;
+                            vertical-alignment: center;
+                            horizontal-stretch: 1;
+                            overflow: elide;
+                        }
+                    }
+
+                    // Every row — entry or divider — occupies item-height so
+                    // the popup height formula `count * item-height + padding`
+                    // stays exact; the hairline centers itself in the full row.
+                    if it.divider: Rectangle {
+                        y: (parent.height - self.height) / 2;
+                        height: 1px;
+                        background: TTheme.border-level-1-color;
+                    }
+
+                    row-ta := TouchArea {
+                        enabled: !it.disabled && !it.divider;
+                        mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;
+                        clicked => {
+                            root.selected(i, it.value);
+                            surface.close();
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

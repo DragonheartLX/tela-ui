@@ -1,0 +1,17 @@
+// Tela UI — TSearch
+//
+// Search box: a TInput preset with the search glyph and clearable on.
+// The cancel affordance is the x clear icon at the field's right edge
+// (hover + non-empty), not an external button. All TInput parameters and
+// callbacks carry over (accepted / changed / cleared / status / disabled …).
+
+import { TInput } from "input.slint";
+import { TIconSet } from "../base/icon/data.slint";
+
+export component TSearch inherits TInput {
+    prefix-icon: TIconSet.Search;
+    clearable: true;
+    // The x is the cancel affordance: pin it while the field has text
+    // instead of the hover-only default.
+    always-clearable: true;
+}

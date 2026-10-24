@@ -39,7 +39,21 @@ export component TDropdownMenu inherits Rectangle {
 
     out property <bool> open: surface.is-open;
 
+    // Divider rows are compact (hairline + spacing-1 above and below), so
+    // the popup height cannot be derived from the item count alone. Every
+    // row reports its height on creation; a whole-model replacement rebuilds
+    // the rows, whose init re-reports over the reset total (the TAutoComplete
+    // reporting pattern).
+    private property <length> divider-h: TTheme.spacing-1 * 2 + 1px;
+    private property <length> rows-h: 0px;
+    changed items => {
+        root.rows-h = 0px;
+    }
+
     public function show() {
+        // The popup rows are (re)created on every open and report their
+        // heights from init, so the accumulator must start from zero.
+        root.rows-h = 0px;
         surface.show();
     }
 
@@ -48,7 +62,11 @@ export component TDropdownMenu inherits Rectangle {
     }
 
     public function toggle() {
-        surface.toggle();
+        if (surface.is-open) {
+            surface.close();
+        } else {
+            root.show();
+        }
     }
 
 
@@ -74,22 +92,23 @@ export component TDropdownMenu inherits Rectangle {
         anchor-width: root.width;
         anchor-height: root.height;
         placement: root.placement;
-        // Explicit height.
-        // The row list lives inside the popup, inlined via @children, and
-        // cannot be measured from here.
-        // The clamp is computed from the model: min(items, visible rows) of
-        // fixed-height rows, plus the list layout's 2 × 4px padding.
-        popup-height: min(root.items.length, root.max-visible-items) * root.item-height + 8px;
+        // Reported row heights, capped at `max-visible-items` full rows plus
+        // the list layout's 2 × 4px padding.
+        popup-height: min(root.rows-h, root.max-visible-items * root.item-height) + 8px;
 
         ScrollView {
             rows := VerticalLayout {
                 padding: 4px;
 
                 for it[i] in root.items: Rectangle {
-                    height: root.item-height;
+                    height: it.divider ? root.divider-h : root.item-height;
                     border-radius: TTheme.radius-default;
                     background: transparent;
                     animate background { duration: TTheme.duration-fast; }
+
+                    init => {
+                        root.rows-h = root.rows-h + self.height;
+                    }
 
                     // Per-entry label color.
                     // Danger red beats the neutral primary.
@@ -129,9 +148,8 @@ export component TDropdownMenu inherits Rectangle {
                         }
                     }
 
-                    // Every row — entry or divider — occupies item-height so
-                    // the popup height formula `count * item-height + padding`
-                    // stays exact; the hairline centers itself in the full row.
+                    // Compact divider row: the hairline centers itself in
+                    // the 9px box; entry rows stay at `item-height`.
                     if it.divider: Rectangle {
                         y: (parent.height - self.height) / 2;
                         height: 1px;

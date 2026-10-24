@@ -1,5 +1,5 @@
 // Gallery section: 浮层 (TDialog / TDrawer / TBottomSheet / TActionSheet /
-// TImageViewer / TCommandPalette / TPopconfirm / Tooltip), 一个组件一张卡.
+// TImageViewer / TCommandPalette / TPopconfirm / TPopover / Tooltip), 一个组件一张卡.
 // The dialog and drawer overlays live at window level in MainWindow; this
 // section only hosts the trigger buttons via two-way bound properties.
 
@@ -7,7 +7,7 @@ import { TTheme, TThemeRole, TPopupPlacement } from "@tela-ui/theme.slint";
 import { TText, TButton, TButtonVariant, TCaption } from "@tela-ui/base.slint";
 import { TSelect, TSelectItem } from "@tela-ui/select.slint";
 import { TMessage } from "@tela-ui/notice.slint";
-import { TDrawerPlacement, TPopconfirm, TDialogService, TLoadingService, TImageViewerService, TCommandPaletteService, TCommandItem, TActionSheetService, TActionSheetItem, TTooltipArea, TTooltipPlacement } from "@tela-ui/overlay.slint";
+import { TDrawerPlacement, TPopconfirm, TPopover, TDialogService, TLoadingService, TImageViewerService, TCommandPaletteService, TCommandItem, TActionSheetService, TActionSheetItem, TTooltipArea, TTooltipPlacement } from "@tela-ui/overlay.slint";
 import { GallerySection } from "../gallery-section.slint";
 
 export component OverlaySection inherits VerticalLayout {
@@ -238,6 +238,52 @@ export component OverlaySection inherits VerticalLayout {
 
                     TText {
                         text: "点击确认";
+                        font-size: TTheme.font-size-m;
+                        color: TTheme.text-color-secondary;
+                        horizontal-alignment: center;
+                        vertical-alignment: center;
+                    }
+                }
+            }
+
+            Rectangle { }
+        }
+    }
+    // ======================== TPopover ======================
+    GallerySection {
+        title: "气泡卡片 TPopover";
+        code: "import { TPopover } from \"@tela-ui/overlay.slint\";\n\npov := TPopover {\n    auto-open: false;   // TButton 触发需关掉, clicked 里 toggle()\n    title: \"标题\";\n    text: \"正文, 点击外部或 ESC 关闭\";\n    TButton { text: \"?\"; clicked => pov.toggle(); }\n}";
+
+        HorizontalLayout {
+            spacing: 24px;
+
+            // TButton trigger: auto-open off, toggle from clicked.
+            pov := TPopover {
+                auto-open: false;
+                title: "什么是 Tela UI?";
+                text: "TDesign 风格的 Slint 第三方组件库,提供主题令牌与常用组件,支持亮暗双主题。与悬停型 TTooltipArea 不同,点击外部或按 ESC 才会关闭。";
+
+                TButton {
+                    variant: TButtonVariant.outline;
+                    text: "什么是 Tela UI?";
+                    clicked => { pov.toggle(); }
+                }
+            }
+
+            // Static trigger: the internal auto-open TouchArea handles it.
+            TPopover {
+                title: "字段说明";
+                text: "该字段用于集群对内服务的访问域名,保存后需要重启实例才能生效。";
+                placement: TPopupPlacement.bottom-start;
+
+                Rectangle {
+                    width: 120px;
+                    height: TTheme.height-m;
+                    background: TTheme.bg-color-secondarycontainer;
+                    border-radius: TTheme.radius-default;
+
+                    TText {
+                        text: "点击展开";
                         font-size: TTheme.font-size-m;
                         color: TTheme.text-color-secondary;
                         horizontal-alignment: center;

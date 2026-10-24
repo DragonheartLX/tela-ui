@@ -1,9 +1,10 @@
 // Gallery section: 输入 (TInput / TTextArea / TInputNumber / TAutoComplete /
-// TSlider / TRate), 一个组件一张卡.
+// TSearch / TInputAdornment / TForm / TSlider / TRate), 一个组件一张卡.
 
 import { TThemeRole, TSize } from "@tela-ui/theme.slint";
 import { TIconSet, TCaption } from "@tela-ui/base.slint";
-import { TInput, TTextArea, TInputNumber, TAutoComplete, TAutoCompleteItem, TSlider, TRate } from "@tela-ui/input.slint";
+import { TMessage } from "@tela-ui/notice.slint";
+import { TInput, TTextArea, TInputNumber, TAutoComplete, TAutoCompleteItem, TSearch, TInputAdornment, TForm, TFormItem, TSlider, TRate } from "@tela-ui/input.slint";
 import { GallerySection } from "../gallery-section.slint";
 
 export component InputSection inherits VerticalLayout {
@@ -16,6 +17,8 @@ export component InputSection inherits VerticalLayout {
     in-out property <float> rate-value: 3;
     in-out property <string> auto-text: "";
     in-out property <string> auto-value: "";
+    in-out property <string> search-text: "";
+    in-out property <string> search-result: "";
     in property <[TAutoCompleteItem]> auto-items: [
         { label: "北京", value: "bj", disabled: false },
         { label: "上海", value: "sh", disabled: false },
@@ -32,7 +35,7 @@ export component InputSection inherits VerticalLayout {
     // ======================== TInput ========================
     GallerySection {
         title: "输入框 TInput";
-        code: "import { TInput } from \"@tela-ui/input.slint\";\n\nTInput { placeholder-text: \"请输入内容\"; clearable: true; prefix-icon: TIconSet.Search; text <=> v; }\nTInput { placeholder-text: \"密码\"; input-type: password; }";
+        code: "import { TInput } from \"@tela-ui/input.slint\";\n\nTInput { placeholder-text: \"请输入内容\"; clearable: true; prefix-icon: TIconSet.Search; text <=> v; }\nTInput { placeholder-text: \"密码\"; input-type: password; }\nTInput { placeholder-text: \"验证码\"; suffix-text: \"发送验证码\"; suffix-clickable: true; suffix-clicked => { … } }";
 
         VerticalLayout {
             spacing: 16px;
@@ -48,13 +51,22 @@ export component InputSection inherits VerticalLayout {
                 spacing: 24px;
 
                 TInput {
-                    width: 240px;
+                    width: 170px;
                     placeholder-text: "密码";
                     input-type: password;
                     clearable: false;
                 }
-                TInput { width: 240px; placeholder-text: "禁用状态"; disabled: true; }
-                TInput { width: 240px; text: "只读状态"; read-only: true; }
+                TInput {
+                    width: 210px;
+                    placeholder-text: "验证码";
+                    suffix-text: "发送验证码";
+                    suffix-clickable: true;
+                    suffix-clicked => {
+                        TMessage.info("验证码已发送");
+                    }
+                }
+                TInput { width: 170px; placeholder-text: "禁用状态"; disabled: true; }
+                TInput { width: 170px; text: "只读状态"; read-only: true; }
                 Rectangle { }
             }
         }
@@ -131,6 +143,123 @@ export component InputSection inherits VerticalLayout {
                     ? "输入即过滤 (标签子串匹配, 不区分大小写); 高亮首条匹配, 回车或点击选中; 输入框为空时列出全部。"
                     : "已选:" + root.auto-value;
                 wrap: word-wrap;
+            }
+        }
+    }
+
+    // ======================== TSearch ========================
+    GallerySection {
+        title: "搜索框 TSearch";
+        code: "import { TSearch } from \"@tela-ui/input.slint\";\n\n// TInput 预设: 内置搜索图标 + 默认可清空, 右缘 x 即清空/取消。\nTSearch {\n    width: 280px;\n    placeholder-text: \"搜索组件\";\n    text <=> q;\n    accepted(q) => { /* 回车触发 */ }\n}";
+
+        VerticalLayout {
+            spacing: 16px;
+
+            HorizontalLayout {
+                spacing: 24px;
+
+                TSearch {
+                    width: 300px;
+                    placeholder-text: "搜索组件";
+                    text <=> root.search-text;
+
+                    accepted(q) => {
+                        root.search-result = "已搜索: " + q;
+                    }
+                }
+
+                TSearch {
+                    width: 240px;
+                    placeholder-text: "禁用状态";
+                    disabled: true;
+                }
+
+                Rectangle { }
+            }
+
+            TCaption {
+                text: root.search-result + " 悬停输入框显示右缘 x 图标, 点击即清空 (取消); 回车触发搜索。";
+                wrap: word-wrap;
+            }
+        }
+    }
+
+    // ===================== TInputAdornment ===================
+    GallerySection {
+        title: "输入装饰 TInputAdornment";
+        code: "import { TInputAdornment } from \"@tela-ui/input.slint\";\n\nTInputAdornment {\n    width: 320px;\n    addon-before: \"https://\";  // 前置附着段, 空串不渲染\n    addon-after: \".com\";       // 后置附着段\n    placeholder-text: \"your-org\";\n    text <=> v;\n}\n// 框内文字装饰在 TInput 上: prefix-text / suffix-text /\n// suffix-clickable + suffix-clicked";
+
+        VerticalLayout {
+            spacing: 16px;
+
+            HorizontalLayout {
+                spacing: 24px;
+
+                TInputAdornment {
+                    width: 340px;
+                    addon-before: "https://";
+                    addon-after: ".com";
+                    placeholder-text: "your-org";
+                    clearable: true;
+                }
+
+                TInputAdornment {
+                    width: 200px;
+                    addon-after: "元";
+                    placeholder-text: "金额";
+                    disabled: true;
+                }
+
+                Rectangle { }
+            }
+
+            TCaption {
+                text: "附着段与输入框共用一套状态边框 (悬停/聚焦/禁用); 框内前后缀文字与可点击后缀按钮直接用 TInput 的 prefix-text / suffix-text / suffix-clickable。";
+                wrap: word-wrap;
+            }
+        }
+    }
+
+    // ========================= TForm =========================
+    GallerySection {
+        title: "轻量表单 TForm / TFormItem";
+        code: "import { TForm, TFormItem } from \"@tela-ui/input.slint\";\n\nTForm {\n    TFormItem { label: \"名称\"; required: true; help-text: \"不超过 20 个字符\";\n        TInput { width: 240px; }\n    }\n    TFormItem { label: \"备注\"; error-text: \"备注不能为空\";\n        TTextArea { width: 320px; rows: 2; }\n    }\n}\n// 无校验引擎: 错误由 Rust 侧写入 error-text 呈现";
+
+        TForm {
+            TFormItem {
+                label: "名称";
+                required: true;
+                help-text: "不超过 20 个字符";
+                label-width: 80px;
+
+                TInput {
+                    width: 280px;
+                    placeholder-text: "请输入名称";
+                    text <=> root.input-text;
+                }
+            }
+
+            TFormItem {
+                label: "链接";
+                label-width: 80px;
+
+                TInputAdornment {
+                    width: 340px;
+                    addon-before: "https://";
+                    placeholder-text: "域名";
+                }
+            }
+
+            TFormItem {
+                label: "备注";
+                label-width: 80px;
+                error-text: "备注不能为空";
+
+                TTextArea {
+                    width: 340px;
+                    rows: 2;
+                    placeholder-text: "请输入备注";
+                }
             }
         }
     }
