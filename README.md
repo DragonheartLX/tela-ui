@@ -89,7 +89,7 @@ TSwitch {
 }
 ```
 
-82 个组件 (基础 12 / 输入 14 / 选择 10 / 日期时间 5 / 展示 9 / 内容 13 / 提示 3 / 浮层 5 / 导航 10, 另有实验性 1; 导航 10 含私有 TNavLabel) 按类别聚合导出; 另有 8 个服务型浮层 (对话框 / 加载 / 消息 / 通知 / 图片预览 / 命令面板 / 动作面板 / 提示) 与主题、图标、浮层栈三个全局对象。`@tela-ui/common.slint` 保留为全量兼容出口, 完整参数说明见 [docs/components.md](docs/components.md)。
+83 个组件 (基础 12 / 输入 14 / 选择 10 / 日期时间 5 / 展示 10 / 内容 13 / 提示 3 / 浮层 5 / 导航 10, 另有实验性 1; 导航 10 含私有 TNavLabel) 按类别聚合导出; 另有 8 个服务型浮层 (对话框 / 加载 / 消息 / 通知 / 图片预览 / 命令面板 / 动作面板 / 提示) 与主题、图标、浮层栈三个全局对象。`@tela-ui/common.slint` 保留为全量兼容出口, 完整参数说明见 [docs/components.md](docs/components.md)。
 
 ## 致谢与说明
 
@@ -115,6 +115,7 @@ TSwitch {
     - TList 行结构固定 (图标/标题/说明), 不支持宿主自定义行渲染 (ListView 行是模型驱动)。
     - TTree 用嵌套声明 + `@children`, 选中态存在 `TTreeLogic` 全局里 (Slint 无实例级 global), 同屏多个树共享一份选中值; 折叠态是分支自己的 `opened`, 不写回模型。
     - TContextMenu 弹层在窗口边缘会被裁剪; 默认触发区会吞掉左键, 交互式触发内容需设 `auto-area: false` 并自行调用 `open-at()`。
+    - 贴窗口边缘的滚动条会被原生拉伸热区抢占命中 (TBorderlessWindow `resize-border`, 默认 8px); 需把条内缩至少 `resize-border` 宽度, 或调小 `resize-border` (gallery 用 4px + 4px 内缩)。
     - TSplitter 第二栏无最小尺寸约束, 可被拖到 0; 主栏折叠无过渡动画。
     - TPopover 主体是 `title` + `text` 两段文本, 完全自定义主体需用 `TPopupSurface` 自建。
     - TForm 是轻量脚手架: 无校验引擎, help/error 只做状态呈现, 校验逻辑在 Rust 侧。

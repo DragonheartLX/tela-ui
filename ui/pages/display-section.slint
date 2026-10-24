@@ -1,10 +1,13 @@
 // Gallery section: 展示 (TTag / TBadge / TAvatar / TAvatarGroup / TEmpty /
-// TTimeline / TDescriptions / TStatistic), 一个组件一张卡.
+// TTimeline / TDescriptions / TStatistic / TScrollBar), 一个组件一张卡.
 
 import { TTheme, TThemeRole, TSize } from "@tela-ui/theme.slint";
 import { TText, TIcon, TIconSet, TButton, TCaption } from "@tela-ui/base.slint";
 import { TTag, TTagVariant, TBadge, TAvatar, TAvatarSize, TAvatarShape, TAvatarGroup, TAvatarGroupItem, TEmpty, TTimeline, TDescriptions, TStatistic } from "@tela-ui/display.slint";
 import { TMessage } from "@tela-ui/notice.slint";
+import { TScrollBar } from "@tela-ui/display.slint";
+import { TParagraph } from "@tela-ui/base.slint";
+import { ScrollView } from "std-widgets.slint";
 import { GallerySection } from "../gallery-section.slint";
 
 export component DisplaySection inherits VerticalLayout {
@@ -35,7 +38,7 @@ export component DisplaySection inherits VerticalLayout {
     // ======================== TBadge ========================
     GallerySection {
         title: "徽标 TBadge";
-        code: "import { TBadge } from \"@tela-ui/display.slint\";\nimport { TIcon, TIconSet } from \"@tela-ui/base.slint\";\n\nTBadge { count: 6; TIcon { icon: TIconSet.Bell; } }\nTBadge { dot: true; TIcon { icon: TIconSet.Settings; } }";
+        code: "import { TBadge } from \"@tela-ui/display.slint\";\nimport { TIcon } from \"@tela-ui/base.slint\";\n\nTBadge {\n    count: 6;\n    TIcon { icon: TIconSet.Bell; size: 24px; icon-color: TTheme.text-color-primary; }\n}\nTBadge {\n    count: 128;\n    TIcon { icon: TIconSet.Mail; size: 24px; icon-color: TTheme.text-color-primary; }\n}\nTBadge {\n    dot: true;\n    TIcon { icon: TIconSet.Settings; size: 24px; icon-color: TTheme.text-color-primary; }\n}";
 
         HorizontalLayout {
             spacing: 28px;
@@ -61,7 +64,7 @@ export component DisplaySection inherits VerticalLayout {
     // ======================== TAvatar =======================
     GallerySection {
         title: "头像 TAvatar";
-        code: "import { TAvatar } from \"@tela-ui/display.slint\";\n\nTAvatar { text: \"T\"; }\nTAvatar { size: TAvatarSize.large; shape: TAvatarShape.square; text: \"\"; }";
+        code: "import { TAvatar } from \"@tela-ui/display.slint\";\n\nTAvatar { text: \"T\"; }\nTAvatar { size: TAvatarSize.small; text: \"TD\"; }\nTAvatar { size: TAvatarSize.large; text: \"龙\"; }\nTAvatar { size: TAvatarSize.extra-large; shape: TAvatarShape.square; text: \"\"; }";
 
         HorizontalLayout {
             spacing: 24px;
@@ -79,7 +82,7 @@ export component DisplaySection inherits VerticalLayout {
     // ====================== TAvatarGroup ====================
     GallerySection {
         title: "头像组 TAvatarGroup";
-        code: "import { TAvatarGroup } from \"@tela-ui/display.slint\";\n\nTAvatarGroup {\n    items: [{ text: \"龙\" }, { source: … }, …];\n    max-count: 4;   // 超出渲染 +N 尾像, 点击报 overflow-clicked\n    clicked(i) => { … }\n}";
+        code: "import { TAvatarGroup } from \"@tela-ui/display.slint\";\n\nTAvatarGroup {\n    items: [\n        { text: \"龙\" },\n        { text: \"T\" },\n        { text: \"UI\" },\n        { text: \"D\" },\n    ];\n}\n\nTAvatarGroup {\n    max-count: 3;\n    items: [\n        { text: \"A\" },\n        { text: \"B\" },\n        { text: \"C\" },\n        { text: \"D\" },\n        { text: \"E\" },\n        { text: \"F\" },\n    ];\n\n    overflow-clicked => {\n        TMessage.info(\"还有 3 个成员\");\n    }\n}\n\nTAvatarGroup {\n    size: TAvatarSize.small;\n    shape: TAvatarShape.square;\n    items: [\n        { text: \"S\" },\n        { text: \"Q\" },\n        { text: \"R\" },\n    ];\n}";
 
         VerticalLayout {
             spacing: 16px;
@@ -132,7 +135,7 @@ export component DisplaySection inherits VerticalLayout {
     // ======================== TEmpty ========================
     GallerySection {
         title: "空状态 TEmpty";
-        code: "import { TEmpty } from \"@tela-ui/display.slint\";\n\nTEmpty { description: \"暂无数据\"; }\n\nTEmpty {\n    icon: TIconSet.Search;\n    description: \"未找到相关结果\";\n    TButton { text: \"立即创建\"; } // 子元素作为操作区\n}";
+        code: "import { TEmpty } from \"@tela-ui/display.slint\";\nimport { TButton } from \"@tela-ui/base.slint\";\n\nRectangle {\n    width: 240px;\n    height: 180px;\n    TEmpty { }\n}\n\nRectangle {\n    width: 240px;\n    height: 180px;\n    TEmpty {\n        description: \"暂无订单数据\";\n\n        TButton {\n            size: TSize.small;\n            text: \"立即创建\";\n        }\n    }\n}\n\nRectangle {\n    width: 240px;\n    height: 180px;\n    TEmpty {\n        icon: TIconSet.Search;\n        description: \"未找到相关结果\";\n    }\n}";
 
         HorizontalLayout {
             spacing: 24px;
@@ -188,7 +191,7 @@ export component DisplaySection inherits VerticalLayout {
     // ===================== TDescriptions ====================
     GallerySection {
         title: "描述列表 TDescriptions";
-        code: "import { TDescriptions } from \"@tela-ui/display.slint\";\n\nTDescriptions {\n    bordered: true;\n    columns: 2;\n    items: [{ label: \"订单编号\", value: \"TD202610070001\" }, …];\n}";
+        code: "import { TDescriptions } from \"@tela-ui/display.slint\";\n\nTDescriptions {\n    bordered: true;\n    items: [\n        { label: \"订单编号\", value: \"TD202610070001\" },\n        { label: \"支付方式\", value: \"微信支付\" },\n        { label: \"配送方式\", value: \"顺丰速运\" },\n        { label: \"收货地址\", value: \"浙江省杭州市西湖区某某街道 88 号\" },\n        { label: \"商品数量\", value: \"3 件\" },\n        { label: \"订单金额\", value: \"¥199.00\" },\n    ];\n}\n\nTDescriptions {\n    columns: 1;\n    items: [\n        { label: \"订单编号\", value: \"TD202610070001\" },\n        { label: \"订单金额\", value: \"¥199.00\" },\n    ];\n}";
 
         VerticalLayout {
             spacing: 16px;
@@ -227,6 +230,43 @@ export component DisplaySection inherits VerticalLayout {
             TStatistic { title: "下载量"; value: "12,930"; suffix: "次"; theme: TThemeRole.success; horizontal-stretch: 0; }
             TStatistic { title: "在线人数"; loading: true; horizontal-stretch: 0; }
             Rectangle { }
+        }
+    }
+
+    // ====================== TScrollBar ======================
+    GallerySection {
+        title: "滚动条 TScrollBar";
+        code: "import { TScrollBar } from \"@tela-ui/display.slint\";\n\nRectangle {\n    height: 220px;\n    border-radius: TTheme.radius-medium;\n    border-width: 1px;\n    border-color: TTheme.component-stroke;\n    clip: true;\n\n    sv := ScrollView {\n        width: parent.width;\n        height: parent.height;\n        vertical-scrollbar-policy: ScrollBarPolicy.always-off;\n\n        VerticalLayout {\n            padding: TTheme.padding-lr-l;\n            spacing: TTheme.spacing-3;\n\n            for i in 16: TParagraph { text: \"滚动内容第 \\{i + 1} 行 — 滑块可拖拽、可点击定位。\"; }\n        }\n    }\n\n    TScrollBar {\n        width: 6px;\n        x: parent.width - self.width;\n        y: 0;\n        height: parent.height;\n        content-length: sv.content-height;\n        viewport-length: sv.visible-height;\n        content-offset <=> sv.content-y;\n    }\n}";
+
+        Rectangle {
+            height: 220px;
+            border-radius: TTheme.radius-medium;
+            border-width: 1px;
+            border-color: TTheme.component-stroke;
+            clip: true;
+
+            sv := ScrollView {
+                width: parent.width;
+                height: parent.height;
+                vertical-scrollbar-policy: ScrollBarPolicy.always-off;
+
+                VerticalLayout {
+                    padding: TTheme.padding-lr-l;
+                    spacing: TTheme.spacing-3;
+
+                    for i in 16: TParagraph { text: "滚动内容第 \{i + 1} 行 — 滑块可拖拽、可点击定位。"; }
+                }
+            }
+
+            TScrollBar {
+                width: 6px;
+                x: parent.width - self.width;
+                y: 0;
+                height: parent.height;
+                content-length: sv.content-height;
+                viewport-length: sv.visible-height;
+                content-offset <=> sv.content-y;
+            }
         }
     }
 }

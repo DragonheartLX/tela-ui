@@ -35,10 +35,6 @@ export component TAvatar inherits Rectangle {
     width: d;
     height: d;
     border-radius: shape == TAvatarShape.circle ? self.width / 2 : TTheme.radius-medium;
-    // Hairline so stacked avatars (TAvatarGroup) and image avatars keep an
-    // edge against the page background.
-    border-width: 1px;
-    border-color: TTheme.component-border;
     background: TTheme.theme-color-light(theme);
     clip: true;
 

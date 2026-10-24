@@ -7,7 +7,9 @@
 // (`vertical-scrollbar-policy: always-off`) and overlays this one instead.
 //
 // The bar is an overlay: a transparent track with a full-width capsule thumb
-// (centered by construction, gray-6 rest / gray-7 pressed for contrast).
+// (centered by construction). All offset writes ease with `duration-base` —
+// click-to-jump, drags and wheel sync through the two-way binding all glide.
+// Idle thumb is gray-7 (most prominent); hover / press lighten progressively.
 // `content-offset` follows the Slint content-y convention (0 .. -max) and is
 // meant to be two-way bound to the scroller's `content-y` — the same wiring
 // the native bar uses internally, so the Flickable stays the owner.
@@ -33,9 +35,26 @@ export component TScrollBar inherits Rectangle {
     private property <length> thumb-pos: max-scroll <= 0px ? TTheme.spacing-1
         : TTheme.spacing-1 + (track-l - thumb-l) * (-content-offset / max-scroll);
 
+    // Offset that centers the thumb under a pointer position along the
+    // scroll axis.
+    pure function pointer-target(mouse: length) -> length {
+        let target = mouse - TTheme.spacing-1 - thumb-l / 2;
+        let ratio = max-scroll > 0px
+            ? max-scroll / Math.max(1px, track-l - thumb-l) : 0;
+        return -Math.max(0px, Math.min(max-scroll, target * ratio));
+    }
+
     visible: max-scroll > 1px;
     clip: true;
 
+    // Offset writes ease (click-jump and the wheel sync through the two-way
+    // binding) so the page glides; while dragging, easing is off and the
+    // thumb stays glued to the pointer.
+    private property <bool> dragging: false;
+    animate content-offset {
+        duration: TTheme.duration-base;
+        enabled: !root.dragging;
+    }
 
     thumb := Rectangle {
         x: horizontal ? thumb-pos : 0px;
@@ -52,31 +71,51 @@ export component TScrollBar inherits Rectangle {
     }
 
     ta := TouchArea {
-        // Drag baseline, captured on press.
+        // Drag baseline, captured on press. Pressing centers the thumb under
+        // the pointer (animated), and the drag continues from that target —
+        // the animation chases the retargeted value each move.
         private property <length> pressed-offset;
         private property <length> pressed-mouse;
 
         pointer-event(e) => {
             if (e.button == PointerEventButton.left && e.kind == PointerEventKind.down) {
-                // Click-to-jump: center the thumb under the pointer, then
-                // drag from there.
-                let target = (horizontal ? self.mouse-x : self.mouse-y)
-                    - TTheme.spacing-1 - thumb-l / 2;
-                let ratio = max-scroll > 0px
-                    ? max-scroll / Math.max(1px, track-l - thumb-l) : 0;
-                content-offset = -Math.max(0px, Math.min(max-scroll, target * ratio));
-                self.pressed-offset = -content-offset;
-                self.pressed-mouse = horizontal ? self.mouse-x : self.mouse-y;
+                root.dragging = false;
+            } else if (e.button == PointerEventButton.left && e.kind == PointerEventKind.up) {
+                root.dragging = false;
             }
         }
 
         moved => {
             if (self.pressed) {
                 let delta = (horizontal ? self.mouse-x : self.mouse-y) - self.pressed-mouse;
-                let ratio = max-scroll > 0px
-                    ? max-scroll / Math.max(1px, track-l - thumb-l) : 0;
-                content-offset = -Math.max(0px, Math.min(max-scroll, pressed-offset + delta * ratio));
+                // A real drag (beyond a 2px jiggle) drops the easing and
+                // centers the thumb under the pointer; from then on the
+                // thumb's center stays glued to the pointer.
+                if (!root.dragging
+                    && (delta < 0px ? -delta : delta) > TTheme.spacing-2) {
+                    root.dragging = true;
+                    content-offset = root.pointer-target(
+                        horizontal ? self.mouse-x : self.mouse-y);
+                    self.pressed-offset = -content-offset;
+                    self.pressed-mouse = horizontal ? self.mouse-x : self.mouse-y;
+                }
+                if (root.dragging) {
+                    let delta2 = (horizontal ? self.mouse-x : self.mouse-y) - self.pressed-mouse;
+                    let ratio = max-scroll > 0px
+                        ? max-scroll / Math.max(1px, track-l - thumb-l) : 0;
+                    content-offset = -Math.max(0px, Math.min(max-scroll, pressed-offset + delta2 * ratio));
+                }
             }
+        }
+
+        // Click-to-jump: center the thumb under the pointer, animated. A drag
+        // release skips it (dragging is still set; it resets here).
+        clicked => {
+            if (!root.dragging) {
+                content-offset = root.pointer-target(
+                    horizontal ? self.mouse-x : self.mouse-y);
+            }
+            root.dragging = false;
         }
     }
 }

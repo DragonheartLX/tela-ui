@@ -36,6 +36,9 @@ export component MainWindow inherits TBorderlessWindow {
     min-width: 960px;
     min-height: 600px;
     window-background: TTheme.bg-color-page;
+    // 4px native resize strip: the page scrollbar sits flush at the right
+    // edge and would otherwise fight the drag-resize hit zone (default 8px).
+    resize-border: 4px;
 
     // ------------------------------------------------------------------
     // Gallery state
@@ -53,6 +56,31 @@ export component MainWindow inherits TBorderlessWindow {
         { label: "实验性", value: "experimental", icon: TIconSet.FlaskConical },
     ];
     in-out property <string> group-value: "basics";
+    // Per-page scroll memory: switching pages stores the outgoing offset and
+    // restores the incoming one, so every page keeps its own position.
+    // Index order matches group-items plus settings (11 entries).
+    in-out property <[length]> page-y: [0px, 0px, 0px, 0px, 0px, 0px, 0px, 0px, 0px, 0px, 0px];
+    private property <string> last-page: "basics";
+
+    pure function page-index(name: string) -> int {
+        name == "input" ? 1
+        : name == "select" ? 2
+        : name == "date-time" ? 3
+        : name == "display" ? 4
+        : name == "content" ? 5
+        : name == "notice" ? 6
+        : name == "overlay" ? 7
+        : name == "navigation" ? 8
+        : name == "experimental" ? 9
+        : name == "settings" ? 10
+        : 0;
+    }
+
+    changed group-value => {
+        root.page-y[root.page-index(root.last-page)] = page-scroll.content-y;
+        page-scroll.content-y = root.page-y[root.page-index(root.group-value)];
+        root.last-page = root.group-value;
+    }
     in-out property <bool> dialog-open: false;
     in-out property <bool> drawer-open: false;
     in-out property <bool> sheet-open: false;
@@ -126,7 +154,9 @@ export component MainWindow inherits TBorderlessWindow {
 
                 TScrollBar {
                     width: 6px;
-                    x: parent.width - self.width;
+                    // Inset by the 4px resize strip so the bar never sits in
+                    // the native drag-resize hit zone.
+                    x: parent.width - self.width - TTheme.spacing-2;
                     y: 0;
                     height: parent.height;
                     content-length: page-scroll.content-height;

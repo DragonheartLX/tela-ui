@@ -897,7 +897,7 @@ import { TCalendar, TDate, TDatePicker, TTimePicker, TTime, TPicker, TPickerColu
 ## 展示 display
 
 ```slint
-import { TTag, TTagVariant, TAvatar, TAvatarSize, TAvatarShape, TAvatarGroup, TAvatarGroupItem, TBadge, TCard, TEmpty, TDescriptions, TDescriptionItem, TTimeline, TTimelineItem, TStatistic } from "@tela-ui/display.slint";
+import { TTag, TTagVariant, TAvatar, TAvatarSize, TAvatarShape, TAvatarGroup, TAvatarGroupItem, TBadge, TCard, TEmpty, TDescriptions, TDescriptionItem, TTimeline, TTimelineItem, TStatistic, TScrollBar } from "@tela-ui/display.slint";
 ```
 
 ### TTag
@@ -923,8 +923,7 @@ import { TTag, TTagVariant, TAvatar, TAvatarSize, TAvatarShape, TAvatarGroup, TA
 
 ### TAvatar
 
-头像。图片, 文字或默认人形图标的圆形/圆角方形占位; 带 1px hairline 边框
-(component-border), 图片头像与叠放头像 (TAvatarGroup) 借此与页面底色区分。
+头像。图片, 文字或默认人形图标的圆形/圆角方形占位, 无边框 (TDesign 同款)。
 
 继承: `Rectangle`。内部组合 TIcon (默认人形)。
 
@@ -959,6 +958,33 @@ import { TTag, TTagVariant, TAvatar, TAvatarSize, TAvatarShape, TAvatarGroup, TA
 回调: `clicked(int)` — 成员点击, 参数为下标; `overflow-clicked()` — +N 尾像点击。
 
 相关结构: `TAvatarGroupItem { text: string, source: image }`。
+
+### TScrollBar
+
+覆盖式滚动条, 替换 std-widgets 的 fluent 原生滚动条 (原生滑块 2px 贴边不居中、
+border 级配色对比不足)。库内全部滚动面都以"关原生条 + 叠此条"方式接线; 宿主
+自建滚动面 (Flickable / 关掉原生条的 ScrollView) 也可以直接使用。透明轨道 +
+6px 全宽胶囊滑块 (构造上居中), 静止 gray-7 最深、悬停 gray-6、按压 gray-5
+(交互时逐级变浅, 内容从条下透出); 支持拖拽与点击定位, 滚轮事件不拦截、穿透
+到底层滚动区。
+
+继承: `Rectangle`。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| horizontal | `bool` | `false` | 水平条 (竖条为默认) |
+| content-length | `length` | `0` | 滚动轴上内容总长 |
+| viewport-length | `length` | `0` | 可视区长; content-length ≤ viewport 时不渲染 |
+| content-offset | `length` (in-out) | `0` | 滚动偏移, 走 Slint 的 content-y 约定 (0 .. -max), 与滚动区双向绑定 |
+
+交互: 拖拽即时跟手 (滑块贴指针, 无缓动); 点击轨道带 `duration-base` 缓动定位,
+滚轮经双向绑定同步同样缓动。
+
+已知限制: 消费方负责关掉原生条 (`vertical-scrollbar-policy: always-off`) 并把
+条叠在滚动区右/下缘; 条厚 6px 需在使用处显式给出 (竖条 `width: 6px`, 横条
+`height: 6px`); 贴窗口边缘放置时会被原生拉伸热区 (TBorderlessWindow 的
+`resize-border`, 默认 8px) 抢占命中, 需内缩至少 `resize-border` 的宽度
+(gallery 用 4px 拉伸带 + 4px 内缩)。
 
 ### TBadge
 
