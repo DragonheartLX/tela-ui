@@ -1,42 +1,54 @@
-// Tela UI — TScrollBar (internal scaffolding)
+// Tela UI — TScrollBar
 //
-// Overlay scrollbar for the library's own ScrollView / ListView surfaces.
-// The fluent-style native scrollbar draws a 2px thumb pinned 4px off the
-// track edge (never centered) with a border-grade color — not tunable from
-// consumer code, so every scrolling surface hides it
-// (`vertical-scrollbar-policy: always-off`) and overlays this one instead.
+// Scroll container with an integrated overlay scrollbar — replaces std
+// ScrollView for the library's scrolling surfaces. The fluent native
+// scrollbar (2px thumb pinned off-center, border-grade color) is not
+// tunable from consumer code; here one Flickable viewport drives everything:
+//   * wheel & flick: native Flickable behavior,
+//   * drag on the thumb strip: instant — the press centers the thumb's
+//     middle under the pointer and it stays glued while dragging,
+//   * click on the strip (press + release without moving): animated jump.
+// All interactions write one shared `content-y`, so the thumb is always an
+// exact map of the page position.
 //
-// The bar is an overlay: a transparent track with a full-width capsule thumb
-// (centered by construction). All offset writes ease with `duration-base` —
-// click-to-jump, drags and wheel sync through the two-way binding all glide.
-// Idle thumb is gray-7 (most prominent); hover / press lighten progressively.
-// `content-offset` follows the Slint content-y convention (0 .. -max) and is
-// meant to be two-way bound to the scroller's `content-y` — the same wiring
-// the native bar uses internally, so the Flickable stays the owner.
-//
-// Consumers pin the long axis and the 6px thickness (width for vertical
-// bars, height for horizontal ones). Wheel events are deliberately not
-// handled: they fall through to the scroller underneath.
+// Vertical scrolling only, for non-virtualized content: TList / TTable keep
+// their ListView row recycling and wire the internal TScrollThumb overlay
+// instead. Content size defaults to the children's preferred height — pin
+// `content-height` when children animate their heights (collapsed rows etc.).
 
 import { TTheme } from "./theme.slint";
 
 export component TScrollBar inherits Rectangle {
-    in property <bool> horizontal: false;
-    // Content size and visible size along the scroll axis.
-    in property <length> content-length;
-    in property <length> viewport-length;
-    // 0 .. -(content-length - viewport-length).
-    in-out property <length> content-offset;
+    // Content size along the scroll axis; defaults to the children's
+    // preferred height. Pin it when children collapse / animate heights.
+    in property <length> content-height: body.preferred-height;
+    // Off state disables the thumb strip (wheel still reaches the viewport).
+    in property <bool> enabled: true;
+    // Gap between the thumb column and the component's right edge — set it
+    // to the window's resize-border width when the scroller sits flush at a
+    // window edge, or the native drag-resize zone swallows the thumb hits.
+    in property <length> thumb-inset: 0px;
 
-    private property <length> max-scroll: Math.max(0px, content-length - viewport-length);
-    private property <length> track-l: (horizontal ? root.width : root.height) - 2 * TTheme.spacing-1;
+    // Current scroll offset (0 .. -(content-height - height)). Two-way:
+    // hosts read it (TBackTop) or scroll programmatically.
+    in-out property <length> content-y <=> flick.content-y;
+
+    private property <length> max-scroll: Math.max(0px, content-height - root.height);
+    private property <length> track-l: root.height - 2 * TTheme.spacing-1;
     private property <length> thumb-l: max-scroll <= 0px ? 0px
-        : max(24px, track-l * viewport-length / content-length);
+        : max(24px, track-l * root.height / content-height);
     private property <length> thumb-pos: max-scroll <= 0px ? TTheme.spacing-1
-        : TTheme.spacing-1 + (track-l - thumb-l) * (-content-offset / max-scroll);
+        : TTheme.spacing-1 + (track-l - thumb-l) * (-content-y / max-scroll);
+    // A press that moves beyond a 2px jiggle becomes a drag (instant); a
+    // press released in place is a click (animated jump). Easing is off
+    // while dragging so the thumb stays glued to the pointer.
+    private property <bool> dragging: false;
+    animate content-y {
+        duration: TTheme.duration-base;
+        enabled: !root.dragging;
+    }
 
-    // Offset that centers the thumb under a pointer position along the
-    // scroll axis.
+    // Offset that centers the thumb's middle under a pointer position.
     pure function pointer-target(mouse: length) -> length {
         let target = mouse - TTheme.spacing-1 - thumb-l / 2;
         let ratio = max-scroll > 0px
@@ -44,36 +56,31 @@ export component TScrollBar inherits Rectangle {
         return -Math.max(0px, Math.min(max-scroll, target * ratio));
     }
 
-    visible: max-scroll > 1px;
     clip: true;
 
-    // Offset writes ease (click-jump and the wheel sync through the two-way
-    // binding) so the page glides; while dragging, easing is off and the
-    // thumb stays glued to the pointer.
-    private property <bool> dragging: false;
-    animate content-offset {
-        duration: TTheme.duration-base;
-        enabled: !root.dragging;
+    flick := Flickable {
+        x: 0;
+        y: 0;
+        width: parent.width;
+        height: parent.height;
+        mouse-drag-pan-enabled: false;
+
+        body := VerticalLayout {
+            width: parent.width;
+            spacing: 0px;
+
+            @children
+        }
     }
 
-    thumb := Rectangle {
-        x: horizontal ? thumb-pos : 0px;
-        y: horizontal ? 0px : thumb-pos;
-        width: horizontal ? thumb-l : parent.width;
-        height: horizontal ? parent.height : thumb-l;
-        border-radius: TTheme.radius-round;
-        // Idle is the most prominent state; hover / press lighten
-        // progressively so the content under the bar shows through.
-        background: ta.pressed ? TTheme.gray-5
-            : ta.has-hover ? TTheme.gray-6
-            : TTheme.gray-7;
-        animate background { duration: TTheme.duration-fast; }
-    }
+    strip := TouchArea {
+        x: parent.width - self.width - root.thumb-inset;
+        y: 0;
+        width: 6px;
+        height: parent.height;
+        enabled: root.enabled;
 
-    ta := TouchArea {
-        // Drag baseline, captured on press. Pressing centers the thumb under
-        // the pointer (animated), and the drag continues from that target —
-        // the animation chases the retargeted value each move.
+        // Drag baseline, captured on press.
         private property <length> pressed-offset;
         private property <length> pressed-mouse;
 
@@ -87,23 +94,21 @@ export component TScrollBar inherits Rectangle {
 
         moved => {
             if (self.pressed) {
-                let delta = (horizontal ? self.mouse-x : self.mouse-y) - self.pressed-mouse;
-                // A real drag (beyond a 2px jiggle) drops the easing and
-                // centers the thumb under the pointer; from then on the
-                // thumb's center stays glued to the pointer.
+                let delta = self.mouse-y - self.pressed-mouse;
                 if (!root.dragging
                     && (delta < 0px ? -delta : delta) > TTheme.spacing-2) {
                     root.dragging = true;
-                    content-offset = root.pointer-target(
-                        horizontal ? self.mouse-x : self.mouse-y);
-                    self.pressed-offset = -content-offset;
-                    self.pressed-mouse = horizontal ? self.mouse-x : self.mouse-y;
+                    // Center the thumb's middle under the pointer, then drag
+                    // from there.
+                    root.content-y = root.pointer-target(self.mouse-y);
+                    self.pressed-offset = -root.content-y;
+                    self.pressed-mouse = self.mouse-y;
                 }
                 if (root.dragging) {
-                    let delta2 = (horizontal ? self.mouse-x : self.mouse-y) - self.pressed-mouse;
+                    let delta2 = self.mouse-y - self.pressed-mouse;
                     let ratio = max-scroll > 0px
                         ? max-scroll / Math.max(1px, track-l - thumb-l) : 0;
-                    content-offset = -Math.max(0px, Math.min(max-scroll, pressed-offset + delta2 * ratio));
+                    root.content-y = -Math.max(0px, Math.min(max-scroll, pressed-offset + delta2 * ratio));
                 }
             }
         }
@@ -112,10 +117,23 @@ export component TScrollBar inherits Rectangle {
         // release skips it (dragging is still set; it resets here).
         clicked => {
             if (!root.dragging) {
-                content-offset = root.pointer-target(
-                    horizontal ? self.mouse-x : self.mouse-y);
+                root.content-y = root.pointer-target(self.mouse-y);
             }
             root.dragging = false;
         }
+    }
+
+    thumb := Rectangle {
+        x: strip.x;
+        y: thumb-pos;
+        width: 6px;
+        height: thumb-l;
+        border-radius: TTheme.radius-round;
+        // Idle is the most prominent state; hover / press lighten
+        // progressively so the content under the bar shows through.
+        background: strip.pressed ? TTheme.gray-5
+            : strip.has-hover ? TTheme.gray-6
+            : TTheme.gray-7;
+        animate background { duration: TTheme.duration-fast; }
     }
 }

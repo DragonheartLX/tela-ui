@@ -21,7 +21,6 @@ import { TIconData, TIconSet } from "../base/icon/data.slint";
 import { TPopupSurface } from "../popup-surface.slint";
 import { TScrollBar } from "../scroll-bar.slint";
 import { TTree, TTreeLogic } from "../content/tree.slint";
-import { ScrollView } from "std-widgets.slint";
 
 export component TTreeSelect inherits Rectangle {
     // Host-provided label; falls back to TTreeLogic.current-value.
@@ -143,11 +142,7 @@ export component TTreeSelect inherits Rectangle {
         popup-width: max(root.width, 200px);
         popup-height: root.panel-height;
 
-        Rectangle {
-            sv := ScrollView {
-                width: parent.width;
-                height: parent.height;
-                vertical-scrollbar-policy: ScrollBarPolicy.always-off;
+        TScrollBar {
 
                 VerticalLayout {
                     padding: 4px;
@@ -158,16 +153,6 @@ export component TTreeSelect inherits Rectangle {
                 }
             }
 
-            TScrollBar {
-                width: 6px;
-                x: parent.width - self.width;
-                y: 0;
-                height: parent.height;
-                content-length: sv.content-height;
-                viewport-length: sv.visible-height;
-                content-offset <=> sv.content-y;
-            }
-        }
     }
 
     changed disabled => {

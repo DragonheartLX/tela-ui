@@ -961,30 +961,27 @@ import { TTag, TTagVariant, TAvatar, TAvatarSize, TAvatarShape, TAvatarGroup, TA
 
 ### TScrollBar
 
-覆盖式滚动条, 替换 std-widgets 的 fluent 原生滚动条 (原生滑块 2px 贴边不居中、
-border 级配色对比不足)。库内全部滚动面都以"关原生条 + 叠此条"方式接线; 宿主
-自建滚动面 (Flickable / 关掉原生条的 ScrollView) 也可以直接使用。透明轨道 +
-6px 全宽胶囊滑块 (构造上居中), 静止 gray-7 最深、悬停 gray-6、按压 gray-5
-(交互时逐级变浅, 内容从条下透出); 支持拖拽与点击定位, 滚轮事件不拦截、穿透
-到底层滚动区。
+自带视口与滚动进度的滚动容器 (替代 std ScrollView): 内容经 `@children` 放入
+内建 Flickable 视口, 滚轮 / 拖拽滑块 / 点击轨道全部驱动同一个 `content-y`,
+滑块始终是页面位置的精确映射。透明轨道 + 6px 全宽胶囊滑块 (构造上居中),
+静止 gray-7 最深、悬停 gray-6、按压 gray-5 (交互时逐级变浅, 内容从条下透出)。
 
-继承: `Rectangle`。
+继承: `Rectangle`。内部为 Flickable 视口 + 滑块条。
 
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| horizontal | `bool` | `false` | 水平条 (竖条为默认) |
-| content-length | `length` | `0` | 滚动轴上内容总长 |
-| viewport-length | `length` | `0` | 可视区长; content-length ≤ viewport 时不渲染 |
-| content-offset | `length` (in-out) | `0` | 滚动偏移, 走 Slint 的 content-y 约定 (0 .. -max), 与滚动区双向绑定 |
+| content-height | `length` (in) | 子元素首选高度 | 内容总高; 子元素高度会塌缩 / 动画时请显式钉住 |
+| enabled | `bool` | `true` | 关闭后滑块条不可交互 (滚轮仍直达视口) |
+| thumb-inset | `length` | `0px` | 滑块列与右缘的间距; 贴窗口边缘时设为 resize-border 宽度, 避开原生拉伸热区 |
+| content-y | `length` (in-out) | `0` | 滚动偏移 (0 .. -max), 双向暴露: 宿主可读 (TBackTop 直绑) 或编程滚动 |
 
-交互: 拖拽即时跟手 (滑块贴指针, 无缓动); 点击轨道带 `duration-base` 缓动定位,
-滚轮经双向绑定同步同样缓动。
+交互: 拖拽即时跟手 (按下移动超 2px 即把滑块中心吸到指针下并保持 glued);
+点击轨道带 `duration-base` 缓动定位; 滚轮走 Flickable 原生直滚。
 
-已知限制: 消费方负责关掉原生条 (`vertical-scrollbar-policy: always-off`) 并把
-条叠在滚动区右/下缘; 条厚 6px 需在使用处显式给出 (竖条 `width: 6px`, 横条
-`height: 6px`); 贴窗口边缘放置时会被原生拉伸热区 (TBorderlessWindow 的
-`resize-border`, 默认 8px) 抢占命中, 需内缩至少 `resize-border` 的宽度
-(gallery 用 4px 拉伸带 + 4px 内缩)。
+已知限制: 仅垂直滚动, 内容宽度恒等于视口宽度 (水平滚动场景用 TTable 的
+ListView 接线); 面向非虚拟化内容 — TList / TTable 保留 ListView 行回收并改接
+内部 `TScrollThumb` 叠加条; 贴窗口边缘时请设 `thumb-inset` 为 TBorderlessWindow
+`resize-border` 的宽度 (gallery 用 4px 拉伸带 + 4px 内缩)。
 
 ### TBadge
 

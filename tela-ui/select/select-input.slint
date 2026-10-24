@@ -21,7 +21,6 @@ import { TSize } from "../structs/enums.slint";
 import { TIcon } from "../base/icon/icon.slint";
 import { TIconSet } from "../base/icon/data.slint";
 import { TSelectItem } from "select.slint";
-import { ScrollView } from "std-widgets.slint";
 
 export component TSelectInput inherits Rectangle {
     in property <[TSelectItem]> items;
@@ -187,11 +186,7 @@ export component TSelectInput inherits Rectangle {
         popup-max-width: max(root.width, 160px);
         popup-height: min(root.content-h, root.cap);
 
-        Rectangle {
-            sv := ScrollView {
-                width: parent.width;
-                height: parent.height;
-                vertical-scrollbar-policy: ScrollBarPolicy.always-off;
+        TScrollBar {
                 // Content height is pinned explicitly: the stock ScrollView
                 // would otherwise keep its own content-size bookkeeping.
                 content-height: root.content-h;
@@ -301,16 +296,6 @@ export component TSelectInput inherits Rectangle {
                 }
             }
 
-            TScrollBar {
-                width: 6px;
-                x: parent.width - self.width;
-                y: 0;
-                height: parent.height;
-                content-length: sv.content-height;
-                viewport-length: sv.visible-height;
-                content-offset <=> sv.content-y;
-            }
-        }
     }
 
     accessible-role: AccessibleRole.text-input;

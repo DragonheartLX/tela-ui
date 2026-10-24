@@ -13,7 +13,7 @@ import { TText } from "../base/typography.slint";
 import { TIcon } from "../base/icon/icon.slint";
 import { TIconData } from "../base/icon/data.slint";
 import { TEmpty } from "../display/empty.slint";
-import { TScrollBar } from "../scroll-bar.slint";
+import { TScrollThumb } from "../scroll-thumb.slint";
 import { ListView } from "std-widgets.slint";
 
 export struct TListItem {
@@ -148,7 +148,7 @@ export component TList inherits Rectangle {
     }
 
     // Overlay scrollbar (replaces the fluent native one).
-    TScrollBar {
+    TScrollThumb {
         width: 6px;
         x: parent.width - self.width;
         y: 0;

@@ -1,0 +1,110 @@
+// Tela UI — TScrollThumb (internal scaffolding)
+//
+// Overlay scrollbar strip for scrollers that TScrollBar's container form
+// cannot serve: TList / TTable keep their std ListView (row recycling) and
+// wire this bar beside it (`vertical-scrollbar-policy: always-off`,
+// `content-offset` two-way bound to the ListView's `content-y` — the Flickable
+// stays the owner, same wiring as the native bar).
+//
+// Interactions match TScrollBar: click-to-jump eases, dragging is instant
+// with the thumb's middle glued to the pointer. Wheel events are not
+// handled — they fall through to the scroller underneath.
+//
+// Consumers pin the long axis and the 6px thickness (width for vertical
+// bars, height for horizontal ones).
+
+import { TTheme } from "./theme.slint";
+
+export component TScrollThumb inherits Rectangle {
+    in property <bool> horizontal: false;
+    // Content size and visible size along the scroll axis.
+    in property <length> content-length;
+    in property <length> viewport-length;
+    // 0 .. -(content-length - viewport-length).
+    in-out property <length> content-offset;
+
+    private property <length> max-scroll: Math.max(0px, content-length - viewport-length);
+    private property <length> track-l: (horizontal ? root.width : root.height) - 2 * TTheme.spacing-1;
+    private property <length> thumb-l: max-scroll <= 0px ? 0px
+        : max(24px, track-l * viewport-length / content-length);
+    private property <length> thumb-pos: max-scroll <= 0px ? TTheme.spacing-1
+        : TTheme.spacing-1 + (track-l - thumb-l) * (-content-offset / max-scroll);
+    private property <bool> dragging: false;
+    animate content-offset {
+        duration: TTheme.duration-base;
+        enabled: !root.dragging;
+    }
+
+    visible: max-scroll > 1px;
+    clip: true;
+
+    // Offset that centers the thumb's middle under a pointer position.
+    pure function pointer-target(mouse: length) -> length {
+        let along = horizontal ? root.width : root.height;
+        let mouse-along = mouse;
+        let target = mouse-along - TTheme.spacing-1 - thumb-l / 2;
+        let ratio = max-scroll > 0px
+            ? max-scroll / Math.max(1px, track-l - thumb-l) : 0;
+        return -Math.max(0px, Math.min(max-scroll, target * ratio));
+    }
+
+    thumb := Rectangle {
+        x: horizontal ? thumb-pos : 0px;
+        y: horizontal ? 0px : thumb-pos;
+        width: horizontal ? thumb-l : parent.width;
+        height: horizontal ? parent.height : thumb-l;
+        border-radius: TTheme.radius-round;
+        // Idle is the most prominent state; hover / press lighten
+        // progressively so the content under the bar shows through.
+        background: ta.pressed ? TTheme.gray-5
+            : ta.has-hover ? TTheme.gray-6
+            : TTheme.gray-7;
+        animate background { duration: TTheme.duration-fast; }
+    }
+
+    ta := TouchArea {
+        // Drag baseline, captured on press.
+        private property <length> pressed-offset;
+        private property <length> pressed-mouse;
+
+        pointer-event(e) => {
+            if (e.button == PointerEventButton.left && e.kind == PointerEventKind.down) {
+                root.dragging = false;
+            } else if (e.button == PointerEventButton.left && e.kind == PointerEventKind.up) {
+                root.dragging = false;
+            }
+        }
+
+        moved => {
+            if (self.pressed) {
+                let mouse = horizontal ? self.mouse-x : self.mouse-y;
+                let delta = mouse - self.pressed-mouse;
+                if (!root.dragging
+                    && (delta < 0px ? -delta : delta) > TTheme.spacing-2) {
+                    root.dragging = true;
+                    // Center the thumb's middle under the pointer, then drag
+                    // from there.
+                    content-offset = root.pointer-target(mouse);
+                    self.pressed-offset = -content-offset;
+                    self.pressed-mouse = mouse;
+                }
+                if (root.dragging) {
+                    let delta2 = mouse - self.pressed-mouse;
+                    let ratio = max-scroll > 0px
+                        ? max-scroll / Math.max(1px, track-l - thumb-l) : 0;
+                    content-offset = -Math.max(0px, Math.min(max-scroll, pressed-offset + delta2 * ratio));
+                }
+            }
+        }
+
+        // Click-to-jump: center the thumb under the pointer, animated. A drag
+        // release skips it (dragging is still set; it resets here).
+        clicked => {
+            if (!root.dragging) {
+                content-offset = root.pointer-target(
+                    horizontal ? self.mouse-x : self.mouse-y);
+            }
+            root.dragging = false;
+        }
+    }
+}

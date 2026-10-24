@@ -17,7 +17,6 @@ import { TPopupSurface } from "../popup-surface.slint";
 import { TScrollBar } from "../scroll-bar.slint";
 import { TSize } from "../structs/enums.slint";
 import { TAutoCompleteItem } from "auto-complete.slint";
-import { ScrollView } from "std-widgets.slint";
 
 export component TMention inherits Rectangle {
     in property <[TAutoCompleteItem]> suggestions;
@@ -100,11 +99,7 @@ export component TMention inherits Rectangle {
         popup-max-width: max(root.width, 160px);
         popup-height: min(root.content-h, root.cap);
 
-        Rectangle {
-        sv := ScrollView {
-            width: parent.width;
-            height: parent.height;
-            vertical-scrollbar-policy: ScrollBarPolicy.always-off;
+        TScrollBar {
             content-height: root.content-h;
 
             VerticalLayout {
@@ -190,17 +185,6 @@ export component TMention inherits Rectangle {
                     }
                 }
             }
-        }
-
-        TScrollBar {
-            width: 6px;
-            x: parent.width - self.width;
-            y: 0;
-            height: parent.height;
-            content-length: sv.content-height;
-            viewport-length: sv.visible-height;
-            content-offset <=> sv.content-y;
-        }
         }
     }
 

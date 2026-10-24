@@ -115,7 +115,7 @@ TSwitch {
     - TList 行结构固定 (图标/标题/说明), 不支持宿主自定义行渲染 (ListView 行是模型驱动)。
     - TTree 用嵌套声明 + `@children`, 选中态存在 `TTreeLogic` 全局里 (Slint 无实例级 global), 同屏多个树共享一份选中值; 折叠态是分支自己的 `opened`, 不写回模型。
     - TContextMenu 弹层在窗口边缘会被裁剪; 默认触发区会吞掉左键, 交互式触发内容需设 `auto-area: false` 并自行调用 `open-at()`。
-    - 贴窗口边缘的滚动条会被原生拉伸热区抢占命中 (TBorderlessWindow `resize-border`, 默认 8px); 需把条内缩至少 `resize-border` 宽度, 或调小 `resize-border` (gallery 用 4px + 4px 内缩)。
+    - 贴窗口边缘的 TScrollBar 会被原生拉伸热区抢占命中 (TBorderlessWindow `resize-border`, 默认 8px); 设 `thumb-inset` 为 `resize-border` 宽度即可避开, 或调小 `resize-border` (gallery 用 4px + 4px 内缩)。
     - TSplitter 第二栏无最小尺寸约束, 可被拖到 0; 主栏折叠无过渡动画。
     - TPopover 主体是 `title` + `text` 两段文本, 完全自定义主体需用 `TPopupSurface` 自建。
     - TForm 是轻量脚手架: 无校验引擎, help/error 只做状态呈现, 校验逻辑在 Rust 侧。

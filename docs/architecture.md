@@ -11,10 +11,10 @@
 
 ## 统计 (2026-10-24, 第二批落地后)
 
-- 110 个 `.slint` / 16,633 行: `tela-ui/` 97 个 13,757 行, `ui/` 13 个 2,876 行。
+- 111 个 `.slint` / 16,622 行: `tela-ui/` 98 个 13,784 行, `ui/` 13 个 2,838 行。
 - 96 个导出组件 = 83 个 UI 组件 (含私有 TNavLabel) + 8 个服务 overlay + 5 个库内基类 (TStrokedShape / TInputFrame / TModalSurface / TPopupSurface / TPopupStackLayer)。
 - 设计令牌: `TTheme` 151 个顶层转发 → `TAppThemeConfig` 103 字段; 色板在 `colors.slint` (亮/暗两套 ramp); `TIconSet` 46 个字形。
-- 滚动条: `TScrollBar` (scroll-bar.slint, 经 display.slint 公开) 替换 fluent 原生滚动条 — 原生滑块 2px 且贴右缘不居中、颜色为 border 级对比不足; 各滚动面 (TList / TTable / 六个下拉弹层 / 两个菜单 / 命令面板 / gallery 页面滚动) 关原生条 (`vertical-scrollbar-policy: always-off`) 后叠 6px 灰阶胶囊滑块, `content-y` 双向绑定 (Flickable 仍持有所有权)。
+- 滚动条: `TScrollBar` (scroll-bar.slint, 经 display.slint 公开) — 自带视口与滚动进度的滚动容器 (内建 Flickable 视口 + 集成滑块), 替代 std ScrollView, 用于六个下拉弹层 / 两菜单 / 命令面板 / gallery 页面滚动; TList / TTable 保留 ListView 行回收并接内部 `TScrollThumb` (scroll-thumb.slint) 叠加条。
 - 浮层体系: `TPopupSurface` 锚定弹层 + `TPopupStack` 层计数与 ESC + z 序令牌 (`z-popup` / `z-modal` / `z-message`) + 服务型 global (`TDialogService` / `TLoadingService` / `TMessage` / `TNotification` / `TTooltip` / `TImageViewerService` / `TActionSheetService` / `TCommandPaletteService`)。
 
 ## 相关文档

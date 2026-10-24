@@ -18,7 +18,6 @@ import { TInput } from "input.slint";
 import { TPopupSurface } from "../popup-surface.slint";
 import { TScrollBar } from "../scroll-bar.slint";
 import { TSize } from "../structs/enums.slint";
-import { ScrollView } from "std-widgets.slint";
 
 export struct TAutoCompleteItem {
     label: string,
@@ -217,14 +216,10 @@ export component TAutoComplete inherits Rectangle {
         popup-max-width: max(root.width, 160px);
         popup-height: min(root.content-h, root.cap);
 
-        Rectangle {
+        TScrollBar {
         // Content height is pinned explicitly: the stock ScrollView would
         // otherwise keep its own content-size bookkeeping.
-        sv := ScrollView {
-            width: parent.width;
-            height: parent.height;
-            vertical-scrollbar-policy: ScrollBarPolicy.always-off;
-            content-height: root.content-h;
+        content-height: root.content-h;
 
             VerticalLayout {
                 padding: root.pad;
@@ -332,17 +327,6 @@ export component TAutoComplete inherits Rectangle {
                     }
                 }
             }
-        }
-
-        TScrollBar {
-            width: 6px;
-            x: parent.width - self.width;
-            y: 0;
-            height: parent.height;
-            content-length: sv.content-height;
-            viewport-length: sv.visible-height;
-            content-offset <=> sv.content-y;
-        }
         }
     }
 }

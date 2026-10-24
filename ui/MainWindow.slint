@@ -10,7 +10,6 @@ import { TTooltipOverlay, TDialog, TDialogService, TDialogServiceOverlay, TDrawe
 import { TMessageOverlay, TMessage, TNotificationOverlay } from "@tela-ui/notice.slint";
 import { TSideNav, TSideNavItem, TSideNavTogglePosition, TBackTop } from "@tela-ui/navigation.slint";
 import { TScrollBar } from "@tela-ui/scroll-bar.slint";
-import { ScrollView } from "std-widgets.slint";
 
 import { BasicsSection } from "pages/basics.slint";
 import { InputSection } from "pages/input-section.slint";
@@ -114,10 +113,9 @@ export component MainWindow inherits TBorderlessWindow {
             Rectangle {
                 vertical-stretch: 1;
 
-                page-scroll := ScrollView {
-                    // The overlay TScrollBar below replaces the fluent
-                    // native one (same wiring as every library surface).
-                    vertical-scrollbar-policy: ScrollBarPolicy.always-off;
+                page-scroll := TScrollBar {
+                    // Thumb inset clears the 4px native resize strip.
+                    thumb-inset: TTheme.spacing-2;
 
                     VerticalLayout {
                         // Top is 16px, tighter than the 32px page gutters —
@@ -150,18 +148,6 @@ export component MainWindow inherits TBorderlessWindow {
                         // viewport is taller than the content.
                         Rectangle { vertical-stretch: 1; }
                     }
-                }
-
-                TScrollBar {
-                    width: 6px;
-                    // Inset by the 4px resize strip so the bar never sits in
-                    // the native drag-resize hit zone.
-                    x: parent.width - self.width - TTheme.spacing-2;
-                    y: 0;
-                    height: parent.height;
-                    content-length: page-scroll.content-height;
-                    viewport-length: page-scroll.visible-height;
-                    content-offset <=> page-scroll.content-y;
                 }
 
                 // Page-level back-to-top: appears once the gallery page is

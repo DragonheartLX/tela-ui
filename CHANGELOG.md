@@ -16,7 +16,7 @@
 - `TPicker`: 通用滚轮多列选择面板 (纯面板, 无触发器); 每列整列渲染 + 动画偏移 + 行内选中框 (TTimePicker 方案), `value: [int]` 逐列存下标并回写 (请与列数等长初始化; 短模型只有恰好补到末位的拾取能 push 追加), `set-value(col, idx)` 编程写入。
 - `TDateTimePicker`: 日期时间选择, 只读触发器 + 年/月/日/时/分五列滚轮; 日列随年月收放 (TCalendar 同款闰月运算), `TDateTime { date, hour, minute }` 承载选中值, `hour < 0` 表示未选时间。
 - `TOtpInput`: 分段验证码输入 (降级形态), 自动跳格 + 空段退格回退 + 全满 `completed()`; 已填段吞掉后续可打印键 (换字符先退格清除, 方向键/编辑键透传), 每段缓冲全文上报 `changed(i, text)`, 段内溢出与粘贴分发由宿主改写 `values` (Slint 1.18 无 max-length 与字符串切片); 初始聚焦经段自身 init 兜底 (仅靠 root init 的 `changed seq` 会在子段创建前跑完而不聚焦, 探针实测)。
-- `TScrollBar`: 覆盖式滚动条公开组件 (原内部脚手架), 替换 fluent 原生滚动条; 透明轨道 + 6px 全宽胶囊滑块 (构造上居中), 静止 gray-7 / 悬停 gray-6 / 按压 gray-5, 支持拖拽与点击定位, 滚轮穿透; 点击定位与滚轮同步带 duration-base 缓动 (页面平滑滑动), 拖拽即时跟手 (滑块贴指针, 2px 抖动阈值内视为点击); `content-offset` 与滚动区 `content-y` 双向绑定, 宿主自建滚动面可直接使用; gallery 展示页新增介绍卡, 页面滚动与 TBackTop 演示同款接线。
+- `TScrollBar`: 重写为自带视口与滚动进度的滚动容器 (替代 std ScrollView) — `@children` 进内建 Flickable 视口, 滚轮 / 拖拽 / 点击轨道驱动同一 `content-y`, 滑块始终是页面位置的精确映射; 6px 胶囊滑块静止 gray-7 / 悬停 gray-6 / 按压 gray-5, 拖拽即时跟手 (滑块中心对齐指针), 点击轨道 duration-base 缓动定位; `content-height` 默认取子元素首选高 (可钉住), `content-y` 双向暴露 (TBackTop 直绑 / 编程滚动), `thumb-inset` 避开窗口原生拉伸热区, `enabled` 关滑块交互。仅垂直滚动、非虚拟化内容; TList / TTable 保留 ListView 行回收并改接内部 `TScrollThumb` 叠加条 (scroll-thumb.slint, 不在公共出口)。库内全部滚动面已迁移, 展示页介绍卡同步新用法。
 - gallery: 页面切换各自记忆滚动位置 (切走时存 `content-y`, 切回时恢复), 每页独立。
 - `TAvatar`: 短暂加过的 1px 边框移除, 回到 TDesign 无边框样式。
 - `TTable`: 列定义 + 行模型, 表头排序回调 (`sort-changed`), 行点击回调, ListView 虚拟滚动与空态; 列宽超出时水平滚动且表头同步; 排序只上报, 行重排由宿主完成。
@@ -45,7 +45,7 @@
 - `TDateTimePicker`: 日期时间选择, 只读触发器 + 年/月/日/时/分五列滚轮; 日列随年月收放, `TDateTime { date, hour, minute }` 承载选中值, `hour < 0` 表示未选时间。
 - `TOtpInput`: 分段验证码输入, 自动跳格 + 空段退格回退 + 全满 `completed()`; 每段缓冲全文上报 `changed(i, text)`, 粘贴分发由宿主改写 `values`; 初始聚焦经段自身 init 兜底。
 - `TPopover` / `TContextMenu`: 富内容气泡与右键菜单, 复用 TPopupSurface 锚定与显式定位, 点击外部 / ESC 关闭。
-- `TScrollBar`: 库内覆盖式滚动条, 6px 灰阶胶囊滑块全宽居中, 支持拖拽与点击定位, 滚轮穿透到底层滚动区。
+- `TScrollBar`: 自带视口与集成滑块的滚动容器 (见 Unreleased 重写条目)。
 - 组件库: 96 个导出组件 = 83 个 UI 组件 + 8 个服务 overlay (TDialogService / TLoadingService / TMessage / TNotification / TTooltip / TImageViewerService / TActionSheetService / TCommandPaletteService) + 5 个库内基类 (TStrokedShape / TInputFrame / TModalSurface / TPopupSurface / TPopupStackLayer)。
 
 ### Changed

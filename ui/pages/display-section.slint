@@ -7,7 +7,6 @@ import { TTag, TTagVariant, TBadge, TAvatar, TAvatarSize, TAvatarShape, TAvatarG
 import { TMessage } from "@tela-ui/notice.slint";
 import { TScrollBar } from "@tela-ui/display.slint";
 import { TParagraph } from "@tela-ui/base.slint";
-import { ScrollView } from "std-widgets.slint";
 import { GallerySection } from "../gallery-section.slint";
 
 export component DisplaySection inherits VerticalLayout {
@@ -236,36 +235,20 @@ export component DisplaySection inherits VerticalLayout {
     // ====================== TScrollBar ======================
     GallerySection {
         title: "滚动条 TScrollBar";
-        code: "import { TScrollBar } from \"@tela-ui/display.slint\";\n\nRectangle {\n    height: 220px;\n    border-radius: TTheme.radius-medium;\n    border-width: 1px;\n    border-color: TTheme.component-stroke;\n    clip: true;\n\n    sv := ScrollView {\n        width: parent.width;\n        height: parent.height;\n        vertical-scrollbar-policy: ScrollBarPolicy.always-off;\n\n        VerticalLayout {\n            padding: TTheme.padding-lr-l;\n            spacing: TTheme.spacing-3;\n\n            for i in 16: TParagraph { text: \"滚动内容第 \\{i + 1} 行 — 滑块可拖拽、可点击定位。\"; }\n        }\n    }\n\n    TScrollBar {\n        width: 6px;\n        x: parent.width - self.width;\n        y: 0;\n        height: parent.height;\n        content-length: sv.content-height;\n        viewport-length: sv.visible-height;\n        content-offset <=> sv.content-y;\n    }\n}";
+        code: "import { TScrollBar } from \"@tela-ui/display.slint\";\nimport { TParagraph } from \"@tela-ui/base.slint\";\n\n// 自带视口与滚动进度的滚动容器 (替代 ScrollView):\nTScrollBar {\n    height: 220px;\n    border-radius: TTheme.radius-medium;\n    border-width: 1px;\n    border-color: TTheme.component-stroke;\n    clip: true;\n\n    VerticalLayout {\n        padding: TTheme.padding-lr-l;\n        spacing: TTheme.spacing-3;\n\n        for i in 16: TParagraph { text: \"滚动内容第 \\{i + 1} 行 — 滑块可拖拽、可点击定位。\"; }\n    }\n}\n// 滑块: 静止 gray-7, 悬停 gray-6, 按压 gray-5; 拖拽即时跟手\n// (滑块中心对齐指针), 点击轨道缓动定位, 滚轮直滚; 贴窗口边缘\n// 时设 thumb-inset 避开原生拉伸热区。";
 
-        Rectangle {
+        TScrollBar {
             height: 220px;
             border-radius: TTheme.radius-medium;
             border-width: 1px;
             border-color: TTheme.component-stroke;
             clip: true;
 
-            sv := ScrollView {
-                width: parent.width;
-                height: parent.height;
-                vertical-scrollbar-policy: ScrollBarPolicy.always-off;
+            VerticalLayout {
+                padding: TTheme.padding-lr-l;
+                spacing: TTheme.spacing-3;
 
-                VerticalLayout {
-                    padding: TTheme.padding-lr-l;
-                    spacing: TTheme.spacing-3;
-
-                    for i in 16: TParagraph { text: "滚动内容第 \{i + 1} 行 — 滑块可拖拽、可点击定位。"; }
-                }
-            }
-
-            TScrollBar {
-                width: 6px;
-                x: parent.width - self.width;
-                y: 0;
-                height: parent.height;
-                content-length: sv.content-height;
-                viewport-length: sv.visible-height;
-                content-offset <=> sv.content-y;
+                for i in 16: TParagraph { text: "滚动内容第 \{i + 1} 行 — 滑块可拖拽、可点击定位。"; }
             }
         }
     }

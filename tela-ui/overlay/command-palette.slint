@@ -365,17 +365,7 @@ export component TCommandPaletteOverlay inherits TModalSurface {
                             }
                         }
                     }
-                }
-
-                TScrollBar {
-                    width: 6px;
-                    x: parent.width - self.width;
-                    y: 0;
-                    height: parent.height;
-                    content-length: sv.content-height;
-                    viewport-length: sv.visible-height;
-                    content-offset <=> sv.content-y;
-                }
+            }
             }
 
             // `active-index` names the first match, so a negative one is
