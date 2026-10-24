@@ -141,7 +141,7 @@ export component OverlaySection inherits VerticalLayout {
     // ======================== TDrawer =======================
     GallerySection {
         title: "抽屉 TDrawer";
-        code: "import { TDrawer } from \"@tela-ui/overlay.slint\";\n\n// 窗口根部:\nTDrawer {\n    open <=> open;\n    placement: TDrawerPlacement.right;\n    title: \"抽屉标题\";\n    TParagraph { text: \"面板主体由子元素提供\"; }\n}";
+        code: "import { TDrawer, TDrawerPlacement } from \"@tela-ui/overlay.slint\";\n\nTDrawer {\n    open <=> root.drawer-open;\n    placement <=> root.drawer-placement;\n    title: \"抽屉标题\";\n\n    TParagraph { text: \"这是 Tela UI 的抽屉组件,从窗口边缘滑出,适合放置表单、详情等较大面积的临时内容。\"; }\n    TButton {\n        variant: TButtonVariant.outline;\n        text: \"关闭抽屉\";\n        clicked => { root.drawer-open = false; }\n    }\n}";
 
         HorizontalLayout {
             spacing: 12px;
@@ -163,7 +163,7 @@ export component OverlaySection inherits VerticalLayout {
     // ==================== TImageViewer ====================
     GallerySection {
         title: "图片预览 TImageViewer";
-        code: "import { TImageViewerService, TImageViewerOverlay } from \"@tela-ui/overlay.slint\";\n\n// 窗口根部放置一次:\nTImageViewerOverlay { max-zoom: 4; thumbnails: true; }\n\n// 任意代码调用:\nTImageViewerService.open([@image-url(\"a.svg\"), @image-url(\"b.svg\")], 0);\n\n// 切换监听 (change-seq + current-index):\nprivate property <int> n: TImageViewerService.change-seq;\nchanged n => { /* 第 current-index + 1 张 */ }";
+        code: "import { TImageViewerOverlay } from \"@tela-ui/overlay.slint\";\n\nTImageViewerOverlay { }";
 
         HorizontalLayout {
             spacing: 12px;
@@ -204,7 +204,7 @@ export component OverlaySection inherits VerticalLayout {
     // ======================= TPopconfirm ====================
     GallerySection {
         title: "气泡确认 TPopconfirm";
-        code: "import { TPopconfirm } from \"@tela-ui/overlay.slint\";\n\nTPopconfirm {\n    text: \"确定删除吗?\";\n    confirm => { … }\n    TButton { text: \"删除\"; clicked => pc.toggle(); } // auto-open: false\n}";
+        code: "import { TPopconfirm, TPopupPlacement } from \"@tela-ui/overlay.slint\";\n\npc := TPopconfirm {\n    auto-open: false;\n    text: \"确定删除这条数据吗?\";\n    confirm => { TMessage.success(\"已删除\"); }\n    cancel => { TMessage.info(\"已取消\"); }\n\n    TButton {\n        theme: TThemeRole.error;\n        variant: TButtonVariant.outline;\n        text: \"删除\";\n        clicked => { pc.toggle(); }\n    }\n}\n\nTPopconfirm {\n    text: \"确认提交表单吗?\";\n    placement: TPopupPlacement.bottom-start;\n\n    Rectangle {\n        width: 120px;\n        height: TTheme.height-m;\n        background: TTheme.bg-color-secondarycontainer;\n        border-radius: TTheme.radius-default;\n\n        TText {\n            text: \"点击确认\";\n            font-size: TTheme.font-size-m;\n            color: TTheme.text-color-secondary;\n            horizontal-alignment: center;\n            vertical-alignment: center;\n        }\n    }\n}";
 
         HorizontalLayout {
             spacing: 24px;
@@ -298,7 +298,7 @@ export component OverlaySection inherits VerticalLayout {
     // ======================== Tooltip ======================
     GallerySection {
         title: "气泡提示 Tooltip";
-        code: "import { TTooltipArea, TTooltipOverlay } from \"@tela-ui/overlay.slint\";\n\n// 窗口根部放置一次:\nTTooltipOverlay { }\n\nTTooltipArea {\n    text: \"提示\"; placement: TTooltipPlacement.top;\n    Text { text: \"目标\"; }\n}";
+        code: "import { TTooltipArea, TTooltipPlacement } from \"@tela-ui/overlay.slint\";\n\nTTooltipArea {\n    width: 120px;\n    height: TTheme.height-m;\n    background: TTheme.bg-color-secondarycontainer;\n    border-radius: TTheme.radius-default;\n    text: \"我是 Tooltip, 鼠标移开即消失, 250ms 延迟出现\";\n    placement: TTooltipPlacement.top;\n\n    TText {\n        text: \"上方提示\";\n        font-size: TTheme.font-size-m;\n        color: TTheme.text-color-secondary;\n        horizontal-alignment: center;\n        vertical-alignment: center;\n    }\n}\n\nTTooltipArea {\n    width: 120px;\n    height: TTheme.height-m;\n    background: TTheme.bg-color-secondarycontainer;\n    border-radius: TTheme.radius-default;\n    text: \"placement: TTooltipPlacement.bottom\";\n    placement: TTooltipPlacement.bottom;\n\n    TText {\n        text: \"下方提示\";\n        font-size: TTheme.font-size-m;\n        color: TTheme.text-color-secondary;\n        horizontal-alignment: center;\n        vertical-alignment: center;\n    }\n}";
 
         HorizontalLayout {
             spacing: 24px;

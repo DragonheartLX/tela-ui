@@ -61,7 +61,7 @@ export component DateTimeSection inherits VerticalLayout {
     // ======================== TDatePicker ===================
     GallerySection {
         title: "日期选择 TDatePicker";
-        code: "import { TDatePicker } from \"@tela-ui/date-time.slint\";\n\nTDatePicker { width: 240px; value <=> date; }\nTDatePicker { width: 260px; range: true; range-start <=> a; range-end <=> b; }";
+        code: "import { TDatePicker } from \"@tela-ui/date-time.slint\";\n\nTDatePicker {\n    width: 240px;\n    today: root.demo-today;\n    value <=> root.picker-date;\n}\n\nTDatePicker {\n    width: 280px;\n    range: true;\n    today: root.demo-today;\n    range-start <=> root.picker-range-start;\n    range-end <=> root.picker-range-end;\n}";
 
         VerticalLayout {
             spacing: 16px;
@@ -122,7 +122,7 @@ export component DateTimeSection inherits VerticalLayout {
     // ========================= TPicker ======================
     GallerySection {
         title: "滚轮选择面板 TPicker";
-        code: "import { TPicker } from \"@tela-ui/date-time.slint\";\n\n// 纯面板组件 (无触发器): 联合显示文本要宿主拼\nTPicker {\n    columns: [\n        { label: \"省\", options: [\"浙江省\", \"江苏省\"] },\n        { label: \"市\", options: [\"杭州市\", \"宁波市\"] },\n    ];\n    value <=> idx;   // 每列选中下标, 需与列数等长\n    changed() => { … }\n}";
+        code: "import { TPicker } from \"@tela-ui/date-time.slint\";\n\nTPicker {\n    columns: [\n        { label: \"省\", options: [\"浙江省\", \"江苏省\", \"广东省\"] },\n        { label: \"市\", options: [\"杭州市\", \"宁波市\", \"南京市\", \"苏州市\"] },\n        { label: \"运营商\", options: [\"移动\", \"联通\", \"电信\"] },\n    ];\n    value <=> root.picker-values;\n}";
 
         VerticalLayout {
             spacing: 16px;
@@ -149,7 +149,7 @@ export component DateTimeSection inherits VerticalLayout {
     // ====================== TDateTimePicker =================
     GallerySection {
         title: "日期时间选择 TDateTimePicker";
-        code: "import { TDateTimePicker, TDateTime } from \"@tela-ui/date-time.slint\";\n\nTDateTimePicker {\n    width: 280px;\n    start-year: 2000; end-year: 2100;\n    value <=> dt;    // { date: TDate, hour, minute }\n    changed(v) => { … }\n}";
+        code: "import { TDateTimePicker } from \"@tela-ui/date-time.slint\";\n\nTDateTimePicker {\n    width: 300px;\n    value <=> root.datetime-value;\n}\n\nTDateTimePicker {\n    width: 300px;\n    disabled: true;\n    value: {\n        date: { year: 2026, month: 10, day: 20 },\n        hour: 9,\n        minute: 30,\n    };\n}";
 
         VerticalLayout {
             spacing: 16px;

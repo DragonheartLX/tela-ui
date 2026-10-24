@@ -102,7 +102,7 @@ export component BasicsSection inherits VerticalLayout {
     // ==================== Typography ======================
     GallerySection {
         title: "排版 Typography";
-        code: "import { THeading, TParagraph, TCaption } from \"@tela-ui/base.slint\";\n\nTHeading { level: 1; text: \"一级标题\"; }\nTParagraph { text: \"正文内容,wrap: word-wrap 自动换行。\"; }\nTCaption { text: \"辅助说明文字\"; }";
+        code: "import { THeading, TParagraph, TCaption } from \"@tela-ui/base.slint\";\n\nTHeading { level: 1; text: \"一级标题 THeading 1\"; }\nTHeading { level: 2; text: \"二级标题 THeading 2\"; }\nTHeading { level: 3; text: \"三级标题 THeading 3\"; }\nTHeading { level: 4; text: \"四级标题 THeading 4\"; }\nTHeading { level: 5; text: \"五级标题 THeading 5\"; }\nTParagraph {\n    max-width: 640px;\n    text: \"Tela UI 是一套参考 TDesign 设计规范的 Slint 第三方组件库,提供主题令牌、基础组件与常用组件,支持亮暗双主题实时切换。\";\n}\nTCaption { text: \"这是辅助说明文字(TCaption)。\"; }";
 
         VerticalLayout {
             spacing: 8px;
@@ -123,7 +123,7 @@ export component BasicsSection inherits VerticalLayout {
     // ======================= TDivider ======================
     GallerySection {
         title: "分割线 TDivider";
-        code: "import { TDivider } from \"@tela-ui/base.slint\";\n\nTDivider { text: \"居中文字\"; }\nTDivider { text: \"左方文字\"; align: TDividerAlign.left; }\nTDivider { orientation: Orientation.vertical; }";
+        code: "import { TDivider, TDividerAlign } from \"@tela-ui/base.slint\";\n\nTDivider { text: \"居中文字\"; }\nTDivider { text: \"左方文字\"; align: TDividerAlign.left; }\nTDivider { text: \"右方文字\"; align: TDividerAlign.right; }\nTDivider { }";
 
         VerticalLayout {
             spacing: 4px;
@@ -138,7 +138,7 @@ export component BasicsSection inherits VerticalLayout {
     // ======================= TLoading ======================
     GallerySection {
         title: "加载 TLoading";
-        code: "import { TLoading } from \"@tela-ui/base.slint\";\n\nTLoading { size: 24px; text: \"加载中…\"; }\nTLoading { size: 32px; theme: TThemeRole.success; }";
+        code: "import { TLoading } from \"@tela-ui/base.slint\";\n\nTLoading { size: 16px; horizontal-stretch: 0; }\nTLoading { size: 24px; text: \"加载中…\"; horizontal-stretch: 0; }\nTLoading { size: 32px; theme: TThemeRole.success; text: \"上传中…\"; horizontal-stretch: 0; }";
 
         HorizontalLayout {
             spacing: 28px;

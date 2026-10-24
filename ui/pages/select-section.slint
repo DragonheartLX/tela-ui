@@ -37,7 +37,7 @@ export component SelectSection inherits VerticalLayout {
     // ======================== TSelect =======================
     GallerySection {
         title: "选择器 TSelect";
-        code: "import { TSelect } from \"@tela-ui/select.slint\";\n\nTSelect {\n    items: [{ label: \"北京\", value: \"bj\" }, …];\n    placeholder-text: \"请选择城市\";\n    current-value <=> city;\n}";
+        code: "import { TSelect } from \"@tela-ui/select.slint\";\n\nTSelect {\n    width: 240px;\n    placeholder-text: \"请选择城市\";\n    items: root.city-items;\n    current-value <=> root.city-value;\n}";
 
         HorizontalLayout {
             spacing: 24px;
@@ -57,7 +57,7 @@ export component SelectSection inherits VerticalLayout {
     // ======================= TCheckBox ======================
     GallerySection {
         title: "复选框 TCheckBox";
-        code: "import { TCheckBox } from \"@tela-ui/select.slint\";\n\nTCheckBox { text: \"选项 A\"; checked <=> a; }\nTCheckBox { text: \"全选\"; indeterminate: a != b; }";
+        code: "import { TCheckBox } from \"@tela-ui/select.slint\";\n\nTCheckBox {\n    text: \"全选\";\n    indeterminate: root.check-a != root.check-b;\n    checked: root.check-a && root.check-b;\n\n    changed(c) => { root.check-a = c; root.check-b = c; }\n}\nTCheckBox { text: \"选项 A\"; checked <=> root.check-a; }\nTCheckBox { text: \"选项 B\"; checked <=> root.check-b; }\nTCheckBox { text: \"禁用\"; disabled: true; }\nTCheckBox { text: \"选中禁用\"; checked: true; disabled: true; }";
 
         HorizontalLayout {
             spacing: 24px;
@@ -128,7 +128,7 @@ export component SelectSection inherits VerticalLayout {
     // ====================== TSelectInput ====================
     GallerySection {
         title: "可输入筛选选择 TSelectInput";
-        code: "import { TSelectInput } from \"@tela-ui/select.slint\";\n\nTSelectInput {\n    items: [{ label: \"北京\", value: \"bj\" }, …];\n    placeholder-text: \"输入或选择城市\";\n    text <=> text;       // 输入态文本\n    current-index <=> i; // 选中下标\n    selected(i, value) => { … }\n}";
+        code: "import { TSelectInput } from \"@tela-ui/select.slint\";\n\nTSelectInput {\n    width: 240px;\n    placeholder-text: \"输入或选择城市\";\n    items: root.city-items;\n    text <=> root.select-input-text;\n    current-index <=> root.select-input-index;\n}\n\nTSelectInput {\n    width: 240px;\n    placeholder-text: \"禁用状态\";\n    items: root.city-items;\n    disabled: true;\n}";
 
         VerticalLayout {
             spacing: 16px;
@@ -161,7 +161,7 @@ export component SelectSection inherits VerticalLayout {
     // ======================= TTreeSelect ====================
     GallerySection {
         title: "树选择 TTreeSelect";
-        code: "import { TTreeSelect, TTreeItem, TTreeBranch } from \"@tela-ui/select.slint\";\n\nTTreeSelect {\n    placeholder-text: \"请选择节点\";\n    selected(value) => { … }\n\n    // 子节点声明在这里, 进入下拉面板:\n    TTreeItem { label: \"概览\"; value: \"overview\"; }\n    TTreeBranch { label: \"文件\"; TTreeItem { label: \"a.txt\"; value: \"a\"; } }\n}";
+        code: "import { TTreeSelect } from \"@tela-ui/select.slint\";\nimport { TTreeItem, TTreeBranch } from \"@tela-ui/content.slint\";\n\nTTreeSelect {\n    width: 240px;\n    placeholder-text: \"请选择节点\";\n\n    selected(v) => { root.tree-select-value = v; }\n\n    TTreeItem { label: \"概览\"; value: \"overview\"; }\n    TTreeItem { label: \"统计\"; value: \"stats\"; }\n\n    TTreeBranch {\n        label: \"文件\";\n        opened: true;\n        TTreeItem { label: \"文件 1.txt\"; value: \"file-1\"; }\n        TTreeItem { label: \"文件 2.txt\"; value: \"file-2\"; }\n    }\n\n    TTreeBranch {\n        label: \"设置\";\n        TTreeItem { label: \"外观\"; value: \"appearance\"; }\n        TTreeItem { label: \"禁用项\"; value: \"disabled-node\"; enabled: false; }\n    }\n}";
 
         VerticalLayout {
             spacing: 16px;
@@ -198,7 +198,7 @@ export component SelectSection inherits VerticalLayout {
     // ======================== TCascader =====================
     GallerySection {
         title: "级联选择 TCascader";
-        code: "import { TCascader, TCascaderItem, TCascaderBranch, TCascaderLogic } from \"@tela-ui/select.slint\";\n\nTCascader {\n    placeholder-text: \"请选择地区\";\n    selected(value) => { … }\n\n    TCascaderBranch { label: \"浙江省\"; TCascaderBranch { label: \"杭州市\";\n        TCascaderItem { label: \"西湖区\"; value: \"xihu\"; } } }\n    TCascaderBranch { label: \"江苏省\"; TCascaderItem { label: \"南京市\"; value: \"nanjing\"; } }\n}\n\n// 读选中: TCascaderLogic.current-value";
+        code: "import { TCascader, TCascaderItem, TCascaderBranch } from \"@tela-ui/select.slint\";\n\nTCascader {\n    width: 240px;\n    placeholder-text: \"请选择地区\";\n\n    selected(v) => { root.cascader-value = v; }\n\n    TCascaderBranch {\n        label: \"浙江省\";\n        opened: true;\n\n        TCascaderBranch {\n            label: \"杭州市\";\n            TCascaderItem { label: \"西湖区\"; value: \"xihu\"; }\n            TCascaderItem { label: \"余杭区\"; value: \"yuhang\"; }\n        }\n\n        TCascaderBranch {\n            label: \"宁波市\";\n            TCascaderItem { label: \"海曙区\"; value: \"haishu\"; }\n        }\n    }\n\n    TCascaderBranch {\n        label: \"江苏省\";\n        TCascaderItem { label: \"南京市\"; value: \"nanjing\"; }\n        TCascaderItem { label: \"苏州市\"; value: \"suzhou\"; }\n    }\n}";
 
         VerticalLayout {
             spacing: 16px;

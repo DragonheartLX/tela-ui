@@ -48,3 +48,4 @@ slint-viewer -L "tela-ui=$PWD\tela-ui" --screenshot out-light.png --size 1200x80
 20. 量"列表滚到哪"别用逐行墨迹*计数*做互相关 —— 在 44px 这类行距上会混叠出假位移(实测报出过假的 36px); 改量每行墨迹的*范围*(最右墨迹 x / 最深可见行号)。
 21. 量"缩放"用画面非遮罩包围盒即可, 但要把工具条/芯片所在的行带排除, 并且留意悬停中的图标会变品牌色, 其抗锯齿光晕会被"蓝色系"谓词误判 —— 谓词里加红通道上限或按行带排除。
 22. 一次 `set_platform` 只能建一个平台; 全部场景共用它, 每个 scenario 各自 `Probe::new()`, 场景之间把所有 overlay 关干净(探针里加"栈已空"断言), 否则上一场景的残留状态会污染下一场景。
+23. testing 后端的合成指针事件 (`Window::dispatch_event(PointerPressed/…)`) 只能命中 Window 的**直接**子元素 — 嵌套在子 Rectangle 里的 TouchArea 一律 `Rejected`(实测 even take_snapshot 强制绘制后依旧)。要驱动嵌套组件的交互逻辑, 别走事件派发: 在探针包装组件里加 `public function` 直接调组件的公开函数或直接写它的属性 (同一代码路径), 再用 `mock_elapsed_time` 分段采样断言动画曲线。

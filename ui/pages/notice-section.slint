@@ -129,7 +129,7 @@ export component NoticeSection inherits VerticalLayout {
     // ======================== TProgress =====================
     GallerySection {
         title: "进度 TProgress(拖动滑块实时变化)";
-        code: "import { TProgress } from \"@tela-ui/notice.slint\";\n\nTProgress { value: 40; theme: TThemeRole.primary; }\nTProgress { value: 66; theme: TThemeRole.success; variant: TProgressVariant.circle; }\nTProgress { value: 90; theme: TThemeRole.error; show-label: false; }\n// 默认数值直通; 一次性跳变想要缓动就打开:\nTProgress { value: v; animated: true; }";
+        code: "import { TProgress, TProgressVariant } from \"@tela-ui/notice.slint\";\n\nTProgress {\n    value: root.progress-value;\n    theme: TThemeRole.primary;\n    horizontal-stretch: 1;\n    animated: root.progress-animated;\n}\nTProgress { value: 66; theme: TThemeRole.success; horizontal-stretch: 1; }\nTProgress { value: 30; theme: TThemeRole.warning; horizontal-stretch: 1; }\nTProgress { value: 90; theme: TThemeRole.error; horizontal-stretch: 1; show-label: false; }\n\nTProgress {\n    variant: TProgressVariant.circle;\n    value: root.progress-value;\n    theme: TThemeRole.primary;\n    animated: root.progress-animated;\n}\nTProgress { variant: TProgressVariant.circle; value: 66; theme: TThemeRole.success; }\nTProgress { variant: TProgressVariant.circle; value: 30; theme: TThemeRole.warning; }\nTProgress { variant: TProgressVariant.circle; value: 100; theme: TThemeRole.error; }\n\nTSlider { value <=> root.progress-value; }\n\nTSwitch { checked <=> root.progress-animated; }";
 
         VerticalLayout {
             spacing: 16px;

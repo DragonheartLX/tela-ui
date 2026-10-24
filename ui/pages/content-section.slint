@@ -44,7 +44,7 @@ export component ContentSection inherits VerticalLayout {
     // ========================= TTable =======================
     GallerySection {
         title: "表格 TTable";
-        code: "import { TTable, TTableAlign } from \"@tela-ui/content.slint\";\n\nTTable {\n    height: 360px;\n    columns: [\n        { title: \"组件\", width: 160px },\n        { title: \"行数\", width: 0px, align: TTableAlign.right, sortable: true },\n    ];\n    rows: [{ cells: [\"TButton\", \"42\"] }, …];\n    sort-changed(column, direction) => { /* 宿主重排 rows */ };\n}";
+        code: "import { TTable, TTableAlign } from \"@tela-ui/content.slint\";\n\nTTable {\n    height: 340px;\n    columns: [\n        { title: \"组件\", width: 200px },\n        { title: \"类别\", width: 140px },\n        { title: \"代码行数\", width: 180px, align: TTableAlign.right, sortable: true },\n        { title: \"说明\", width: 520px },\n        { title: \"维护\", width: 160px },\n    ];\n    rows: [\n        { cells: [\"TButton\", \"基础\", \"155\", \"主要操作按钮\", \"基础组\"] },\n        { cells: [\"TSelect\", \"选择\", \"195\", \"下拉选择器\", \"选择组\"] },\n        { cells: [\"TTable\", \"内容\", \"240\", \"列定义 + 行模型, 表头排序\", \"内容组\"] },\n        { cells: [\"TDialog\", \"浮层\", \"125\", \"模态对话框\", \"浮层组\"] },\n        { cells: [\"TCarousel\", \"内容\", \"152\", \"走马灯\", \"内容组\"] },\n        { cells: [\"TTooltipArea\", \"浮层\", \"194\", \"悬停气泡\", \"浮层组\"] },\n    ];\n}\n\nTTable {\n    height: 160px;\n    columns: [\n        { title: \"任务\", width: 0px },\n        { title: \"负责人\", width: 120px },\n        { title: \"状态\", width: 100px },\n    ];\n    empty-text: \"暂无任务\";\n}";
 
         VerticalLayout {
             spacing: 16px;
@@ -88,7 +88,7 @@ export component ContentSection inherits VerticalLayout {
     // ======================== TCarousel =====================
     GallerySection {
         title: "走马灯 TCarousel";
-        code: "import { TCarousel } from \"@tela-ui/content.slint\";\n\nTCarousel {\n    height: 240px;\n    autoplay: true;\n    items: [{ image: @image-url(\"slide-1.svg\") }, …];\n}";
+        code: "import { TCarousel } from \"@tela-ui/content.slint\";\n\nTCarousel {\n    height: 240px;\n    autoplay: true;\n    interval: 3s;\n    items: [\n        { image: @image-url(\"../assets/slide-1.svg\") },\n        { image: @image-url(\"../assets/slide-2.svg\") },\n        { image: @image-url(\"../assets/slide-3.svg\") },\n    ];\n}";
 
         TCarousel {
             height: 240px;
@@ -104,7 +104,7 @@ export component ContentSection inherits VerticalLayout {
     // ========================= TTree ========================
     GallerySection {
         title: "树形控件 TTree";
-        code: "import { TTree, TTreeBranch, TTreeItem, TTreeLogic } from \"@tela-ui/content.slint\";\n\n// 嵌套声明: 分支自带折叠 (clip + 高度动画), 子节点经 @children 放入。\n// 选中值放在 TTreeLogic 全局, 树里不写模型。\nTTree {\n    TTreeItem { label: \"概览\"; value: \"overview\"; }\n\n    TTreeBranch {\n        label: \"文件\";\n        opened: true;\n        TTreeItem { label: \"文件 1.txt\"; value: \"f1\"; }\n    }\n}\n\n// 读/写选中:\n// TTreeLogic.current-value = \"overview\";";
+        code: "import { TTree, TTreeItem, TTreeBranch } from \"@tela-ui/content.slint\";\n\nTTree {\n    width: 220px;\n\n    TTreeItem { label: \"概览\"; value: \"overview\"; }\n    TTreeItem { label: \"统计\"; value: \"stats\"; }\n\n    TTreeBranch {\n        label: \"文件\";\n        opened: true;\n        TTreeItem { label: \"文件 1.txt\"; value: \"file-1\"; icon: TIconSet.File; }\n        TTreeItem { label: \"文件 2.txt\"; value: \"file-2\"; icon: TIconSet.File; }\n\n        TTreeBranch {\n            label: \"子文件夹\";\n            opened: true;\n            TTreeItem { label: \"文件 3.txt\"; value: \"file-3\"; icon: TIconSet.File; }\n        }\n    }\n\n    TTreeBranch {\n        label: \"设置\";\n        TTreeItem { label: \"外观\"; value: \"appearance\"; }\n        TTreeItem { label: \"禁用项\"; value: \"disabled-node\"; enabled: false; }\n    }\n\n    TTreeItem { label: \"关于\"; value: \"about\"; }\n}";
 
         HorizontalLayout {
             spacing: 24px;
@@ -147,7 +147,7 @@ export component ContentSection inherits VerticalLayout {
     // ========================= TList ========================
     GallerySection {
         title: "列表 TList";
-        code: "import { TList } from \"@tela-ui/content.slint\";\n\nTList {\n    height: 240px;          // 固定视口, 行回收由 ListView 完成\n    selectable: true;\n    current-index <=> i;\n    items: [{ text: \"标题\", description: \"说明\", icon: … }, …];\n    row-clicked(i) => { … }\n}";
+        code: "import { TList } from \"@tela-ui/content.slint\";\n\nTList {\n    width: 320px;\n    height: 240px;\n    selectable: true;\n    current-index <=> root.list-index;\n    items: [\n        { text: \"收件箱\", description: \"12 封未读\" },\n        { text: \"已加星标\", description: \"3 封\" },\n        { text: \"已发送\", icon: TIconSet.Mail },\n        { text: \"草稿箱\", description: \"1 封\", disabled: true },\n        { text: \"垃圾邮件\" },\n        { text: \"已删除\" },\n        { text: \"归档\" },\n    ];\n}\n\nTList {\n    width: 320px;\n    height: 144px;\n    items: [\n        { text: \"暂无描述的列表\" },\n        { text: \"只有标题也可以\" },\n        { text: \"空态看另一个\" },\n    ];\n    empty-text: \"列表为空\";\n}";
 
         VerticalLayout {
             spacing: 16px;
@@ -192,7 +192,7 @@ export component ContentSection inherits VerticalLayout {
     // ======================= TSplitter =======================
     GallerySection {
         title: "分栏 TSplitter";
-        code: "import { TSplitter, TSplitterPane, TSplitterPanePrimary } from \"@tela-ui/content.slint\";\n\nTSplitter {\n    height: 220px;\n    TSplitterPanePrimary {   // 第一栏: 自带拖拽条与折叠钮\n        size: 240px; min-size: 120px; collapsible: true;\n        changed(s) => { … }\n        Rectangle { … }\n    }\n    TSplitterPane { Rectangle { … } } // 第二栏: 填满剩余\n}\n// 垂直分栏: TSplitterVertical + TSplitterPanePrimaryVertical";
+        code: "import { TSplitter, TSplitterVertical, TSplitterPane,\n    TSplitterPanePrimary, TSplitterPanePrimaryVertical } from \"@tela-ui/content.slint\";\n\nTSplitter {\n    horizontal-stretch: 1;\n\n    TSplitterPanePrimary {\n        size: 240px;\n        min-size: 120px;\n        collapsible: true;\n\n        changed(s) => {\n            root.pane-size = \"\\{round(s / 1px)}px\";\n        }\n\n        Rectangle {\n            background: TTheme.bg-color-secondarycontainer;\n            border-radius: TTheme.radius-medium;\n\n            TText {\n                text: \"第一栏\\n拖边缘 / 点圆钮折叠\";\n                color: TTheme.text-color-secondary;\n                horizontal-alignment: center;\n                vertical-alignment: center;\n                wrap: word-wrap;\n            }\n        }\n    }\n\n    TSplitterPane {\n        Rectangle {\n            background: TTheme.bg-color-container;\n            border-width: 1px;\n            border-color: TTheme.component-stroke;\n            border-radius: TTheme.radius-medium;\n\n            TText {\n                text: \"第二栏 (填满剩余)\";\n                color: TTheme.text-color-secondary;\n                horizontal-alignment: center;\n                vertical-alignment: center;\n            }\n        }\n    }\n}\n\nTSplitterVertical {\n    width: 180px;\n\n    TSplitterPanePrimaryVertical {\n        size: 96px;\n        min-size: 48px;\n        collapsible: true;\n\n        Rectangle {\n            background: TTheme.bg-color-secondarycontainer;\n            border-radius: TTheme.radius-medium;\n\n            TText {\n                text: \"垂直第一栏\";\n                color: TTheme.text-color-secondary;\n                horizontal-alignment: center;\n                vertical-alignment: center;\n            }\n        }\n    }\n\n    TSplitterPane {\n        Rectangle {\n            background: TTheme.bg-color-container;\n            border-width: 1px;\n            border-color: TTheme.component-stroke;\n            border-radius: TTheme.radius-medium;\n\n            TText {\n                text: \"垂直第二栏\";\n                color: TTheme.text-color-secondary;\n                horizontal-alignment: center;\n                vertical-alignment: center;\n            }\n        }\n    }\n}";
 
         VerticalLayout {
             spacing: 16px;
