@@ -1,0 +1,158 @@
+// Tela UI — TAnchor
+//
+// Anchor navigation: a rail of links that tracks the scroll position.
+// Each item points at a document-space y (`target-y`, ascending); the
+// last target that crossed `offset-top` is the current anchor (-1 while
+// above the first target). Clicking (or `goto(i)`) glides the bound view
+// so the target lands at `offset-top`, clamped to [0, max-scroll]; the
+// glide is timer-driven and aborted by any user scrolling in between.
+// Place it beside the scroller and two-way bind `content-y`:
+//   sv := TScrollBar { ... }
+//   TAnchor {
+//       items: [{ label: "概览", target-y: 0px }, ...];
+//       max-scroll: sv.content-height - sv.height;
+//       content-y <=> sv.content-y;
+//   }
+// Finding the current anchor has no loop available (1.18), so each row
+// computes its own active state from its target and its successor's.
+
+import { TTheme } from "../theme.slint";
+import { TText } from "../base/typography.slint";
+
+export struct TAnchorItem {
+    label: string,
+    // Document-space top of the section; ascending order.
+    target-y: length,
+}
+
+// One row: a 12px link plus the per-row bookkeeping TNavLabel-style rows
+// cannot hold. Transitions relay to the host wiring via `toggled`.
+component AnchorRow inherits Rectangle {
+    in property <string> label;
+    in property <bool> active;
+
+    callback toggled(bool);
+    callback clicked();
+
+    // `changed` skips the initial binding evaluation, so a row that is
+    // already active at mount reports itself once via init.
+    init => {
+        if (self.active) { self.toggled(self.active); }
+    }
+
+    changed active => { self.toggled(self.active); }
+
+    t := TText {
+        x: TTheme.padding-lr-m;
+        width: parent.width - TTheme.padding-lr-m;
+        height: parent.height;
+        text: root.label;
+        overflow: elide;
+        font-size: TTheme.font-size-s;
+        line-height: TTheme.line-height-s;
+        vertical-alignment: center;
+        color: root.active ? TTheme.brand-color
+            : ta.has-hover ? TTheme.text-color-primary : TTheme.text-color-secondary;
+        animate color { duration: TTheme.duration-fast; }
+    }
+
+    ta := TouchArea {
+        mouse-cursor: MouseCursor.pointer;
+        clicked => { root.clicked(); }
+    }
+}
+
+export component TAnchor inherits Rectangle {
+    in property <[TAnchorItem]> items;
+    // Two-way bind to the target scroller's content-y.
+    in-out property <length> content-y;
+    // A section becomes current once its target-y crosses this viewport
+    // line (set it to the sticky header height when headers overlay).
+    in property <length> offset-top: 0px;
+    // Largest allowed downward scroll (bind scroller content-height minus
+    // viewport height); clicking the last anchors clamps into it. The
+    // default is effectively unbounded.
+    in property <length> max-scroll: 1000000000px;
+    // Index of the current anchor, -1 while above the first target.
+    out property <int> current: -1;
+
+    callback changed(int);
+
+    // 32px click rows (height-m) so the rail is a comfortable target.
+    private property <length> row-h: TTheme.height-m;
+    height: Math.max(0, root.items.length) * root.row-h;
+
+    // Whether section i's target has crossed the viewport line.
+    pure function passed(i: int) -> bool {
+        return root.items[i].target-y + root.content-y <= root.offset-top;
+    }
+
+    for it[i] in root.items: AnchorRow {
+        x: 0;
+        y: i * root.row-h;
+        width: parent.width;
+        height: root.row-h;
+        label: it.label;
+        active: root.passed(i) && (i == root.items.length - 1 || !root.passed(i + 1));
+
+        accessible-role: AccessibleRole.text;
+        accessible-label: it.label;
+        accessible-action-default => { root.goto(i); }
+
+        // Exactly one row reports on each boundary crossing; the reset
+        // guard rechecks the scroll position so it cannot race the row
+        // that just became active.
+        toggled(a) => {
+            if (a) {
+                root.current = i;
+                root.changed(i);
+            } else if (i == 0 && !root.passed(0)) {
+                root.current = -1;
+                root.changed(-1);
+            }
+        }
+
+        clicked => { root.goto(i); }
+    }
+
+    // Eased jump. `animate content-y` cannot be used here: the Flickable
+    // removes the binding on every pointer press (flickable.rs "Stop
+    // animation by removing the binding"), and the press that opens this
+    // click kills it before the write. So the glide is a Timer writing
+    // plain values each frame; the short glide overrides other writes
+    // instead of aborting on them.
+    private property <bool> gliding: false;
+    private property <length> glide-from: 0px;
+    private property <length> glide-to: 0px;
+    private property <float> glide-pos: 1;
+
+    glide := Timer {
+        // 16ms frame step; 0.08 ≈ 16ms / duration-base(200ms).
+        interval: 16ms;
+        running: root.gliding;
+
+        // The glide wins over any write in between (wheel momentum and
+        // other residue made abort-on-foreign-write stop mid-way in real
+        // windows); it is short enough that overriding feels fine.
+        triggered => {
+            root.glide-pos = Math.min(1, root.glide-pos + 0.08);
+            // ease-out cubic
+            let k = 1 - (1 - root.glide-pos) * (1 - root.glide-pos) * (1 - root.glide-pos);
+            root.content-y = root.glide-from + (root.glide-to - root.glide-from) * k;
+            if (root.glide-pos >= 1) {
+                root.gliding = false;
+            }
+        }
+    }
+
+    // Scroll so the target lands at `offset-top`, clamped to [0, max-scroll].
+    public function goto(i: int) {
+        if (i >= 0 && i < root.items.length) {
+            root.glide-from = root.content-y;
+            root.glide-to = -Math.max(0px,
+                Math.min(root.max-scroll, root.items[i].target-y - root.offset-top));
+            root.glide-pos = 0;
+            root.gliding = true;
+        }
+    }
+}

@@ -60,6 +60,8 @@ Slint 组件为单继承 (`inherits`), 子类可直接使用基类的全部属�
 - TCommandPaletteOverlay = TModalSurface + TDivider + TIcon + ScrollView (列表)
 - TComment = TAvatar + TIcon + TLink (点赞/回复)
 - TTabBar = TIcon + TBadge (角标计数/红点复用)
+- TStickyTool = TIcon + TText (私有 StickyToolRow xN, 连体卡内行)
+- TAnchor = TText (私有 AnchorRow xN, 自算 active 并上报)
 - TNavBar, TTabs, TBreadcrumb = 私有 TNavLabel xN (文本行悬停/选中态与点击共享)
 - TPopconfirm = TButton x2 (取消/确认)
 - TSearch = TInput 的预设 (内置搜索图标 + 默认可清空)
@@ -76,7 +78,7 @@ Slint 组件为单继承 (`inherits`), 子类可直接使用基类的全部属�
   TTree (节点列表), TTreeBranch (子节点, 放进折叠盒), TCellGroup (单元行组),
   TForm (表单项), TFormItem (控件行), TSplitter / TSplitterVertical (窗格),
   TSplitterPane (窗格内容), TSplitterPanePrimary / TSplitterPanePrimaryVertical
-  (窗格内容)
+  (窗格内容), TSticky / TAffix (被吸附/钉住的内容)
 
 私有组件 (仅供实现参考, 不经聚合器导出): `TInputFrame` (input/input.slint,
 已对库内导出供 TInputNumber 复用), `TModalSurface` (modal-surface.slint, 已对库内
@@ -84,6 +86,9 @@ Slint 组件为单继承 (`inherits`), 子类可直接使用基类的全部属�
 `TViewerButton` / `TViewerChip` (overlay/image-viewer.slint, 遮罩上的圆形图标按钮与控件卡片),
 `TNavLabel` (navigation/nav-label.slint),
 `TNavRow` (navigation/side-nav.slint),
+`AnchorRow` (navigation/anchor.slint, 锚点行: 12px 链接 + active 转变上报),
+`StickyToolRow` (navigation/sticky-tool.slint, 吸附工具卡内行: 图标/文案/
+悬停高亮, 气泡状态在轨级),
 `TTableCell` (content/table.slint, 表头与数据单元格的文本、对齐与排序图标),
 `TTimeColumn` (date-time/time-picker.slint, 时间面板的单列数据; 选中框画在选中行上并随数据滚动),
 `TreeRow` (content/tree.slint, 树的单行: 箭头槽 + 可选字形 + 文本区, TTreeItem 与 TTreeBranch 的头部共用),
@@ -980,8 +985,14 @@ import { TTag, TTagVariant, TAvatar, TAvatarSize, TAvatarShape, TAvatarGroup, TA
 | thumb-inset | `length` | `0px` | 滑块列与右缘的间距; 贴窗口边缘时设为 resize-border 宽度, 避开原生拉伸热区 |
 | content-y | `length` (in-out) | `0` | 滚动偏移 (0 .. -max), 双向暴露: 宿主可读 (TBackTop 直绑) 或编程滚动 |
 
-交互: 拖拽即时跟手 (按下移动超 2px 即把滑块中心吸到指针下并保持 glued);
-点击轨道带 `duration-base` 缓动定位; 滚轮走 Flickable 原生直滚。
+交互: 按在**滑块上**拖拽时被按住的那一点跟指针走 (抓取偏移保持, 不重定位,
+移动超 4px 才接管); 按在**轨道空白**拖拽或点击轨道时滑块**中部**对齐点击点
+(点击带 `duration-base` 缓动), 点击滑块本身无动作; 滚轮走 Flickable 原生直滚。
+
+公开函数: `scroll-to(offset)` — 缓动滚到绝对 content-y 偏移 (夹紧滚动范围)。
+缓动由内部 16ms Timer 逐帧写入实现 (`animate content-y` 活不过 Flickable
+的首次按压, 见 `docs/slint-semantics.md` 第 36 条); 拖拽滑块会立即接管
+缓动, 其余写入 (滚轮动量等) 在缓动的 200ms 内会被缓动覆盖。
 
 已知限制: 仅垂直滚动, 内容宽度恒等于视口宽度 (水平滚动场景用 TTable 的
 ListView 接线); 面向非虚拟化内容 — TList / TTable 保留 ListView 行回收并改接
@@ -1316,7 +1327,45 @@ TouchArea 走同一状态机 (探针即由此驱动)。
 回调: `changed(length)` — 主栏尺寸变化; 只读输出 `collapsed` / `vis-size`;
 公开函数 `toggle-collapse()`。
 
-已知限制: 第二栏无最小尺寸约束, 可拖到 0; 主栏折叠无过渡动画。
+已知限制: 第二栏无最小尺寸约束, 可被拖到 0; 主栏折叠无过渡动画。
+
+### TSticky
+
+粘性布局盒 (CSS `position: sticky` 语义): 内容随文档滚动, 越过
+`offset-top` 后钉在视口顶, `bounds-bottom` (文档坐标) 越过后贴住范围底缘
+释放。组件是滚动容器的**覆盖层兄弟** (TBackTop 同款摆位) — 文档里的占位
+由宿主自己预留:
+
+```slint
+Rectangle {
+    height: 260px;
+    clip: true;
+    sv := TScrollBar { /* 每节为标题预留 40px */ }
+    for i in 3: TSticky {
+        width: sv.width;
+        height: 40px;
+        natural-y: i * 180px;           // 标题在文档里的位置
+        bounds-bottom: (i + 1) * 180px; // 本节滚完即释放
+        content-y <=> sv.content-y;
+        /* 子元素 = 标题内容 */
+    }
+}
+```
+
+继承: `Rectangle` (宽高/外观由宿主定, 子元素即内容)。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| content-y | `length` (in-out) | `0` | 双向绑定目标滚动容器的 content-y |
+| natural-y | `length` | `0px` | 未吸附时盒顶在文档坐标里的位置 |
+| offset-top | `length` | `0px` | 吸附线: 距视口顶的距离 |
+| bounds-bottom | `length` | 近无限 | 吸附范围底缘 (文档坐标); 越过即贴底释放 |
+| enabled | `bool` | `true` | 关闭后随文档滚动, 不吸附 |
+
+只读输出 `pinned` (是否钉在顶轨); 回调 `changed(bool)` — 吸附态真变化时。
+
+已知限制: 仅顶轨吸附 (无底轨变体, 底部场景用 TAffix `side: bottom`);
+z 序按声明序, 后声明的粘性盒盖住先前的 (多级吸顶的常规行为)。
 
 ---
 
@@ -2009,6 +2058,84 @@ TouchArea 同路径 (y 为相对条顶的指针位置)。
 
 已知限制: 面板不是弹出层 — 层叠按声明序, 宿主后续兄弟元素会盖住它;
 子操作超过 5 个时面板可能超出容器上缘, 由宿主控制容量。
+
+### TAffix
+
+固钉盒: 把子元素钉在滚动视口的顶轨或底轨 — 自然位置滚出视口后钉住,
+文档继续滚动也不释放 (与 TSticky 的区分: 无容器范围)。覆盖层兄弟摆位
+(TBackTop 同款)。底部表单提交条 = `side: bottom` + 宿主自绘底色/分隔线。
+
+继承: `Rectangle` (宽高/外观由宿主定, 子元素即内容)。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| content-y | `length` (in-out) | `0` | 双向绑定目标滚动容器的 content-y |
+| natural-y | `length` | `0px` | 未钉住时盒顶在文档坐标里的位置 |
+| side | `TAffixSide` | `TAffixSide.top` | 顶轨 / 底轨 |
+| offset | `length` | `0px` | 离轨距离 |
+| viewport-height | `length` | `0px` | 滚动视口高; **底轨必需** (0 时底轨退化为随文档滚动) |
+| enabled | `bool` | `true` | 关闭后随文档滚动, 不钉 |
+
+只读输出 `pinned`; 回调 `changed(bool)` — 钉住态真变化时。相关枚举
+`TAffixSide { top, bottom }`。
+
+### TAnchor
+
+锚点导航: 一列链接跟随滚动位置高亮。每个锚点指向文档坐标 `target-y`
+(升序); 最后越过 `offset-top` 判定线的锚点为当前项 (首个锚点之上为 -1)。
+点击 (或 `goto(i)`) 缓动滚动到 `target-y - offset-top`, 夹在
+`[0, max-scroll]`。当前项由每行自算 (本节已过线且下一节未过线) —
+1.18 语言内没有循环语句, 组件无法扫描模型。
+
+继承: `Rectangle` (行高 32px = `height-m` × 锚点数; 摆在滚动容器旁, 绑同一 content-y)。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| items | `[TAnchorItem]` | `[]` | 锚点模型 |
+| content-y | `length` (in-out) | `0` | 双向绑定目标滚动容器的 content-y |
+| offset-top | `length` | `0px` | 判定线 (有吸顶标题时设为标题高) |
+| max-scroll | `length` | 近无限 | 最大下滚量 (绑 `sv.content-height - sv.height`), 末尾锚点防过滚 |
+
+只读输出 `current` (当前下标, -1 在首个锚点之上); 回调 `changed(int)` —
+下标真变化时 (含挂载初报); 公开函数 `goto(i)` — 与点击同路径的缓动跳转。
+缓动为 16ms Timer 逐帧 ease-out (200ms), 期间其他写入 (滚轮动量) 会被
+缓动覆盖 (见 `docs/slint-semantics.md` 第 36 条)。
+
+相关结构: `TAnchorItem { label: string, target-y: length }`。
+
+已知限制: 末个锚点要能高亮, 文档需长于最后目标 + 视口高 (否则点击被
+max-scroll 夹住, 目标永远过不了判定线); 无拖拽滑选 (对比 TIndexes)。
+
+### TStickyTool
+
+吸附工具 (TDesign StickyTool 同构): 固定在容器一侧的**连体**工具卡 —
+所有条目共享一张背景卡, `shape` 只改卡片两端的圆角 (square 直角 /
+round 胶囊端), 悬停/按压只做行内高亮。条目 `popup` 文本在内容侧以
+气泡胶囊展示 (per 条目 `trigger`: hover / click, click 可开关)。
+
+继承: `Rectangle` (默认几何撑满宿主盒, 指针事件穿透, 仅条目可点; 作为
+宿主盒的最后一个子元素摆放即可)。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| items | `[TStickyToolItem]` | `[]` | 工具条目模型 |
+| placement | `TStickyToolPlacement` | `right-bottom` | 左/右 × 上/中/下 六向 |
+| shape | `TStickyToolShape` | `square` | 卡片两端 square 直角 / round 胶囊 |
+| type | `TStickyToolType` | `normal` | 常规 56px (图标+文案) / 紧凑 40px (纯图标) |
+| offset-x / offset-y | `length` | `24px` | 离侧缘 / 离上或下缘的距离 |
+
+回调: `clicked(int)` — 条目点击 (click 触发的气泡先自开关再回调);
+`hovered(int)` — 条目悬停进入。
+
+相关结构: `TStickyToolItem { icon: TIconData, label: string = "",
+popup: string = "", trigger: TStickyToolTrigger = hover }`; 枚举
+`TStickyToolPlacement { left-top, left-center, left-bottom, right-top,
+right-center, right-bottom }`、`TStickyToolShape { square, round }`、
+`TStickyToolType { normal, compact }`、`TStickyToolTrigger { hover, click }`。
+
+已知限制: popup 仅支持文本气泡 (气泡在卡外, 宿主盒不要 clip 卡片区);
+`width` 不可调 (由 type 决定 56/40px); 条目数多时按 placement 方向溢出
+由宿主控制。
 
 ## 实验性组件 experimental
 

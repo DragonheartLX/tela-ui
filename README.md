@@ -131,6 +131,9 @@ TSwitch {
     - TIndexes 只上报 changed(index), 分组列表滚动由宿主执行; 气泡溢出组件左缘。
     - TSortable 排序只上报 reorder(from, to), 行序由宿主重建模型 (1.18 语言内没有循环语句); 拖拽中列表不滚动。
     - TFab 展开面板不是弹出层, 层叠按声明序 (宿主后续兄弟元素会盖住它), 子操作容量由宿主控制。
+    - TSticky / TAffix 是滚动容器的覆盖层兄弟, 文档内的占位由宿主预留; TSticky 仅顶轨 (底部场景用 TAffix side: bottom); TAffix 底轨需绑 viewport-height。
+    - TAnchor 末个锚点要能高亮, 文档需长于最后目标 + 视口高; 跳转缓动约 200ms, 期间滚轮写入会被缓动覆盖。
+    - TStickyTool 的 popup 仅支持文本气泡, 条目宽由 type 固定 (56/40px), 不可调。
 
 ## 许可证
 

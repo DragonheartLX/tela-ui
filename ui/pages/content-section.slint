@@ -1,9 +1,10 @@
 // Gallery section: 内容 (TCollapse / TTable / TCarousel / TTree / TList /
-// TCell / TSortable / TSplitter), 一个组件一张卡.
+// TCell / TSortable / TSplitter / TSticky), 一个组件一张卡.
 
-import { TTheme, TThemeRole } from "@tela-ui/theme.slint";
+import { TTheme } from "@tela-ui/theme.slint";
 import { TIconSet, TCaption, TText } from "@tela-ui/base.slint";
-import { TCollapse, TCarousel, TTable, TTree, TTreeItem, TTreeBranch, TSplitter, TSplitterVertical, TSplitterPane, TSplitterPanePrimary, TSplitterPanePrimaryVertical, TTableAlign, TList, TListItem, TCell, TCellGroup, TSortable, TSortableItem } from "@tela-ui/content.slint";
+import { TCollapse, TCarousel, TTable, TTree, TTreeItem, TTreeBranch, TSplitter, TSplitterVertical, TSplitterPane, TSplitterPanePrimary, TSplitterPanePrimaryVertical, TTableAlign, TList, TListItem, TCell, TCellGroup, TSortable, TSortableItem, TSticky } from "@tela-ui/content.slint";
+import { TScrollBar } from "@tela-ui/display.slint";
 import { TMessage } from "@tela-ui/notice.slint";
 import { GallerySection } from "../gallery-section.slint";
 
@@ -365,4 +366,68 @@ export component ContentSection inherits VerticalLayout {
             TCaption { text: "按住任意行拖动, 其余行实时让位预览插入位置, 松手上报 reorder(from, to) — 1.18 语言内没有循环语句, 行序由宿主重建模型完成; 拖拽中列表不滚动。"; wrap: word-wrap; }
         }
     }
+
+    // ========================= TSticky =========================
+    GallerySection {
+        title: "粘性布局 TSticky";
+        code: "import { TSticky } from \"@tela-ui/content.slint\";\nimport { TScrollBar } from \"@tela-ui/display.slint\";\nimport { TText } from \"@tela-ui/base.slint\";\nimport { TTheme } from \"@tela-ui/theme.slint\";\n\nRectangle {\n    height: 260px;\n    clip: true;\n\n    sv := TScrollBar {\n        content-height: 540px; // 3 节 × 180px, 文档里为标题留出 40px\n\n        VerticalLayout {\n            for s in 3: Rectangle {\n                height: 180px;\n                background: TTheme.bg-color-secondarycontainer;\n\n                TText {\n                    x: 16px;\n                    y: 56px;\n                    width: parent.width - 32px;\n                    text: \"第 \\{s + 1} 节正文\";\n                    color: TTheme.text-color-secondary;\n                }\n            }\n        }\n    }\n\n    // 吸顶标题: 与滚动容器同父绝对定位, 声明在 sv 之后盖住正文\n    for i in 3: TSticky {\n        width: sv.width;\n        height: 40px;\n        natural-y: i * 180px;           // 未吸附时标题在文档里的位置\n        bounds-bottom: (i + 1) * 180px; // 本节滚完即释放, 让位给下一节\n        content-y <=> sv.content-y;\n        background: TTheme.bg-color-container;\n\n        TText {\n            x: 16px;\n            width: parent.width - 32px;\n            height: parent.height;\n            text: \"第 \\{i + 1} 节标题 (吸顶)\";\n            vertical-alignment: center;\n            font-weight: TTheme.font-weight-medium;\n        }\n    }\n}";
+
+        VerticalLayout {
+            spacing: 16px;
+
+            Rectangle {
+                height: 260px;
+                border-radius: TTheme.radius-medium;
+                clip: true;
+
+                st-sv := TScrollBar {
+                    content-height: 540px;
+
+                    VerticalLayout {
+                        for s in 3: Rectangle {
+                            height: 180px;
+                            background: TTheme.bg-color-secondarycontainer;
+
+                            TText {
+                                x: 16px;
+                                y: 56px;
+                                width: parent.width - 32px;
+                                text: "第 \{s + 1} 节正文 — 下滚后标题吸附在顶部, 本节滚完释放回文档, 下一节标题滑入接棒。";
+                                color: TTheme.text-color-secondary;
+                                overflow: elide;
+                            }
+                        }
+                    }
+                }
+
+                for i in 3: TSticky {
+                    width: st-sv.width;
+                    height: 40px;
+                    natural-y: i * 180px;
+                    bounds-bottom: (i + 1) * 180px;
+                    content-y <=> st-sv.content-y;
+                    background: TTheme.bg-color-container;
+
+                    TText {
+                        x: 16px;
+                        width: parent.width - 32px;
+                        height: parent.height;
+                        text: "第 \{i + 1} 节标题 (吸顶)";
+                        vertical-alignment: center;
+                        font-weight: TTheme.font-weight-medium;
+                    }
+
+                    Rectangle {
+                        y: parent.height - 1px;
+                        width: parent.width;
+                        height: 1px;
+                        background: TTheme.component-stroke;
+                    }
+                }
+            }
+
+            TCaption { text: "CSS position:sticky 语义: natural-y 是标题在文档里的位置, 滚动越过 offset-top 后钉在视口顶, bounds-bottom (文档坐标) 越过后释放; 组件是滚动容器的覆盖层兄弟, 文档里的 40px 由宿主自己预留。pinned / changed(bool) 上报吸附态。"; wrap: word-wrap; }
+        }
+    }
+
 }

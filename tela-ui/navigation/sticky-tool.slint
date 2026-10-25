@@ -1,0 +1,230 @@
+// Tela UI — TStickyTool
+//
+// Fixed side tool rail (TDesign StickyTool 吸附工具): a vertical column of
+// icon items in ONE connected card, pinned to a side of its parent
+// container. `placement` picks the side and the vertical anchor, `shape`
+// only rounds the card's two ends (square / round), `type` normal (56px
+// icon+label) or compact (40px icon only). An item with `popup` text
+// shows it in a bubble pill on the content side, per the item's
+// `trigger` (hover or click). The component is an overlay: it fills the
+// host container and passes pointer events through everywhere except its
+// own items — place it as the last child of the box it anchors to:
+//   Rectangle {
+//       … content …
+//       TStickyTool {
+//           items: [{ icon: TIconSet.Bell, label: "通知", popup: "消息中心" }, …];
+//           clicked(i) => { … }
+//       }
+//   }
+
+import { TTheme } from "../theme.slint";
+import { TText } from "../base/typography.slint";
+import { TIcon } from "../base/icon/icon.slint";
+import { TIconData } from "../base/icon/data.slint";
+
+export enum TStickyToolPlacement {
+    left-top,
+    left-center,
+    left-bottom,
+    right-top,
+    right-center,
+    right-bottom,
+}
+
+export enum TStickyToolShape {
+    square,
+    round,
+}
+
+export enum TStickyToolType {
+    normal,
+    compact,
+}
+
+// How an item's popup bubble is shown.
+export enum TStickyToolTrigger {
+    hover,
+    click,
+}
+
+export struct TStickyToolItem {
+    icon: TIconData,
+    label: string = "",
+    // Bubble text on the content side; empty never shows a bubble.
+    popup: string = "",
+    trigger: TStickyToolTrigger = TStickyToolTrigger.hover,
+}
+
+// One tool item: icon block and optional label inside the connected
+// card; hover/pressed only tint the row. Popup state lives with the rail.
+component StickyToolRow inherits Rectangle {
+    in property <TStickyToolItem> item;
+    in property <bool> compact: false;
+
+    callback clicked();
+    callback hover(bool);
+
+    y: 0;
+    // Height comes from the rail's item-size (set at instantiation) so the
+    // rows tile the card exactly — a row-local formula drifted from the
+    // pitch once and left hover-less strips.
+    background: ta.pressed ? TTheme.bg-color-container-active
+        : ta.has-hover ? TTheme.bg-color-container-hover
+        : transparent;
+    animate background { duration: TTheme.duration-fast; }
+
+    TIcon {
+        x: (parent.width - self.width) / 2;
+        y: root.compact ? (parent.height - self.height) / 2 : TTheme.spacing-3;
+        icon: root.item.icon;
+        size: 20px;
+        icon-color: ta.has-hover ? TTheme.text-color-primary : TTheme.text-color-secondary;
+        animate icon-color { duration: TTheme.duration-fast; }
+    }
+
+    // Explicit height pins the line box to 20px — without it the text's
+    // default geometry fills the row and the card's clip cuts the glyphs.
+    if !root.compact && root.item.label != "": TText {
+        x: TTheme.spacing-2;
+        y: TTheme.spacing-9;
+        width: parent.width - 2 * TTheme.spacing-2;
+        height: TTheme.line-height-s;
+        text: root.item.label;
+        overflow: elide;
+        horizontal-alignment: center;
+        vertical-alignment: center;
+        font-size: TTheme.font-size-s;
+        line-height: TTheme.line-height-s;
+        color: ta.has-hover ? TTheme.text-color-primary : TTheme.text-color-secondary;
+        animate color { duration: TTheme.duration-fast; }
+    }
+
+    ta := TouchArea {
+        mouse-cursor: MouseCursor.pointer;
+
+        changed has-hover => {
+            root.hover(self.has-hover);
+        }
+
+        clicked => { root.clicked(); }
+    }
+}
+
+export component TStickyTool inherits Rectangle {
+    in property <[TStickyToolItem]> items;
+    in property <TStickyToolPlacement> placement: TStickyToolPlacement.right-bottom;
+    in property <TStickyToolShape> shape: TStickyToolShape.square;
+    in property <TStickyToolType> type: TStickyToolType.normal;
+    // Inset from the chosen side / from the top or bottom edge.
+    in property <length> offset-x: TTheme.margin-xxl;
+    in property <length> offset-y: TTheme.margin-xxl;
+
+    callback clicked(int);
+    // Hover entered item i (TDesign onHover).
+    callback hovered(int);
+
+    // Item whose popup bubble is shown by a click trigger, -1 none.
+    private property <int> popup-open: -1;
+    // Item currently hovered, -1 none.
+    private property <int> hover-index: -1;
+    // The bubble actually shown: click popups win over hover popups.
+    private property <int> bubble-index:
+        root.popup-open >= 0 && root.popup-open < root.items.length
+            && root.items[root.popup-open].trigger == TStickyToolTrigger.click
+        ? root.popup-open
+        : root.hover-index >= 0 && root.hover-index < root.items.length
+            && root.items[root.hover-index].trigger == TStickyToolTrigger.hover
+            && root.items[root.hover-index].popup != ""
+        ? root.hover-index : -1;
+    private property <bool> on-right:
+        root.placement == TStickyToolPlacement.right-top
+        || root.placement == TStickyToolPlacement.right-center
+        || root.placement == TStickyToolPlacement.right-bottom;
+    private property <bool> at-bottom:
+        root.placement == TStickyToolPlacement.left-bottom
+        || root.placement == TStickyToolPlacement.right-bottom;
+    private property <bool> at-top:
+        root.placement == TStickyToolPlacement.left-top
+        || root.placement == TStickyToolPlacement.right-top;
+    // 56px normal / 40px compact rows, flush (one connected card) — the
+    // TTabBar height idiom (height-l + spacing-6).
+    private property <length> item-size: root.type == TStickyToolType.compact
+        ? TTheme.height-l : TTheme.height-l + TTheme.spacing-6;
+
+    // Overlay shell: default geometry fills the host box (percentage or
+    // `parent` are unavailable on a component root), pointer-transparent
+    // except for the card's own items.
+    accessible-role: AccessibleRole.list;
+    accessible-label: "工具栏";
+
+    // The connected card; `shape` rounds only its two ends. Rows are
+    // clipped to the rounded ends.
+    card := Rectangle {
+        x: root.on-right ? parent.width - self.width - root.offset-x : root.offset-x;
+        y: root.at-top ? root.offset-y
+            : root.at-bottom ? parent.height - self.height - root.offset-y
+            : (parent.height - self.height) / 2;
+        width: root.item-size;
+        height: root.items.length * root.item-size;
+        border-radius: root.shape == TStickyToolShape.round
+            ? TTheme.radius-round : TTheme.radius-default;
+        background: TTheme.bg-color-container;
+        border-width: 1px;
+        border-color: TTheme.component-stroke;
+        clip: true;
+
+        for it[i] in root.items: StickyToolRow {
+            y: i * root.item-size;
+            height: root.item-size;
+            item: it;
+            compact: root.type == TStickyToolType.compact;
+
+            accessible-role: AccessibleRole.button;
+            accessible-label: it.label != "" ? it.label : "工具 \{i + 1}";
+            accessible-action-default => { root.clicked(i); }
+
+            hover(on) => {
+                root.hover-index = on ? i : (root.hover-index == i ? -1 : root.hover-index);
+                if (on) {
+                    root.hovered(i);
+                }
+            }
+
+            clicked => {
+                if (it.trigger == TStickyToolTrigger.click) {
+                    root.popup-open = root.popup-open == i ? -1 : i;
+                }
+                root.clicked(i);
+            }
+        }
+    }
+
+    // Popup bubble on the content side; a sibling of the card so the
+    // card's clip cannot cut it (TFab's pill idiom).
+    if root.bubble-index >= 0: Rectangle {
+        x: root.on-right
+            ? card.x - self.width - TTheme.spacing-4
+            : card.x + card.width + TTheme.spacing-4;
+        y: card.y + root.bubble-index * root.item-size
+            + (root.item-size - self.height) / 2;
+        width: pill-text.preferred-width + 2 * TTheme.padding-lr-s;
+        height: TTheme.height-m;
+        border-radius: TTheme.radius-medium;
+        background: TTheme.bg-color-container;
+        border-width: 1px;
+        border-color: TTheme.component-stroke;
+        drop-shadow-blur: TTheme.shadow-1-blur;
+        drop-shadow-offset-y: TTheme.shadow-1-offset-y;
+        drop-shadow-color: TTheme.shadow-1-color;
+
+        pill-text := TText {
+            x: TTheme.padding-lr-s;
+            y: (parent.height - self.height) / 2;
+            text: root.bubble-index >= 0 && root.bubble-index < root.items.length
+                ? root.items[root.bubble-index].popup : "";
+            font-size: TTheme.font-size-s;
+            line-height: TTheme.line-height-s;
+            color: TTheme.text-color-secondary;
+        }
+    }
+}

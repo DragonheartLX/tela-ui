@@ -1,12 +1,12 @@
 // Gallery section: 导航 (TTabs / TPagination / TNavBar / TDropdownMenu /
-// TContextMenu / TBreadcrumb / TSteps / TTabBar / TIndexes / TFab),
-// 一个组件一张卡. The app's own top navigation bar is
+// TContextMenu / TBreadcrumb / TSteps / TTabBar / TIndexes / TFab /
+// TAffix / TAnchor / TStickyTool), 一个组件一张卡. The app's own top navigation bar is
 // the live TNavBar; this section covers the rest.
 
 import { TTheme,  TThemeRole,  TSize, TPopupPlacement } from "@tela-ui/theme.slint";
 import { TText, TIconSet, TCaption, TButton, TButtonVariant, TParagraph } from "@tela-ui/base.slint";
 import { TMessage } from "@tela-ui/notice.slint";
-import { TTabs, TPagination, TNavBar, TNavItem, TSideNav, TSideNavItem, TSideNavMode, TSideNavTogglePosition, TBreadcrumb, TCrumbItem, TSteps, TDropdownMenu, TDropdownMenuItem, TContextMenu, TBackTop, TTabBar, TTabBarItem, TIndexes, TFab, TFabItem } from "@tela-ui/navigation.slint";
+import { TTabs, TPagination, TNavBar, TNavItem, TSideNav, TSideNavItem, TSideNavMode, TSideNavTogglePosition, TBreadcrumb, TCrumbItem, TSteps, TDropdownMenu, TDropdownMenuItem, TContextMenu, TBackTop, TTabBar, TTabBarItem, TIndexes, TFab, TFabItem, TAffix, TAffixSide, TAnchor, TAnchorItem, TStickyTool, TStickyToolPlacement, TStickyToolShape, TStickyToolType, TStickyToolTrigger } from "@tela-ui/navigation.slint";
 import { GallerySection } from "../gallery-section.slint";
 import { TScrollBar } from "@tela-ui/scroll-bar.slint";
 
@@ -51,6 +51,13 @@ export component NavigationSection inherits VerticalLayout {
     ];
     in-out property <string> side-nav-value: "input";
     in-out property <bool> side-collapsed: false;
+    in property <[TAnchorItem]> anchor-items: [
+        { label: "概览", target-y: 0px },
+        { label: "安装", target-y: 200px },
+        { label: "快速上手", target-y: 400px },
+        { label: "常见问题", target-y: 600px },
+    ];
+    in-out property <int> anchor-current: -1;
 
     // ======================= TTabs =========================
     GallerySection {
@@ -456,6 +463,277 @@ export component NavigationSection inherits VerticalLayout {
                     TMessage.info("子操作 \{i + 1}");
                 }
             }
+        }
+    }
+
+    // ========================= TAffix =========================
+    GallerySection {
+        title: "固钉 TAffix";
+        code: "import { TAffix, TAffixSide } from \"@tela-ui/navigation.slint\";\nimport { TScrollBar } from \"@tela-ui/display.slint\";\nimport { TText, TButton } from \"@tela-ui/base.slint\";\nimport { TTheme, TSize } from \"@tela-ui/theme.slint\";\n\nRectangle {\n    height: 240px;\n    clip: true;\n\n    sv := TScrollBar {\n        content-height: 480px; // 80px 说明区 + 10 行 × 40px\n\n        VerticalLayout {\n            Rectangle {\n                height: 80px;\n\n                TText {\n                    x: 16px;\n                    y: 16px;\n                    text: \"说明区: 下方的工具行原位跟随文档,\";\n                }\n\n                TText {\n                    x: 16px;\n                    y: 40px;\n                    text: \"滚出视口后被 TAffix 钉在顶部。\";\n                }\n            }\n\n            for i in 10: Rectangle {\n                height: 40px;\n\n                TText {\n                    x: 16px;\n                    width: parent.width - 32px;\n                    height: parent.height;\n                    text: \"列表项 \\{i + 1}\";\n                    vertical-alignment: center;\n                    color: TTheme.text-color-secondary;\n                }\n            }\n        }\n    }\n\n    // 顶钉: natural-y 之后钉到 offset\n    TAffix {\n        width: sv.width;\n        height: 40px;\n        natural-y: 80px;               // 工具行在文档里的位置\n        content-y <=> sv.content-y;\n        background: TTheme.bg-color-secondarycontainer;\n\n        TButton {\n            x: parent.width - self.width - 8px;\n            y: (parent.height - self.height) / 2;\n            size: TSize.small;\n            text: \"筛选\";\n        }\n    }\n\n    // 底钉: 文档末尾滚入视口前钉在底部, offset 是离底边的距离\n    TAffix {\n        x: parent.width - self.width - 16px;\n        width: 148px;\n        height: 32px;\n        side: TAffixSide.bottom;\n        natural-y: 448px;               // 480px - 32px, 文档末尾\n        offset: 12px;\n        viewport-height: parent.height; // 底钉需要视口高\n        content-y <=> sv.content-y;\n        border-radius: TTheme.radius-round;\n        background: TTheme.bg-color-container;\n        border-width: 1px;\n        border-color: TTheme.component-stroke;\n\n        TText {\n            width: parent.width;\n            height: parent.height;\n            text: \"底部固钉\";\n            horizontal-alignment: center;\n            vertical-alignment: center;\n            font-size: TTheme.font-size-s;\n            color: TTheme.text-color-secondary;\n        }\n    }\n}";
+
+        VerticalLayout {
+            spacing: 16px;
+
+            Rectangle {
+                height: 240px;
+                border-radius: TTheme.radius-medium;
+                clip: true;
+
+                afx-sv := TScrollBar {
+                    content-height: 480px;
+
+                    VerticalLayout {
+                        Rectangle {
+                            height: 80px;
+
+                            TText {
+                                x: 16px;
+                                y: 16px;
+                                width: parent.width - 32px;
+                                text: "说明区: 下方的工具行原位跟随文档, 滚出视口后被 TAffix 钉在顶部。";
+                            }
+
+                            TText {
+                                x: 16px;
+                                y: 40px;
+                                width: parent.width - 32px;
+                                text: "右下角胶囊演示 side: bottom — 文档末尾滚入视口前钉在底部。";
+                                color: TTheme.text-color-secondary;
+                            }
+                        }
+
+                        for i in 10: Rectangle {
+                            height: 40px;
+
+                            TText {
+                                x: 16px;
+                                width: parent.width - 32px;
+                                height: parent.height;
+                                text: "列表项 \{i + 1}";
+                                vertical-alignment: center;
+                                color: TTheme.text-color-secondary;
+                            }
+                        }
+                    }
+                }
+
+                TAffix {
+                    width: afx-sv.width;
+                    height: 40px;
+                    natural-y: 80px;
+                    content-y <=> afx-sv.content-y;
+                    background: TTheme.bg-color-secondarycontainer;
+
+                    TText {
+                        x: 16px;
+                        width: parent.width - 96px;
+                        height: parent.height;
+                        text: "固钉工具行 — 随说明区滚出视口后钉在顶部";
+                        vertical-alignment: center;
+                        overflow: elide;
+                    }
+
+                    TButton {
+                        x: parent.width - self.width - 8px;
+                        y: (parent.height - self.height) / 2;
+                        size: TSize.small;
+                        text: "筛选";
+
+                        clicked => {
+                            TMessage.info("固钉行按钮");
+                        }
+                    }
+                }
+
+                TAffix {
+                    x: parent.width - self.width - 16px;
+                    width: 148px;
+                    height: 32px;
+                    side: TAffixSide.bottom;
+                    natural-y: 448px;
+                    offset: 12px;
+                    viewport-height: parent.height;
+                    content-y <=> afx-sv.content-y;
+                    border-radius: TTheme.radius-round;
+                    background: TTheme.bg-color-container;
+                    border-width: 1px;
+                    border-color: TTheme.component-stroke;
+                    drop-shadow-blur: TTheme.shadow-1-blur;
+                    drop-shadow-offset-y: TTheme.shadow-1-offset-y;
+                    drop-shadow-color: TTheme.shadow-1-color;
+
+                    TText {
+                        width: parent.width;
+                        height: parent.height;
+                        text: "底部固钉";
+                        horizontal-alignment: center;
+                        vertical-alignment: center;
+                        font-size: TTheme.font-size-s;
+                        line-height: TTheme.line-height-s;
+                        color: TTheme.text-color-secondary;
+                    }
+                }
+            }
+
+            TCaption { text: "与 TSticky 的区分: 无容器范围, 钉住后一直保持到宿主关闭; side 选顶轨/底轨, offset 是离轨距离, 底钉还需 viewport-height (未绑定时退化为随文档滚动)。pinned / changed(bool) 上报钉住态。"; wrap: word-wrap; }
+        }
+    }
+
+    // ========================= TAnchor =========================
+    GallerySection {
+        title: "锚点导航 TAnchor";
+        code: "import { TAnchor, TAnchorItem } from \"@tela-ui/navigation.slint\";\nimport { TScrollBar } from \"@tela-ui/display.slint\";\nimport { TText } from \"@tela-ui/base.slint\";\nimport { TTheme } from \"@tela-ui/theme.slint\";\n\nproperty <int> current: -1;\nproperty <[string]> names: [\"概览\", \"安装\", \"快速上手\", \"常见问题\"];\n\nRectangle {\n    height: 260px;\n    clip: true;\n\n    HorizontalLayout {\n        sv := TScrollBar {\n            content-height: 800px; // 4 节 × 200px\n\n            VerticalLayout {\n                for s in 4: Rectangle {\n                    height: 200px;\n                    background: TTheme.bg-color-secondarycontainer;\n\n                    TText {\n                        x: 16px;\n                        y: 16px;\n                        text: \"0\\{s + 1} \\{names[s]}\"; // 品牌色序号 + 节名\n                        font-size: TTheme.font-size-l;\n                        font-weight: TTheme.font-weight-semibold;\n                        color: TTheme.brand-color;\n                    }\n                }\n            }\n        }\n\n        TAnchor {\n            width: 108px;\n            items: [\n                { label: \"概览\", target-y: 0px },\n                { label: \"安装\", target-y: 200px },\n                { label: \"快速上手\", target-y: 400px },\n                { label: \"常见问题\", target-y: 600px },\n            ];\n            max-scroll: sv.content-height - sv.height; // 末节防过滚\n            content-y <=> sv.content-y;\n\n            changed(i) => { root.current = i; } // -1 表示在首个锚点之上\n        }\n    }\n}";
+
+        VerticalLayout {
+            spacing: 16px;
+
+            Rectangle {
+                height: 260px;
+                border-radius: TTheme.radius-medium;
+                border-width: 1px;
+                border-color: TTheme.component-stroke;
+                clip: true;
+
+                HorizontalLayout {
+                    anc-sv := TScrollBar {
+                        content-height: 800px;
+
+                        VerticalLayout {
+                            for s in 4: Rectangle {
+                                height: 200px;
+
+                                // 圆角内卡: 节与节之间留 16px 视觉间隔
+                                // (TScrollBar 内层 spacing 恒 0, 只能靠内缩)
+                                Rectangle {
+                                    x: TTheme.spacing-4;
+                                    y: TTheme.spacing-4;
+                                    width: parent.width - 2 * TTheme.spacing-4;
+                                    height: parent.height - 2 * TTheme.spacing-4;
+                                    border-radius: TTheme.radius-medium;
+                                    background: TTheme.bg-color-secondarycontainer;
+
+                                    // 文档式节头: 品牌色序号 + 节名 (与锚点标签共用)
+                                    TText {
+                                        x: TTheme.padding-lr-l;
+                                        y: TTheme.padding-lr-l;
+                                        text: "0\{s + 1}";
+                                        font-size: TTheme.font-size-l;
+                                        font-weight: TTheme.font-weight-semibold;
+                                        color: TTheme.brand-color;
+                                    }
+
+                                    TText {
+                                        x: TTheme.padding-lr-l + TTheme.spacing-9;
+                                        y: TTheme.padding-lr-l;
+                                        text: root.anchor-items[s].label;
+                                        font-size: TTheme.font-size-l;
+                                        font-weight: TTheme.font-weight-semibold;
+                                    }
+
+                                    Rectangle {
+                                        x: TTheme.padding-lr-l;
+                                        y: 44px;
+                                        width: parent.width - 2 * TTheme.padding-lr-l;
+                                        height: 1px;
+                                        background: TTheme.component-stroke;
+                                    }
+
+                                    TText {
+                                        x: TTheme.padding-lr-l;
+                                        y: 56px;
+                                        width: parent.width - 2 * TTheme.padding-lr-l;
+                                        text: "本节内容 — 滚动时右侧锚点高亮跟随。";
+                                        color: TTheme.text-color-secondary;
+                                        overflow: elide;
+                                    }
+
+                                    TText {
+                                        x: TTheme.padding-lr-l;
+                                        y: 80px;
+                                        width: parent.width - 2 * TTheme.padding-lr-l;
+                                        text: "点击锚点平滑滚动到此处; 末尾留白让文档长于最后目标 + 视口高。";
+                                        color: TTheme.text-color-secondary;
+                                        overflow: elide;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    Rectangle {
+                        width: 1px;
+                        background: TTheme.component-stroke;
+                    }
+
+                    TAnchor {
+                        width: 108px;
+                        items: root.anchor-items;
+                        max-scroll: anc-sv.content-height - anc-sv.height;
+                        content-y <=> anc-sv.content-y;
+
+                        changed(i) => {
+                            root.anchor-current = i;
+                        }
+                    }
+                }
+            }
+
+            TCaption {
+                text: "当前锚点: \{root.anchor-current >= 0 ? root.anchor-items[root.anchor-current].label : "—"}; 每行自己算 active (本节已过线且下一节未过线), 1.18 无循环语句; 点击或 goto(i) 缓动滚到 target-y - offset-top, 夹在 [0, max-scroll], 用户滚动可中断缓动。";
+                wrap: word-wrap;
+            }
+        }
+    }
+
+    // ======================= TStickyTool =======================
+    GallerySection {
+        title: "吸附工具 TStickyTool";
+        code: "import { TStickyTool, TStickyToolPlacement, TStickyToolShape, TStickyToolType, TStickyToolTrigger } from \"@tela-ui/navigation.slint\";\nimport { TIconSet } from \"@tela-ui/base.slint\";\n\n// 右下角常规工具栏 (56px 图标+文案), 悬浮显示 popup 气泡\nTStickyTool {\n    items: [\n        { icon: TIconSet.Bell, label: \"通知\", popup: \"消息中心\" },\n        { icon: TIconSet.Plus, label: \"添加\", popup: \"新建任务\" },\n        { icon: TIconSet.Ellipsis, label: \"更多\", popup: \"更多操作\", trigger: TStickyToolTrigger.click },\n    ];\n\n    clicked(i) => { /* 工具项点击 */ }\n}\n\n// 左上角紧凑圆形工具栏 (40px 纯图标)\nTStickyTool {\n    placement: TStickyToolPlacement.left-top;\n    shape: TStickyToolShape.round;\n    type: TStickyToolType.compact;\n    items: [\n        { icon: TIconSet.User },\n        { icon: TIconSet.Settings },\n    ];\n}";
+
+        VerticalLayout {
+            spacing: 16px;
+
+            Rectangle {
+                height: 300px;
+                border-radius: TTheme.radius-medium;
+                background: TTheme.bg-color-secondarycontainer;
+
+                TParagraph {
+                    // 让位两侧工具栏: 左上紧凑栏占 x 24..64, 右下常规栏占右缘 80px。
+                    x: 88px;
+                    y: 16px;
+                    width: parent.width - 176px;
+                    text: "覆盖层吸附在容器边缘: 右下为常规工具栏 (图标+文案, 悬浮出 popup 气泡, \"更多\"为 click 触发), 左上为紧凑圆形工具栏。组件本身穿透指针事件, 只有工具项可点。";
+                }
+
+                TStickyTool {
+                    items: [
+                        { icon: TIconSet.Bell, label: "通知", popup: "消息中心" },
+                        { icon: TIconSet.Plus, label: "添加", popup: "新建任务" },
+                        { icon: TIconSet.Ellipsis, label: "更多", popup: "更多操作", trigger: TStickyToolTrigger.click },
+                    ];
+
+                    clicked(i) => {
+                        TMessage.info("吸附工具 \{i + 1}");
+                    }
+                }
+
+                TStickyTool {
+                    placement: TStickyToolPlacement.left-top;
+                    shape: TStickyToolShape.round;
+                    type: TStickyToolType.compact;
+                    items: [
+                        { icon: TIconSet.User },
+                        { icon: TIconSet.Settings },
+                    ];
+
+                    clicked(i) => {
+                        TMessage.info("紧凑工具 \{i + 1}");
+                    }
+                }
+            }
+
+            TCaption { text: "TDesign StickyTool 同构: placement 六向 (左右 × 上中下), shape 方/圆, type 常规 56px (图标+文案) / 紧凑 40px (纯图标); popup 为文本气泡, 悬浮或点击 (trigger) 展示在内容侧, 偏移由 offset-x / offset-y 调整。回调 clicked(i) / hovered(i)。"; wrap: word-wrap; }
         }
     }
 

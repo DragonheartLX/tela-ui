@@ -1,0 +1,67 @@
+// Tela UI — TAffix
+//
+// Viewport affix box: pins its children to the scroll viewport's top or
+// bottom rail once their natural position scrolls past it, and releases
+// them back when the document scrolls on. Unlike TSticky there is no
+// container scope — the pin holds for the rest of the document. Overlay
+// sibling of the scroll container (TBackTop-style placement):
+//   Rectangle {
+//       height: 260px;
+//       clip: true;
+//       sv := TScrollBar { ... }
+//       TAffix {
+//           width: sv.width; height: 40px;
+//           natural-y: 80px;                  // document-space top edge
+//           side: TAffixSide.top;             // top (default) or bottom rail
+//           offset: 0px;                      // distance from the rail
+//           content-y <=> sv.content-y;
+//           TButton { ... }
+//       }
+//   }
+// The bottom rail additionally needs `viewport-height` (the scroll box's
+// height); until it is bound the bottom side falls back to following the
+// document.
+
+export enum TAffixSide {
+    top,
+    bottom,
+}
+
+export component TAffix inherits Rectangle {
+    // Two-way bind to the target scroller's content-y.
+    in-out property <length> content-y;
+    // Unpinned top edge in document space (its on-screen position is
+    // natural-y + content-y).
+    in property <length> natural-y: 0px;
+    in property <TAffixSide> side: TAffixSide.top;
+    // Distance from the chosen rail.
+    in property <length> offset: 0px;
+    // Height of the scroll viewport; the bottom rail is computed from it.
+    // Zero (unset) disables bottom pinning.
+    in property <length> viewport-height: 0px;
+    // Off releases the box back to its natural position.
+    in property <bool> enabled: true;
+
+    // True while pinned to the rail.
+    out property <bool> pinned: root.is-pinned;
+    // Pin state actually changed.
+    callback changed(bool);
+
+    private property <length> y-follow: root.natural-y + root.content-y;
+    private property <bool> on-bottom:
+        root.side == TAffixSide.bottom && root.viewport-height > 0px;
+    private property <bool> is-pinned:
+        root.enabled && (root.on-bottom
+            ? root.y-follow >= root.viewport-height - root.offset - root.height
+            : root.y-follow <= root.offset);
+
+    x: 0;
+    y: !root.enabled ? root.y-follow
+        : root.on-bottom
+            ? Math.min(root.viewport-height - root.offset - root.height, root.y-follow)
+            : Math.max(root.offset, root.y-follow);
+
+    changed is-pinned => { root.changed(root.is-pinned); }
+
+    @children
+}

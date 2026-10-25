@@ -5,9 +5,13 @@
 // scrollbar (2px thumb pinned off-center, border-grade color) is not
 // tunable from consumer code; here one Flickable viewport drives everything:
 //   * wheel & flick: native Flickable behavior,
-//   * drag on the thumb strip: instant — the press centers the thumb's
-//     middle under the pointer and it stays glued while dragging,
-//   * click on the strip (press + release without moving): animated jump.
+//   * drag starting on the thumb: instant — the pressed point of the
+//     thumb stays glued under the pointer (grab offset preserved),
+//   * drag starting on the track: the thumb's middle centers under the
+//     pointer first, then drags along,
+//   * click on the track (press + release without moving): eased jump,
+//     thumb's middle on the click point (`scroll-to`, a glide timer —
+//     see below why not `animate`); clicking the thumb itself is a no-op.
 // All interactions write one shared `content-y`, so the thumb is always an
 // exact map of the page position.
 //
@@ -39,21 +43,64 @@ export component TScrollBar inherits Rectangle {
         : max(24px, track-l * root.height / content-height);
     private property <length> thumb-pos: max-scroll <= 0px ? TTheme.spacing-1
         : TTheme.spacing-1 + (track-l - thumb-l) * (-content-y / max-scroll);
-    // A press that moves beyond a 2px jiggle becomes a drag (instant); a
-    // press released in place is a click (animated jump). Easing is off
-    // while dragging so the thumb stays glued to the pointer.
+    // A press that moves beyond a 4px jiggle becomes a drag (instant; a
+    // press on the thumb keeps its grab offset); a press released in place
+    // on the track is a click (eased jump via scroll-to(), thumb centered
+    // on the click point).
+    // Easing cannot be `animate content-y`: the Flickable removes that
+    // binding on every pointer press ("Stop animation by removing the
+    // binding"), so the glide is a Timer writing plain values each frame.
+    // The short glide overrides other writes instead of aborting on them
+    // (wheel momentum residue killed abort-on-foreign-write mid-flight);
+    // an active thumb drag is the one explicit hand-over.
     private property <bool> dragging: false;
-    animate content-y {
-        duration: TTheme.duration-base;
-        enabled: !root.dragging;
+    private property <bool> gliding: false;
+    private property <length> glide-from: 0px;
+    private property <length> glide-to: 0px;
+    private property <float> glide-pos: 1;
+
+    glide := Timer {
+        // 16ms frame step; 0.08 ≈ 16ms / duration-base(200ms).
+        interval: 16ms;
+        running: root.gliding;
+
+        triggered => {
+            if (root.dragging) {
+                root.gliding = false;
+                return;
+            }
+            root.glide-pos = Math.min(1, root.glide-pos + 0.08);
+            // ease-out cubic
+            let k = 1 - (1 - root.glide-pos) * (1 - root.glide-pos) * (1 - root.glide-pos);
+            root.content-y = root.glide-from + (root.glide-to - root.glide-from) * k;
+            if (root.glide-pos >= 1) {
+                root.gliding = false;
+            }
+        }
     }
 
-    // Offset that centers the thumb's middle under a pointer position.
+    // Eased scroll to an absolute content offset, clamped to the scroll
+    // range. Instant writes stay possible through `content-y` directly.
+    public function scroll-to(target: length) {
+        root.glide-from = root.content-y;
+        root.glide-to = Math.max(-max-scroll, Math.min(0px, target));
+        root.glide-pos = 0;
+        root.gliding = true;
+    }
+
+    // Offset that centers the thumb's middle under a pointer position —
+    // used for track presses; presses on the thumb keep their grab offset
+    // instead (see the strip's moved handler).
     pure function pointer-target(mouse: length) -> length {
         let target = mouse - TTheme.spacing-1 - thumb-l / 2;
         let ratio = max-scroll > 0px
             ? max-scroll / Math.max(1px, track-l - thumb-l) : 0;
         return -Math.max(0px, Math.min(max-scroll, target * ratio));
+    }
+
+    // Whether a strip coordinate is on the thumb itself.
+    pure function on-thumb(y: length) -> bool {
+        return y >= root.thumb-pos && y <= root.thumb-pos + root.thumb-l;
     }
 
     clip: true;
@@ -80,13 +127,16 @@ export component TScrollBar inherits Rectangle {
         height: parent.height;
         enabled: root.enabled;
 
-        // Drag baseline, captured on press.
+        // Drag baseline and press target, captured on press.
         private property <length> pressed-offset;
         private property <length> pressed-mouse;
+        private property <bool> pressed-on-thumb;
 
         pointer-event(e) => {
             if (e.button == PointerEventButton.left && e.kind == PointerEventKind.down) {
                 root.dragging = false;
+                self.pressed-mouse = self.mouse-y;
+                self.pressed-on-thumb = root.on-thumb(self.mouse-y);
             } else if (e.button == PointerEventButton.left && e.kind == PointerEventKind.up) {
                 root.dragging = false;
             }
@@ -98,9 +148,13 @@ export component TScrollBar inherits Rectangle {
                 if (!root.dragging
                     && (delta < 0px ? -delta : delta) > TTheme.spacing-2) {
                     root.dragging = true;
-                    // Center the thumb's middle under the pointer, then drag
-                    // from there.
-                    root.content-y = root.pointer-target(self.mouse-y);
+                    if (!self.pressed-on-thumb) {
+                        // Track press: center the thumb's middle under the
+                        // pointer, then drag from there.
+                        root.content-y = root.pointer-target(self.mouse-y);
+                    }
+                    // Thumb press: keep the grab offset — the pressed point
+                    // of the thumb stays under the pointer, no reposition.
                     self.pressed-offset = -root.content-y;
                     self.pressed-mouse = self.mouse-y;
                 }
@@ -113,11 +167,12 @@ export component TScrollBar inherits Rectangle {
             }
         }
 
-        // Click-to-jump: center the thumb under the pointer, animated. A drag
-        // release skips it (dragging is still set; it resets here).
+        // Click-to-jump on the track, eased via the glide timer (see
+        // above); clicking the thumb itself is a no-op. A drag release
+        // skips it too (dragging is still set; it resets here).
         clicked => {
-            if (!root.dragging) {
-                root.content-y = root.pointer-target(self.mouse-y);
+            if (!root.dragging && !self.pressed-on-thumb) {
+                root.scroll-to(root.pointer-target(self.mouse-y));
             }
             root.dragging = false;
         }

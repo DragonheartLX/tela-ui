@@ -1,9 +1,10 @@
 // Tela UI — TBackTop
 //
 // Round "back to top" button. Two-way bind `content-y` to a ScrollView's
-// `content-y`: visibility then follows the `threshold` and clicking scrolls
-// the view back to the top. Place it absolutely within the scroll area's
-// container:
+// `content-y`: visibility then follows the `threshold` and clicking glides
+// the view back to the top (timer-driven — `animate` on a scroll offset
+// dies on the Flickable's first pointer press). Place it absolutely within
+// the scroll area's container:
 //   Rectangle {
 //       sv := ScrollView { … }
 //       TBackTop { x: …; y: …; content-y <=> sv.content-y; }
@@ -20,6 +21,28 @@ export component TBackTop inherits Rectangle {
     in property <length> threshold: 200px;
 
     callback clicked();
+
+    // Eased return to the top; the short glide overrides other writes
+    // (wheel momentum residue) instead of aborting on them.
+    private property <bool> gliding: false;
+    private property <length> glide-from: 0px;
+    private property <float> glide-pos: 1;
+
+    glide := Timer {
+        // 16ms frame step; 0.08 ≈ 16ms / duration-base(200ms).
+        interval: 16ms;
+        running: root.gliding;
+
+        triggered => {
+            root.glide-pos = Math.min(1, root.glide-pos + 0.08);
+            // ease-out cubic
+            let k = 1 - (1 - root.glide-pos) * (1 - root.glide-pos) * (1 - root.glide-pos);
+            root.content-y = root.glide-from + (0px - root.glide-from) * k;
+            if (root.glide-pos >= 1) {
+                root.gliding = false;
+            }
+        }
+    }
 
     width: 44px;
     height: 44px;
@@ -54,7 +77,9 @@ export component TBackTop inherits Rectangle {
     ta := TouchArea {
         mouse-cursor: MouseCursor.pointer;
         clicked => {
-            root.content-y = 0;
+            root.glide-from = root.content-y;
+            root.glide-pos = 0;
+            root.gliding = true;
             root.clicked();
         }
     }
