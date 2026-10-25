@@ -91,7 +91,7 @@ TSwitch {
 }
 ```
 
-93 个组件 (基础 12 / 输入 14 / 选择 11 / 日期时间 5 / 展示 12 / 内容 16 / 提示 4 / 浮层 6 / 导航 12, 另有实验性 1; 另有库内部件 TNavLabel / TScrollThumb 不在聚合出口) 按类别聚合导出; 另有 8 个服务型浮层 (对话框 / 加载 / 消息 / 通知 / 图片预览 / 命令面板 / 动作面板 / 提示) 与主题、图标、浮层栈三个全局对象。`@tela-ui/common.slint` 保留为全量兼容出口, 完整参数说明见 [docs/components.md](docs/components.md)。
+100 个组件 (基础 12 / 输入 14 / 选择 11 / 日期时间 5 / 展示 12 / 内容 20 / 提示 4 / 浮层 6 / 导航 15, 另有实验性 1; 另有库内部件 TNavLabel / TScrollThumb 不在聚合出口) 按类别聚合导出; 另有 8 个服务型浮层 (对话框 / 加载 / 消息 / 通知 / 图片预览 / 命令面板 / 动作面板 / 提示) 与主题、图标、浮层栈三个全局对象。`@tela-ui/common.slint` 保留为全量兼容出口, 完整参数说明见 [docs/components.md](docs/components.md)。
 
 ## 致谢与说明
 
@@ -119,6 +119,8 @@ TSwitch {
     - TList 行结构固定 (图标/标题/说明), 不支持宿主自定义行渲染 (ListView 行是模型驱动)。
     - TTree 用嵌套声明 + `@children`, 选中态存在 `TTreeLogic` 全局里 (Slint 无实例级 global), 同屏多个树共享一份选中值; 折叠态是分支自己的 `opened`, 不写回模型。
     - TContextMenu 弹层在窗口边缘会被裁剪; 默认触发区会吞掉左键, 交互式触发内容需设 `auto-area: false` 并自行调用 `open-at()`。
+    - TSwipeCell 手势层在内容子元素之下: 从可点击子元素上起手的拖动不触发滑动; 吸附无惯性; 操作按钮恒着语义色 (省略 theme 按 primary 渲染), 操作列无描边 (描边会在色块内侧压一圈, 视觉上仍显行高不一致); 底部分隔线固定在行上不随内容滑动, 连续列表末格需设 divider: false。
+    - TPullDownRefresh 无惯性滚动; 手势锁定下拉轴后推回只收下拉量 (重新按压才能滚动); repeater-only 的内容需钉死 `content-height`; 顶部滚轮向上可触发拉动 (过阈值当次即刷新, 无松手语义), 刷新中滚轮只滚动列表。
     - 贴窗口边缘的 TScrollBar 会被原生拉伸热区抢占命中 (TBorderlessWindow `resize-border`, 默认 8px); 设 `thumb-inset` 为 `resize-border` 宽度即可避开, 或调小 `resize-border` (gallery 用 4px + 4px 内缩)。
     - TSplitter 第二栏无最小尺寸约束, 可被拖到 0; 主栏折叠无过渡动画。
     - TPopover 主体是 `title` + `text` 两段文本, 完全自定义主体需用 `TPopupSurface` 自建。

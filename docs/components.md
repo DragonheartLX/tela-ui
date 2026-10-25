@@ -40,7 +40,7 @@ Slint 组件为单继承 (`inherits`), 子类可直接使用基类的全部属�
 | TText | `Text` | 主题字体 + TDesign 正文样式 (14px/22px); 库内所有文本的基类 |
 | THeading, TParagraph, TCaption | `TText` | 依次覆盖字号与行高, 保留 `text`, `color`, `wrap` 等全部内建属性 |
 | TRadioGroup, TLoading | `HorizontalLayout` | 本身就是一行布局 |
-| TTimeline, TStatistic, TCollapse, TTree, TTreeBranch, TForm, TFormItem, TSplitter, TSplitterVertical, TCellGroup | `VerticalLayout` / `HorizontalLayout` | 本身即布局, 首选尺寸随内容 |
+| TTimeline, TStatistic, TCollapse, TTree, TTreeBranch, TForm, TFormItem, TSplitter, TSplitterVertical, TCellGroup, TFooter | `VerticalLayout` / `HorizontalLayout` | 本身即布局, 首选尺寸随内容 |
 | TComment | `HorizontalLayout` | 首列 TAvatar 固定宽, 内容列 stretch 1 |
 | 其余全部组件 | `Rectangle` | 基础容器 |
 
@@ -59,6 +59,7 @@ Slint 组件为单继承 (`inherits`), 子类可直接使用基类的全部属�
 - TImageViewerOverlay = TModalSurface + 私有 TViewerButton x6 (上一张/下一张/缩小/放大/适应窗口/关闭) + TViewerChip x4 (计数/缩放组/关闭/缩略图条) + 窗口宽的图片轨道
 - TCommandPaletteOverlay = TModalSurface + TDivider + TIcon + ScrollView (列表)
 - TComment = TAvatar + TIcon + TLink (点赞/回复)
+- TFooter = TLink + TIcon + TText (链接列 / 品牌行)
 - TTabBar = TIcon + TBadge (角标计数/红点复用)
 - TStickyTool = TIcon + TText (私有 StickyToolRow xN, 连体卡内行)
 - TAnchor = TText (私有 AnchorRow xN, 自算 active 并上报)
@@ -78,7 +79,8 @@ Slint 组件为单继承 (`inherits`), 子类可直接使用基类的全部属�
   TTree (节点列表), TTreeBranch (子节点, 放进折叠盒), TCellGroup (单元行组),
   TForm (表单项), TFormItem (控件行), TSplitter / TSplitterVertical (窗格),
   TSplitterPane (窗格内容), TSplitterPanePrimary / TSplitterPanePrimaryVertical
-  (窗格内容), TSticky / TAffix (被吸附/钉住的内容)
+  (窗格内容), TSticky / TAffix (被吸附/钉住的内容), TSwipeCell (单元格内容,
+  手势层在其下), TPullDownRefresh (滚动内容)
 
 私有组件 (仅供实现参考, 不经聚合器导出): `TInputFrame` (input/input.slint,
 已对库内导出供 TInputNumber 复用), `TModalSurface` (modal-surface.slint, 已对库内
@@ -1132,7 +1134,7 @@ ListView 接线); 面向非虚拟化内容 — TList / TTable 保留 ListView �
 ## 内容 content
 
 ```slint
-import { TCollapse, TCollapseItem, TCarousel, TCarouselSlide, TCodeBlock, TTable, TTableColumn, TTableRow, TTableAlign, TTableSortDirection, TTree, TTreeItem, TTreeBranch, TList, TListItem, TCell, TCellGroup, TSortable, TSortableItem, TSplitter, TSplitterVertical, TSplitterPane, TSplitterPanePrimary, TSplitterPanePrimaryVertical } from "@tela-ui/content.slint";
+import { TCollapse, TCollapseItem, TCarousel, TCarouselSlide, TCodeBlock, TTable, TTableColumn, TTableRow, TTableAlign, TTableSortDirection, TTree, TTreeItem, TTreeBranch, TList, TListItem, TCell, TCellGroup, TSortable, TSortableItem, TSplitter, TSplitterVertical, TSplitterPane, TSplitterPanePrimary, TSplitterPanePrimaryVertical, TSticky, TSwipeCell, TSwipeAction, TSwipeSide, TPullDownRefresh, TFooter, TFooterLink, TFooterLogo } from "@tela-ui/content.slint";
 ```
 
 ### TCollapse
@@ -1366,6 +1368,98 @@ Rectangle {
 
 已知限制: 仅顶轨吸附 (无底轨变体, 底部场景用 TAffix `side: bottom`);
 z 序按声明序, 后声明的粘性盒盖住先前的 (多级吸顶的常规行为)。
+
+### TSwipeCell
+
+滑动单元格 (移动端模式)。横向拖动内容露出钉在左右边缘后的操作按钮;
+松手越过操作列一半宽度吸附展开, 否则弹回。拖动轴在最初 4px 内锁定,
+纵向手势不触发滑动。操作按钮恒着语义色 (省略 `theme` 的条目按
+`primary` 渲染 — struct 字段默认值不跨组件边界, 见
+`slint-semantics.md` 第 38 条); 操作列不画描边 — 1px / 2px 描边都会在色块
+内侧压出一圈, 视觉上仍读成与内容行高度不一致, 所以色块全高铺满, 行边界
+交给底部分隔线。底部分隔线是根级兄弟节点: 滑动时留在原位, 并压住操作列
+底边, 所以展开态的行边界仍然齐平。左侧操作列与分隔线同一起点 — 也从
+`padding-lr-l` 开始, 展开后色块左缘与线条左端对齐。
+
+继承: `Rectangle` (内容为宿主 `@children`, 随滑动偏移平移; 组件自身
+透明且 `clip: true`, 内容自备背景, 行高由宿主钉住, 最小高 48px)。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| left-actions | `[TSwipeAction]` | `[]` | 左侧操作列 (右滑露出); 空则该方向锁定 |
+| right-actions | `[TSwipeAction]` | `[]` | 右侧操作列 (左滑露出) |
+| disabled | `bool` | `false` | 禁用手势 |
+| left-opened | `bool` (in-out) | `false` | 左列展开态, 双向可写 (写入即动画开合) |
+| right-opened | `bool` (in-out) | `false` | 右列展开态 |
+| divider | `bool` | `true` | 底部分隔线 (1px `component-stroke`, 左内缩 `padding-lr-l`), 固定在行上不随内容滑动; 左侧操作列从同一内缩起点开始; 连续列表末格设 false |
+
+回调: `changed(TSwipeSide, bool)` — 某侧展开态**定案**时 (松手判定或
+编程开合), 仅真实变化触发; `action-clicked(TSwipeSide, int)` — 点操作
+按钮, 组件先收起再回调 (side, 下标)。
+
+公开函数: `open(side)` / `close()` / `begin-drag()` / `drag-to(dx, dy)` /
+`end-drag()` (拖拽状态机, 探针可驱动)。
+
+相关结构: `TSwipeAction { text: string, theme: TThemeRole = primary }`;
+枚举 `TSwipeSide { left, right }`。
+
+已知限制: 手势层在宿主子元素**之下** — 子元素自身的点击不受影响,
+代价是从可点击子元素上起手的拖动不会滑动单元格; 吸附动画为组件内
+Timer glide (150ms), 无惯性; 一次手势锁定横轴后纵滚不接管; 分隔线由
+每格自绘 (无模型可迭代), 连续列表末格需手动 `divider: false`。
+
+### TPullDownRefresh
+
+下拉刷新视口 (移动端模式)。滚到顶部后按住下拖, 状态条 (箭头 + 文案)
+从内容上方滑入; 过 `loading-bar-height` 松手触发 `refresh()` 并把加载条
+锁定在固定高度, 宿主写 `refreshing: false` 收起 (短暂显示完成语),
+或 `refresh-timeout` 超时自动收起并报 `timeout()`。滚轮在顶部向上滚
+同样拉动 (阻尼一致; 滚轮没有松手, 越过阈值当次即触发), 向下滚先把
+拉动量收回再转交列表滚动; 其余滚轮事件穿透给 Flickable 原生处理
+(1.18 无 overscroll 信号, 拖拽由组件自持, 见 `slint-semantics.md`
+第 37 条)。状态条按拉动量裁剪, 静止时不可见。
+
+继承: `Rectangle` (滚动内容为宿主 `@children`)。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| content-height | `length` | 内容首选高 | 滚动轴内容高; repeater-only 的 body 量不出, 需钉死 |
+| loading-bar-height | `length` | `50px` | 松手阈值 = 刷新时加载条高度 (TDesign 默认) |
+| max-bar-height | `length` | `80px` | 下拉上限 (0.5 阻尼之上) |
+| refresh-timeout | `duration` | `3s` | 无人收起的自动结束时限, 到点报 `timeout()` |
+| loading-texts | `[string]` | 下拉刷新 / 松手刷新 / 正在刷新 / 刷新完成 | 状态文案 (缺项回退空串) |
+| disabled | `bool` | `false` | 禁用手势 |
+| refreshing | `bool` (in-out) | `false` | 刷新中; 宿主写 false 结束循环 |
+| content-y | `length` (in-out) | `0` | 滚动偏移, 双向绑定 |
+
+回调: `refresh()` — 过阈值松手; `timeout()` — 超时自动收起;
+`changed(bool)` — `refreshing` 真变化 (属性变更通知延迟一帧, `refresh()`
+先于 `changed(true)` 到达)。
+
+公开函数: `begin-drag()` / `drag-to(dy)` / `end-drag()` / `start-refresh()` /
+`end-refresh()` (拖拽状态机, 探针可驱动)。
+
+已知限制: 仅纵向; 手势锁定下拉轴后推回只收下拉量不转滚动 (重新按压
+即可); 无惯性滚动; 刷新中滚轮事件全部穿透给列表滚动 (不参与拉动)。
+
+### TFooter
+
+页脚。可选品牌行 (图标 + 标题) / 居中链接列 (`|` 分隔, TLink 渲染,
+悬停下划线) / 版权行, 竖排居中, 三段都可省略。纯展示件 — 跳转由宿主
+处理。
+
+继承: `VerticalLayout` (首选高随内容)。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| logo | `TFooterLogo` | 空 | 品牌行: `icon` + `title` (可只给其一) |
+| links | `[TFooterLink]` | `[]` | 链接列 (name 为显示文本) |
+| text | `string` | `""` | 版权 / 备案行 |
+
+回调: `logo-clicked()`; `link-clicked(int)` (链接下标)。
+
+相关结构: `TFooterLink { name: string }`;
+`TFooterLogo { icon: TIconData, title: string = "" }`。
 
 ---
 
@@ -2307,6 +2401,8 @@ PanelLeftClose, PanelLeftOpen, FlaskConical, Inbox, Square, Copy。
 | TTabBarItem | TTabBar | text, icon, badge, badge-dot |
 | TFabItem | TFab | icon, text |
 | TSortableItem | TSortable | text, disabled |
+| TSwipeAction / TSwipeSide | TSwipeCell | text, theme (默认 primary) / left, right |
+| TFooterLink / TFooterLogo | TFooter | name / icon, title |
 | TSideNavMode / TSideNavTogglePosition | TSideNav | icon-text, text, icon / top, bottom |
 | TSideNavItem | TSideNav | label, value, icon, disabled |
 | TSideNavFooterItem | TSideNav | label, icon, value |

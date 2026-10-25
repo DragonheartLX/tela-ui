@@ -56,6 +56,9 @@ export component MainWindow inherits TBorderlessWindow {
         { label: "实验性", value: "experimental", icon: TIconSet.FlaskConical },
     ];
     in-out property <string> group-value: "basics";
+    // Current page scroll offset, exposed read-only for hosts and probes
+    // (element ids are not part of the compiled API).
+    out property <length> page-scroll-y: page-scroll.content-y;
     // Per-page scroll memory: switching pages stores the outgoing offset and
     // restores the incoming one, so every page keeps its own position.
     // Index order matches group-items plus settings (11 entries).
@@ -76,11 +79,84 @@ export component MainWindow inherits TBorderlessWindow {
         : 0;
     }
 
+    // Per-page scroll memory: a 100ms cadence timer snapshots the live
+    // offset into page-y[current], suspended while a switch is settling.
+    // Saving at the switch moment is unreliable: the if-flip's collapse
+    // can clamp content-y BEFORE the deferred changed callback runs (the
+    // display page's unmount pulled -1200 to -1047 mid-trajectory and
+    // the handler then saved the clamped value — real-app diag log), so
+    // the saved value must predate the click entirely.
+    save-timer := Timer {
+        interval: 100ms;
+        running: true;
+
+        triggered => {
+            if (!root.restore-armed) {
+                root.page-y[root.page-index(root.last-page)] = page-scroll.content-y;
+            }
+        }
+    }
+
     changed group-value => {
-        root.page-y[root.page-index(root.last-page)] = page-scroll.content-y;
         page-scroll.content-y = root.page-y[root.page-index(root.group-value)];
+        // The if-flip collapses the viewport content for a few layout
+        // rounds; the Flickable's in-bound clamp eats the restored offset
+        // written above (slint-semantics #39). Heavy pages materialize
+        // slower than any fixed re-assert window (real-app probe: with a
+        // UIA client attached, the content page came back at 0), so the
+        // timer asserts the offset until the layout has stopped churning
+        // and the value is observed in place (see restore-timer).
+        root.restore-target = root.page-y[root.page-index(root.group-value)];
+        root.restore-count = 0;
+        root.restore-writes = 0;
+        root.restore-sticks = 0;
+        root.restore-armed = true;
         root.last-page = root.group-value;
     }
+
+    // 32ms ticks. The page's content-height churns non-monotonically
+    // while it materializes (the display page grows, then shrinks as
+    // images settle — a late in-bound clamp pulled a restored offset up
+    // and an early 2-tick "stable" verdict ratified the wrong value), so
+    // any height change resets the stability count. Disarm after 8
+    // stable ticks (~256ms), >8 unanswered corrective writes (a user
+    // wheeling the fresh page) — stability refunds the budget — or the
+    // ~1.3s lifetime cap.
+    restore-timer := Timer {
+        interval: 32ms;
+        running: root.restore-armed;
+
+        triggered => {
+            if (page-scroll.content-height != root.restore-height) {
+                root.restore-height = page-scroll.content-height;
+                root.restore-sticks = 0;
+            }
+            if (-root.restore-target + page-scroll.height <= page-scroll.content-height) {
+                if (page-scroll.content-y != root.restore-target) {
+                    page-scroll.content-y = root.restore-target;
+                    root.restore-writes += 1;
+                } else {
+                    root.restore-sticks += 1;
+                    root.restore-writes = 0;
+                }
+            }
+            if (root.restore-sticks >= 8 || root.restore-writes > 8
+                || root.restore-count >= 40) {
+                root.restore-armed = false;
+                root.restore-count = 0;
+                root.restore-writes = 0;
+                root.restore-sticks = 0;
+            } else {
+                root.restore-count += 1;
+            }
+        }
+    }
+    private property <bool> restore-armed: false;
+    private property <length> restore-target: 0px;
+    private property <length> restore-height: 0px;
+    private property <int> restore-count: 0;
+    private property <int> restore-writes: 0;
+    private property <int> restore-sticks: 0;
     in-out property <bool> dialog-open: false;
     in-out property <bool> drawer-open: false;
     in-out property <bool> sheet-open: false;

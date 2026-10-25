@@ -1,0 +1,98 @@
+// Tela UI — TFooter
+//
+// Page footer (TDesign mobile pattern): an optional brand line (icon +
+// title), a centered link row with "|" separators and a copyright line,
+// stacked and centered. Pure presentation — navigation is the host's job:
+// `logo-clicked()` and `link-clicked(index)` report taps, links render as
+// TLink (hover underline included).
+
+import { TTheme } from "../theme.slint";
+import { TText, TCaption } from "../base/typography.slint";
+import { TIcon } from "../base/icon/icon.slint";
+import { TIconData } from "../base/icon/data.slint";
+import { TLink } from "../base/link.slint";
+
+export struct TFooterLink {
+    name: string,
+}
+
+export struct TFooterLogo {
+    icon: TIconData,
+    title: string = "",
+}
+
+export component TFooter inherits VerticalLayout {
+    in property <TFooterLogo> logo;
+    in property <[TFooterLink]> links;
+    // Copyright / disclaimer line.
+    in property <string> text: "";
+
+    callback logo-clicked();
+    callback link-clicked(int);
+
+    spacing: TTheme.spacing-4;
+
+    // Brand line: icon and/or title, neutral colors (not a TLink — the
+    // logo is a mark, not one of the links).
+    if root.logo.icon.paths.length > 0 || root.logo.title != "": Rectangle {
+        height: TTheme.height-m;
+
+        HorizontalLayout {
+            spacing: TTheme.spacing-2;
+            alignment: center;
+
+            if root.logo.icon.paths.length > 0: TIcon {
+                y: (parent.height - self.height) / 2;
+                icon: root.logo.icon;
+                size: 20px;
+                icon-color: TTheme.text-color-primary;
+            }
+
+            if root.logo.title != "": TText {
+                y: (parent.height - self.height) / 2;
+                width: self.preferred-width;
+                height: TTheme.line-height-m;
+                text: root.logo.title;
+                font-weight: TTheme.font-weight-medium;
+                color: TTheme.text-color-primary;
+            }
+        }
+
+        logo-touch := TouchArea {
+            mouse-cursor: MouseCursor.pointer;
+            accessible-role: AccessibleRole.button;
+            accessible-label: root.logo.title != "" ? root.logo.title : "logo";
+
+            clicked => { root.logo-clicked(); }
+        }
+    }
+
+    if root.links.length > 0: HorizontalLayout {
+        spacing: TTheme.spacing-4;
+        alignment: center;
+
+        for l[i] in root.links: HorizontalLayout {
+            spacing: TTheme.spacing-4;
+
+            TLink {
+                text: l.name;
+
+                clicked => { root.link-clicked(i); }
+            }
+
+            // "|" divider after every link but the last.
+            if i < root.links.length - 1: TCaption {
+                text: "|";
+                color: TTheme.text-color-placeholder;
+            }
+        }
+    }
+
+    // Cross-axis stretch (the layout default) already gives the caption
+    // the full row width; center the text inside it.
+    if root.text != "": TCaption {
+        horizontal-alignment: center;
+        text: root.text;
+        color: TTheme.text-color-secondary;
+    }
+}

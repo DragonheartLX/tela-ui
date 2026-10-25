@@ -29,7 +29,7 @@ fn theme_from_env() -> Result<Option<ColorScheme>, String> {
 
 fn run() -> Result<(), String> {
     // Validated before the render backend comes up, so a typo in the
-    // environment cannot be masked by a window-creation failure.
+    // environment cannot mask a window-creation failure.
     let preference = theme_from_env()?;
     let ui = MainWindow::new().map_err(|error| format!("cannot create the window: {error}"))?;
     if let Some(color_scheme) = preference {

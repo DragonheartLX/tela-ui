@@ -1,0 +1,387 @@
+// Tela UI — TSwipeCell
+//
+// Swipe-to-reveal cell (mobile pattern): drag the content horizontally to
+// reveal action buttons pinned behind the left and/or right edge. Release
+// past half of the action row and it snaps open, otherwise it snaps shut.
+// The open state is exposed two-way (`left-opened` / `right-opened`, the
+// sides are mutually exclusive) and settled changes report
+// `changed(side, opened)`; tapping an action snaps the cell shut first,
+// then reports `action-clicked(side, index)`.
+//
+// The drag axis locks on the first 4px of movement (a vertical gesture
+// never swipes), and the settle slide is a Timer glide — imperative writes
+// strip `animate` bindings (slint-semantics #8), so the offset is always a
+// plain value (same approach as TScrollBar). The gesture layer rides inside
+// the sliding content, so its `mouse-x` is measured in a moving frame;
+// `moved` adds the offset delta back to recover the window-space drag
+// (slint-semantics #40) — without it a slow drag oscillates.
+//
+// Content is host-defined `@children` translated by the swipe offset; give
+// it its own background — the cell itself is transparent and clipped. The
+// swipe TouchArea sits BELOW the host children: interactive content keeps
+// its clicks, and the gesture works wherever the children do not claim the
+// pointer (plain text never does). Action columns are borderless: a stroke
+// inside the column (1px or 2px) only insets the saturated slab and still
+// reads as a different row height, so the color runs full-bleed and the
+// static bottom divider marks the row boundary. Pin the row height (or rely
+// on the 48px min-height): a Rectangle root does not propagate its
+// children's preferred height. The bottom `divider` (default on) is a root
+// sibling, so it stays put while the content slides and closes the revealed
+// actions' bottom edge; the last cell of a group sets `divider: false`.
+
+import { TTheme } from "../theme.slint";
+import { TThemeRole } from "../structs/enums.slint";
+import { TText } from "../base/typography.slint";
+
+export enum TSwipeSide {
+    left,
+    right,
+}
+
+export struct TSwipeAction {
+    text: string,
+    theme: TThemeRole = TThemeRole.primary,
+}
+
+// Internal: one colored action button (text on the role's color ramp).
+component TSwipeActionButton inherits Rectangle {
+    in property <string> text;
+    in property <TThemeRole> theme: TThemeRole.primary;
+
+    // Struct field defaults do not cross component boundaries: an actions
+    // array bound at the instantiation site delivers the zero variant
+    // (`default`) for omitted fields (slint-semantics #38). Swipe actions
+    // are always tinted, so `default` resolves to primary.
+    private property <TThemeRole> tint:
+        root.theme == TThemeRole.default ? TThemeRole.primary : root.theme;
+
+    callback clicked();
+
+    // 56px (spacing-14) is the minimum tap target; wider labels grow.
+    width: max(TTheme.spacing-14, label.preferred-width + 2 * TTheme.padding-lr-l);
+
+    background: touch.pressed ? TTheme.theme-color-active(root.tint)
+        : touch.has-hover ? TTheme.theme-color-hover(root.tint)
+        : TTheme.theme-color(root.tint);
+    animate background { duration: TTheme.duration-fast; }
+
+    label := TText {
+        x: (parent.width - self.width) / 2;
+        y: (parent.height - self.height) / 2;
+        width: self.preferred-width;
+        height: TTheme.line-height-m;
+        text: root.text;
+        color: TTheme.text-color-anti;
+    }
+
+    touch := TouchArea {
+        mouse-cursor: MouseCursor.pointer;
+        accessible-role: AccessibleRole.button;
+        accessible-label: root.text;
+
+        clicked => { root.clicked(); }
+    }
+}
+
+export component TSwipeCell inherits Rectangle {
+    in property <[TSwipeAction]> left-actions;
+    in property <[TSwipeAction]> right-actions;
+    in property <bool> disabled: false;
+    // Bottom hairline (same geometry as TCell); the last cell of a group
+    // sets false.
+    in property <bool> divider: true;
+
+    // Two-way open state per side; writing from the host animates the
+    // slide. Both false = closed.
+    in-out property <bool> left-opened: false;
+    in-out property <bool> right-opened: false;
+
+    // A side's open state settled (release decision, programmatic open or
+    // close); fires only on real changes.
+    callback changed(TSwipeSide, bool);
+    // An action button was tapped: the cell snaps shut first, then the
+    // callback reports (side, index into that side's model).
+    callback action-clicked(TSwipeSide, int);
+
+    // Live swipe offset: positive slides the content right (left actions
+    // revealed), negative slides it left (right actions revealed). Always a
+    // plain value — see the header comment for why not `animate`.
+    private property <length> offset: 0px;
+    // Open travel per side. The left pane is inset from the cell edge, so
+    // its travel is its right edge, not just its width; no actions means no
+    // travel (the inset alone must not unlock a right swipe).
+    private property <length> left-width:
+        root.left-actions.length > 0 ? left-pane.x + left-pane.width : 0px;
+    private property <length> right-width: right-pane.width;
+
+    private property <bool> dragging: false;
+    // True once this press locked onto the horizontal axis; a press
+    // released without it counts as a tap (close-if-open), not a swipe.
+    private property <bool> swiped: false;
+    private property <length> press-offset: 0px;
+
+    private property <bool> gliding: false;
+    private property <length> glide-from: 0px;
+    private property <length> glide-to: 0px;
+    private property <float> glide-pos: 1;
+
+    glide := Timer {
+        // 16ms frame step; 0.11 ≈ 16ms / duration-fast(150ms).
+        interval: 16ms;
+        running: root.gliding;
+
+        triggered => {
+            // A live drag takes over the offset; stop gliding.
+            if (root.dragging) {
+                root.gliding = false;
+                return;
+            }
+            root.glide-pos = Math.min(1, root.glide-pos + 0.11);
+            // ease-out cubic
+            let k = 1 - (1 - root.glide-pos) * (1 - root.glide-pos) * (1 - root.glide-pos);
+            root.offset = root.glide-from + (root.glide-to - root.glide-from) * k;
+            if (root.glide-pos >= 1) {
+                root.gliding = false;
+            }
+        }
+    }
+
+    // Offset that matches the current open flags.
+    pure function glide-target() -> length {
+        return root.left-opened ? root.left-width
+            : root.right-opened ? -root.right-width
+            : 0px;
+    }
+
+    function start-glide(target: length) {
+        root.glide-from = root.offset;
+        root.glide-to = Math.max(-root.right-width, Math.min(root.left-width, target));
+        root.glide-pos = 0;
+        root.gliding = true;
+    }
+
+    // Open/close re-route through the flags: their changed handlers run the
+    // glide, so gesture, taps and host writes share one path.
+    changed left-opened => { root.start-glide(root.glide-target()); }
+    changed right-opened => { root.start-glide(root.glide-target()); }
+
+    public function open(side: TSwipeSide) {
+        if (side == TSwipeSide.left) {
+            if (root.right-opened) {
+                root.right-opened = false;
+                root.changed(TSwipeSide.right, false);
+            }
+            if (!root.left-opened) {
+                root.left-opened = true;
+                root.changed(TSwipeSide.left, true);
+            }
+        } else {
+            if (root.left-opened) {
+                root.left-opened = false;
+                root.changed(TSwipeSide.left, false);
+            }
+            if (!root.right-opened) {
+                root.right-opened = true;
+                root.changed(TSwipeSide.right, true);
+            }
+        }
+    }
+
+    public function close() {
+        if (root.left-opened) {
+            root.left-opened = false;
+            root.changed(TSwipeSide.left, false);
+        }
+        if (root.right-opened) {
+            root.right-opened = false;
+            root.changed(TSwipeSide.right, false);
+        }
+    }
+
+    // The drag state machine lives in public functions (probe-drivable,
+    // same code path as the content TouchArea below).
+    public function begin-drag() {
+        root.dragging = true;
+        root.swiped = false;
+        root.press-offset = root.offset;
+        root.gliding = false;
+    }
+
+    public function drag-to(dx: length, dy: length) {
+        if (!root.dragging) {
+            return;
+        }
+        if (!root.swiped) {
+            let adx = dx < 0 ? -dx : dx;
+            let ady = dy < 0 ? -dy : dy;
+            // 4px jiggle gate, then the dominant axis wins; a vertical
+            // gesture never becomes a swipe.
+            if (adx <= TTheme.spacing-2 && ady <= TTheme.spacing-2) {
+                return;
+            }
+            if (adx <= ady) {
+                return;
+            }
+            root.swiped = true;
+        }
+        root.offset = Math.max(-root.right-width,
+            Math.min(root.left-width, root.press-offset + dx));
+    }
+
+    public function end-drag() {
+        if (!root.dragging) {
+            return;
+        }
+        root.dragging = false;
+        if (root.swiped) {
+            let was-left = root.left-opened;
+            let was-right = root.right-opened;
+            if (root.offset > 0px && root.left-width > 0px) {
+                // Opens once more than half of the inset column is revealed.
+                let opens = root.offset >= left-pane.x + left-pane.width / 2;
+                root.right-opened = false;
+                root.left-opened = opens;
+                if (opens != was-left) {
+                    root.changed(TSwipeSide.left, opens);
+                }
+            } else if (root.offset < 0px && root.right-width > 0px) {
+                let opens = -root.offset >= root.right-width / 2;
+                root.left-opened = false;
+                root.right-opened = opens;
+                if (opens != was-right) {
+                    root.changed(TSwipeSide.right, opens);
+                }
+            } else {
+                if (was-left) {
+                    root.left-opened = false;
+                    root.changed(TSwipeSide.left, false);
+                }
+                if (was-right) {
+                    root.right-opened = false;
+                    root.changed(TSwipeSide.right, false);
+                }
+            }
+        }
+        // Nothing decided (jiggle release) or the flags did not flip: still
+        // snap home.
+        if (!root.gliding && root.offset != root.glide-target()) {
+            root.start-glide(root.glide-target());
+        }
+    }
+
+    min-height: TTheme.height-l + TTheme.spacing-4;
+    clip: true;
+
+    // Left action row, pinned behind the left edge and inset by the same
+    // `padding-lr-l` the bottom divider starts at, so the revealed column
+    // lines up with the row separator. Width 0 without actions, which also
+    // locks that swipe direction in drag-to.
+    left-pane := Rectangle {
+        x: TTheme.padding-lr-l;
+        y: 0;
+        width: left-row.preferred-width;
+        height: parent.height;
+
+        left-row := HorizontalLayout {
+            x: 0;
+            y: 0;
+            width: parent.width;
+            height: parent.height;
+
+            for a[i] in root.left-actions: TSwipeActionButton {
+                text: a.text;
+                theme: a.theme;
+
+                clicked => {
+                    root.close();
+                    root.action-clicked(TSwipeSide.left, i);
+                }
+            }
+        }
+    }
+
+    right-pane := Rectangle {
+        x: parent.width - self.width;
+        y: 0;
+        width: right-row.preferred-width;
+        height: parent.height;
+
+        right-row := HorizontalLayout {
+            x: 0;
+            y: 0;
+            width: parent.width;
+            height: parent.height;
+
+            for a[i] in root.right-actions: TSwipeActionButton {
+                text: a.text;
+                theme: a.theme;
+
+                clicked => {
+                    root.close();
+                    root.action-clicked(TSwipeSide.right, i);
+                }
+            }
+        }
+    }
+
+    content := Rectangle {
+        x: root.offset;
+        y: 0;
+        width: parent.width;
+        height: parent.height;
+
+        // Gesture layer BELOW the host children: the children keep their
+        // own pointer events; the swipe works wherever they do not claim
+        // the pointer.
+        swipe := TouchArea {
+            x: 0;
+            y: 0;
+            width: parent.width;
+            height: parent.height;
+            enabled: !root.disabled;
+
+            pointer-event(ev) => {
+                if (ev.kind == PointerEventKind.down) {
+                    root.begin-drag();
+                } else if (ev.kind == PointerEventKind.up || ev.kind == PointerEventKind.cancel) {
+                    root.end-drag();
+                }
+            }
+
+            moved => {
+                if (self.pressed) {
+                    // `mouse-x` is local to this (moving) TouchArea: the
+                    // content's offset shrinks it by exactly the distance
+                    // already applied this gesture. Add that back, otherwise
+                    // the offset feeds on itself and a slow drag oscillates
+                    // (slint-semantics #40).
+                    root.drag-to(self.mouse-x - self.pressed-x
+                            + root.offset - root.press-offset,
+                        self.mouse-y - self.pressed-y);
+                }
+            }
+
+            // A tap (no axis lock this press) on open content closes the
+            // cell. A swipe release skips this: `swiped` is still set.
+            clicked => {
+                if (!root.swiped && (root.left-opened || root.right-opened)) {
+                    root.close();
+                }
+            }
+        }
+
+        @children
+    }
+
+    // Root sibling of `content`: the separator belongs to the row, so it
+    // stays put while the content slides and closes the revealed action
+    // columns' bottom edge. Inset from the left like TCell; last in the
+    // declaration order so it paints over content and actions.
+    if root.divider: Rectangle {
+        x: TTheme.padding-lr-l;
+        y: parent.height - self.height;
+        width: parent.width - TTheme.padding-lr-l;
+        height: 1px;
+        background: TTheme.component-stroke;
+    }
+}

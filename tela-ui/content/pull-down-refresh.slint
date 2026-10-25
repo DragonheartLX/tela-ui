@@ -1,0 +1,342 @@
+// Tela UI — TPullDownRefresh
+//
+// Pull-to-refresh viewport (mobile pattern): drag the content down while
+// the scroll offset is at the top and a status bar slides in above it —
+// "下拉刷新" turns into "松手刷新" past `loading-bar-height` (the arrow
+// flips meanwhile). Release past the threshold enters the refreshing state
+// at a fixed bar height and fires `refresh()`; the host ends it by writing
+// `refreshing: false` (brief "刷新完成" phase while the bar glides home),
+// or the `refresh-timeout` timer ends it and fires `timeout()`.
+//
+// Slint 1.18 has no overscroll signal on Flickable (its content offsets are
+// also snapped back in bounds by an internal handler — slint-semantics
+// #37), so the pull is a private `pull` offset translating a pan group
+// around the viewport, and the drag itself is handled by this component:
+// with `mouse-drag-pan-enabled: false` the Flickable forwards mouse
+// presses to this TouchArea. Wheel-up at the very top feeds the same pull
+// through the TouchArea's `scroll-event` (accepted, so the Flickable's
+// clamp cannot eat it); every other wheel event is rejected through to
+// the Flickable. The settle slide is a Timer
+// glide like TScrollBar's — imperative writes strip `animate` bindings.
+//
+// Dragging up pans the content directly (clamped); once the gesture locked
+// to the pull axis it stays there until release — pushing back up only
+// retracts the pull, it does not scroll. Vertical scrolling only.
+//
+// Content is host-defined `@children`; pin `content-height` when children
+// animate their heights — and for repeater-only bodies (`for` rows), which
+// do not measure through the preferred chain — same contract as TScrollBar.
+
+import { TTheme } from "../theme.slint";
+import { TText } from "../base/typography.slint";
+import { TIcon } from "../base/icon/icon.slint";
+import { TIconSet } from "../base/icon/data.slint";
+import { TLoadingSpinner } from "../base/loading.slint";
+
+export component TPullDownRefresh inherits Rectangle {
+    // Content size along the scroll axis; defaults to the children's
+    // preferred height.
+    in property <length> content-height: body.preferred-height;
+    in property <bool> disabled: false;
+    // Release threshold and the bar height held while refreshing
+    // (TDesign defaults).
+    in property <length> loading-bar-height: 50px;
+    // Pull ceiling with the 0.5 damping applied on top (TDesign default).
+    in property <length> max-bar-height: 80px;
+    // Auto-end of an unattended refresh; fires `timeout()`.
+    in property <duration> refresh-timeout: 3s;
+    // Status texts [pull, release, refreshing, complete]; partial arrays
+    // fall back to empty strings.
+    in property <[string]> loading-texts: ["下拉刷新", "松手刷新", "正在刷新", "刷新完成"];
+
+    // True while the refresh is running. Two-way: the host ends the cycle
+    // by writing false.
+    in-out property <bool> refreshing: false;
+    // Current scroll offset (0 .. -(content-height - height)). Two-way:
+    // hosts read it or scroll programmatically.
+    in-out property <length> content-y <=> flick.content-y;
+
+    // Released past the threshold: the bar locks to `loading-bar-height`
+    // and the host starts its work.
+    callback refresh();
+    // The refresh was not ended by the host within `refresh-timeout`: the
+    // bar retracts and the host should treat the work as failed/stale.
+    callback timeout();
+    // `refreshing` actually changed (gesture, timeout or host write).
+    callback changed(bool);
+
+    private property <length> pull: 0px;
+    private property <bool> dragging: false;
+    // 0 undecided / 1 pull / 2 pan; locks on the first 4px of movement.
+    private property <int> axis: 0;
+    private property <length> base-dy: 0px;
+    private property <length> press-content-y: 0px;
+    private property <length> max-scroll: Math.max(0px, root.content-height - root.height);
+    // Glide-home after a finished refresh keeps the "complete" text until
+    // the bar reaches 0.
+    private property <bool> completing: false;
+
+    private property <bool> gliding: false;
+    private property <length> glide-from: 0px;
+    private property <length> glide-to: 0px;
+    private property <float> glide-pos: 1;
+
+    glide := Timer {
+        // 16ms frame step; 0.11 ≈ 16ms / duration-fast(150ms).
+        interval: 16ms;
+        running: root.gliding;
+
+        triggered => {
+            // A live pull takes over the offset; stop gliding.
+            if (root.dragging && root.axis == 1) {
+                root.gliding = false;
+                return;
+            }
+            root.glide-pos = Math.min(1, root.glide-pos + 0.11);
+            // ease-out cubic
+            let k = 1 - (1 - root.glide-pos) * (1 - root.glide-pos) * (1 - root.glide-pos);
+            root.pull = root.glide-from + (root.glide-to - root.glide-from) * k;
+            if (root.glide-pos >= 1) {
+                root.gliding = false;
+                if (root.glide-to == 0px) {
+                    root.completing = false;
+                }
+            }
+        }
+    }
+
+    timeout := Timer {
+        interval: root.refresh-timeout;
+        running: root.refreshing;
+
+        triggered => {
+            if (root.refreshing) {
+                root.end-refresh();
+                root.timeout();
+            }
+        }
+    }
+
+    public pure function text-at(i: int) -> string {
+        return root.loading-texts.length > i ? root.loading-texts[i] : "";
+    }
+
+    private property <string> status-text:
+        root.refreshing ? root.text-at(2)
+        : root.completing ? root.text-at(3)
+        : root.pull >= root.loading-bar-height ? root.text-at(1)
+        : root.text-at(0);
+
+    function glide-pull-to(target: length) {
+        root.glide-from = root.pull;
+        root.glide-to = Math.max(0px, Math.min(root.max-bar-height, target));
+        root.glide-pos = 0;
+        root.gliding = true;
+    }
+
+    public function start-refresh() {
+        if (root.refreshing) {
+            return;
+        }
+        root.refreshing = true;
+        root.glide-pull-to(root.loading-bar-height);
+        root.refresh();
+    }
+
+    public function end-refresh() {
+        if (!root.refreshing) {
+            return;
+        }
+        root.refreshing = false;
+    }
+
+    // Any writer (host write, timeout, gesture) retracts the bar through
+    // the same path; `changed(bool)` reports the flip itself.
+    changed refreshing => {
+        root.changed(root.refreshing);
+        if (!root.refreshing && root.pull > 0px) {
+            root.completing = true;
+            root.glide-pull-to(0px);
+        }
+    }
+
+    // The drag state machine lives in public functions (probe-drivable,
+    // same code path as the viewport TouchArea below).
+    public function begin-drag() {
+        if (root.disabled || root.refreshing) {
+            return;
+        }
+        root.dragging = true;
+        root.axis = 0;
+        root.completing = false;
+        root.gliding = false;
+    }
+
+    public function drag-to(dy: length) {
+        if (!root.dragging) {
+            return;
+        }
+        if (root.axis == 0) {
+            let ady = dy < 0 ? -dy : dy;
+            if (ady <= TTheme.spacing-2) {
+                return;
+            }
+            root.base-dy = dy;
+            // Downward at the very top pulls; anything else pans.
+            root.axis = dy > 0 && root.content-y >= 0px ? 1 : 2;
+            root.press-content-y = root.content-y;
+        }
+        let d = dy - root.base-dy;
+        if (root.axis == 1) {
+            // Damped pull, clamped to the ceiling.
+            root.pull = Math.min(root.max-bar-height, Math.max(0px, d * 0.5));
+        } else {
+            // Finger up (d < 0) scrolls down: content-y follows the finger.
+            root.content-y = Math.max(-root.max-scroll,
+                Math.min(0px, root.press-content-y + d));
+        }
+    }
+
+    public function end-drag() {
+        if (!root.dragging) {
+            return;
+        }
+        root.dragging = false;
+        if (root.axis == 1) {
+            if (root.pull >= root.loading-bar-height) {
+                root.start-refresh();
+            } else {
+                root.glide-pull-to(0px);
+            }
+        }
+        root.axis = 0;
+    }
+
+    clip: true;
+
+    // Pan group: content viewport plus the status bar above it, translated
+    // down by the pull amount (content-y itself stays in bounds).
+    pan := Rectangle {
+        x: 0;
+        y: root.pull;
+        width: parent.width;
+        height: parent.height;
+
+        header := Rectangle {
+            x: 0;
+            y: -root.pull;
+            width: parent.width;
+            height: root.pull;
+            // The status row centers on the bar height; without the clip
+            // its 32px row shows through the 0-height bar at rest and
+            // half-covers the first content row.
+            clip: true;
+
+            status-row := HorizontalLayout {
+                x: (parent.width - self.preferred-width) / 2;
+                y: (parent.height - TTheme.height-m) / 2;
+                width: self.preferred-width;
+                height: TTheme.height-m;
+                spacing: TTheme.spacing-2;
+
+                if root.refreshing: TLoadingSpinner {
+                    y: (parent.height - self.height) / 2;
+                    size: 16px;
+                    spinner-color: TTheme.brand-color;
+                }
+
+                if !root.refreshing: TIcon {
+                    y: (parent.height - self.height) / 2;
+                    icon: TIconSet.ChevronDown;
+                    size: 16px;
+                    icon-color: TTheme.text-color-secondary;
+                    // Flips to "release" as the pull crosses the threshold.
+                    transform-rotation: 180deg * Math.min(1.0, root.pull / root.loading-bar-height);
+                }
+
+                status-text := TText {
+                    y: (parent.height - self.height) / 2;
+                    width: self.preferred-width;
+                    height: TTheme.line-height-m;
+                    text: root.status-text;
+                    color: TTheme.text-color-secondary;
+                }
+            }
+        }
+
+        flick := Flickable {
+            x: 0;
+            y: 0;
+            width: parent.width;
+            height: parent.height;
+            // Mouse drags belong to the gesture layer below; the wheel is
+            // still handled by the Flickable itself.
+            mouse-drag-pan-enabled: false;
+            // The Flickable's own scrollability (wheel acceptance, the
+            // in-bounds clamp) keys off its content-height. The compiler
+            // default — max over the direct layout child's min-height —
+            // cannot feed from a repeater-only body (#407), leaving the
+            // viewport unscrollable; route the root property through.
+            content-height: root.content-height;
+
+            body := VerticalLayout {
+                width: parent.width;
+                spacing: 0px;
+
+                @children
+            }
+        }
+    }
+
+    // Gesture layer on top of everything; disabled rows show it while a
+    // refresh is running (the wheel still scrolls — scroll events pass).
+    gesture := TouchArea {
+        x: 0;
+        y: 0;
+        width: parent.width;
+        height: parent.height;
+        enabled: !root.disabled && !root.refreshing;
+
+        pointer-event(ev) => {
+            if (ev.kind == PointerEventKind.down) {
+                root.begin-drag();
+            } else if (ev.kind == PointerEventKind.up || ev.kind == PointerEventKind.cancel) {
+                root.end-drag();
+            }
+        }
+
+        moved => {
+            if (self.pressed) {
+                root.drag-to(self.mouse-y - self.pressed-y);
+            }
+        }
+
+        // A wheel at the very top pulls instead of bouncing dead against
+        // the Flickable's clamp: wheel-up (positive delta-y in Slint —
+        // content-y += delta, so negative scrolls down) grows the pull
+        // with the same 0.5 damping, and crossing the threshold releases
+        // right away — a wheel has no release of its own. Wheel-down
+        // first retracts an open pull, then hands the event over to the
+        // Flickable.
+        scroll-event(event) => {
+            if (root.disabled || root.refreshing || root.dragging
+                || event.delta-y == 0px) {
+                reject
+            } else if (event.delta-y > 0px && root.content-y >= 0px) {
+                root.gliding = false;
+                root.pull = Math.min(root.max-bar-height,
+                    Math.max(0px, root.pull + event.delta-y * 0.5));
+                if (root.pull >= root.loading-bar-height) {
+                    root.start-refresh();
+                }
+                accept
+            } else if (event.delta-y < 0px && root.pull > 0px) {
+                root.gliding = false;
+                root.pull = Math.max(0px, root.pull + event.delta-y * 0.5);
+                root.pull > 0px ? accept : reject
+            } else {
+                reject
+            }
+        }
+    }
+}

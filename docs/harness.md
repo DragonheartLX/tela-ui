@@ -56,3 +56,5 @@ python scripts\check-code-samples.py
 21. 量"缩放"用画面非遮罩包围盒即可, 但要把工具条/芯片所在的行带排除, 并且留意悬停中的图标会变品牌色, 其抗锯齿光晕会被"蓝色系"谓词误判 —— 谓词里加红通道上限或按行带排除。
 22. 一次 `set_platform` 只能建一个平台; 全部场景共用它, 每个 scenario 各自 `Probe::new()`, 场景之间把所有 overlay 关干净(探针里加"栈已空"断言), 否则上一场景的残留状态会污染下一场景。
 23. testing 后端的合成指针事件 (`Window::dispatch_event(PointerPressed/…)`) 只能命中 Window 的**直接**子元素 — 嵌套在子 Rectangle 里的 TouchArea 一律 `Rejected`(实测 even take_snapshot 强制绘制后依旧)。要驱动嵌套组件的交互逻辑, 别走事件派发: 在探针包装组件里加 `public function` 直接调组件的公开函数或直接写它的属性 (同一代码路径), 再用 `mock_elapsed_time` 分段采样断言动画曲线。
+24. `WindowEvent::PointerScrolled` 合成滚轮事件在 testing 后端同样只进 Window 直接子元素 (与第 23 条同族) — 裸可滚 Flickable 都收不到; 滚轮/嵌套路由只能源码分析或真机验证, 探针别为它写断言。
+25. **嵌套 TouchArea 的慢拖只能 OS 鼠标驱动** (第 23 条的现实出口): `Start-Process slint-viewer` 后 `Process.MainWindowHandle` 取到的是 `Winit Thread Event Target` (外层 14x14, 客户区 0x0), 必须 `EnumWindows` 按 pid 取**面积最大且有标题**的窗口。`SetWindowPos` 摆位后 `ClientToScreen(0,0)` 拿客户区原点, `SetCursorPos` 1px/步 + 每步 `mouse_event` LEFTDOWN 保持按下, 每步 `CopyFromScreen` 存一帧, 用探针里高对比色块的左边界量 `offset`。截图含标题栏且受 DPI 缩放任一影响,**只看跨帧相对变化** (本次 24 步实测: 修复前 38→33→40→34 抽搐, 修复后 38→39→41→…→62 单调)。临时脚本放 `Temp/`, 收尾删除。
