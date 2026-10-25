@@ -89,7 +89,7 @@ TSwitch {
 }
 ```
 
-83 个组件 (基础 12 / 输入 14 / 选择 10 / 日期时间 5 / 展示 10 / 内容 13 / 提示 3 / 浮层 5 / 导航 10, 另有实验性 1; 导航 10 含私有 TNavLabel) 按类别聚合导出; 另有 8 个服务型浮层 (对话框 / 加载 / 消息 / 通知 / 图片预览 / 命令面板 / 动作面板 / 提示) 与主题、图标、浮层栈三个全局对象。`@tela-ui/common.slint` 保留为全量兼容出口, 完整参数说明见 [docs/components.md](docs/components.md)。
+93 个组件 (基础 12 / 输入 14 / 选择 11 / 日期时间 5 / 展示 12 / 内容 16 / 提示 4 / 浮层 6 / 导航 12, 另有实验性 1; 另有库内部件 TNavLabel / TScrollThumb 不在聚合出口) 按类别聚合导出; 另有 8 个服务型浮层 (对话框 / 加载 / 消息 / 通知 / 图片预览 / 命令面板 / 动作面板 / 提示) 与主题、图标、浮层栈三个全局对象。`@tela-ui/common.slint` 保留为全量兼容出口, 完整参数说明见 [docs/components.md](docs/components.md)。
 
 ## 致谢与说明
 
@@ -119,6 +119,14 @@ TSwitch {
     - TSplitter 第二栏无最小尺寸约束, 可被拖到 0; 主栏折叠无过渡动画。
     - TPopover 主体是 `title` + `text` 两段文本, 完全自定义主体需用 `TPopupSurface` 自建。
     - TForm 是轻量脚手架: 无校验引擎, help/error 只做状态呈现, 校验逻辑在 Rust 侧。
+    - TComment 纯展示: 回复列表与图片由宿主自行嵌套; 点赞态组件自翻转后回调。
+    - TNoticeBar 单行 elide 无跑马灯; 多条公告为整条垂直轮播; 关闭走 visible, 隐藏期间布局占位仍在。
+    - TCell 分隔线由每行自绘, 组内末行需设 divider: false; 行结构固定 (图标/标题/说明/note/箭头)。
+    - TCountDown 由剩余时长 (duration) 驱动, 无目标时刻解析 (Slint 不暴露当前日期); 时位不按 24 回绕。
+    - TTabBar 贴底定位与安全区由宿主容器负责。
+    - TIndexes 只上报 changed(index), 分组列表滚动由宿主执行; 气泡溢出组件左缘。
+    - TSortable 排序只上报 reorder(from, to), 行序由宿主重建模型 (1.18 语言内没有循环语句); 拖拽中列表不滚动。
+    - TFab 展开面板不是弹出层, 层叠按声明序 (宿主后续兄弟元素会盖住它), 子操作容量由宿主控制。
 
 ## 许可证
 

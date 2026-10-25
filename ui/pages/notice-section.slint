@@ -1,16 +1,18 @@
-// Gallery section: 提示 (TAlert / Message / Notification / TProgress / TResult),
-// 一个组件一张卡.
+// Gallery section: 提示 (TAlert / TNoticeBar / Message / Notification /
+// TProgress / TResult), 一个组件一张卡.
 
 import { TTheme, TThemeRole } from "@tela-ui/theme.slint";
-import { TText, TButton, TButtonVariant, TCaption } from "@tela-ui/base.slint";
+import { TText, TButton, TButtonVariant, TCaption, TIconSet } from "@tela-ui/base.slint";
 import { TSelect, TSelectItem, TSwitch } from "@tela-ui/select.slint";
 import { TSlider } from "@tela-ui/input.slint";
-import { TAlert, TMessage, TMessagePlacement, TNotification, TResult, TResultStatus, TProgress, TProgressVariant } from "@tela-ui/notice.slint";
+import { TAlert, TNoticeBar, TMessage, TMessagePlacement, TNotification, TResult, TResultStatus, TProgress, TProgressVariant } from "@tela-ui/notice.slint";
 import { GallerySection } from "../gallery-section.slint";
 
 export component NoticeSection inherits VerticalLayout {
     spacing: 28px;
 
+    // TNoticeBar demo feedback as plain text (no toast round-trip).
+    in-out property <string> notice-status: "等待轮播";
     in-out property <float> progress-value: 40;
     // Defaults to the component's own default (no easing), so the slider
     // reads as the "live value" case until the switch is flipped.
@@ -209,6 +211,47 @@ export component NoticeSection inherits VerticalLayout {
             }
 
             Rectangle { }
+        }
+    }
+
+    // ======================= TNoticeBar ======================
+    GallerySection {
+        title: "通告栏 TNoticeBar";
+        code: "import { TNoticeBar } from \"@tela-ui/notice.slint\";\n\n// 多条公告轮播 (整条垂直切换, 默认 3s 一条):\nTNoticeBar {\n    contents: [\n        \"系统将于今晚 23:00 例行维护, 预计 30 分钟。\",\n        \"v2.0 版本已发布, 新增暗色主题。\",\n    ];\n    changed(i) => { 状态文本 = \"已轮播到第 N 条\"; }\n}\n\n// 可关闭 + 主题色:\nTNoticeBar {\n    contents: [\"您的账户存在安全风险, 请尽快修改密码。\"];\n    theme: TThemeRole.error;\n    closable: true;\n\n    closed => { 状态文本 = \"已关闭\"; }\n}";
+
+        VerticalLayout {
+            spacing: 16px;
+
+            TNoticeBar {
+                contents: [
+                    "系统将于今晚 23:00 例行维护, 预计 30 分钟。",
+                    "v2.0 版本已发布, 新增暗色主题。",
+                ];
+
+                changed(i) => {
+                    root.notice-status = "已轮播到第 \{i + 1} 条公告";
+                }
+            }
+
+            TNoticeBar {
+                contents: ["您的账户存在安全风险, 请尽快修改密码。"];
+                theme: TThemeRole.error;
+                closable: true;
+
+                closed => {
+                    root.notice-status = "错误公告已关闭";
+                }
+            }
+
+            TNoticeBar {
+                contents: ["任务已完成, 全部检查项通过。"];
+                theme: TThemeRole.success;
+                icon: TIconSet.CircleCheck;
+            }
+
+            TCaption { text: "状态: \{root.notice-status}"; wrap: word-wrap; }
+
+            TCaption { text: "单行 elide 展示, 无跑马灯; 多条内容为整条轮播 (changed 只在真切换时触发); 关闭走 visible (TAlert 同款), 宿主重新置 open 即可恢复。"; wrap: word-wrap; }
         }
     }
 

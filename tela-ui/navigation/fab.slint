@@ -1,0 +1,187 @@
+// Tela UI — TFab
+//
+// Floating action button: a round primary button that optionally expands
+// a column of sub-actions above itself (labels grow leftward from the
+// button's right edge; the panel deliberately overflows the component's
+// own bounds — position the host-side with x/y like TBackTop). With
+// `actions` the main button toggles `open` (icon rotates 45°); without,
+// it only fires `clicked`.
+
+import { TTheme } from "../theme.slint";
+import { TText } from "../base/typography.slint";
+import { TIcon } from "../base/icon/icon.slint";
+import { TIconSet, TIconData } from "../base/icon/data.slint";
+
+export struct TFabItem {
+    icon: TIconData,
+    text: string = "",
+}
+
+export component TFab inherits Rectangle {
+    in property <TIconData> icon: TIconSet.Plus;
+    in property <[TFabItem]> actions;
+    in-out property <bool> open: false;
+
+    // Main button press (fires in addition to the `open` toggle when
+    // sub-actions exist).
+    callback clicked();
+    // Sub-action pressed (index into `actions`); the panel closes first.
+    callback action-clicked(int);
+
+    // Toggle the expand panel programmatically (the main button does this
+    // and additionally fires `clicked`).
+    public function toggle-open() {
+        if (root.actions.length > 0) {
+            root.open = !root.open;
+        }
+    }
+
+    // 48px on the token scale (height-l + spacing-4).
+    private property <length> main-size: TTheme.height-l + TTheme.spacing-4;
+    private property <length> sub-size: TTheme.height-l;
+    private property <length> sub-gap: TTheme.spacing-4;
+
+    width: main-size;
+    height: main-size;
+
+    // Expanded panel: a clip box above the button whose height animates;
+    // the column inside is anchored to its bottom edge (TTree-branch
+    // technique, so closing animates too).
+    if root.actions.length > 0: Rectangle {
+        x: parent.width - col.preferred-width;
+        y: -self.height - TTheme.spacing-4;
+        height: root.open ? col.preferred-height : 0px;
+        width: col.preferred-width;
+        clip: true;
+        animate height { duration: TTheme.duration-base; }
+
+        col := VerticalLayout {
+            // Anchored to the clip box's bottom edge so growing/revealing
+            // happens upward. Width pinned to its own preferred: leaving the
+            // default 100%-of-clip binding would cycle with the clip's
+            // `width: col.preferred-width` (slint-semantics 第 31c 条).
+            x: 0;
+            y: parent.height - self.preferred-height;
+            width: self.preferred-width;
+            height: self.preferred-height;
+            spacing: root.sub-gap;
+
+            // Rows stretch to the column width; `alignment: end` keeps the
+            // round buttons in one right-aligned column with labels to
+            // their left (label-less rows would otherwise hug the left).
+            for it[i] in root.actions: HorizontalLayout {
+                alignment: end;
+                spacing: TTheme.spacing-2;
+
+                // Stretched wrapper centers the 32px pill vertically (a
+                // fixed-height layout child would top-align).
+                if it.text != "": Rectangle {
+                    width: pill.width;
+
+                    pill := Rectangle {
+                        y: (parent.height - self.height) / 2;
+                        width: chip-text.preferred-width + 2 * TTheme.padding-lr-s;
+                        height: TTheme.height-m;
+                        border-radius: TTheme.radius-round;
+                        background: TTheme.bg-color-container;
+                        border-width: 1px;
+                        border-color: TTheme.component-stroke;
+                        drop-shadow-blur: TTheme.shadow-1-blur;
+                        drop-shadow-offset-y: TTheme.shadow-1-offset-y;
+                        drop-shadow-color: TTheme.shadow-1-color;
+
+                        chip-text := TText {
+                            x: TTheme.padding-lr-s;
+                            y: (parent.height - self.height) / 2;
+                            width: parent.width - 2 * TTheme.padding-lr-s;
+                            text: it.text;
+                            font-size: TTheme.font-size-s;
+                            line-height: TTheme.line-height-s;
+                            color: TTheme.text-color-secondary;
+                        }
+                    }
+                }
+
+                Rectangle {
+                    width: root.sub-size;
+                    height: root.sub-size;
+                    border-radius: self.width / 2;
+                    background: TTheme.bg-color-container;
+                    border-width: 1px;
+                    border-color: TTheme.component-stroke;
+                    drop-shadow-blur: TTheme.shadow-1-blur;
+                    drop-shadow-offset-y: TTheme.shadow-1-offset-y;
+                    drop-shadow-color: TTheme.shadow-1-color;
+
+                    TIcon {
+                        x: (parent.width - self.width) / 2;
+                        y: (parent.height - self.height) / 2;
+                        icon: it.icon;
+                        size: 20px;
+                        icon-color: sub-ta.has-hover ? TTheme.brand-color : TTheme.text-color-secondary;
+                        animate icon-color { duration: TTheme.duration-fast; }
+                    }
+
+                    states [
+                        hovered when sub-ta.has-hover: {
+                            background: TTheme.bg-color-container-hover;
+                        }
+                    ]
+
+                    sub-ta := TouchArea {
+                        mouse-cursor: MouseCursor.pointer;
+                        accessible-role: AccessibleRole.button;
+                        accessible-label: it.text != "" ? it.text : "操作 \{i + 1}";
+
+                        clicked => {
+                            root.open = false;
+                            root.action-clicked(i);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    Rectangle {
+        x: 0;
+        y: 0;
+        width: root.main-size;
+        height: root.main-size;
+        border-radius: self.width / 2;
+        background: TTheme.brand-color;
+        drop-shadow-blur: TTheme.shadow-2-blur;
+        drop-shadow-offset-y: TTheme.shadow-2-offset-y;
+        drop-shadow-color: TTheme.shadow-2-color;
+
+        TIcon {
+            x: (parent.width - self.width) / 2;
+            y: (parent.height - self.height) / 2;
+            icon: root.open ? TIconSet.X : root.icon;
+            size: 24px;
+            icon-color: TTheme.text-color-anti;
+        }
+
+        states [
+            hovered when main-ta.has-hover: {
+                background: TTheme.brand-color-hover;
+            }
+            pressed when main-ta.pressed: {
+                background: TTheme.brand-color-active;
+            }
+        ]
+
+        main-ta := TouchArea {
+            mouse-cursor: MouseCursor.pointer;
+            accessible-role: AccessibleRole.button;
+            accessible-label: root.actions.length > 0
+                ? (root.open ? "收起操作" : "展开操作")
+                : "操作按钮";
+
+            clicked => {
+                root.toggle-open();
+                root.clicked();
+            }
+        }
+    }
+}

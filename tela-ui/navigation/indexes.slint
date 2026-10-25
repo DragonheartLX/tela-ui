@@ -1,0 +1,96 @@
+// Tela UI — TIndexes
+//
+// Alphabet/side index bar (contacts-style): a narrow column of letters
+// with click AND drag selection (drag glides through the letters), the
+// current letter highlighted and echoed in a bubble while interacting.
+// The component only reports `changed(index)` — scrolling the target
+// list to the picked group is the host's job.
+
+import { TTheme } from "../theme.slint";
+import { TText } from "../base/typography.slint";
+
+export component TIndexes inherits Rectangle {
+    // Letter captions, top to bottom (e.g. "A".."Z" or "#,A..Z").
+    in property <[string]> letters;
+    in-out property <int> current: -1;
+
+    // Letter actually changed (index into `letters`).
+    callback changed(int);
+
+    // True between pointer-down and pointer-up: drives the echo bubble.
+    private property <bool> active: false;
+
+    // 32px touch width on the token scale.
+    width: TTheme.spacing-10;
+    height: Math.max(root.letters.length, 0) * TTheme.line-height-s;
+
+    for it[i] in root.letters: TText {
+        x: 0;
+        y: i * TTheme.line-height-s;
+        width: parent.width;
+        height: TTheme.line-height-s;
+        text: it;
+        horizontal-alignment: center;
+        vertical-alignment: center;
+        font-weight: i == root.current ? TTheme.font-weight-medium : TTheme.font-weight-regular;
+        color: i == root.current ? TTheme.brand-color : TTheme.text-color-secondary;
+        animate color { duration: TTheme.duration-fast; }
+    }
+
+    // Echo bubble while pressing/dragging (overflows to the left on
+    // purpose — the bar hugs the container edge).
+    if root.active && root.current >= 0 && root.letters.length > 0: Rectangle {
+        x: -self.width - TTheme.spacing-2;
+        y: root.current * TTheme.line-height-s + (TTheme.line-height-s - self.height) / 2;
+        width: TTheme.spacing-9;
+        height: TTheme.spacing-9;
+        border-radius: TTheme.radius-medium;
+        background: TTheme.bg-color-container;
+        border-width: 1px;
+        border-color: TTheme.component-stroke;
+        drop-shadow-blur: TTheme.shadow-1-blur;
+        drop-shadow-offset-y: TTheme.shadow-1-offset-y;
+        drop-shadow-color: TTheme.shadow-1-color;
+
+        TText {
+            width: parent.width;
+            height: parent.height;
+            text: root.letters[root.current];
+            font-weight: TTheme.font-weight-semibold;
+            color: TTheme.brand-color;
+            horizontal-alignment: center;
+            vertical-alignment: center;
+        }
+    }
+
+    ta := TouchArea {
+        // One area handles click and drag (a per-letter row would lose the
+        // drag once the pointer leaves its row). Hit-testing is pure math.
+        accessible-role: AccessibleRole.list;
+        accessible-label: "字母索引";
+
+        pointer-event(ev) => {
+            if (ev.kind == PointerEventKind.down) {
+                root.active = true;
+                root.pick(ta.mouse-y);
+            } else if (ev.kind == PointerEventKind.up || ev.kind == PointerEventKind.cancel) {
+                root.active = false;
+            }
+        }
+
+        moved => {
+            root.pick(ta.mouse-y);
+        }
+    }
+
+    public function pick(y: length) {
+        if (root.letters.length > 0) {
+            let idx = Math.max(0, Math.min(root.letters.length - 1,
+                Math.floor(y / (root.height / root.letters.length))));
+            if (idx != root.current) {
+                root.current = idx;
+                root.changed(idx);
+            }
+        }
+    }
+}

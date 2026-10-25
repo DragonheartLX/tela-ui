@@ -1,0 +1,158 @@
+// Tela UI — TCell / TCellGroup
+//
+// Settings-page skeleton: a unit row with optional leading icon, title,
+// description, trailing note and chevron; TCellGroup stacks rows into a
+// titled card. Rows report `clicked` only — state lives in the host.
+// The bottom divider is drawn by each cell itself (no model to iterate),
+// so the last cell of a group sets `divider: false`.
+
+import { TTheme } from "../theme.slint";
+import { TText, TCaption } from "../base/typography.slint";
+import { TIcon } from "../base/icon/icon.slint";
+import { TIconData, TIconSet } from "../base/icon/data.slint";
+
+export component TCell inherits Rectangle {
+    in property <TIconData> icon;
+    in property <string> title;
+    in property <string> description: "";
+    // Secondary text on the right edge (before the chevron).
+    in property <string> note: "";
+    in property <bool> arrow: false;
+    in property <bool> disabled: false;
+    in property <bool> divider: true;
+
+    callback clicked();
+
+    // 48px 单行 / 70px 带说明 (布局对显式 y 的说明行不计 preferred 高, 显式钉住)。
+    min-height: root.description == ""
+        ? TTheme.height-l + TTheme.spacing-4
+        : 2 * TTheme.spacing-5 + TTheme.line-height-m + TTheme.spacing-1 + TTheme.line-height-s;
+    clip: true;
+
+    states [
+        hovered when row-touch.has-hover && !root.disabled: {
+            background: TTheme.bg-color-secondarycontainer-hover;
+        }
+    ]
+
+    HorizontalLayout {
+        padding-left: TTheme.padding-lr-l;
+        padding-right: TTheme.padding-lr-l;
+        padding-top: TTheme.spacing-5;
+        padding-bottom: TTheme.spacing-5;
+        spacing: TTheme.spacing-3;
+
+        if root.icon.paths.length > 0: Rectangle {
+            // 图标盒定宽; 不给宽度会被布局当 stretch 子元素对半分,
+            // 给了 stretch 0 又会塌到 0 与标题重叠。
+            width: 20px;
+            horizontal-stretch: 0;
+
+            TIcon {
+                x: 0;
+                y: (parent.height - self.height) / 2;
+                icon: root.icon;
+                size: 20px;
+                icon-color: root.disabled ? TTheme.text-color-disabled : TTheme.text-color-secondary;
+            }
+        }
+
+        Rectangle {
+            horizontal-stretch: 1;
+            min-width: 0;
+
+            title-text := TText {
+                y: root.description == ""
+                    ? (parent.height - self.height) / 2
+                    : 0px;
+                width: parent.width;
+                height: TTheme.line-height-m;
+                text: root.title;
+                color: root.disabled ? TTheme.text-color-disabled : TTheme.text-color-primary;
+                overflow: elide;
+            }
+
+            if root.description != "": TCaption {
+                y: TTheme.line-height-m + TTheme.spacing-1;
+                width: parent.width;
+                text: root.description;
+                color: root.disabled ? TTheme.text-color-disabled : TTheme.text-color-secondary;
+                overflow: elide;
+            }
+        }
+
+        // 右侧列: 固定宽 (`width: self.preferred-width` 让布局当它是定宽
+        // 子元素, 显式 y 才会被尊重) + 行高上垂直居中。
+        if root.note != "": TText {
+            width: self.preferred-width;
+            height: TTheme.line-height-s;
+            y: (parent.height - self.height) / 2;
+            text: root.note;
+            font-size: TTheme.font-size-s;
+            line-height: TTheme.line-height-s;
+            color: root.disabled ? TTheme.text-color-disabled : TTheme.text-color-secondary;
+            overflow: elide;
+        }
+
+        if root.arrow: TIcon {
+            y: (parent.height - self.height) / 2;
+            icon: TIconSet.ChevronRight;
+            size: 16px;
+            icon-color: root.disabled ? TTheme.text-color-disabled : TTheme.text-color-placeholder;
+        }
+    }
+
+    // Sibling of the layout (not a layout child): a TouchArea inside the row
+    // would join the stretch distribution and shove the title aside.
+    row-touch := TouchArea {
+        x: 0;
+        y: 0;
+        width: parent.width;
+        height: parent.height;
+        enabled: !root.disabled;
+        mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;
+        accessible-role: AccessibleRole.button;
+        accessible-label: root.title;
+        accessible-enabled: !root.disabled;
+
+        clicked => {
+            root.clicked();
+        }
+    }
+
+    if root.divider: Rectangle {
+        x: TTheme.padding-lr-l;
+        y: parent.height - self.height;
+        width: parent.width - TTheme.padding-lr-l;
+        height: 1px;
+        background: TTheme.component-stroke;
+    }
+}
+
+export component TCellGroup inherits VerticalLayout {
+    in property <string> title: "";
+    // Render rows inside a rounded container card. With `bordered: false`
+    // the group is a bare stack (rows keep their own dividers).
+    in property <bool> bordered: true;
+
+    spacing: TTheme.spacing-2;
+
+    if root.title != "": Rectangle {
+        height: TTheme.line-height-s;
+
+        TCaption {
+            x: root.bordered ? TTheme.padding-lr-l : 0px;
+            text: root.title;
+        }
+    }
+
+    Rectangle {
+        background: root.bordered ? TTheme.bg-color-container : transparent;
+        border-radius: root.bordered ? TTheme.radius-medium : 0px;
+        clip: true;
+
+        VerticalLayout {
+            @children
+        }
+    }
+}

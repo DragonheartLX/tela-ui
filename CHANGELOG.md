@@ -4,7 +4,24 @@
 
 ## [Unreleased]
 
+### Fixed
+- 第三批修复轮 (用户验收反馈): TTabBar 标签内容改为固定几何定位 — 原内层布局读自身 preferred 尺寸, 在重页面首帧整个不渲染 (图标消失), 现图标/文字/角标按固定 y 槽位排布; TCell 右侧 note/箭头垂直居中 (`width: self.preferred-width` 钉宽后显式 y 生效, 原写法顶对齐); TFab 子操作行 `alignment: end` (无标签行的圆钮不再左贴, 与上方按钮成一列), 标签胶囊经拉伸包装盒垂直居中; TSortable 演示钉死固定高度 (模型长度绑定的首选高度在深页首帧饿死, 行渲染不完整, slint-semantics 第 33 条)。
+- gallery 内容页移除第二个 TTable 演示实例 (空态演示, 文档保留) — 页面实例化链恰好被它推过运行时 10 轮收尾预算, 触发 "long callback/instantiation chain" 警告; 移除后 0 警告。
+- TNoticeBar / TComment 演示反馈改为组件内纯文本状态行, 不再弹 TMessage。
+- TSortable 恢复让位行的 `animate y` (拖拽行关断, 其余行 duration-fast 缓动到新槽位); TTabBar 演示改为居中手机宽度 (520px) — 整宽演示条的右端落在页面级回到顶部悬浮钮热区里被挡住, 居中后任何滚动位置都不相交; TTabBar 演示反馈同步改纯文本状态行。
+- TTabBar 演示包装盒塌缩修复 (720px 高窗口报障) — 无显式高度的 `Rectangle { width: 520px }` 靠固定高子元素撑 preferred, 重页实例化预算外饿死成 8px, 56px 标签栏被 clip 成 3px 缝贴在卡片标题下且不自愈 (slint-semantics 第 33 条第四实例); 改为包装盒显式 `height: bar.height + 2px` (2px 是描边厚度), bar 内缩 1px 避免盖住描边。
+
 ### Added
+- 第三批中频组件 8 个: `TComment` / `TCountDown` (display), `TCell` + `TCellGroup` / `TSortable` (content), `TNoticeBar` (notice), `TTabBar` / `TIndexes` / `TFab` (navigation)。
+- `TComment`: 评论条目, TAvatar 头像 + 作者/时间/正文 + 点赞切换与回复链接; 点赞先自翻转 `liked` 再回调 `like-changed`; 纯展示, 回复列表由宿主嵌套。
+- `TCountDown`: 倒计时, `remaining` (duration) 双向绑定 + `running`, 每秒递减并 `changed`, 归零自停并 `finished`; 无目标时刻解析, 时位不按 24 回绕 (25h 显示 25:00:00)。
+- `TNoticeBar`: 通告栏, 主题色浅底 + 前置图标 + 单行 elide; 多条 `contents` 整条垂直轮播 (TCarousel 镜像动画法, `changed` 只在真切换时触发); `closable` + 公开函数 `close()` (关闭走 visible, TAlert 同款)。
+- `TCell` / `TCellGroup`: 设置页单元行 (图标/标题/说明/右侧 note/箭头, 行高 48/70px) 与带标题的分组卡片容器; 行分隔线自绘 (组内末行 divider: false); 点击只上报 `clicked`。
+- `TSortable`: 拖拽排序列表 — 拖拽行淡出并以带阴影浮层跟随指针, 其余行实时让位预览插入槽; 松手上报 `reorder(from, to)`, 行序由宿主重建模型 (1.18 无循环语句); 拖拽状态机为 public function (`begin-drag`/`drag-to`/`end-drag`), 探针走同一代码路径。
+- `TTabBar`: 底部标签栏 (图标 + 文案 + TBadge 角标), 等宽拉伸, 选中品牌色, 顶部分隔线内建; `changed` 上报, 与 TTabs 语义区分, 贴底定位由宿主负责。
+- `TIndexes`: 字母索引条, 点击与拖拽统一走 `pick(y)` 命中夹紧 (`changed` 上报), 按住期间气泡回显当前字母; 分组列表滚动由宿主执行。
+- `TFab`: 浮动操作按钮 — 无 `actions` 即悬浮圆钮; 有则主钮切换向上展开的子操作面板 (clip 高度动画, TTree 折叠盒同款), 主钮图标切 X, 子项点击先收起再 `action-clicked(i)`; 公开函数 `toggle-open()`; 面板随宿主绝对定位 (TBackTop 同款), 非弹出层。
+- `TNoticeBar` / `TComment` / `TCell` 修复过程中沉淀 slint-semantics 第 32 条: 全定宽子元素的嵌套行会把拉伸列塌缩到首选宽, 行尾空 `Rectangle` 吸收位是修法。
 - `TAvatarGroup`: 头像组, 成员按声明顺序叠放 (重叠 spacing-4), `max-count` 截断并渲染 `+N` 尾像; 成员 `clicked(index)`, 尾像 `overflow-clicked()`; `TAvatarGroupItem` 承载 text/source。
 - `TRangeInput`: 数值区间输入, 双 decimal 格共享状态边框 (`~` 分隔); 沿用 TInputNumber 缓冲语义 (空缓冲不触发 changed, 失焦重排), 一侧变更夹紧另一侧合并发一次 `changed(min, max)`, Up/Down 步进。
 - `TTagInput`: 标签录入, 模型渲染为可关闭 TTag + 行尾输入格; 回车添加、空缓冲退格删末位、标签 x 删除; 增删只上报 (`tag-added` / `tag-removed(i, tag)`), 模型由宿主改写。
@@ -38,15 +55,7 @@
 - 无障碍: 可点击元素覆盖 `accessible-role` / `accessible-label`, 浮层文本带 `accessible-live-region`, 禁用态显式 `accessible-enabled` 并在动作回调自带守卫。
 - 自证工具链: `docs/harness.md` 的 `--check` 全量扫描与亮/暗渲染对照配方。
 - gallery 程序 (bin `tela`): 11 个页面 (10 个分类页 + 设置页), 按 `if` 懒挂载, 亮/暗主题经 `TELA_THEME` 环境变量选择。
-- `TTreeSelect`: 树选择下拉, TSelect 触发器 + 弹层内 TTree (`@children` 承载子节点); 选中值走 `TTreeLogic` 全局, 面板打开期间叶子选中即上报 `selected` 并关闭; 弹层高度固定 `panel-height`, 并提供 `show()` / `close()` / `toggle()`。
-- `TCascader`: 级联选择, 嵌套声明式 (TTree 同构); 单列逐级原位展开 (clip 折叠动画), 叶子选中写 `TCascaderLogic.current-value` 并上报 `selected`; 弹层高度固定 `panel-height`, 并提供 `show()` / `close()` / `toggle()`。
-- `TMention`: 提及输入, TInput + 宿主驱动的建议面板; `@` 解析与文本拼接在宿主, 组件上报 `changed`/`selected` 并提供 `show-suggestions()` / `close-suggestions()`; 面板锚输入框不锚光标。
-- `TPicker`: 通用滚轮多列选择面板 (纯面板, 无触发器); 每列整列渲染 + 动画偏移 + 行内选中框, `value: [int]` 逐列存下标并回写, `set-value(col, idx)` 编程写入。
-- `TDateTimePicker`: 日期时间选择, 只读触发器 + 年/月/日/时/分五列滚轮; 日列随年月收放, `TDateTime { date, hour, minute }` 承载选中值, `hour < 0` 表示未选时间。
-- `TOtpInput`: 分段验证码输入, 自动跳格 + 空段退格回退 + 全满 `completed()`; 每段缓冲全文上报 `changed(i, text)`, 粘贴分发由宿主改写 `values`; 初始聚焦经段自身 init 兜底。
-- `TPopover` / `TContextMenu`: 富内容气泡与右键菜单, 复用 TPopupSurface 锚定与显式定位, 点击外部 / ESC 关闭。
-- `TScrollBar`: 自带视口与集成滑块的滚动容器 (见 Unreleased 重写条目)。
-- 组件库: 96 个导出组件 = 83 个 UI 组件 + 8 个服务 overlay (TDialogService / TLoadingService / TMessage / TNotification / TTooltip / TImageViewerService / TActionSheetService / TCommandPaletteService) + 5 个库内基类 (TStrokedShape / TInputFrame / TModalSurface / TPopupSurface / TPopupStackLayer)。
+- 组件库: 108 个导出组件 = 93 个 UI 组件 + 8 个服务 overlay (TDialogService / TLoadingService / TMessage / TNotification / TTooltip / TImageViewerService / TActionSheetService / TCommandPaletteService) + 5 个库内基类 (TStrokedShape / TInputFrame / TModalSurface / TPopupSurface / TPopupStackLayer) + 2 个库内部件 (私有 TNavLabel / 内部 TScrollThumb, 不在聚合出口)。
 
 ### Changed
 - 滚动条: 库内全部滚动面 (TList / TTable / 下拉弹层 / 菜单 / 命令面板) 关闭 fluent 原生滚动条, 改用内部 `TScrollBar` 覆盖条 — 原生滑块 2px 贴边不居中且对比不足; 新条为 6px 灰阶胶囊滑块, 全宽居中, 支持拖拽与点击定位, 滚轮穿透到底层滚动区; 静止 gray-7 最深, 悬停 gray-6, 按压 gray-5 (交互时逐级变浅, 内容从条下透出)。gallery 自身的页面滚动与 TBackTop 演示同款接线。
@@ -54,8 +63,3 @@
 - TOtpInput: 首次渲染不再抢焦点 (点击段聚焦), 新增 `focus-segment(index)`; 聚焦移动时光标自动落段末, 自动跳格后可直接 Backspace 清段 (探针实测: 修复前光标停在 0 位, 退格删不到字符)。
 - TDropdownMenu / TContextMenu: 分隔线行高收窄为 5px (细线上下各 spacing-1 间距), 条目行仍为 item-height; 弹层高度改为各行 `init` 自报累加, 且在每次 show/toggle/open-at 先清零 (弹层行每次打开都重建, 不清零会翻倍把弹层顶出窗口), 上限仍为 max-visible-items 个整行。
 - **BREAKING**: 分类聚合器按交互类型拆分 — `data-entry.slint` → `input.slint` / `select.slint` / `date-time.slint`, `data-display.slint` → `display.slint` / `content.slint`, `feedback.slint` → `notice.slint` / `overlay.slint`; 组件文件移入对应目录, 旧聚合器删除, 导入路径改为 `@tela-ui/input.slint` 等; `@tela-ui/common.slint` 仍汇总全部导出。
-- 滚动条: 库内全部滚动面 (TList / TTable / 下拉弹层 / 菜单 / 命令面板) 关闭 fluent 原生滚动条, 改用内部 `TScrollBar` 覆盖条。
-- TTree / TCascader 分支折叠动画只在本分支开合时播放, 嵌套子分支展开不再呈阶梯式串行。
-- TOtpInput: 首次渲染不再抢焦点, 新增 `focus-segment(index)`; 聚焦移动时光标自动落段末。
-- TAvatar: 新增 1px hairline 边框, 图片头像与 TAvatarGroup 叠放成员借此与页面底色区分。
-- TDropdownMenu / TContextMenu: 分隔线行高收窄为 5px, 弹层高度改为各行 `init` 自报累加并在每次打开前清零。

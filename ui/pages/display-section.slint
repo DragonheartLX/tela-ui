@@ -1,9 +1,10 @@
 // Gallery section: 展示 (TTag / TBadge / TAvatar / TAvatarGroup / TEmpty /
-// TTimeline / TDescriptions / TStatistic / TScrollBar), 一个组件一张卡.
+// TTimeline / TDescriptions / TStatistic / TScrollBar / TComment /
+// TCountDown), 一个组件一张卡.
 
 import { TTheme, TThemeRole, TSize } from "@tela-ui/theme.slint";
 import { TText, TIcon, TIconSet, TButton, TCaption } from "@tela-ui/base.slint";
-import { TTag, TTagVariant, TBadge, TAvatar, TAvatarSize, TAvatarShape, TAvatarGroup, TAvatarGroupItem, TEmpty, TTimeline, TDescriptions, TStatistic } from "@tela-ui/display.slint";
+import { TTag, TTagVariant, TBadge, TAvatar, TAvatarSize, TAvatarShape, TAvatarGroup, TAvatarGroupItem, TEmpty, TTimeline, TDescriptions, TStatistic, TComment, TCountDown } from "@tela-ui/display.slint";
 import { TMessage } from "@tela-ui/notice.slint";
 import { TScrollBar } from "@tela-ui/display.slint";
 import { TParagraph } from "@tela-ui/base.slint";
@@ -11,6 +12,9 @@ import { GallerySection } from "../gallery-section.slint";
 
 export component DisplaySection inherits VerticalLayout {
     spacing: 28px;
+
+    // TComment demo feedback as plain text.
+    in-out property <string> comment-status: "暂无操作";
 
     // ========================= TTag =========================
     GallerySection {
@@ -250,6 +254,71 @@ export component DisplaySection inherits VerticalLayout {
 
                 for i in 16: TParagraph { text: "滚动内容第 \{i + 1} 行 — 滑块可拖拽、可点击定位。"; }
             }
+        }
+    }
+
+    // ======================= TComment =======================
+    GallerySection {
+        title: "评论 TComment";
+        code: "import { TComment } from \"@tela-ui/display.slint\";\n\nTComment {\n    author: \"龙背上的骑兵\";\n    avatar-text: \"龙\";\n    datetime: \"3 小时前\";\n    content: \"组件库的令牌体系很完整, 亮暗切换零成本。\";\n    likes: 12;\n}\n\nTComment {\n    author: \"TDesign\";\n    avatar-text: \"TD\";\n    datetime: \"昨天 14:20\";\n    content: \"收到反馈, 下个版本会补充键盘导航。\";\n    likes: 3;\n    liked: true;\n\n    like-changed(l) => { 状态文本 = l ? \"已点赞\" : \"已取消点赞\"; }\n    reply-clicked => { 状态文本 = \"打开回复框\"; }\n}";
+
+        VerticalLayout {
+            spacing: 16px;
+
+            TComment {
+                author: "龙背上的骑兵";
+                avatar-text: "龙";
+                datetime: "3 小时前";
+                content: "组件库的令牌体系很完整, 亮暗切换零成本, 桌面端与移动端模式也能共用一套布局骨架。";
+                likes: 12;
+            }
+
+            TComment {
+                author: "TDesign";
+                avatar-text: "TD";
+                datetime: "昨天 14:20";
+                content: "收到反馈, 下个版本会补充键盘导航与虚拟滚动说明。";
+                likes: 3;
+                liked: true;
+
+                like-changed(l) => {
+                    root.comment-status = l ? "TDesign 的评论已点赞" : "TDesign 的评论已取消点赞";
+                }
+                reply-clicked => {
+                    root.comment-status = "打开 TDesign 评论的回复框";
+                }
+            }
+
+            TComment {
+                author: "游客";
+                datetime: "刚刚";
+                content: "纯展示组件, 回复列表由宿主自行嵌套。";
+            }
+
+            TCaption { text: "状态: \{root.comment-status}"; wrap: word-wrap; }
+        }
+    }
+
+    // ======================= TCountDown =====================
+    GallerySection {
+        title: "倒计时 TCountDown";
+        code: "import { TCountDown } from \"@tela-ui/display.slint\";\n\n// 剩余时长驱动, 双向绑定后组件每秒递减:\nTCountDown {\n    remaining <=> cd.remaining; // in-out property <duration>\n    running: true;\n\n    finished() => { 状态文本 = \"时间到\"; }\n}\n\n// 时位不按 24 回绕, 25h 显示为 25:00:00;\n// 无目标时刻解析 (Slint 不暴露当前日期)。";
+
+        HorizontalLayout {
+            spacing: 48px;
+
+            TCountDown {
+                remaining: 90s;
+                running: true;
+                horizontal-stretch: 0;
+            }
+
+            TCountDown {
+                remaining: 90000s;
+                horizontal-stretch: 0;
+            }
+
+            Rectangle { }
         }
     }
 }

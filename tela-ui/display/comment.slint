@@ -1,0 +1,132 @@
+// Tela UI — TComment
+//
+// One comment entry: avatar (image or text via TAvatar), author, datetime,
+// body text and an action row (like toggle + reply link). Pure display:
+// the model (author, content, …) lives in the host, replies are not nested
+// (render follow-up TComment rows in the host's own layout).
+
+import { TTheme } from "../theme.slint";
+import { TText, TCaption } from "../base/typography.slint";
+import { TIcon } from "../base/icon/icon.slint";
+import { TIconSet } from "../base/icon/data.slint";
+import { TLink } from "../base/link.slint";
+import { TAvatar } from "avatar.slint";
+
+export component TComment inherits HorizontalLayout {
+    in property <string> author;
+    in property <string> avatar-text: "";
+    in property <image> avatar;
+    in property <string> datetime;
+    in property <string> content;
+    in property <int> likes: 0;
+    in-out property <bool> liked: false;
+
+    // Like is self-updating first, then reported (component convention).
+    callback like-changed(bool);
+    callback reply-clicked();
+
+    spacing: TTheme.spacing-3;
+
+    TAvatar {
+        source: root.avatar;
+        text: root.avatar-text;
+    }
+
+    VerticalLayout {
+        spacing: TTheme.spacing-2;
+        horizontal-stretch: 1;
+
+        // Author left (elided, stretch 1), datetime right (hug). A
+        // HorizontalLayout keeps the two line boxes on one row; layouts have
+        // no cross-axis alignment, so the caption centers itself in a fixed
+        // author-height box.
+        HorizontalLayout {
+            spacing: TTheme.spacing-3;
+
+            TText {
+                horizontal-stretch: 1;
+                height: TTheme.line-height-m;
+                text: root.author;
+                font-weight: TTheme.font-weight-semibold;
+                overflow: elide;
+            }
+
+            if root.datetime != "": Rectangle {
+                width: dt.preferred-width;
+                height: TTheme.line-height-m;
+
+                dt := TCaption {
+                    y: (TTheme.line-height-m - TTheme.line-height-s) / 2;
+                    text: root.datetime;
+                    wrap: no-wrap;
+                    overflow: elide;
+                }
+            }
+        }
+
+        if root.content != "": Rectangle {
+            // Text won't fill a layout's cross axis on its own (default
+            // width is its preferred text width); the Rectangle wrapper
+            // carries the 100% width binding instead.
+            TText {
+                width: parent.width;
+                text: root.content;
+                wrap: word-wrap;
+            }
+        }
+
+        HorizontalLayout {
+            spacing: TTheme.spacing-5;
+
+            Rectangle {
+                width: like-row.preferred-width;
+                height: like-row.preferred-height;
+
+                like-row := HorizontalLayout {
+                    spacing: TTheme.spacing-1;
+
+                    TIcon {
+                        y: (parent.height - self.height) / 2;
+                        icon: TIconSet.Heart;
+                        size: 14px;
+                        icon-color: root.liked ? TTheme.error-color : TTheme.text-color-secondary;
+                        animate icon-color { duration: TTheme.duration-fast; }
+                    }
+
+                    if root.likes > 0: TText {
+                        height: TTheme.line-height-s;
+                        y: (parent.height - self.height) / 2;
+                        text: "\{root.likes}";
+                        font-size: TTheme.font-size-s;
+                        line-height: TTheme.line-height-s;
+                        color: root.liked ? TTheme.error-color : TTheme.text-color-secondary;
+                        animate color { duration: TTheme.duration-fast; }
+                    }
+                }
+
+                like-ta := TouchArea {
+                    mouse-cursor: MouseCursor.pointer;
+                    accessible-role: AccessibleRole.button;
+                    accessible-label: root.liked ? "取消点赞" : "点赞";
+
+                    clicked => {
+                        root.liked = !root.liked;
+                        root.like-changed(root.liked);
+                    }
+                }
+            }
+
+            TLink {
+                text: "回复";
+
+                clicked => {
+                    root.reply-clicked();
+                }
+            }
+
+            // 吸收剩余宽度: 全定宽子元素的嵌套行会把拉伸列的交叉轴 max
+            // 钳到首选宽 (整列塌缩), 见 docs/slint-semantics.md 第 32 条。
+            Rectangle { }
+        }
+    }
+}

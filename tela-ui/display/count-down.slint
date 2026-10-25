@@ -1,0 +1,60 @@
+// Tela UI — TCountDown
+//
+// Countdown display driven by a `duration` the host owns: two-way bind
+// `remaining <=> cd.remaining` (and set `running: true`) and the component
+// ticks it down once per second, reporting `changed` and `finished`.
+// There is no target-time parsing (Slint does not expose the current date);
+// the hour slot is not wrapped at 24 — 25h renders as "25:00:00".
+
+import { TTheme } from "../theme.slint";
+import { TText } from "../base/typography.slint";
+
+export component TCountDown inherits Rectangle {
+    // Remaining time; the component decrements it in place while running.
+    in-out property <duration> remaining: 0s;
+    in-out property <bool> running: false;
+
+    // Fires once per tick with the new remaining time.
+    callback changed(duration);
+    // Fires once when the countdown reaches zero (running is switched off).
+    callback finished();
+
+    width: label.preferred-width;
+    height: label.preferred-height;
+
+    private property <float> total-ms: root.remaining / 1ms;
+    private property <int> hours: Math.floor(self.total-ms / 3600000);
+    private property <int> minutes: Math.mod(Math.floor(self.total-ms / 60000), 60);
+    private property <int> seconds: Math.mod(Math.floor(self.total-ms / 1000), 60);
+
+    public pure function pad2(n: int) -> string {
+        return n < 10 ? "0\{n}" : "\{n}";
+    }
+
+    label := TText {
+        text: "\{root.pad2(root.hours)}:\{root.pad2(root.minutes)}:\{root.pad2(root.seconds)}";
+        font-size: TTheme.font-size-title-l;
+        line-height: TTheme.line-height-title;
+        font-weight: TTheme.font-weight-semibold;
+    }
+
+    Timer {
+        // Timer defaults to running: bind explicitly. `remaining` is
+        // decremented by assignment, which also releases any host binding —
+        // the countdown owns its state from the first tick on.
+        running: root.running && root.remaining > 0s;
+        interval: 1s;
+
+        triggered => {
+            root.remaining = Math.max(0s, root.remaining - 1s);
+            root.changed(root.remaining);
+            if (root.remaining <= 0s) {
+                root.running = false;
+                root.finished();
+            }
+        }
+    }
+
+    accessible-role: AccessibleRole.text;
+    accessible-label: label.text;
+}

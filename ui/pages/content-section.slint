@@ -1,15 +1,23 @@
 // Gallery section: 内容 (TCollapse / TTable / TCarousel / TTree / TList /
-// TSplitter), 一个组件一张卡.
+// TCell / TSortable / TSplitter), 一个组件一张卡.
 
 import { TTheme, TThemeRole } from "@tela-ui/theme.slint";
 import { TIconSet, TCaption, TText } from "@tela-ui/base.slint";
-import { TCollapse, TCarousel, TTable, TTree, TTreeItem, TTreeBranch, TSplitter, TSplitterVertical, TSplitterPane, TSplitterPanePrimary, TSplitterPanePrimaryVertical, TTableAlign, TList, TListItem } from "@tela-ui/content.slint";
+import { TCollapse, TCarousel, TTable, TTree, TTreeItem, TTreeBranch, TSplitter, TSplitterVertical, TSplitterPane, TSplitterPanePrimary, TSplitterPanePrimaryVertical, TTableAlign, TList, TListItem, TCell, TCellGroup, TSortable, TSortableItem } from "@tela-ui/content.slint";
+import { TMessage } from "@tela-ui/notice.slint";
 import { GallerySection } from "../gallery-section.slint";
 
 export component ContentSection inherits VerticalLayout {
     spacing: 28px;
 
     in-out property <string> pane-size: "240px";
+    in-out property <[TSortableItem]> sort-items: [
+        { text: "晨间例会" },
+        { text: "需求评审" },
+        { text: "设计走查" },
+        { text: "代码回审" },
+        { text: "发布窗口" },
+    ];
     in-out property <int> list-index: -1;
 
     // ======================== TCollapse =====================
@@ -68,18 +76,8 @@ export component ContentSection inherits VerticalLayout {
                 ];
             }
 
-            TTable {
-                height: 160px;
-                columns: [
-                    { title: "任务", width: 0px },
-                    { title: "负责人", width: 120px },
-                    { title: "状态", width: 100px },
-                ];
-                empty-text: "暂无任务";
-            }
-
             TCaption {
-                text: "点击可排序列切换升序 / 降序 / 取消, 行重排由宿主在 sort-changed 里完成; 列宽超出时拖动底部滚动条或横向滚轮, 表头同步。第二张表演示空态。";
+                text: "点击可排序列切换升序 / 降序 / 取消, 行重排由宿主在 sort-changed 里完成; 列宽超出时拖动底部滚动条或横向滚轮, 表头同步。";
                 wrap: word-wrap;
             }
         }
@@ -287,6 +285,84 @@ export component ContentSection inherits VerticalLayout {
                 text: "第一栏宽度随拖拽变化 (当前 \{root.pane-size}, 下限 min-size), 圆形按钮折叠/展开, 尺寸由组件自己维护, 一个窗口可放多个分栏; 第二栏无下限, 可被拖到 0。";
                 wrap: word-wrap;
             }
+        }
+    }
+
+    // ========================= TCell =========================
+    GallerySection {
+        title: "单元行 TCell";
+        code: "import { TCell, TCellGroup } from \"@tela-ui/content.slint\";\n\nTCellGroup {\n    title: \"设置\";\n\n    TCell {\n        icon: TIconSet.Bell;\n        title: \"消息通知\";\n        description: \"应用内提醒与红点\";\n        arrow: true;\n\n        clicked => { TMessage.info(\"打开通知设置\"); }\n    }\n\n    TCell {\n        icon: TIconSet.Lock;\n        title: \"隐私\";\n\n        clicked => { }\n    }\n\n    TCell {\n        title: \"退出登录\";\n        note: \"v1.0.0\";\n        divider: false; // 组内末行\n    }\n}\n\n// 不分组的裸行:\nTCell { title: \"独立一行\"; note: \"可点击\"; }";
+
+        VerticalLayout {
+            spacing: 16px;
+
+            TCellGroup {
+                title: "设置";
+
+                TCell {
+                    icon: TIconSet.Bell;
+                    title: "消息通知";
+                    description: "应用内提醒与红点";
+                    arrow: true;
+
+                    clicked => {
+                        TMessage.info("打开通知设置");
+                    }
+                }
+
+                TCell {
+                    icon: TIconSet.Lock;
+                    title: "隐私";
+                    note: "已开启";
+
+                    clicked => {
+                        TMessage.info("打开隐私设置");
+                    }
+                }
+
+                TCell {
+                    icon: TIconSet.Info;
+                    title: "关于";
+                    note: "v1.0.0";
+                    divider: false;
+                }
+            }
+
+            TCellGroup {
+                bordered: false;
+
+                TCell {
+                    title: "退出登录";
+                    divider: false;
+                }
+            }
+
+            TCaption { text: "行高随说明文字自适应, 分隔线由每行自绘 — 组内末行设 divider: false; 点击只上报 clicked, 状态由宿主维护。"; wrap: word-wrap; }
+        }
+    }
+
+    // ======================= TSortable =======================
+    GallerySection {
+        title: "拖拽排序 TSortable";
+        code: "import { TSortable } from \"@tela-ui/content.slint\";\n\nTSortable {\n    items: root.sort-items;\n\n    reorder(from, to) => {\n        // 组件只上报, 宿主重建模型:\n        let it = root.sort-items[from];\n        root.sort-items.remove(from);\n        root.sort-items.insert(to, it);\n    }\n}";
+
+        VerticalLayout {
+            spacing: 16px;
+
+            TSortable {
+                // 与 TList/TTable 演示同款: 固定视口高度。模型长度绑定的首选
+                // 高度在整页首帧布局里不可靠 (实例化链耗尽时不重排)。
+                height: 240px;
+                items: root.sort-items;
+
+                reorder(from, to) => {
+                    let it = root.sort-items[from];
+                    root.sort-items.remove(from);
+                    root.sort-items.insert(to, it);
+                }
+            }
+
+            TCaption { text: "按住任意行拖动, 其余行实时让位预览插入位置, 松手上报 reorder(from, to) — 1.18 语言内没有循环语句, 行序由宿主重建模型完成; 拖拽中列表不滚动。"; wrap: word-wrap; }
         }
     }
 }

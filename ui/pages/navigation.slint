@@ -1,15 +1,21 @@
 // Gallery section: 导航 (TTabs / TPagination / TNavBar / TDropdownMenu /
-// TContextMenu / TBreadcrumb / TSteps), 一个组件一张卡. The app's own top navigation bar is
+// TContextMenu / TBreadcrumb / TSteps / TTabBar / TIndexes / TFab),
+// 一个组件一张卡. The app's own top navigation bar is
 // the live TNavBar; this section covers the rest.
 
 import { TTheme,  TThemeRole,  TSize, TPopupPlacement } from "@tela-ui/theme.slint";
 import { TText, TIconSet, TCaption, TButton, TButtonVariant, TParagraph } from "@tela-ui/base.slint";
 import { TMessage } from "@tela-ui/notice.slint";
-import { TTabs, TPagination, TNavBar, TNavItem, TSideNav, TSideNavItem, TSideNavMode, TSideNavTogglePosition, TBreadcrumb, TCrumbItem, TSteps, TDropdownMenu, TDropdownMenuItem, TContextMenu, TBackTop } from "@tela-ui/navigation.slint";
+import { TTabs, TPagination, TNavBar, TNavItem, TSideNav, TSideNavItem, TSideNavMode, TSideNavTogglePosition, TBreadcrumb, TCrumbItem, TSteps, TDropdownMenu, TDropdownMenuItem, TContextMenu, TBackTop, TTabBar, TTabBarItem, TIndexes, TFab, TFabItem } from "@tela-ui/navigation.slint";
 import { GallerySection } from "../gallery-section.slint";
 import { TScrollBar } from "@tela-ui/scroll-bar.slint";
 
 export component NavigationSection inherits VerticalLayout {
+    in-out property <int> idx: -1;
+    // TTabBar demo feedback as plain text.
+    in-out property <string> tab-status: "尚未切换";
+    in-out property <[string]> idx-letters: ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"];
+
     spacing: 28px;
 
     in property <[string]> tab-titles: ["首页", "组件", "文档", "关于"];
@@ -320,6 +326,135 @@ export component NavigationSection inherits VerticalLayout {
                 content-y <=> sv.content-y;
                 // gallery 区内容不长, 阈值调小才能看到按钮出现.
                 threshold: 40px;
+            }
+        }
+    }
+
+    // ======================== TTabBar ========================
+    GallerySection {
+        title: "底部标签栏 TTabBar";
+        code: "import { TTabBar } from \"@tela-ui/navigation.slint\";\n\nTTabBar {\n    items: [\n        { text: \"首页\", icon: TIconSet.House },\n        { text: \"发现\", icon: TIconSet.Search },\n        { text: \"消息\", icon: TIconSet.Bell, badge: 6 },\n        { text: \"我的\", icon: TIconSet.User, badge-dot: true },\n    ];\n    current: 0;\n\n    changed(i) => { /* 宿主切换页面 */ }\n}\n\n// 与 TTabs 的区分: TTabs 是内容顶部的页签, TTabBar 是底部主导航;\n// 定位 (贴底 / 安全区) 由宿主容器负责。";
+
+        VerticalLayout {
+            spacing: 16px;
+
+            // 手机宽度居中展示 — 整宽演示条的右端会落在页面级回到顶部
+            // 悬浮钮的热区里被挡住。
+            HorizontalLayout {
+                alignment: center;
+
+                Rectangle {
+                    width: 520px;
+                    // 高度显式给, 不靠子元素 preferred 撑: 深页面首轮布局会
+                    // 饿死无高度的包装盒且不再自愈 (slint-semantics 第 22
+                    // 条), 标题下只剩 8px 缝。+2px 是描边厚度, bar 内缩 1px
+                    // 避免盖住描边 (子元素画在父描边之上)。
+                    height: bar.height + 2px;
+                    // bar 底色与卡片同色, 无边框时整条贴在标题下没有
+                    // 组件边界 (暗色下尤其), 补一圈描边。
+                    border-radius: TTheme.radius-medium;
+                    border-width: 1px;
+                    border-color: TTheme.component-stroke;
+                    clip: true;
+
+                    bar := TTabBar {
+                        x: 1px;
+                        y: 1px;
+                        width: parent.width - 2px;
+                        items: [
+                            { text: "首页", icon: TIconSet.House },
+                            { text: "发现", icon: TIconSet.Search },
+                            { text: "消息", icon: TIconSet.Bell, badge: 6 },
+                            { text: "我的", icon: TIconSet.User, badge-dot: true },
+                        ];
+                        current: 0;
+
+                        changed(i) => {
+                            root.tab-status = "已切到第 \{i + 1} 个标签";
+                        }
+                    }
+                }
+            }
+
+            TCaption { text: "状态: \{root.tab-status}"; wrap: word-wrap; }
+
+            TCaption { text: "标签等宽拉伸, 选中项品牌色; 角标复用 TBadge (badge 计数 / badge-dot 红点); 顶部分隔线内建; 图示为手机宽度, 实际随容器拉伸。"; wrap: word-wrap; }
+        }
+    }
+
+    // ======================== TIndexes =======================
+    GallerySection {
+        title: "字母索引条 TIndexes";
+        code: "import { TIndexes } from \"@tela-ui/navigation.slint\";\n\nTIndexes {\n    letters: [\"A\", \"B\", \"C\", \"D\", \"E\", \"F\", \"G\", \"H\", \"I\", \"J\", \"K\", \"L\", \"M\", \"N\", \"O\", \"P\", \"Q\", \"R\", \"S\", \"T\", \"U\", \"V\", \"W\", \"X\", \"Y\", \"Z\"];\n    current: idx;\n\n    changed(i) => { idx = i; /* 宿主把对应分组滚到顶部 */ }\n}";
+
+        Rectangle {
+            height: 220px;
+            border-radius: TTheme.radius-medium;
+            border-width: 1px;
+            border-color: TTheme.component-stroke;
+            clip: true;
+
+            HorizontalLayout {
+                padding-right: TTheme.spacing-1;
+
+                Rectangle {
+                    horizontal-stretch: 1;
+
+                    TText {
+                        x: 16px;
+                        y: 16px;
+                        text: "通讯录 — 按住右侧索引条拖动, 当前字母: \{root.idx >= 0 ? root.idx-letters[root.idx] : "—"}";
+                        color: TTheme.text-color-secondary;
+                    }
+                }
+
+                idx-bar := TIndexes {
+                    letters: root.idx-letters;
+                    current: root.idx;
+
+                    changed(i) => {
+                        root.idx = i;
+                    }
+                }
+            }
+        }
+    }
+
+    // ========================== TFab ==========================
+    GallerySection {
+        title: "浮动操作按钮 TFab";
+        code: "import { TFab } from \"@tela-ui/navigation.slint\";\n\n// 无子操作: 就是一个悬浮圆钮\nTFab {\n    x: …; y: …;\n\n    clicked => { … }\n}\n\n// 有子操作: 主钮切换展开/收起, 子项点击后自动收起\nTFab {\n    x: …; y: …;\n    actions: [\n        { icon: TIconSet.Pencil, text: \"新建文档\" },\n        { icon: TIconSet.Upload, text: \"导入\" },\n    ];\n\n    action-clicked(i) => { … }\n}";
+
+        Rectangle {
+            height: 240px;
+            border-radius: TTheme.radius-medium;
+            border-width: 1px;
+            border-color: TTheme.component-stroke;
+            clip: true;
+
+            TParagraph {
+                x: 16px;
+                y: 16px;
+                text: "展开面板向上溢出组件自身边界, 靠宿主绝对定位 (TBackTop 同款); 点击子项自动收起。";
+                color: TTheme.text-color-secondary;
+            }
+
+            TFab {
+                x: parent.width - self.width - 20px;
+                y: parent.height - self.height - 20px;
+                actions: [
+                    { icon: TIconSet.Pencil, text: "新建文档" },
+                    { icon: TIconSet.Upload, text: "导入" },
+                    { icon: TIconSet.Trash2 },
+                ];
+
+                clicked => {
+                    TMessage.info("主按钮 clicked (无子操作时唯一入口)");
+                }
+
+                action-clicked(i) => {
+                    TMessage.info("子操作 \{i + 1}");
+                }
             }
         }
     }

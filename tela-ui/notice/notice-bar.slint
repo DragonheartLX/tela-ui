@@ -1,0 +1,136 @@
+// Tela UI — TNoticeBar
+//
+// Announcement strip: themed light background, leading icon, one-line
+// elided text and an optional close button. With several `contents` the
+// bar rolls them vertically (Timer-driven, `interval` per item) and
+// reports `changed(index)`; a single entry never starts the timer.
+// A marquee (in-place horizontal ticker) is not provided — long text
+// is elided instead.
+
+import { TTheme } from "../theme.slint";
+import { TText } from "../base/typography.slint";
+import { TIcon } from "../base/icon/icon.slint";
+import { TIconSet, TIconData } from "../base/icon/data.slint";
+import { TThemeRole } from "../structs/enums.slint";
+
+export component TNoticeBar inherits Rectangle {
+    // One or more announcements; multiple entries rotate vertically.
+    in property <[string]> contents;
+    in property <TThemeRole> theme: TThemeRole.primary;
+    in property <TIconData> icon: TIconSet.Info;
+    in property <bool> closable: false;
+    // Rotation interval between entries (only used when contents > 1).
+    in property <duration> interval: 3s;
+    // Closable bars hide via `visible` (TAlert convention); the host can
+    // write `open` back to `true` to reshow.
+    in-out property <bool> open: true;
+    // Current carousel index (only meaningful when contents > 1).
+    in-out property <int> current: 0;
+
+    callback closed();
+    // Carousel index actually changed (rotation / host write).
+    callback changed(int);
+
+    // Close programmatically (same path as the close button).
+    public function close() {
+        root.open = false;
+        root.closed();
+    }
+
+    height: TTheme.height-l;
+    border-radius: TTheme.radius-medium;
+    background: TTheme.theme-color-light(theme);
+    visible: open;
+    clip: true;
+
+    // Clamped index every visual reads.
+    private property <int> safe-current:
+        root.contents.length == 0 ? 0
+        : Math.max(0, Math.min(root.current, root.contents.length - 1));
+
+    // Animated float mirror (TCarousel technique): animating the mirror
+    // instead of `y` keeps a resize of the bar instant.
+    private property <float> roll-pos: root.safe-current;
+    animate roll-pos { duration: TTheme.duration-base; }
+
+    private property <length> line-h: TTheme.line-height-m;
+    private property <length> text-x:
+        root.icon.paths.length > 0
+            ? TTheme.padding-lr-m + 16px + TTheme.spacing-3
+            : TTheme.padding-lr-m;
+
+    if root.icon.paths.length > 0: TIcon {
+        x: TTheme.padding-lr-m;
+        y: (parent.height - self.height) / 2;
+        icon: root.icon;
+        size: 16px;
+        icon-color: TTheme.theme-color(root.theme);
+    }
+
+    // One-line rolling window over the announcement track.
+    Rectangle {
+        x: root.text-x;
+        y: (parent.height - root.line-h) / 2;
+        width: parent.width - self.x
+            - (root.closable ? 24px + TTheme.spacing-2 : TTheme.padding-lr-m);
+        height: root.line-h;
+        clip: true;
+
+        Rectangle {
+            y: -root.roll-pos * root.line-h;
+            x: 0;
+            width: parent.width;
+            height: parent.height;
+
+            for it[i] in root.contents: TText {
+                x: 0;
+                y: i * root.line-h;
+                width: parent.width;
+                height: root.line-h;
+                text: it;
+                color: TTheme.theme-color(root.theme);
+                overflow: elide;
+            }
+        }
+    }
+
+    if root.closable: Rectangle {
+        x: parent.width - self.width - TTheme.padding-lr-m;
+        y: (parent.height - self.height) / 2;
+        width: 24px;
+        height: 24px;
+
+        TIcon {
+            x: 5px;
+            y: 5px;
+            icon: TIconSet.X;
+            size: 14px;
+            icon-color: close-ta.has-hover ? TTheme.theme-color(root.theme) : TTheme.text-color-secondary;
+            animate icon-color { duration: TTheme.duration-fast; }
+        }
+
+        close-ta := TouchArea {
+            mouse-cursor: MouseCursor.pointer;
+            accessible-role: AccessibleRole.button;
+            accessible-label: "关闭公告";
+
+            clicked => {
+                root.close();
+            }
+        }
+    }
+
+    Timer {
+        // Timer defaults to running: bind explicitly.
+        running: root.open && root.contents.length > 1;
+        interval: root.interval;
+
+        triggered => {
+            root.current = Math.mod(root.current + 1, root.contents.length);
+            root.changed(root.current);
+        }
+    }
+
+    accessible-role: AccessibleRole.text;
+    accessible-label: root.contents.length > 0 ? root.contents[root.safe-current] : "";
+}

@@ -1,0 +1,103 @@
+// Tela UI — TTabBar
+//
+// Mobile-style bottom tab bar: icon + label + badge per tab, evenly
+// stretched, brand-colored selection. Distinct from TTabs (page tabs on
+// top of content): TTabBar is the primary bottom navigation. The host
+// switches pages on `changed(index)`; the component only updates the
+// highlighted tab. Rendered inside a bottom-anchored container by the
+// host (positioning is not part of the component).
+
+import { TTheme } from "../theme.slint";
+import { TText } from "../base/typography.slint";
+import { TIcon } from "../base/icon/icon.slint";
+import { TIconData } from "../base/icon/data.slint";
+import { TBadge } from "../display/badge.slint";
+
+export struct TTabBarItem {
+    text: string,
+    icon: TIconData,
+    // Pill count; 0 hides the pill unless `badge-dot` is set.
+    badge: int = 0,
+    badge-dot: bool = false,
+}
+
+export component TTabBar inherits Rectangle {
+    in property <[TTabBarItem]> items;
+    in-out property <int> current: 0;
+
+    // Tab actually changed; fires after `current` is updated.
+    callback changed(int);
+
+    // 56px on the token scale (height-l + spacing-6).
+    height: TTheme.height-l + TTheme.spacing-6;
+    background: TTheme.bg-color-container;
+
+    // Top hairline against the page content above.
+    Rectangle {
+        x: 0;
+        y: 0;
+        width: parent.width;
+        height: 1px;
+        background: TTheme.component-stroke;
+    }
+
+    HorizontalLayout {
+        padding-top: TTheme.spacing-2;
+        padding-bottom: TTheme.spacing-2;
+
+        // Tab content is positioned with fixed geometry — an inner layout
+        // reading its own preferred size starves on first layout in deep
+        // pages (the icon row never renders), see slint-semantics 第 22 条.
+        for it[i] in root.items: Rectangle {
+            horizontal-stretch: 1;
+
+            // TBadge hugs its 24px icon; the count pill overlays the icon's
+            // top-right, so fixed 24px slots carry the centering.
+            TBadge {
+                x: (parent.width - 24px) / 2;
+                y: 2px;
+                dot: it.badge-dot;
+                count: it.badge;
+
+                TIcon {
+                    icon: it.icon;
+                    size: 24px;
+                    icon-color: i == root.safe-current ? TTheme.brand-color : TTheme.text-color-secondary;
+                    animate icon-color { duration: TTheme.duration-fast; }
+                }
+            }
+
+            TText {
+                y: 28px;
+                x: 0;
+                width: parent.width;
+                height: TTheme.line-height-s;
+                text: it.text;
+                font-size: TTheme.font-size-s;
+                line-height: TTheme.line-height-s;
+                horizontal-alignment: center;
+                color: i == root.safe-current ? TTheme.brand-color : TTheme.text-color-secondary;
+                animate color { duration: TTheme.duration-fast; }
+            }
+
+            tab-touch := TouchArea {
+                accessible-role: AccessibleRole.tab;
+                accessible-label: it.text;
+
+                clicked => {
+                    if (i != root.current) {
+                        root.current = i;
+                        root.changed(i);
+                    }
+                }
+            }
+        }
+    }
+
+    // Writing `current` stays unclamped; visuals clamp so an out-of-range
+    // value cannot highlight a wrong tab.
+    private property <int> safe-current:
+        Math.max(0, Math.min(root.current, root.items.length - 1));
+
+    accessible-role: AccessibleRole.tab-list;
+}
