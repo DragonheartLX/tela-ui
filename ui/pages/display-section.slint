@@ -19,7 +19,7 @@ export component DisplaySection inherits VerticalLayout {
     // ========================= TTag =========================
     GallerySection {
         title: "标签 TTag";
-        code: "import { TTag } from \"@tela-ui/display.slint\";\n\nTTag { text: \"主要\"; theme: TThemeRole.primary; }\nTTag { text: \"可关闭\"; theme: TThemeRole.primary; closable: true; }\nTTag { text: \"描边\"; variant: TTagVariant.outline; }";
+        code: "import { TTag, TTagVariant } from \"@tela-ui/display.slint\";\nimport { TThemeRole } from \"@tela-ui/theme.slint\";\n\nTTag { text: \"主要\"; theme: TThemeRole.primary; }\nTTag { text: \"可关闭\"; theme: TThemeRole.primary; closable: true; }\nTTag { text: \"描边\"; variant: TTagVariant.outline; }";
 
         HorizontalLayout {
             spacing: 8px;
@@ -41,7 +41,7 @@ export component DisplaySection inherits VerticalLayout {
     // ======================== TBadge ========================
     GallerySection {
         title: "徽标 TBadge";
-        code: "import { TBadge } from \"@tela-ui/display.slint\";\nimport { TIcon } from \"@tela-ui/base.slint\";\n\nTBadge {\n    count: 6;\n    TIcon { icon: TIconSet.Bell; size: 24px; icon-color: TTheme.text-color-primary; }\n}\nTBadge {\n    count: 128;\n    TIcon { icon: TIconSet.Mail; size: 24px; icon-color: TTheme.text-color-primary; }\n}\nTBadge {\n    dot: true;\n    TIcon { icon: TIconSet.Settings; size: 24px; icon-color: TTheme.text-color-primary; }\n}";
+        code: "import { TBadge } from \"@tela-ui/display.slint\";\nimport { TIcon, TIconSet } from \"@tela-ui/base.slint\";\nimport { TTheme } from \"@tela-ui/theme.slint\";\n\nTBadge {\n    count: 6;\n    TIcon { icon: TIconSet.Bell; size: 24px; icon-color: TTheme.text-color-primary; }\n}\nTBadge {\n    count: 128;\n    TIcon { icon: TIconSet.Mail; size: 24px; icon-color: TTheme.text-color-primary; }\n}\nTBadge {\n    dot: true;\n    TIcon { icon: TIconSet.Settings; size: 24px; icon-color: TTheme.text-color-primary; }\n}";
 
         HorizontalLayout {
             spacing: 28px;
@@ -67,7 +67,7 @@ export component DisplaySection inherits VerticalLayout {
     // ======================== TAvatar =======================
     GallerySection {
         title: "头像 TAvatar";
-        code: "import { TAvatar } from \"@tela-ui/display.slint\";\n\nTAvatar { text: \"T\"; }\nTAvatar { size: TAvatarSize.small; text: \"TD\"; }\nTAvatar { size: TAvatarSize.large; text: \"龙\"; }\nTAvatar { size: TAvatarSize.extra-large; shape: TAvatarShape.square; text: \"\"; }";
+        code: "import { TAvatar, TAvatarSize, TAvatarShape } from \"@tela-ui/display.slint\";\n\nTAvatar { text: \"T\"; }\nTAvatar { size: TAvatarSize.small; text: \"TD\"; }\nTAvatar { size: TAvatarSize.large; text: \"龙\"; }\nTAvatar { size: TAvatarSize.extra-large; shape: TAvatarShape.square; text: \"\"; }";
 
         HorizontalLayout {
             spacing: 24px;
@@ -85,7 +85,7 @@ export component DisplaySection inherits VerticalLayout {
     // ====================== TAvatarGroup ====================
     GallerySection {
         title: "头像组 TAvatarGroup";
-        code: "import { TAvatarGroup } from \"@tela-ui/display.slint\";\n\nTAvatarGroup {\n    items: [\n        { text: \"龙\" },\n        { text: \"T\" },\n        { text: \"UI\" },\n        { text: \"D\" },\n    ];\n}\n\nTAvatarGroup {\n    max-count: 3;\n    items: [\n        { text: \"A\" },\n        { text: \"B\" },\n        { text: \"C\" },\n        { text: \"D\" },\n        { text: \"E\" },\n        { text: \"F\" },\n    ];\n\n    overflow-clicked => {\n        TMessage.info(\"还有 3 个成员\");\n    }\n}\n\nTAvatarGroup {\n    size: TAvatarSize.small;\n    shape: TAvatarShape.square;\n    items: [\n        { text: \"S\" },\n        { text: \"Q\" },\n        { text: \"R\" },\n    ];\n}";
+        code: "import { TAvatarGroup, TAvatarSize, TAvatarShape } from \"@tela-ui/display.slint\";\nimport { TMessage } from \"@tela-ui/notice.slint\";\n\nTAvatarGroup {\n    items: [\n        { text: \"龙\" },\n        { text: \"T\" },\n        { text: \"UI\" },\n        { text: \"D\" },\n    ];\n}\n\nTAvatarGroup {\n    max-count: 3;\n    items: [\n        { text: \"A\" },\n        { text: \"B\" },\n        { text: \"C\" },\n        { text: \"D\" },\n        { text: \"E\" },\n        { text: \"F\" },\n    ];\n\n    overflow-clicked => {\n        TMessage.info(\"还有 3 个成员\");\n    }\n}\n\nTAvatarGroup {\n    size: TAvatarSize.small;\n    shape: TAvatarShape.square;\n    items: [\n        { text: \"S\" },\n        { text: \"Q\" },\n        { text: \"R\" },\n    ];\n}";
 
         VerticalLayout {
             spacing: 16px;
@@ -138,7 +138,7 @@ export component DisplaySection inherits VerticalLayout {
     // ======================== TEmpty ========================
     GallerySection {
         title: "空状态 TEmpty";
-        code: "import { TEmpty } from \"@tela-ui/display.slint\";\nimport { TButton } from \"@tela-ui/base.slint\";\n\nRectangle {\n    width: 240px;\n    height: 180px;\n    TEmpty { }\n}\n\nRectangle {\n    width: 240px;\n    height: 180px;\n    TEmpty {\n        description: \"暂无订单数据\";\n\n        TButton {\n            size: TSize.small;\n            text: \"立即创建\";\n        }\n    }\n}\n\nRectangle {\n    width: 240px;\n    height: 180px;\n    TEmpty {\n        icon: TIconSet.Search;\n        description: \"未找到相关结果\";\n    }\n}";
+        code: "import { TEmpty } from \"@tela-ui/display.slint\";\nimport { TButton, TIconSet } from \"@tela-ui/base.slint\";\nimport { TSize } from \"@tela-ui/theme.slint\";\n\nRectangle {\n    width: 240px;\n    height: 180px;\n    TEmpty { }\n}\n\nRectangle {\n    width: 240px;\n    height: 180px;\n    TEmpty {\n        description: \"暂无订单数据\";\n\n        TButton {\n            size: TSize.small;\n            text: \"立即创建\";\n        }\n    }\n}\n\nRectangle {\n    width: 240px;\n    height: 180px;\n    TEmpty {\n        icon: TIconSet.Search;\n        description: \"未找到相关结果\";\n    }\n}";
 
         HorizontalLayout {
             spacing: 24px;
@@ -179,7 +179,7 @@ export component DisplaySection inherits VerticalLayout {
     // ======================= TTimeline ======================
     GallerySection {
         title: "时间线 TTimeline";
-        code: "import { TTimeline } from \"@tela-ui/display.slint\";\n\nTTimeline {\n    items: [\n        { label: \"创建订单\", content: \"…\", theme: TThemeRole.primary },\n        { label: \"支付完成\", content: \"…\", theme: TThemeRole.success },\n    ];\n}";
+        code: "import { TTimeline } from \"@tela-ui/display.slint\";\nimport { TThemeRole } from \"@tela-ui/theme.slint\";\n\nTTimeline {\n    items: [\n        { label: \"创建订单\", content: \"用户提交了订单,等待支付。\", theme: TThemeRole.primary },\n        { label: \"支付完成\", content: \"微信支付 ¥199.00,交易号 202610070001。\", theme: TThemeRole.success },\n    ];\n}";
 
         TTimeline {
             items: [
@@ -239,7 +239,7 @@ export component DisplaySection inherits VerticalLayout {
     // ====================== TScrollBar ======================
     GallerySection {
         title: "滚动条 TScrollBar";
-        code: "import { TScrollBar } from \"@tela-ui/display.slint\";\nimport { TParagraph } from \"@tela-ui/base.slint\";\n\n// 自带视口与滚动进度的滚动容器 (替代 ScrollView):\nTScrollBar {\n    height: 220px;\n    border-radius: TTheme.radius-medium;\n    border-width: 1px;\n    border-color: TTheme.component-stroke;\n    clip: true;\n\n    VerticalLayout {\n        padding: TTheme.padding-lr-l;\n        spacing: TTheme.spacing-3;\n\n        for i in 16: TParagraph { text: \"滚动内容第 \\{i + 1} 行 — 滑块可拖拽、可点击定位。\"; }\n    }\n}\n// 滑块: 静止 gray-7, 悬停 gray-6, 按压 gray-5; 拖拽即时跟手\n// (滑块中心对齐指针), 点击轨道缓动定位, 滚轮直滚; 贴窗口边缘\n// 时设 thumb-inset 避开原生拉伸热区。";
+        code: "import { TScrollBar } from \"@tela-ui/display.slint\";\nimport { TParagraph } from \"@tela-ui/base.slint\";\nimport { TTheme } from \"@tela-ui/theme.slint\";\n\n// 自带视口与滚动进度的滚动容器 (替代 ScrollView):\nTScrollBar {\n    height: 220px;\n    border-radius: TTheme.radius-medium;\n    border-width: 1px;\n    border-color: TTheme.component-stroke;\n    clip: true;\n\n    VerticalLayout {\n        padding: TTheme.padding-lr-l;\n        spacing: TTheme.spacing-3;\n\n        for i in 16: TParagraph { text: \"滚动内容第 \\{i + 1} 行 — 滑块可拖拽、可点击定位。\"; }\n    }\n}\n// 滑块: 静止 gray-7, 悬停 gray-6, 按压 gray-5; 拖拽即时跟手\n// (滑块中心对齐指针), 点击轨道缓动定位, 滚轮直滚; 贴窗口边缘\n// 时设 thumb-inset 避开原生拉伸热区。";
 
         TScrollBar {
             height: 220px;
@@ -260,7 +260,7 @@ export component DisplaySection inherits VerticalLayout {
     // ======================= TComment =======================
     GallerySection {
         title: "评论 TComment";
-        code: "import { TComment } from \"@tela-ui/display.slint\";\n\nTComment {\n    author: \"龙背上的骑兵\";\n    avatar-text: \"龙\";\n    datetime: \"3 小时前\";\n    content: \"组件库的令牌体系很完整, 亮暗切换零成本。\";\n    likes: 12;\n}\n\nTComment {\n    author: \"TDesign\";\n    avatar-text: \"TD\";\n    datetime: \"昨天 14:20\";\n    content: \"收到反馈, 下个版本会补充键盘导航。\";\n    likes: 3;\n    liked: true;\n\n    like-changed(l) => { 状态文本 = l ? \"已点赞\" : \"已取消点赞\"; }\n    reply-clicked => { 状态文本 = \"打开回复框\"; }\n}";
+        code: "import { TComment } from \"@tela-ui/display.slint\";\n\nproperty <string> status: \"暂无操作\";\n\nTComment {\n    author: \"龙背上的骑兵\";\n    avatar-text: \"龙\";\n    datetime: \"3 小时前\";\n    content: \"组件库的令牌体系很完整, 亮暗切换零成本。\";\n    likes: 12;\n}\n\nTComment {\n    author: \"TDesign\";\n    avatar-text: \"TD\";\n    datetime: \"昨天 14:20\";\n    content: \"收到反馈, 下个版本会补充键盘导航。\";\n    likes: 3;\n    liked: true;\n\n    like-changed(l) => { root.status = l ? \"已点赞\" : \"已取消点赞\"; }\n    reply-clicked => { root.status = \"打开回复框\"; }\n}";
 
         VerticalLayout {
             spacing: 16px;
@@ -302,7 +302,7 @@ export component DisplaySection inherits VerticalLayout {
     // ======================= TCountDown =====================
     GallerySection {
         title: "倒计时 TCountDown";
-        code: "import { TCountDown } from \"@tela-ui/display.slint\";\n\n// 剩余时长驱动, 双向绑定后组件每秒递减:\nTCountDown {\n    remaining <=> cd.remaining; // in-out property <duration>\n    running: true;\n\n    finished() => { 状态文本 = \"时间到\"; }\n}\n\n// 时位不按 24 回绕, 25h 显示为 25:00:00;\n// 无目标时刻解析 (Slint 不暴露当前日期)。";
+        code: "import { TCountDown } from \"@tela-ui/display.slint\";\n\nproperty <duration> remaining: 90s;\nproperty <string> status: \"\";\n\n// 剩余时长驱动, 双向绑定后组件每秒递减:\nTCountDown {\n    remaining <=> root.remaining;\n    running: true;\n\n    finished() => { root.status = \"时间到\"; }\n}\n\n// 时位不按 24 回绕, 25h 显示为 25:00:00;\n// 无目标时刻解析 (Slint 不暴露当前日期)。";
 
         HorizontalLayout {
             spacing: 48px;

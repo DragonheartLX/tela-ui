@@ -49,7 +49,7 @@ export component NoticeSection inherits VerticalLayout {
     // ======================== TAlert ========================
     GallerySection {
         title: "警告提示 TAlert";
-        code: "import { TAlert } from \"@tela-ui/notice.slint\";\n\nTAlert { theme: TThemeRole.success; title: \"操作成功\"; description: \"表单已成功提交。\"; closable: true; }";
+        code: "import { TAlert } from \"@tela-ui/notice.slint\";\nimport { TThemeRole } from \"@tela-ui/theme.slint\";\n\nTAlert { theme: TThemeRole.success; title: \"操作成功\"; description: \"表单已成功提交。\"; closable: true; }";
 
         VerticalLayout {
             spacing: 12px;
@@ -64,7 +64,7 @@ export component NoticeSection inherits VerticalLayout {
     // ======================== Message ======================
     GallerySection {
         title: "全局消息 Message";
-        code: "import { TMessage, TMessagePlacement } from \"@tela-ui/notice.slint\";\n\nTMessage.success(\"保存成功\");\nTMessage.placement = TMessagePlacement.bottom-right;";
+        code: "import { TMessage, TMessagePlacement } from \"@tela-ui/notice.slint\";\nimport { TButton } from \"@tela-ui/base.slint\";\n\n// 任意回调里调用 (TMessageOverlay 挂在窗口根部):\nTButton {\n    text: \"保存\";\n    clicked => {\n        TMessage.success(\"保存成功\");\n        TMessage.placement = TMessagePlacement.bottom-right;\n    }\n}";
 
         VerticalLayout {
             spacing: 12px;
@@ -107,7 +107,7 @@ export component NoticeSection inherits VerticalLayout {
     // ======================= Notification ==================
     GallerySection {
         title: "通知 Notification";
-        code: "import { TNotification, TNotificationOverlay } from \"@tela-ui/notice.slint\";\n\n// 窗口根部放置一次:\nTNotificationOverlay { }\n\n// 任意代码调用:\nTNotification.info(\"提示\", \"这是一条信息通知\");\nTNotification.success(\"操作成功\", \"数据已保存\");";
+        code: "import { TNotification, TNotificationOverlay } from \"@tela-ui/notice.slint\";\nimport { TButton } from \"@tela-ui/base.slint\";\n\n// 窗口根部放置一次:\nTNotificationOverlay { }\n\n// 任意回调里调用:\nTButton {\n    text: \"通知\";\n    clicked => {\n        TNotification.info(\"提示\", \"这是一条信息通知\");\n        TNotification.success(\"操作成功\", \"数据已保存\");\n    }\n}";
 
         VerticalLayout {
             spacing: 12px;
@@ -131,7 +131,7 @@ export component NoticeSection inherits VerticalLayout {
     // ======================== TProgress =====================
     GallerySection {
         title: "进度 TProgress(拖动滑块实时变化)";
-        code: "import { TProgress, TProgressVariant } from \"@tela-ui/notice.slint\";\n\nTProgress {\n    value: root.progress-value;\n    theme: TThemeRole.primary;\n    horizontal-stretch: 1;\n    animated: root.progress-animated;\n}\nTProgress { value: 66; theme: TThemeRole.success; horizontal-stretch: 1; }\nTProgress { value: 30; theme: TThemeRole.warning; horizontal-stretch: 1; }\nTProgress { value: 90; theme: TThemeRole.error; horizontal-stretch: 1; show-label: false; }\n\nTProgress {\n    variant: TProgressVariant.circle;\n    value: root.progress-value;\n    theme: TThemeRole.primary;\n    animated: root.progress-animated;\n}\nTProgress { variant: TProgressVariant.circle; value: 66; theme: TThemeRole.success; }\nTProgress { variant: TProgressVariant.circle; value: 30; theme: TThemeRole.warning; }\nTProgress { variant: TProgressVariant.circle; value: 100; theme: TThemeRole.error; }\n\nTSlider { value <=> root.progress-value; }\n\nTSwitch { checked <=> root.progress-animated; }";
+        code: "import { TProgress, TProgressVariant } from \"@tela-ui/notice.slint\";\nimport { TThemeRole } from \"@tela-ui/theme.slint\";\nimport { TSlider } from \"@tela-ui/input.slint\";\nimport { TSwitch } from \"@tela-ui/select.slint\";\n\nproperty <float> value: 40;\nproperty <bool> animated: false;\n\nTProgress {\n    value: root.value;\n    theme: TThemeRole.primary;\n    horizontal-stretch: 1;\n    animated: root.animated;\n}\nTProgress { value: 66; theme: TThemeRole.success; horizontal-stretch: 1; }\nTProgress { value: 30; theme: TThemeRole.warning; horizontal-stretch: 1; }\nTProgress { value: 90; theme: TThemeRole.error; horizontal-stretch: 1; show-label: false; }\n\nTProgress {\n    variant: TProgressVariant.circle;\n    value: root.value;\n    theme: TThemeRole.primary;\n    animated: root.animated;\n}\nTProgress { variant: TProgressVariant.circle; value: 66; theme: TThemeRole.success; }\nTProgress { variant: TProgressVariant.circle; value: 30; theme: TThemeRole.warning; }\nTProgress { variant: TProgressVariant.circle; value: 100; theme: TThemeRole.error; }\n\nTSlider { value <=> root.value; }\n\nTSwitch { checked <=> root.animated; }";
 
         VerticalLayout {
             spacing: 16px;
@@ -177,7 +177,7 @@ export component NoticeSection inherits VerticalLayout {
     // ========================= TResult ======================
     GallerySection {
         title: "结果页 TResult";
-        code: "import { TResult } from \"@tela-ui/notice.slint\";\n\nTResult {\n    status: TResultStatus.success;\n    title: \"提交成功\";\n    description: \"表单已提交。\";\n    TButton { text: \"查看详情\"; } // 子元素作为操作区\n}";
+        code: "import { TResult, TResultStatus } from \"@tela-ui/notice.slint\";\nimport { TButton } from \"@tela-ui/base.slint\";\n\nTResult {\n    status: TResultStatus.success;\n    title: \"提交成功\";\n    description: \"表单已提交。\";\n    TButton { text: \"查看详情\"; } // 子元素作为操作区\n}";
 
         HorizontalLayout {
             spacing: 24px;
@@ -217,7 +217,7 @@ export component NoticeSection inherits VerticalLayout {
     // ======================= TNoticeBar ======================
     GallerySection {
         title: "通告栏 TNoticeBar";
-        code: "import { TNoticeBar } from \"@tela-ui/notice.slint\";\n\n// 多条公告轮播 (整条垂直切换, 默认 3s 一条):\nTNoticeBar {\n    contents: [\n        \"系统将于今晚 23:00 例行维护, 预计 30 分钟。\",\n        \"v2.0 版本已发布, 新增暗色主题。\",\n    ];\n    changed(i) => { 状态文本 = \"已轮播到第 N 条\"; }\n}\n\n// 可关闭 + 主题色:\nTNoticeBar {\n    contents: [\"您的账户存在安全风险, 请尽快修改密码。\"];\n    theme: TThemeRole.error;\n    closable: true;\n\n    closed => { 状态文本 = \"已关闭\"; }\n}";
+        code: "import { TNoticeBar } from \"@tela-ui/notice.slint\";\nimport { TThemeRole } from \"@tela-ui/theme.slint\";\n\nproperty <string> status: \"等待轮播\";\n\n// 多条公告轮播 (整条垂直切换, 默认 3s 一条):\nTNoticeBar {\n    contents: [\n        \"系统将于今晚 23:00 例行维护, 预计 30 分钟。\",\n        \"v2.0 版本已发布, 新增暗色主题。\",\n    ];\n    changed(i) => { root.status = \"已轮播到第 \\{i + 1} 条\"; }\n}\n\n// 可关闭 + 主题色:\nTNoticeBar {\n    contents: [\"您的账户存在安全风险, 请尽快修改密码。\"];\n    theme: TThemeRole.error;\n    closable: true;\n\n    closed => { root.status = \"已关闭\"; }\n}";
 
         VerticalLayout {
             spacing: 16px;

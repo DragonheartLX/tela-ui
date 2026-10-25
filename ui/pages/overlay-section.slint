@@ -101,7 +101,7 @@ export component OverlaySection inherits VerticalLayout {
     // ======================== TDialog =======================
     GallerySection {
         title: "对话框 TDialog";
-        code: "import { TDialog } from \"@tela-ui/overlay.slint\";\n\n// 窗口根部:\nTDialog {\n    open <=> open;\n    title: \"对话框标题\";\n    content: \"这是内容\";\n    accepted => { … }\n    canceled => { … }\n}";
+        code: "import { TDialog } from \"@tela-ui/overlay.slint\";\n\nproperty <bool> open: false;\n\n// 挂在窗口根部, 置 open: true 打开:\nTDialog {\n    open <=> root.open;\n    title: \"对话框标题\";\n    content: \"这是内容\";\n\n    accepted => { /* 确认 */ }\n    canceled => { /* 取消或关闭 */ }\n}";
 
         HorizontalLayout {
             spacing: 12px;
@@ -114,7 +114,7 @@ export component OverlaySection inherits VerticalLayout {
     // ==================== TDialogService ====================
     GallerySection {
         title: "对话框服务 TDialogService";
-        code: "import { TDialogService, TDialogServiceOverlay } from \"@tela-ui/overlay.slint\";\n\n// 窗口根部放置一次:\nTDialogServiceOverlay { }\n\n// 任意代码调用:\nTDialogService.confirm(\"删除\", \"确认删除该项?\");\nTDialogService.alert(\"提示\", \"仅确认按钮\");\n\n// 结果监听 (result-seq + accepted):\nprivate property <int> r: TDialogService.result-seq;\nchanged r => { if (TDialogService.accepted) { /* 已确认 */ } }";
+        code: "import { TDialogService, TDialogServiceOverlay } from \"@tela-ui/overlay.slint\";\nimport { TButton } from \"@tela-ui/base.slint\";\n\n// 窗口根部放置一次:\nTDialogServiceOverlay { }\n\n// 任意回调里调用:\nTButton {\n    text: \"删除\";\n    clicked => {\n        TDialogService.confirm(\"删除\", \"确认删除该项?\");\n        TDialogService.alert(\"提示\", \"仅确认按钮\");\n    }\n}\n\n// 结果监听 (result-seq + accepted):\nproperty <int> result-seq: TDialogService.result-seq;\nchanged result-seq => {\n    if (TDialogService.accepted) { /* 已确认 */ }\n}";
 
         HorizontalLayout {
             spacing: 12px;
@@ -128,7 +128,7 @@ export component OverlaySection inherits VerticalLayout {
     // ==================== TLoadingService ====================
     GallerySection {
         title: "加载服务 TLoadingService";
-        code: "import { TLoadingService, TLoadingServiceOverlay } from \"@tela-ui/overlay.slint\";\n\n// 窗口根部放置一次:\nTLoadingServiceOverlay { }\n\n// 任意代码调用:\nTLoadingService.show(\"保存中…\");\nTLoadingService.hide();";
+        code: "import { TLoadingService, TLoadingServiceOverlay } from \"@tela-ui/overlay.slint\";\nimport { TButton } from \"@tela-ui/base.slint\";\n\n// 窗口根部放置一次:\nTLoadingServiceOverlay { }\n\n// 任意回调里调用; 结束时 hide():\nTButton {\n    text: \"保存\";\n    clicked => { TLoadingService.show(\"保存中…\"); }\n}";
 
         HorizontalLayout {
             spacing: 12px;
@@ -141,7 +141,7 @@ export component OverlaySection inherits VerticalLayout {
     // ======================== TDrawer =======================
     GallerySection {
         title: "抽屉 TDrawer";
-        code: "import { TDrawer, TDrawerPlacement } from \"@tela-ui/overlay.slint\";\n\nTDrawer {\n    open <=> root.drawer-open;\n    placement <=> root.drawer-placement;\n    title: \"抽屉标题\";\n\n    TParagraph { text: \"这是 Tela UI 的抽屉组件,从窗口边缘滑出,适合放置表单、详情等较大面积的临时内容。\"; }\n    TButton {\n        variant: TButtonVariant.outline;\n        text: \"关闭抽屉\";\n        clicked => { root.drawer-open = false; }\n    }\n}";
+        code: "import { TDrawer, TDrawerPlacement } from \"@tela-ui/overlay.slint\";\nimport { TParagraph, TButton, TButtonVariant } from \"@tela-ui/base.slint\";\n\nproperty <bool> open: false;\nproperty <TDrawerPlacement> placement: TDrawerPlacement.right;\n\nTDrawer {\n    open <=> root.open;\n    placement <=> root.placement;\n    title: \"抽屉标题\";\n\n    TParagraph { text: \"这是 Tela UI 的抽屉组件,从窗口边缘滑出,适合放置表单、详情等较大面积的临时内容。\"; }\n    TButton {\n        variant: TButtonVariant.outline;\n        text: \"关闭抽屉\";\n        clicked => { root.open = false; }\n    }\n}";
 
         HorizontalLayout {
             spacing: 12px;
@@ -177,7 +177,7 @@ export component OverlaySection inherits VerticalLayout {
     // ==================== TCommandPalette ====================
     GallerySection {
         title: "命令面板 TCommandPalette";
-        code: "import { TCommandPaletteService, TCommandPaletteOverlay } from \"@tela-ui/overlay.slint\";\n\n// 窗口根部放置一次:\nTCommandPaletteOverlay { }\n\n// 命令表一次写入, 之后 open() 即可:\nTCommandPaletteService.commands = [ { label: \"打开设置\", shortcut: \"Ctrl+,\" } ];\nTCommandPaletteService.open();\n\n// 执行监听 (run-seq + run-index):\nprivate property <int> r: TCommandPaletteService.run-seq;\nchanged r => { /* run-index < 0 表示未执行任何命令 */ }";
+        code: "import { TCommandPaletteService, TCommandPaletteOverlay, TCommandItem } from \"@tela-ui/overlay.slint\";\nimport { TButton } from \"@tela-ui/base.slint\";\n\nproperty <[TCommandItem]> commands: [\n    { label: \"打开设置\", shortcut: \"Ctrl+,\" },\n    { label: \"新建文件\", shortcut: \"Ctrl+N\" },\n];\nproperty <int> run-seq: TCommandPaletteService.run-seq;\n\n// 命令表一次写入, 之后 open() 即可:\ninit => { TCommandPaletteService.commands = root.commands; }\n\n// 窗口根部放置一次:\nTCommandPaletteOverlay { }\n\nTButton {\n    text: \"打开命令面板\";\n    clicked => { TCommandPaletteService.open(); }\n}\n\n// 执行监听 (run-seq + run-index):\nchanged run-seq => { /* run-index < 0 表示未执行任何命令 */ }";
 
         HorizontalLayout {
             spacing: 12px;
@@ -190,7 +190,7 @@ export component OverlaySection inherits VerticalLayout {
     // ==================== TBottomSheet / TActionSheet ====================
     GallerySection {
         title: "底部弹层 TBottomSheet / 动作面板 TActionSheet";
-        code: "import { TBottomSheet, TActionSheetService, TActionSheetOverlay } from \"@tela-ui/overlay.slint\";\n\n// 窗口根部:\nTBottomSheet {\n    open <=> sheet-open;\n    title: \"底部弹层标题\";\n    TParagraph { text: \"面板主体由子元素提供\"; }\n}\n\n// 全局动作面板, 一次调用即得结果:\nTActionSheetService.show(\"选择操作\", \"该操作不可撤销\", [\n    { label: \"分享\", theme: TThemeRole.primary },\n    { label: \"删除\", theme: TThemeRole.error, disabled: true },\n]);";
+        code: "import { TBottomSheet, TActionSheetService, TActionSheetOverlay } from \"@tela-ui/overlay.slint\";\nimport { TButton, TParagraph } from \"@tela-ui/base.slint\";\nimport { TThemeRole } from \"@tela-ui/theme.slint\";\n\nproperty <bool> open: false;\n\n// 窗口根部:\nTBottomSheet {\n    open <=> root.open;\n    title: \"底部弹层标题\";\n\n    TParagraph { text: \"面板主体由子元素提供\"; }\n}\n\n// 全局动作面板 (TActionSheetOverlay 挂在窗口根部), 一次调用即得结果:\nTButton {\n    text: \"打开动作面板\";\n    clicked => {\n        TActionSheetService.show(\"选择操作\", \"该操作不可撤销\", [\n            { label: \"分享\", theme: TThemeRole.primary },\n            { label: \"删除\", theme: TThemeRole.error, disabled: true },\n        ]);\n    }\n}";
 
         HorizontalLayout {
             spacing: 12px;
@@ -204,7 +204,7 @@ export component OverlaySection inherits VerticalLayout {
     // ======================= TPopconfirm ====================
     GallerySection {
         title: "气泡确认 TPopconfirm";
-        code: "import { TPopconfirm, TPopupPlacement } from \"@tela-ui/overlay.slint\";\n\npc := TPopconfirm {\n    auto-open: false;\n    text: \"确定删除这条数据吗?\";\n    confirm => { TMessage.success(\"已删除\"); }\n    cancel => { TMessage.info(\"已取消\"); }\n\n    TButton {\n        theme: TThemeRole.error;\n        variant: TButtonVariant.outline;\n        text: \"删除\";\n        clicked => { pc.toggle(); }\n    }\n}\n\nTPopconfirm {\n    text: \"确认提交表单吗?\";\n    placement: TPopupPlacement.bottom-start;\n\n    Rectangle {\n        width: 120px;\n        height: TTheme.height-m;\n        background: TTheme.bg-color-secondarycontainer;\n        border-radius: TTheme.radius-default;\n\n        TText {\n            text: \"点击确认\";\n            font-size: TTheme.font-size-m;\n            color: TTheme.text-color-secondary;\n            horizontal-alignment: center;\n            vertical-alignment: center;\n        }\n    }\n}";
+        code: "import { TPopconfirm } from \"@tela-ui/overlay.slint\";\nimport { TPopupPlacement, TThemeRole, TTheme } from \"@tela-ui/theme.slint\";\nimport { TButton, TButtonVariant, TText } from \"@tela-ui/base.slint\";\nimport { TMessage } from \"@tela-ui/notice.slint\";\n\npc := TPopconfirm {\n    auto-open: false;\n    text: \"确定删除这条数据吗?\";\n    confirm => { TMessage.success(\"已删除\"); }\n    cancel => { TMessage.info(\"已取消\"); }\n\n    TButton {\n        theme: TThemeRole.error;\n        variant: TButtonVariant.outline;\n        text: \"删除\";\n        clicked => { pc.toggle(); }\n    }\n}\n\nTPopconfirm {\n    text: \"确认提交表单吗?\";\n    placement: TPopupPlacement.bottom-start;\n\n    Rectangle {\n        width: 120px;\n        height: TTheme.height-m;\n        background: TTheme.bg-color-secondarycontainer;\n        border-radius: TTheme.radius-default;\n\n        TText {\n            text: \"点击确认\";\n            font-size: TTheme.font-size-m;\n            color: TTheme.text-color-secondary;\n            horizontal-alignment: center;\n            vertical-alignment: center;\n        }\n    }\n}";
 
         HorizontalLayout {
             spacing: 24px;
@@ -252,7 +252,7 @@ export component OverlaySection inherits VerticalLayout {
     // ======================== TPopover ======================
     GallerySection {
         title: "气泡卡片 TPopover";
-        code: "import { TPopover } from \"@tela-ui/overlay.slint\";\n\npov := TPopover {\n    auto-open: false;   // TButton 触发需关掉, clicked 里 toggle()\n    title: \"标题\";\n    text: \"正文, 点击外部或 ESC 关闭\";\n    TButton { text: \"?\"; clicked => pov.toggle(); }\n}";
+        code: "import { TPopover } from \"@tela-ui/overlay.slint\";\nimport { TButton } from \"@tela-ui/base.slint\";\n\npov := TPopover {\n    auto-open: false;   // TButton 触发需关掉, clicked 里 toggle()\n    title: \"标题\";\n    text: \"正文, 点击外部或 ESC 关闭\";\n\n    TButton { text: \"?\"; clicked => { pov.toggle(); } }\n}";
 
         HorizontalLayout {
             spacing: 24px;
@@ -298,7 +298,7 @@ export component OverlaySection inherits VerticalLayout {
     // ======================== Tooltip ======================
     GallerySection {
         title: "气泡提示 Tooltip";
-        code: "import { TTooltipArea, TTooltipPlacement } from \"@tela-ui/overlay.slint\";\n\nTTooltipArea {\n    width: 120px;\n    height: TTheme.height-m;\n    background: TTheme.bg-color-secondarycontainer;\n    border-radius: TTheme.radius-default;\n    text: \"我是 Tooltip, 鼠标移开即消失, 250ms 延迟出现\";\n    placement: TTooltipPlacement.top;\n\n    TText {\n        text: \"上方提示\";\n        font-size: TTheme.font-size-m;\n        color: TTheme.text-color-secondary;\n        horizontal-alignment: center;\n        vertical-alignment: center;\n    }\n}\n\nTTooltipArea {\n    width: 120px;\n    height: TTheme.height-m;\n    background: TTheme.bg-color-secondarycontainer;\n    border-radius: TTheme.radius-default;\n    text: \"placement: TTooltipPlacement.bottom\";\n    placement: TTooltipPlacement.bottom;\n\n    TText {\n        text: \"下方提示\";\n        font-size: TTheme.font-size-m;\n        color: TTheme.text-color-secondary;\n        horizontal-alignment: center;\n        vertical-alignment: center;\n    }\n}";
+        code: "import { TTooltipArea, TTooltipPlacement } from \"@tela-ui/overlay.slint\";\nimport { TText } from \"@tela-ui/base.slint\";\nimport { TTheme } from \"@tela-ui/theme.slint\";\n\nTTooltipArea {\n    width: 120px;\n    height: TTheme.height-m;\n    background: TTheme.bg-color-secondarycontainer;\n    border-radius: TTheme.radius-default;\n    text: \"我是 Tooltip, 鼠标移开即消失, 250ms 延迟出现\";\n    placement: TTooltipPlacement.top;\n\n    TText {\n        text: \"上方提示\";\n        font-size: TTheme.font-size-m;\n        color: TTheme.text-color-secondary;\n        horizontal-alignment: center;\n        vertical-alignment: center;\n    }\n}\n\nTTooltipArea {\n    width: 120px;\n    height: TTheme.height-m;\n    background: TTheme.bg-color-secondarycontainer;\n    border-radius: TTheme.radius-default;\n    text: \"placement: TTooltipPlacement.bottom\";\n    placement: TTooltipPlacement.bottom;\n\n    TText {\n        text: \"下方提示\";\n        font-size: TTheme.font-size-m;\n        color: TTheme.text-color-secondary;\n        horizontal-alignment: center;\n        vertical-alignment: center;\n    }\n}";
 
         HorizontalLayout {
             spacing: 24px;

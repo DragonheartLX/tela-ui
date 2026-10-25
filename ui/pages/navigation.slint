@@ -55,7 +55,7 @@ export component NavigationSection inherits VerticalLayout {
     // ======================= TTabs =========================
     GallerySection {
         title: "选项卡 TTabs";
-        code: "import { TTabs } from \"@tela-ui/navigation.slint\";\n\nTTabs { items: [\"首页\", \"组件\", \"文档\", \"关于\"]; current-index <=> i; }\nif root.i == 0: TParagraph { text: \"首页内容\"; }";
+        code: "import { TTabs } from \"@tela-ui/navigation.slint\";\nimport { TParagraph } from \"@tela-ui/base.slint\";\n\nproperty <int> current-index: 0;\n\nTTabs { items: [\"首页\", \"组件\", \"文档\", \"关于\"]; current-index <=> root.current-index; }\nif root.current-index == 0: TParagraph { text: \"首页内容\"; }";
 
         VerticalLayout {
             spacing: 16px;
@@ -86,7 +86,7 @@ export component NavigationSection inherits VerticalLayout {
     // ==================== TPagination ======================
     GallerySection {
         title: "分页 TPagination";
-        code: "import { TPagination } from \"@tela-ui/navigation.slint\";\n\nTPagination { total-pages: 20; current <=> page; }";
+        code: "import { TPagination } from \"@tela-ui/navigation.slint\";\n\nproperty <int> current: 3;\n\nTPagination { total-pages: 20; current <=> root.current; }";
 
         HorizontalLayout {
             spacing: 24px;
@@ -104,7 +104,7 @@ export component NavigationSection inherits VerticalLayout {
     // ======================= TNavBar =======================
     GallerySection {
         title: "导航栏 TNavBar";
-        code: "import { TNavBar } from \"@tela-ui/navigation.slint\";\n\nTNavBar {\n    title: \"Tela UI\";\n    logo: TIconSet.LayoutDashboard;\n    items: [{ label: \"首页\", value: \"home\" }, …];\n    current-value <=> nav;\n    TButton { text: \"操作\"; } // 右侧操作区\n}";
+        code: "import { TNavBar } from \"@tela-ui/navigation.slint\";\nimport { TButton, TIconSet } from \"@tela-ui/base.slint\";\n\nproperty <string> current-value: \"components\";\n\nTNavBar {\n    title: \"Tela UI\";\n    logo: TIconSet.LayoutDashboard;\n    items: [\n        { label: \"首页\", value: \"home\" },\n        { label: \"组件\", value: \"components\" },\n        { label: \"文档\", value: \"docs\" },\n        { label: \"关于\", value: \"about\" },\n    ];\n    current-value <=> root.current-value;\n\n    TButton { text: \"操作\"; } // 右侧操作区\n}";
 
         VerticalLayout {
             spacing: 16px;
@@ -125,7 +125,7 @@ export component NavigationSection inherits VerticalLayout {
     // ======================= TSideNav ======================
     GallerySection {
         title: "侧边导航 TSideNav";
-        code: "import { TSideNav, TSideNavItem } from \"@tela-ui/navigation.slint\";\n\nTSideNav {\n    title: \"Tela UI\";\n    logo: TIconSet.LayoutDashboard;\n    items: [{ label: \"仪表盘\", value: \"dash\", icon: TIconSet.LayoutDashboard }, …];\n    current-value <=> nav;\n    collapsed <=> c; // 收起后仅显示图标\n}";
+        code: "import { TSideNav } from \"@tela-ui/navigation.slint\";\nimport { TIconSet } from \"@tela-ui/base.slint\";\n\nproperty <string> current-value: \"input\";\nproperty <bool> collapsed: false;\n\nTSideNav {\n    title: \"Tela UI\";\n    logo: TIconSet.LayoutDashboard;\n    items: [\n        { label: \"仪表盘\", value: \"dash\", icon: TIconSet.LayoutDashboard },\n        { label: \"输入\", value: \"input\", icon: TIconSet.Pencil },\n        { label: \"选择\", value: \"select\", icon: TIconSet.Check },\n        { label: \"提示\", value: \"notice\", icon: TIconSet.Bell, disabled: true },\n        { label: \"系统设置\", value: \"settings\", icon: TIconSet.Settings },\n    ];\n    current-value <=> root.current-value;\n    collapsed <=> root.collapsed; // 收起后仅显示图标\n}";
 
         VerticalLayout {
             spacing: 16px;
@@ -186,7 +186,7 @@ export component NavigationSection inherits VerticalLayout {
     // ================== TDropdownMenu =====================
     GallerySection {
         title: "下拉菜单 TDropdownMenu";
-        code: "import { TDropdownMenu, TDropdownMenuItem } from \"@tela-ui/navigation.slint\";\n\ndm := TDropdownMenu {\n    auto-open: false;\n    items: [\n        { label: \"编辑\", value: \"edit\", icon: TIconSet.Pencil },\n        { label: \"删除\", value: \"delete\", danger: true },\n        { label: \"分隔线\", value: \"\", divider: true },\n    ];\n    selected(i, v) => { … }\n    TButton { text: \"更多操作\"; clicked => dm.toggle(); }\n}";
+        code: "import { TDropdownMenu } from \"@tela-ui/navigation.slint\";\nimport { TButton, TIconSet } from \"@tela-ui/base.slint\";\nimport { TMessage } from \"@tela-ui/notice.slint\";\n\ndm := TDropdownMenu {\n    auto-open: false;\n    items: [\n        { label: \"编辑\", value: \"edit\", icon: TIconSet.Pencil },\n        { label: \"下载\", value: \"download\", icon: TIconSet.Download },\n        { label: \"分隔线\", value: \"\", divider: true },\n        { label: \"分享\", value: \"share\", icon: TIconSet.Upload, disabled: true },\n        { label: \"删除\", value: \"delete\", icon: TIconSet.Trash2, danger: true },\n    ];\n    selected(i, v) => { TMessage.info(\"选中: \\{v}\"); }\n\n    TButton { text: \"更多操作\"; clicked => { dm.toggle(); } }\n}";
 
         VerticalLayout {
             spacing: 16px;
@@ -245,7 +245,7 @@ export component NavigationSection inherits VerticalLayout {
     // =================== TContextMenu ======================
     GallerySection {
         title: "右键菜单 TContextMenu";
-        code: "import { TContextMenu, TDropdownMenuItem } from \"@tela-ui/navigation.slint\";\n\ncm := TContextMenu {\n    items: [{ label: \"编辑\", value: \"edit\", icon: TIconSet.Pencil }, …];\n    selected(i, v) => { … }\n    Rectangle { width: 280px; height: 96px; } // 触发区 (非交互内容)\n}\n// 交互触发器: auto-area: false, 在自己的 TouchArea 里\n// cm.open-at(self.mouse-x, self.mouse-y);";
+        code: "import { TContextMenu } from \"@tela-ui/navigation.slint\";\nimport { TIconSet } from \"@tela-ui/base.slint\";\nimport { TMessage } from \"@tela-ui/notice.slint\";\n\ncm := TContextMenu {\n    items: [\n        { label: \"编辑\", value: \"edit\", icon: TIconSet.Pencil },\n        { label: \"删除\", value: \"delete\", danger: true },\n    ];\n    selected(i, v) => { TMessage.info(\"右键选中: \\{v}\"); }\n\n    Rectangle { width: 280px; height: 96px; } // 触发区 (非交互内容)\n}\n// 交互式触发内容: 设 auto-area: false, 在自己的 TouchArea 里调\n// cm.open-at(self.mouse-x, self.mouse-y);";
 
         VerticalLayout {
             spacing: 16px;
@@ -282,7 +282,7 @@ export component NavigationSection inherits VerticalLayout {
     // ==================== TBreadcrumb ======================
     GallerySection {
         title: "面包屑 TBreadcrumb";
-        code: "import { TBreadcrumb } from \"@tela-ui/navigation.slint\";\n\nTBreadcrumb {\n    items: [{ label: \"首页\", value: \"home\" }, …];\n    current-value <=> crumb;\n}";
+        code: "import { TBreadcrumb } from \"@tela-ui/navigation.slint\";\n\nproperty <string> current-value: \"nav\";\n\nTBreadcrumb {\n    items: [\n        { label: \"首页\", value: \"home\" },\n        { label: \"组件库\", value: \"components\" },\n        { label: \"导航栏\", value: \"nav\" },\n    ];\n    current-value <=> root.current-value;\n}";
 
         TBreadcrumb {
             items: root.crumb-items;
@@ -303,7 +303,7 @@ export component NavigationSection inherits VerticalLayout {
     // ======================== TBackTop ======================
     GallerySection {
         title: "回到顶部 TBackTop";
-        code: "import { TBackTop } from \"@tela-ui/navigation.slint\";\n\nRectangle {\n    sv := ScrollView { … }\n    TBackTop {\n        x: …; y: …;\n        content-y <=> sv.content-y; // 超过阈值显示, 点击回顶\n        threshold: 40px; // 默认 200px, 内容短时调小\n    }\n}";
+        code: "import { TBackTop } from \"@tela-ui/navigation.slint\";\nimport { TScrollBar } from \"@tela-ui/display.slint\";\nimport { TParagraph } from \"@tela-ui/base.slint\";\n\nRectangle {\n    height: 240px;\n    clip: true;\n\n    sv := TScrollBar {\n        VerticalLayout {\n            for i in 24: TParagraph { text: \"滚动内容第 \\{i + 1} 行\"; }\n        }\n    }\n\n    TBackTop {\n        x: parent.width - self.width - 16px;\n        y: parent.height - self.height - 16px;\n        content-y <=> sv.content-y; // 超过阈值显示, 点击回顶\n        threshold: 40px; // 默认 200px, 内容短时调小\n    }\n}";
 
         Rectangle {
             height: 240px;
@@ -333,7 +333,7 @@ export component NavigationSection inherits VerticalLayout {
     // ======================== TTabBar ========================
     GallerySection {
         title: "底部标签栏 TTabBar";
-        code: "import { TTabBar } from \"@tela-ui/navigation.slint\";\n\nTTabBar {\n    items: [\n        { text: \"首页\", icon: TIconSet.House },\n        { text: \"发现\", icon: TIconSet.Search },\n        { text: \"消息\", icon: TIconSet.Bell, badge: 6 },\n        { text: \"我的\", icon: TIconSet.User, badge-dot: true },\n    ];\n    current: 0;\n\n    changed(i) => { /* 宿主切换页面 */ }\n}\n\n// 与 TTabs 的区分: TTabs 是内容顶部的页签, TTabBar 是底部主导航;\n// 定位 (贴底 / 安全区) 由宿主容器负责。";
+        code: "import { TTabBar } from \"@tela-ui/navigation.slint\";\nimport { TIconSet } from \"@tela-ui/base.slint\";\n\nTTabBar {\n    items: [\n        { text: \"首页\", icon: TIconSet.House },\n        { text: \"发现\", icon: TIconSet.Search },\n        { text: \"消息\", icon: TIconSet.Bell, badge: 6 },\n        { text: \"我的\", icon: TIconSet.User, badge-dot: true },\n    ];\n    current: 0;\n\n    changed(i) => { /* 宿主切换页面 */ }\n}\n\n// 与 TTabs 的区分: TTabs 是内容顶部的页签, TTabBar 是底部主导航;\n// 定位 (贴底 / 安全区) 由宿主容器负责。";
 
         VerticalLayout {
             spacing: 16px;
@@ -385,7 +385,7 @@ export component NavigationSection inherits VerticalLayout {
     // ======================== TIndexes =======================
     GallerySection {
         title: "字母索引条 TIndexes";
-        code: "import { TIndexes } from \"@tela-ui/navigation.slint\";\n\nTIndexes {\n    letters: [\"A\", \"B\", \"C\", \"D\", \"E\", \"F\", \"G\", \"H\", \"I\", \"J\", \"K\", \"L\", \"M\", \"N\", \"O\", \"P\", \"Q\", \"R\", \"S\", \"T\", \"U\", \"V\", \"W\", \"X\", \"Y\", \"Z\"];\n    current: idx;\n\n    changed(i) => { idx = i; /* 宿主把对应分组滚到顶部 */ }\n}";
+        code: "import { TIndexes } from \"@tela-ui/navigation.slint\";\n\nproperty <int> current: -1;\n\nTIndexes {\n    letters: [\"A\", \"B\", \"C\", \"D\", \"E\", \"F\", \"G\", \"H\", \"I\", \"J\", \"K\", \"L\", \"M\", \"N\", \"O\", \"P\", \"Q\", \"R\", \"S\", \"T\", \"U\", \"V\", \"W\", \"X\", \"Y\", \"Z\"];\n    current: root.current;\n\n    changed(i) => { root.current = i; /* 宿主把对应分组滚到顶部 */ }\n}";
 
         Rectangle {
             height: 220px;
@@ -423,7 +423,7 @@ export component NavigationSection inherits VerticalLayout {
     // ========================== TFab ==========================
     GallerySection {
         title: "浮动操作按钮 TFab";
-        code: "import { TFab } from \"@tela-ui/navigation.slint\";\n\n// 无子操作: 就是一个悬浮圆钮\nTFab {\n    x: …; y: …;\n\n    clicked => { … }\n}\n\n// 有子操作: 主钮切换展开/收起, 子项点击后自动收起\nTFab {\n    x: …; y: …;\n    actions: [\n        { icon: TIconSet.Pencil, text: \"新建文档\" },\n        { icon: TIconSet.Upload, text: \"导入\" },\n    ];\n\n    action-clicked(i) => { … }\n}";
+        code: "import { TFab } from \"@tela-ui/navigation.slint\";\nimport { TIconSet } from \"@tela-ui/base.slint\";\nimport { TMessage } from \"@tela-ui/notice.slint\";\n\n// 无子操作: 就是一个悬浮圆钮\nTFab {\n    x: 24px;\n    y: 24px;\n\n    clicked => { TMessage.info(\"主按钮 clicked\"); }\n}\n\n// 有子操作: 主钮切换展开/收起, 子项点击后自动收起\nTFab {\n    x: parent.width - self.width - 24px;\n    y: parent.height - self.height - 24px;\n    actions: [\n        { icon: TIconSet.Pencil, text: \"新建文档\" },\n        { icon: TIconSet.Upload, text: \"导入\" },\n    ];\n\n    action-clicked(i) => { TMessage.info(\"子操作 \\{i + 1}\"); }\n}";
 
         Rectangle {
             height: 240px;

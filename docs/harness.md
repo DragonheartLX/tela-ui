@@ -18,6 +18,10 @@ Get-ChildItem tela-ui,ui -Recurse -Filter *.slint |
 slint-viewer -L "tela-ui=$PWD\tela-ui" --screenshot out-light.png --size 1200x800 ui\MainWindow.slint
 #    暗色: --load-data dark.json, 内容 {"TTheme": {"preference": "dark"}}
 #    JSON 必须无 BOM, Set-Content 默认带 BOM 会报 "expected value at line 1 column 1"
+
+# 4) gallery 代码样本门禁 — code: 字符串不参与编译, 改动样本后必跑
+python scripts\check-code-samples.py
+#    把每个样本包成独立组件逐个 --check, 83 样本 0 诊断才算通过
 ```
 
 - 本机工具: `slint-viewer` / `slint-lsp` / `cargo`。

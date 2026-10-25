@@ -14,7 +14,7 @@ export component SettingsSection inherits VerticalLayout {
 
     GallerySection {
         title: "主题模式 TTheme mode";
-        code: "import { TTheme, TThemePreference } from \"@tela-ui/theme.slint\";\n\nTTheme.preference = TThemePreference.dark;\n// TTheme.is-dark 是实际生效的模式 (system 已按系统解析)";
+        code: "import { TTheme, TThemePreference } from \"@tela-ui/theme.slint\";\nimport { TRadio } from \"@tela-ui/select.slint\";\n\nTRadio {\n    text: \"深色\";\n    selected: TTheme.preference == TThemePreference.dark;\n    clicked => { TTheme.preference = TThemePreference.dark; }\n}\n// TTheme.is-dark 是实际生效的模式 (system 已按系统解析)";
 
         VerticalLayout {
             spacing: 12px;

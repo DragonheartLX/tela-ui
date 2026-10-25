@@ -41,7 +41,7 @@ export component InputSection inherits VerticalLayout {
     // ======================== TInput ========================
     GallerySection {
         title: "输入框 TInput";
-        code: "import { TInput } from \"@tela-ui/input.slint\";\n\nTInput {\n    placeholder-text: \"请输入内容\";\n    clearable: true;\n    prefix-icon: TIconSet.Search;\n    text <=> root.input-text;\n}\n\nTInput {\n    width: 170px;\n    placeholder-text: \"密码\";\n    input-type: password;\n    clearable: false;\n}\nTInput {\n    width: 210px;\n    placeholder-text: \"验证码\";\n    suffix-text: \"发送验证码\";\n    suffix-clickable: true;\n\n    suffix-clicked => {\n        TMessage.info(\"验证码已发送\");\n    }\n}\nTInput { width: 170px; placeholder-text: \"禁用状态\"; disabled: true; }\nTInput { width: 170px; text: \"只读状态\"; read-only: true; }";
+        code: "import { TInput } from \"@tela-ui/input.slint\";\nimport { TIconSet } from \"@tela-ui/base.slint\";\nimport { TMessage } from \"@tela-ui/notice.slint\";\n\nproperty <string> input-text: \"\";\n\nTInput {\n    placeholder-text: \"请输入内容\";\n    clearable: true;\n    prefix-icon: TIconSet.Search;\n    text <=> root.input-text;\n}\n\nTInput {\n    width: 170px;\n    placeholder-text: \"密码\";\n    input-type: password;\n    clearable: false;\n}\nTInput {\n    width: 210px;\n    placeholder-text: \"验证码\";\n    suffix-text: \"发送验证码\";\n    suffix-clickable: true;\n\n    suffix-clicked => {\n        TMessage.info(\"验证码已发送\");\n    }\n}\nTInput { width: 170px; placeholder-text: \"禁用状态\"; disabled: true; }\nTInput { width: 170px; text: \"只读状态\"; read-only: true; }";
 
         VerticalLayout {
             spacing: 16px;
@@ -81,7 +81,7 @@ export component InputSection inherits VerticalLayout {
     // ======================= TTextArea ======================
     GallerySection {
         title: "多行输入 TTextArea";
-        code: "import { TTextArea } from \"@tela-ui/input.slint\";\n\nTTextArea { rows: 3; placeholder-text: \"请输入描述…\"; text <=> v; }";
+        code: "import { TTextArea } from \"@tela-ui/input.slint\";\n\nproperty <string> text: \"\";\n\nTTextArea { rows: 3; placeholder-text: \"请输入描述…\"; text <=> root.text; }";
 
         TTextArea {
             rows: 3;
@@ -93,7 +93,7 @@ export component InputSection inherits VerticalLayout {
     // ====================== TInputNumber ====================
     GallerySection {
         title: "数字输入框 TInputNumber";
-        code: "import { TInputNumber } from \"@tela-ui/input.slint\";\n\nTInputNumber {\n    width: 160px;\n    min: 0;\n    max: 10;\n    value <=> root.num-value;\n}\nTInputNumber { width: 160px; value: 3.5; min: 0; max: 10; step: 0.5; editable: false; }\nTInputNumber { width: 160px; value: 2; disabled: true; }";
+        code: "import { TInputNumber } from \"@tela-ui/input.slint\";\n\nproperty <float> value: 1;\n\nTInputNumber {\n    width: 160px;\n    min: 0;\n    max: 10;\n    value <=> root.value;\n}\nTInputNumber { width: 160px; value: 3.5; min: 0; max: 10; step: 0.5; editable: false; }\nTInputNumber { width: 160px; value: 2; disabled: true; }";
 
         HorizontalLayout {
             spacing: 24px;
@@ -114,7 +114,7 @@ export component InputSection inherits VerticalLayout {
     // ======================== TAutoComplete =================
     GallerySection {
         title: "自动补全 TAutoComplete";
-        code: "import { TAutoComplete } from \"@tela-ui/input.slint\";\n\nTAutoComplete {\n    width: 240px;\n    clearable: true;\n    placeholder-text: \"输入城市名称, 如 北\";\n    items: root.auto-items;\n    text <=> root.auto-text;\n\n    selected(i, value) => { root.auto-value = value; }\n}\n\nTAutoComplete {\n    width: 240px;\n    placeholder-text: \"禁用状态\";\n    items: root.auto-items;\n    disabled: true;\n}";
+        code: "import { TAutoComplete, TAutoCompleteItem } from \"@tela-ui/input.slint\";\n\nproperty <string> text: \"\";\nproperty <string> selected-value: \"\";\nproperty <[TAutoCompleteItem]> items: [\n    { label: \"北京\", value: \"bj\", disabled: false },\n    { label: \"上海\", value: \"sh\", disabled: false },\n    { label: \"广州\", value: \"gz\", disabled: false },\n    { label: \"深圳\", value: \"sz\", disabled: false },\n    { label: \"杭州\", value: \"hz\", disabled: false },\n    { label: \"西安\", value: \"xa\", disabled: true },\n];\n\nTAutoComplete {\n    width: 240px;\n    clearable: true;\n    placeholder-text: \"输入城市名称, 如 北\";\n    items: root.items;\n    text <=> root.text;\n\n    selected(i, value) => { root.selected-value = value; }\n}\n\nTAutoComplete {\n    width: 240px;\n    placeholder-text: \"禁用状态\";\n    items: root.items;\n    disabled: true;\n}";
 
         VerticalLayout {
             spacing: 16px;
@@ -156,7 +156,7 @@ export component InputSection inherits VerticalLayout {
     // ======================== TSearch ========================
     GallerySection {
         title: "搜索框 TSearch";
-        code: "import { TSearch } from \"@tela-ui/input.slint\";\n\nTSearch {\n    width: 300px;\n    placeholder-text: \"搜索组件\";\n    text <=> root.search-text;\n\n    accepted(q) => { root.search-result = \"已搜索: \" + q; }\n}\n\nTSearch { width: 240px; placeholder-text: \"禁用状态\"; disabled: true; }";
+        code: "import { TSearch } from \"@tela-ui/input.slint\";\n\nproperty <string> text: \"\";\nproperty <string> result: \"\";\n\nTSearch {\n    width: 300px;\n    placeholder-text: \"搜索组件\";\n    text <=> root.text;\n\n    accepted(q) => { root.result = \"已搜索: \" + q; }\n}\n\nTSearch { width: 240px; placeholder-text: \"禁用状态\"; disabled: true; }";
 
         VerticalLayout {
             spacing: 16px;
@@ -229,7 +229,7 @@ export component InputSection inherits VerticalLayout {
     // ========================= TForm =========================
     GallerySection {
         title: "轻量表单 TForm / TFormItem";
-        code: "import { TForm, TFormItem } from \"@tela-ui/input.slint\";\n\nTForm {\n    TFormItem {\n        label: \"名称\";\n        required: true;\n        help-text: \"不超过 20 个字符\";\n        label-width: 80px;\n\n        TInput {\n            width: 280px;\n            placeholder-text: \"请输入名称\";\n            text <=> root.input-text;\n        }\n    }\n\n    TFormItem {\n        label: \"链接\";\n        label-width: 80px;\n\n        TInputAdornment {\n            width: 340px;\n            addon-before: \"https://\";\n            placeholder-text: \"域名\";\n        }\n    }\n\n    TFormItem {\n        label: \"备注\";\n        label-width: 80px;\n        error-text: \"备注不能为空\";\n\n        TTextArea {\n            width: 340px;\n            rows: 2;\n            placeholder-text: \"请输入备注\";\n        }\n    }\n}";
+        code: "import { TForm, TFormItem, TInput, TInputAdornment, TTextArea } from \"@tela-ui/input.slint\";\n\nproperty <string> input-text: \"\";\n\nTForm {\n    TFormItem {\n        label: \"名称\";\n        required: true;\n        help-text: \"不超过 20 个字符\";\n        label-width: 80px;\n\n        TInput {\n            width: 280px;\n            placeholder-text: \"请输入名称\";\n            text <=> root.input-text;\n        }\n    }\n\n    TFormItem {\n        label: \"链接\";\n        label-width: 80px;\n\n        TInputAdornment {\n            width: 340px;\n            addon-before: \"https://\";\n            placeholder-text: \"域名\";\n        }\n    }\n\n    TFormItem {\n        label: \"备注\";\n        label-width: 80px;\n        error-text: \"备注不能为空\";\n\n        TTextArea {\n            width: 340px;\n            rows: 2;\n            placeholder-text: \"请输入备注\";\n        }\n    }\n}";
 
         TForm {
             TFormItem {
@@ -273,7 +273,7 @@ export component InputSection inherits VerticalLayout {
     // ======================== TSlider =======================
     GallerySection {
         title: "滑块 TSlider";
-        code: "import { TSlider } from \"@tela-ui/input.slint\";\n\nTSlider { value <=> v; }";
+        code: "import { TSlider } from \"@tela-ui/input.slint\";\n\nproperty <float> value: 40;\n\nTSlider { value <=> root.value; }";
 
         TSlider {
             value <=> root.slider-value;
@@ -283,7 +283,7 @@ export component InputSection inherits VerticalLayout {
     // ========================= TRate ========================
     GallerySection {
         title: "评分 TRate";
-        code: "import { TRate } from \"@tela-ui/input.slint\";\n\nTRate { value <=> root.rate-value; }\nTRate { value: 2; read-only: true; }\nTRate { size: TSize.small; theme: TThemeRole.primary; value: 4; }\nTRate { value: 3; disabled: true; }";
+        code: "import { TRate } from \"@tela-ui/input.slint\";\nimport { TSize, TThemeRole } from \"@tela-ui/theme.slint\";\n\nproperty <float> value: 3;\n\nTRate { value <=> root.value; }\nTRate { value: 2; read-only: true; }\nTRate { size: TSize.small; theme: TThemeRole.primary; value: 4; }\nTRate { value: 3; disabled: true; }";
 
         HorizontalLayout {
             spacing: 24px;
@@ -299,7 +299,7 @@ export component InputSection inherits VerticalLayout {
     // ======================== TTagInput =====================
     GallerySection {
         title: "标签输入 TTagInput";
-        code: "import { TTagInput } from \"@tela-ui/input.slint\";\n\nTTagInput {\n    width: 320px;\n    tags <=> root.tag-values;\n    placeholder-text: \"回车添加标签\";\n\n    tag-added(t) => { root.tag-values.push(t); }\n    tag-removed(i, t) => { root.tag-values.remove(i); }\n}\n\nTTagInput {\n    width: 240px;\n    tags: [\"只读\", \"禁用\"];\n    disabled: true;\n}";
+        code: "import { TTagInput } from \"@tela-ui/input.slint\";\n\nproperty <[string]> tags: [\"Slint\", \"TDesign\"];\n\nTTagInput {\n    width: 320px;\n    tags <=> root.tags;\n    placeholder-text: \"回车添加标签\";\n\n    tag-added(t) => { root.tags.push(t); }\n    tag-removed(i, t) => { root.tags.remove(i); }\n}\n\nTTagInput {\n    width: 240px;\n    tags: [\"只读\", \"禁用\"];\n    disabled: true;\n}";
 
         VerticalLayout {
             spacing: 16px;
@@ -336,7 +336,7 @@ export component InputSection inherits VerticalLayout {
     // ======================= TRangeInput ====================
     GallerySection {
         title: "区间输入 TRangeInput";
-        code: "import { TRangeInput } from \"@tela-ui/input.slint\";\n\nTRangeInput {\n    width: 240px;\n    placeholder-min-text: \"最低价\";\n    placeholder-max-text: \"最高价\";\n    min: 0;\n    max: 100;\n    min-value <=> root.range-min;\n    max-value <=> root.range-max;\n}\n\nTRangeInput {\n    width: 240px;\n    min: 0;\n    max: 100;\n    disabled: true;\n    min-value: 20;\n    max-value: 60;\n}";
+        code: "import { TRangeInput } from \"@tela-ui/input.slint\";\n\nproperty <float> min-value: 10;\nproperty <float> max-value: 80;\n\nTRangeInput {\n    width: 240px;\n    placeholder-min-text: \"最低价\";\n    placeholder-max-text: \"最高价\";\n    min: 0;\n    max: 100;\n    min-value <=> root.min-value;\n    max-value <=> root.max-value;\n}\n\nTRangeInput {\n    width: 240px;\n    min: 0;\n    max: 100;\n    disabled: true;\n    min-value: 20;\n    max-value: 60;\n}";
 
         VerticalLayout {
             spacing: 16px;
@@ -373,7 +373,7 @@ export component InputSection inherits VerticalLayout {
     // ======================== TOtpInput =====================
     GallerySection {
         title: "分段输入 TOtpInput";
-        code: "import { TOtpInput } from \"@tela-ui/input.slint\";\n\nTOtpInput {\n    length: 6;\n    values <=> root.otp-values;\n}\n\nTOtpInput {\n    length: 4;\n    masked: true;\n}";
+        code: "import { TOtpInput } from \"@tela-ui/input.slint\";\n\nproperty <[string]> values: [\"\", \"\", \"\", \"\", \"\", \"\"];\n\nTOtpInput {\n    length: 6;\n    values <=> root.values;\n}\n\nTOtpInput {\n    length: 4;\n    masked: true;\n}";
 
         VerticalLayout {
             spacing: 16px;
@@ -401,7 +401,7 @@ export component InputSection inherits VerticalLayout {
     // ========================= TMention =====================
     GallerySection {
         title: "提及输入 TMention";
-        code: "import { TMention } from \"@tela-ui/input.slint\";\n\nmention-input := TMention {\n    width: 320px;\n    text <=> root.mention-text;\n    suggestions: [\n        { label: \"张三\", value: \"zhangsan\" },\n        { label: \"李四\", value: \"lisi\" },\n        { label: \"王五\", value: \"wangwu\" },\n    ];\n\n    changed(t) => {\n        // 触发符解析在宿主: 键入单独一个 @ 即触发。\n        if (t == \"@\") {\n            mention-input.show-suggestions();\n        }\n    }\n\n    selected(i, value) => {\n        // 拼接在宿主: 把选中值替换 @ 后的占位。\n        mention-input.text = \"@\" + value + \" \";\n        mention-input.move-caret-to-end();\n    }\n}";
+        code: "import { TMention } from \"@tela-ui/input.slint\";\n\nproperty <string> text: \"\";\n\nmention-input := TMention {\n    width: 320px;\n    text <=> root.text;\n    suggestions: [\n        { label: \"张三\", value: \"zhangsan\" },\n        { label: \"李四\", value: \"lisi\" },\n        { label: \"王五\", value: \"wangwu\" },\n    ];\n\n    changed(t) => {\n        // 触发符解析在宿主: 键入单独一个 @ 即触发。\n        if (t == \"@\") {\n            mention-input.show-suggestions();\n        }\n    }\n\n    selected(i, value) => {\n        // 拼接在宿主: 把选中值替换 @ 后的占位。\n        mention-input.text = \"@\" + value + \" \";\n        mention-input.move-caret-to-end();\n    }\n}";
 
         VerticalLayout {
             spacing: 16px;

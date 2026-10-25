@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 ### Fixed
+- gallery 全部 83 个代码样本修复为可独立编译的自包含片段 — 原 72 个不可编译: 枚举/全局未 import (TThemeRole / TSize / TIconSet / TTheme / TMessage 等), `…` 省略号当数组占位与回调体留 `{ … }`, 引用页面私有状态 (root.input-text / 中文标识符 状态文本 / 未声明的 nav、v、page 等), 全局服务调用 (TMessage.success 等) 裸写在组件顶层; 现统一为完整 import + 完整模型数组 + 演示状态以 property 声明 + 服务调用包进按钮回调, TBorderlessWindow 样本改教 `export component MainWindow inherits TBorderlessWindow` 形式 (Window 作子元素放置会被编译器警告); 沉淀 `scripts/check-code-samples.py` 样本门禁 (每个 code: 字符串包成独立组件逐个 --check, 样本字符串不参与日常编译, 必须单独把关), 配方同步 harness.md 第 4 条。
 - 第三批修复轮 (用户验收反馈): TTabBar 标签内容改为固定几何定位 — 原内层布局读自身 preferred 尺寸, 在重页面首帧整个不渲染 (图标消失), 现图标/文字/角标按固定 y 槽位排布; TCell 右侧 note/箭头垂直居中 (`width: self.preferred-width` 钉宽后显式 y 生效, 原写法顶对齐); TFab 子操作行 `alignment: end` (无标签行的圆钮不再左贴, 与上方按钮成一列), 标签胶囊经拉伸包装盒垂直居中; TSortable 演示钉死固定高度 (模型长度绑定的首选高度在深页首帧饿死, 行渲染不完整, slint-semantics 第 33 条)。
 - gallery 内容页移除第二个 TTable 演示实例 (空态演示, 文档保留) — 页面实例化链恰好被它推过运行时 10 轮收尾预算, 触发 "long callback/instantiation chain" 警告; 移除后 0 警告。
 - TNoticeBar / TComment 演示反馈改为组件内纯文本状态行, 不再弹 TMessage。

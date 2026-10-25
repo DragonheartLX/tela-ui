@@ -11,7 +11,7 @@ export component BasicsSection inherits VerticalLayout {
     // ======================= TButton =======================
     GallerySection {
         title: "按钮 TButton";
-        code: "import { TButton } from \"@tela-ui/base.slint\";\n\nTButton { text: \"主要按钮\"; theme: TThemeRole.primary; }\nTButton { text: \"描边按钮\"; variant: TButtonVariant.outline; }\nTButton { text: \"下载\"; theme: TThemeRole.primary; icon: TIconSet.Download; }\nTButton { text: \"加载中\"; theme: TThemeRole.primary; loading: true; }";
+        code: "import { TButton, TButtonVariant, TIconSet } from \"@tela-ui/base.slint\";\nimport { TThemeRole } from \"@tela-ui/theme.slint\";\n\nTButton { text: \"主要按钮\"; theme: TThemeRole.primary; }\nTButton { text: \"描边按钮\"; variant: TButtonVariant.outline; }\nTButton { text: \"下载\"; theme: TThemeRole.primary; icon: TIconSet.Download; }\nTButton { text: \"加载中\"; theme: TThemeRole.primary; loading: true; }";
 
         VerticalLayout {
             spacing: 16px;
@@ -85,7 +85,7 @@ export component BasicsSection inherits VerticalLayout {
     // ========================= TLink =======================
     GallerySection {
         title: "链接 TLink";
-        code: "import { TLink } from \"@tela-ui/base.slint\";\n\nTLink { text: \"默认链接\"; }\nTLink { text: \"成功链接\"; theme: TThemeRole.success; underline: true; }";
+        code: "import { TLink } from \"@tela-ui/base.slint\";\nimport { TThemeRole } from \"@tela-ui/theme.slint\";\n\nTLink { text: \"默认链接\"; }\nTLink { text: \"成功链接\"; theme: TThemeRole.success; underline: true; }";
 
         HorizontalLayout {
             spacing: 24px;
@@ -138,7 +138,7 @@ export component BasicsSection inherits VerticalLayout {
     // ======================= TLoading ======================
     GallerySection {
         title: "加载 TLoading";
-        code: "import { TLoading } from \"@tela-ui/base.slint\";\n\nTLoading { size: 16px; horizontal-stretch: 0; }\nTLoading { size: 24px; text: \"加载中…\"; horizontal-stretch: 0; }\nTLoading { size: 32px; theme: TThemeRole.success; text: \"上传中…\"; horizontal-stretch: 0; }";
+        code: "import { TLoading } from \"@tela-ui/base.slint\";\nimport { TThemeRole } from \"@tela-ui/theme.slint\";\n\nTLoading { size: 16px; horizontal-stretch: 0; }\nTLoading { size: 24px; text: \"加载中…\"; horizontal-stretch: 0; }\nTLoading { size: 32px; theme: TThemeRole.success; text: \"上传中…\"; horizontal-stretch: 0; }";
 
         HorizontalLayout {
             spacing: 28px;
@@ -155,7 +155,7 @@ export component BasicsSection inherits VerticalLayout {
     // ========================= TKbd ========================
     GallerySection {
         title: "键位 TKbd";
-        code: "import { TKbd } from \"@tela-ui/base.slint\";\n\nTKbd { text: \"Esc\"; }\nTKbd { keys: [\"Ctrl\", \"Shift\", \"V\"]; }\nTKbd { text: \"Enter\"; size: TSize.large; }";
+        code: "import { TKbd } from \"@tela-ui/base.slint\";\nimport { TSize } from \"@tela-ui/theme.slint\";\n\nTKbd { text: \"Esc\"; }\nTKbd { keys: [\"Ctrl\", \"Shift\", \"V\"]; }\nTKbd { text: \"Enter\"; size: TSize.large; }";
 
         VerticalLayout {
             spacing: 8px;
