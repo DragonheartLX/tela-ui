@@ -16,7 +16,10 @@ Get-ChildItem tela-ui,ui -Recurse -Filter *.slint |
 
 # 3) 亮/暗各一张, 交付前必做
 slint-viewer -L "tela-ui=$PWD\tela-ui" --screenshot out-light.png --size 1200x800 ui\MainWindow.slint
-#    暗色: --load-data dark.json, 内容 {"TTheme": {"preference": "dark"}}
+#    暗色: --load-data dark.json, 内容 {"Palette": {"color-scheme": "dark"}}
+#    亮色参考值需显式 light.json {"Palette": {"color-scheme": "light"}} —
+#    --screenshot 单帧渲染里 Palette.color-scheme 尚为 unknown (OS 检测未落地),
+#    按 unknown→暗色规则默认帧是暗的。
 #    JSON 必须无 BOM, Set-Content 默认带 BOM 会报 "expected value at line 1 column 1"
 
 # 4) gallery 代码样本门禁 — code: 字符串不参与编译, 改动样本后必跑

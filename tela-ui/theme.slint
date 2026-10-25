@@ -6,10 +6,14 @@
 //   * Swap the whole active config:      TTheme.theme = { ... };
 //   * Override one mode preset:          TTheme.dark = { ... };
 //   * Patch a single token of a preset:  TTheme.dark.bg-page = #101010;
-//   * From Rust:                         TTheme::get(ui).set_preference(TThemePreference::Dark);
+//   * Pick a mode:                       Palette.color-scheme = ColorScheme.dark;
+//     (from Rust: Palette::get(ui).set_color_scheme(ColorScheme::Dark))
 //
-// When `preference` is `system` the theme follows the OS color scheme and
-// updates live.
+// The mode preference is the std-widgets palette's own `color-scheme`
+// (in-out): `light`/`dark` force a mode, `unknown` asks the OS and updates
+// live. Reading/writing it retunes the standard widgets (AboutSlint,
+// ScrollView, ...) together with the tela-ui tokens; a write replaces the
+// palette's follow-the-OS binding (Slint assignment semantics).
 
 import { Palette } from "std-widgets.slint";
 import { TPrimaryColor, TAppThemeConfig } from "structs/theme.slint";
@@ -20,21 +24,14 @@ import { TThemeRole,  TSize } from "structs/enums.slint";
 export { TThemeRole,  TSize,  TPopupPlacement } from "structs/enums.slint";
 import { TLightColors, TDarkColors } from "colors.slint";
 
-export enum TThemePreference {
-    system,
-    light,
-    dark,
-}
-
 export global TTheme {
-    // User intent. Defaults to following the OS color scheme.
-    in-out property <TThemePreference> preference: TThemePreference.system;
-
-    // The mode actually in effect: `system` resolved against the OS scheme.
-    // Bind toggles to this, not to `preference`, so they reflect the real mode.
+    // The mode actually in effect: bind toggles to this, not to
+    // `Palette.color-scheme`, so they reflect the resolved mode. `unknown`
+    // (跟随系统) resolves per-OS in the standard widgets but the tela tokens
+    // default to dark there.
     out property <bool> is-dark:
-        preference == TThemePreference.dark
-        || (preference == TThemePreference.system && Palette.color-scheme == ColorScheme.dark);
+        Palette.color-scheme == ColorScheme.dark
+        || Palette.color-scheme == ColorScheme.unknown;
 
     // The active configuration. Assign to it directly to take full control.
     in-out property <TAppThemeConfig> theme: root.is-dark ? root.dark : root.light;

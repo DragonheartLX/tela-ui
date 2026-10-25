@@ -75,17 +75,19 @@ TTheme.dark = {
 ```
 
 ```rust
-// 从 Rust 侧操作 (TTheme/TThemePreference 由 ui/MainWindow.slint 再导出)
-use tela_lib::{TTheme, TThemePreference};
-TTheme::get(&ui).set_preference(TThemePreference::Dark);
+// 从 Rust 侧操作 (Palette/TTheme 由 ui/MainWindow.slint 再导出;
+// ColorScheme 走生成代码同款 re-export 路径)
+use tela_lib::Palette;
+use slint::private_unstable_api::re_exports::ColorScheme;
+Palette::get(&ui).set_color_scheme(ColorScheme::Dark);
 ```
 
-`preference` 默认为 `system`, 实时跟随 `Palette.color-scheme`; 组件通过各自的 `states` 自动换肤。亮暗开关应绑定 `TTheme.is-dark` (而非 `preference`), 以反映解析后的真实模式。
+模式偏好就是标准库 `Palette.color-scheme` (in-out, std-widgets): `light`/`dark` 强制, `unknown` 跟随 OS。直接读写它, tela 令牌与标准库组件 (AboutSlint / ScrollView 等) 一起切换; 组件通过各自的 `states` 自动换肤。亮暗开关应绑定 `TTheme.is-dark` (而非 `Palette.color-scheme`), 以反映解析后的模式 (`unknown` 下 tela 令牌默认暗色)。
 
 ```slint
 TSwitch {
-    checked: TTheme.is-dark;      // OS 为暗色且 preference 为 system 时为 true
-    changed(c) => { TTheme.preference = c ? TThemePreference.dark : TThemePreference.light; }
+    checked: TTheme.is-dark;      // Palette.color-scheme 为 dark 或 unknown 时为 true
+    changed(c) => { Palette.color-scheme = c ? ColorScheme.dark : ColorScheme.light; }
 }
 ```
 
@@ -96,6 +98,8 @@ TSwitch {
 - 图标几何数据来自 [Lucide](https://lucide.dev) (ISC 许可), 按 [lucide-slint](https://github.com/cnlancehu/lucide-slint) (MIT OR Apache-2.0)的数据化结构打包。
 - 设计令牌遵循 [TDesign 规范](https://tdesign.tencent.com)。
 - 已知限制:
+    - 主题模式直接读写标准库 `Palette.color-scheme`; 写入会替换其"跟随 OS"绑定 (Slint 赋值语义), 之后 `unknown` (跟随系统) 下标准库组件按 OS 解析, 但 tela 令牌默认暗色, 两者可能短暂不一致; AboutSlint 的 logo 读原始 color-scheme, `unknown` 下恒为亮色版。
+    - gallery 设置页的 AboutSlint 徽标 (标准库组件) 版本行未设颜色, Slint 默认黑字, 暗色主题下对比度低 (logo 本体明暗各自适配, 不受影响)。
     - 按钮无虚线变体 (Slint 边框仅支持实线)。
     - TSelect 与 TDropdownMenu 暂无键盘导航; TCommandPalette 的列表不支持上下方向键步进 (1.18 语言内没有循环语句, 组件层无法扫描匹配项 —— 高亮停在第一条匹配项, 回车执行它或点击列表项)。
     - TSelectInput / TTreeSelect / TCascader 暂无键盘导航 (对齐 TSelect); TTreeSelect 的选中值经 `TTreeLogic` 全局共享 (同 TTree); TCascader 面板为单列逐级展开, 触发器只回显叶子 label, 完整路径回显暂不支持 (声明式嵌套下叶子拿不到祖先 label)。

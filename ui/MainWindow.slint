@@ -4,7 +4,8 @@
 // edge; the collapsible TSideNav below switches pages and carries the
 // dark-mode toggle at its bottom edge.
 
-import { TTheme,  TThemePreference } from "@tela-ui/theme.slint";
+import { TTheme } from "@tela-ui/theme.slint";
+import { Palette } from "std-widgets.slint";
 import { TBorderlessWindow, TIconSet, TParagraph, TButton, TButtonVariant } from "@tela-ui/base.slint";
 import { TTooltipOverlay, TDialog, TDialogService, TDialogServiceOverlay, TDrawer, TDrawerPlacement, TBottomSheet, TActionSheetOverlay, TActionSheetService, TImageViewerOverlay, TImageViewerService, TCommandPaletteOverlay, TCommandPaletteService, TLoadingService, TLoadingServiceOverlay } from "@tela-ui/overlay.slint";
 import { TMessageOverlay, TMessage, TNotificationOverlay } from "@tela-ui/notice.slint";
@@ -101,9 +102,9 @@ export component MainWindow inherits TBorderlessWindow {
                     { icon: TIconSet.Settings, label: "设置", value: "settings" },
                 ];
                 footer-clicked(item) => {
-                    TTheme.preference = TTheme.is-dark
-                        ? TThemePreference.light
-                        : TThemePreference.dark;
+                    Palette.color-scheme = TTheme.is-dark
+                        ? ColorScheme.light
+                        : ColorScheme.dark;
                 }
                 items: root.group-items;
                 current-value <=> root.group-value;
@@ -211,9 +212,11 @@ export component MainWindow inherits TBorderlessWindow {
     TTooltipOverlay { }
 }
 
-// Re-export the theme global so hosts can control it from Rust:
-//   TTheme::get(ui).set_preference(TThemePreference::Dark);
+// Re-export the theme surface so hosts can control it from Rust:
+//   Palette::get(ui).set_color_scheme(ColorScheme::Dark);
+//   TTheme::get(ui) — is-dark reads and the token presets.
 // TLoadingService rides along so Rust can show/hide the fullscreen loading.
 // The P5 services ride along too: every global-driven overlay is drivable
 // from Rust only when the global is exported from the main .slint.
-export { TTheme, TThemePreference, TLoadingService, TDialogService, TActionSheetService, TImageViewerService, TCommandPaletteService }
+export { TTheme, TLoadingService, TDialogService, TActionSheetService, TImageViewerService, TCommandPaletteService }
+export { Palette } from "std-widgets.slint";

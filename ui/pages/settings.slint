@@ -1,12 +1,15 @@
-// Page: 设置 (Settings) — theme-mode preferences, written straight to the
-// TTheme global so the whole gallery (light and dark) switches live.
-// Standalone TRadio buttons (not TRadioGroup) so `selected` stays a reactive
-// binding to `TTheme.preference` instead of the group's internal value.
+// Page: 设置 (Settings) — theme-mode preferences, written straight into the
+// std-widgets Palette (its in-out `color-scheme` is the mode storage) so the
+// whole gallery (light and dark), tela tokens and standard widgets switch
+// live. Standalone TRadio buttons (not TRadioGroup) so `selected` stays a
+// reactive binding to `Palette.color-scheme` instead of the group's value.
 
-import { TTheme,  TThemePreference } from "@tela-ui/theme.slint";
+import { TTheme } from "@tela-ui/theme.slint";
+import { Palette } from "std-widgets.slint";
 import { TCaption, TParagraph } from "@tela-ui/base.slint";
 import { TCard } from "@tela-ui/display.slint";
 import { TRadio } from "@tela-ui/select.slint";
+import { AboutSlint } from "std-widgets.slint";
 import { GallerySection } from "../gallery-section.slint";
 
 export component SettingsSection inherits VerticalLayout {
@@ -14,7 +17,7 @@ export component SettingsSection inherits VerticalLayout {
 
     GallerySection {
         title: "主题模式 TTheme mode";
-        code: "import { TTheme, TThemePreference } from \"@tela-ui/theme.slint\";\nimport { TRadio } from \"@tela-ui/select.slint\";\n\nTRadio {\n    text: \"深色\";\n    selected: TTheme.preference == TThemePreference.dark;\n    clicked => { TTheme.preference = TThemePreference.dark; }\n}\n// TTheme.is-dark 是实际生效的模式 (system 已按系统解析)";
+        code: "import { Palette } from \"std-widgets.slint\";\nimport { TRadio } from \"@tela-ui/select.slint\";\n\nTRadio {\n    text: \"深色\";\n    selected: Palette.color-scheme == ColorScheme.dark;\n    clicked => { Palette.color-scheme = ColorScheme.dark; }\n}\n// ColorScheme: light / dark / unknown (跟随系统), 标准库枚举免 import;\n// TTheme.is-dark 是实际生效的模式";
 
         VerticalLayout {
             spacing: 12px;
@@ -24,28 +27,28 @@ export component SettingsSection inherits VerticalLayout {
 
                 TRadio {
                     text: "浅色";
-                    selected: TTheme.preference == TThemePreference.light;
+                    selected: Palette.color-scheme == ColorScheme.light;
                     clicked => {
-                        TTheme.preference = TThemePreference.light;
+                        Palette.color-scheme = ColorScheme.light;
                     }
                 }
                 TRadio {
                     text: "深色";
-                    selected: TTheme.preference == TThemePreference.dark;
+                    selected: Palette.color-scheme == ColorScheme.dark;
                     clicked => {
-                        TTheme.preference = TThemePreference.dark;
+                        Palette.color-scheme = ColorScheme.dark;
                     }
                 }
                 TRadio {
                     text: "跟随系统";
-                    selected: TTheme.preference == TThemePreference.system;
+                    selected: Palette.color-scheme == ColorScheme.unknown;
                     clicked => {
-                        TTheme.preference = TThemePreference.system;
+                        Palette.color-scheme = ColorScheme.unknown;
                     }
                 }
             }
 
-            TCaption { text: "选择即时写入 TTheme.preference; 跟随系统时实际模式由操作系统的深浅色设置决定, 侧边栏底部的按钮仍是亮暗快捷切换。"; }
+            TCaption { text: "选择即时写入 Palette.color-scheme; 跟随系统时实际模式由操作系统的深浅色设置决定, 侧边栏底部的按钮仍是亮暗快捷切换。"; }
         }
     }
 
@@ -56,6 +59,19 @@ export component SettingsSection inherits VerticalLayout {
             spacing: 8px;
 
             TParagraph { text: "Tela UI — TDesign 风格的 Slint 组件库。所有 token 都在 TTheme 单例上, 此页的修改即时作用于整个演示应用。"; }
+        }
+    }
+
+    // Standard-library AboutSlint badge (MadeWithSlint logo + version +
+    // slint.dev link), centered under the About card. Size is pinned: the
+    // widget's own preferred is 100% x 100%, which inside the scrollable
+    // page would stretch it to the viewport instead of hugging its content.
+    HorizontalLayout {
+        alignment: center;
+
+        AboutSlint {
+            width: 280px;
+            height: 176px;
         }
     }
 }

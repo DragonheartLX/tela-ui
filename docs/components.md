@@ -2026,12 +2026,14 @@ import { TSkeleton } from "@tela-ui/experimental.slint";
 
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| preference | `TThemePreference` (in-out) | `TThemePreference.system` | 用户意图: 跟随系统/强制亮/强制暗 |
-| is-dark | `bool` (out) | — | 实际生效模式 (`system` 对 OS 色彩方案解析后的结果); 亮暗开关绑定到它而非 preference |
+| is-dark | `bool` (out) | — | 实际生效模式; 亮暗开关绑定到它而非 Palette.color-scheme |
 | theme | `TAppThemeConfig` (in-out) | 亮暗随 is-dark 切换 | 当前生效配置, 直接赋值可完全接管 |
 | light / dark | `TAppThemeConfig` (in-out) | 内置预设 | 两个模式预设, 可逐字段覆盖 |
 
-`TThemePreference { system, light, dark }`。
+模式偏好不在 TTheme 上: 直接读写标准库 `Palette.color-scheme` (std-widgets,
+in-out, 即 `ColorScheme`)。`light`/`dark` 强制模式, `unknown` 跟随 OS;
+读写它会让 tela 令牌与标准库组件一起切换。`is-dark = color-scheme == dark ||
+color-scheme == unknown` (`unknown` 下 tela 令牌默认暗色)。
 
 令牌转发 (均为 `out` 只读快捷属性): 四组语义色阶 `primary/success/warning/error`
 (完整 `TPrimaryColor` 结构) 与 7 态快捷色 (`brand-color`, `brand-color-hover`,
@@ -2182,5 +2184,4 @@ PanelLeftClose, PanelLeftOpen, FlaskConical, Inbox, Square, Copy。
 | TSideNavItem | TSideNav | label, value, icon, disabled |
 | TSideNavFooterItem | TSideNav | label, icon, value |
 | TCrumbItem | TBreadcrumb | label, value |
-| TThemePreference | TTheme | system, light, dark |
 | TIconPath / TIconData | TIcon | command, has_fill / paths |
