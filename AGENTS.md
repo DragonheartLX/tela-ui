@@ -6,6 +6,8 @@
 
 一句话一个事实, 结论放句首, 位置用 `file:line`。
 
+README 只做入门: 不放组件统计与已知限制。统计进 `docs/architecture.md`, 限制进 `docs/components.md` 对应组件节。
+
 ## 仓库速览
 
 - `tela-ui/` 组件库, `@tela-ui/...`; 分类聚合, `common.slint` 仅兼容。
@@ -17,7 +19,7 @@
 2. 改完自证: 每个改动的 `.slint` `--check` 0 诊断; 全量扫描只允许 5 个非组件数据文件报既有 "No component found"; Rust/gallery 改动跑 `cargo build`。
 3. 亮/暗各渲染一张并对 `docs/harness.md` 参考值; 读不了图就交 PNG 给用户终判, 不声称"看过了"。
 4. 行为/事件改动跑 Rust 探针, 放 `Temp/`; 配方见 `docs/harness.md`。
-5. 同步 `common.slint`、gallery 段落、`docs/components.md`、`README.md` 已知限制、`docs/architecture.md` 统计、`CHANGELOG.md` Unreleased; 清空 `Temp/`。
+5. 同步 `common.slint`、gallery 段落、`docs/components.md` (API 与已知限制)、`docs/architecture.md` 统计、`CHANGELOG.md` (只记总体, 不分类); 清空 `Temp/`。
 
 ## 组件约定
 
@@ -33,6 +35,6 @@
 
 一条事实只写一处, 别处只引用:
 
-- 机制→`docs/slint-semantics.md`; 取舍→`docs/decisions.md`; API→`docs/components.md`。
-- 配方→`docs/harness.md`; 结构/统计→`docs/architecture.md`; 规划→`docs/components-plan.md` (gitignored)。
+- 机制→`docs/slint-semantics.md`; 取舍→`docs/decisions.md`; API/已知限制→`docs/components.md`。
+- 配方→`docs/harness.md`; 结构/统计→`docs/architecture.md`; 本地待办→`docs/TODO.md` (gitignored); 版本总览→`CHANGELOG.md`。
 - Slint 技能→`skills/slint/`。

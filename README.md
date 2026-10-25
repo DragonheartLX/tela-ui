@@ -57,22 +57,13 @@ $env:TELA_THEME="dark"; cargo run   # PowerShell 写法
 所有令牌都在 `TTheme` 全局 (`theme.slint`) 上。当前生效的配置是一个 `TAppThemeConfig` 结构体; `light` / `dark` 是两个 `in-out` 预设。
 
 ```slint
-// 读取令牌
+// 读取
 Rectangle { background: TTheme.bg-color-container; }
-
-// 覆盖某个预设的单个令牌
+// 覆盖单个令牌
 TTheme.dark.bg-page = #101010;
-
-// 整体替换预设 (省略的字段必须补齐 — 请基于 TLightColors / TDarkColors 派生, 以保留原色阶)
-import { TDarkColors } from "@tela-ui/colors.slint";
-TTheme.dark = {
-    animation-duration: 200ms,
-    duration-fast: 150ms,
-    duration-slow: 300ms,
-    primary: TDarkColors.brand,
-    // …完整字段清单见 structs/theme.slint
-};
 ```
+
+整体替换用 `TTheme.dark = { ... }`; 省略字段必须补齐, 请基于 `@tela-ui/colors.slint` 的 `TLightColors` / `TDarkColors` 派生以保留色阶, 完整字段见 `structs/theme.slint`。
 
 ```rust
 // 从 Rust 侧操作 (Palette/TTheme 由 ui/MainWindow.slint 再导出;
@@ -91,51 +82,12 @@ TSwitch {
 }
 ```
 
-100 个组件 (基础 12 / 输入 14 / 选择 11 / 日期时间 5 / 展示 12 / 内容 20 / 提示 4 / 浮层 6 / 导航 15, 另有实验性 1; 另有库内部件 TNavLabel / TScrollThumb 不在聚合出口) 按类别聚合导出; 另有 8 个服务型浮层 (对话框 / 加载 / 消息 / 通知 / 图片预览 / 命令面板 / 动作面板 / 提示) 与主题、图标、浮层栈三个全局对象。`@tela-ui/common.slint` 保留为全量兼容出口, 完整参数说明见 [docs/components.md](docs/components.md)。
+组件按交互类型聚合导出: `base` / `input` / `select` / `date-time` / `display` / `content` / `notice` / `overlay` / `navigation` / `experimental`; 另有服务型浮层 (对话框 / 加载 / 消息 / 通知 / 图片预览 / 命令面板 / 动作面板 / 提示) 与主题、图标、浮层栈三个全局对象。`@tela-ui/common.slint` 保留为全量兼容出口。完整参数说明与各组件已知限制见 [docs/components.md](docs/components.md); 组件统计见 [docs/architecture.md](docs/architecture.md)。
 
 ## 致谢与说明
 
 - 图标几何数据来自 [Lucide](https://lucide.dev) (ISC 许可), 按 [lucide-slint](https://github.com/cnlancehu/lucide-slint) (MIT OR Apache-2.0)的数据化结构打包。
 - 设计令牌遵循 [TDesign 规范](https://tdesign.tencent.com)。
-- 已知限制:
-    - 主题模式直接读写标准库 `Palette.color-scheme`; 写入会替换其"跟随 OS"绑定 (Slint 赋值语义), 之后 `unknown` (跟随系统) 下标准库组件按 OS 解析, 但 tela 令牌默认暗色, 两者可能短暂不一致; AboutSlint 的 logo 读原始 color-scheme, `unknown` 下恒为亮色版。
-    - gallery 设置页的 AboutSlint 徽标 (标准库组件) 版本行未设颜色, Slint 默认黑字, 暗色主题下对比度低 (logo 本体明暗各自适配, 不受影响)。
-    - 按钮无虚线变体 (Slint 边框仅支持实线)。
-    - TSelect 与 TDropdownMenu 暂无键盘导航; TCommandPalette 的列表不支持上下方向键步进 (1.18 语言内没有循环语句, 组件层无法扫描匹配项 —— 高亮停在第一条匹配项, 回车执行它或点击列表项)。
-    - TSelectInput / TTreeSelect / TCascader 暂无键盘导航 (对齐 TSelect); TTreeSelect 的选中值经 `TTreeLogic` 全局共享 (同 TTree); TCascader 面板为单列逐级展开, 触发器只回显叶子 label, 完整路径回显暂不支持 (声明式嵌套下叶子拿不到祖先 label)。
-    - TTextArea 暂无 maxLength 字数统计。
-    - 对话框 / 通知 / 底部弹层正文超过窗口高度时按上限裁剪 (无滚动容器)。
-    - TImageViewer 无旋转与图片说明文字。
-    - TTable 列宽不可拖拽, 不支持多列排序; 排序只回调, 行重排由宿主完成 (1.18 语言内没有循环语句)。
-    - TDatePicker 触发器只读, 不支持手工输入或字符串解析; 日历的 `today` 需宿主传入 (Slint 不暴露当前日期)。
-    - TCalendar / TDatePicker 暂无键盘导航 (方向键切换日期、回车确认)。
-    - TTimePicker 触发器只读, 滚轮逐格改值并直接触发 `changed`, 无确认按钮 (点击外部或 ESC 关闭), 暂无键盘导航。
-    - TAutoComplete 暂无上下方向键步进 (高亮停在第一条可选匹配或悬停项); 过滤只匹配 `label` 子串, 不区分大小写。
-    - TTagInput 单行不换行, 重复校验由宿主完成; 删除只上报 (下标 + 标签), 模型增删由宿主执行。
-    - TOtpInput 无 `max-length` (Slint 1.18 未提供), 段内溢出清理与整段粘贴分发由宿主改写 `values` 完成; 已填段吞掉后续可打印键, 换字符需先退格清除。
-    - TMention 的 `@` 触发解析与选中文本拼接由宿主完成 (1.18 无字符串切片); 建议面板锚输入框而非光标。
-    - TPicker 无触发器 (多列联合显示文本无法在语言内拼接) 与联动列, 列宽固定 56px; `value` 请初始化成与列数等长 (短模型只有恰好补到末位的拾取能追加, 中间留空的列写不进)。
-    - TDateTimePicker 触发器只读, 年列范围由宿主给定 (整列渲染), 无"此刻"高亮。
-    - TList 行结构固定 (图标/标题/说明), 不支持宿主自定义行渲染 (ListView 行是模型驱动)。
-    - TTree 用嵌套声明 + `@children`, 选中态存在 `TTreeLogic` 全局里 (Slint 无实例级 global), 同屏多个树共享一份选中值; 折叠态是分支自己的 `opened`, 不写回模型。
-    - TContextMenu 弹层在窗口边缘会被裁剪; 默认触发区会吞掉左键, 交互式触发内容需设 `auto-area: false` 并自行调用 `open-at()`。
-    - TSwipeCell 手势层在内容子元素之下: 从可点击子元素上起手的拖动不触发滑动; 吸附无惯性; 操作按钮恒着语义色 (省略 theme 按 primary 渲染), 操作列无描边 (描边会在色块内侧压一圈, 视觉上仍显行高不一致); 底部分隔线固定在行上不随内容滑动, 连续列表末格需设 divider: false。
-    - TPullDownRefresh 无惯性滚动; 手势锁定下拉轴后推回只收下拉量 (重新按压才能滚动); repeater-only 的内容需钉死 `content-height`; 顶部滚轮向上可触发拉动 (过阈值当次即刷新, 无松手语义), 刷新中滚轮只滚动列表。
-    - 贴窗口边缘的 TScrollBar 会被原生拉伸热区抢占命中 (TBorderlessWindow `resize-border`, 默认 8px); 设 `thumb-inset` 为 `resize-border` 宽度即可避开, 或调小 `resize-border` (gallery 用 4px + 4px 内缩)。
-    - TSplitter 第二栏无最小尺寸约束, 可被拖到 0; 主栏折叠无过渡动画。
-    - TPopover 主体是 `title` + `text` 两段文本, 完全自定义主体需用 `TPopupSurface` 自建。
-    - TForm 是轻量脚手架: 无校验引擎, help/error 只做状态呈现, 校验逻辑在 Rust 侧。
-    - TComment 纯展示: 回复列表与图片由宿主自行嵌套; 点赞态组件自翻转后回调。
-    - TNoticeBar 单行 elide 无跑马灯; 多条公告为整条垂直轮播; 关闭走 visible, 隐藏期间布局占位仍在。
-    - TCell 分隔线由每行自绘, 组内末行需设 divider: false; 行结构固定 (图标/标题/说明/note/箭头)。
-    - TCountDown 由剩余时长 (duration) 驱动, 无目标时刻解析 (Slint 不暴露当前日期); 时位不按 24 回绕。
-    - TTabBar 贴底定位与安全区由宿主容器负责。
-    - TIndexes 只上报 changed(index), 分组列表滚动由宿主执行; 气泡溢出组件左缘。
-    - TSortable 排序只上报 reorder(from, to), 行序由宿主重建模型 (1.18 语言内没有循环语句); 拖拽中列表不滚动。
-    - TFab 展开面板不是弹出层, 层叠按声明序 (宿主后续兄弟元素会盖住它), 子操作容量由宿主控制。
-    - TSticky / TAffix 是滚动容器的覆盖层兄弟, 文档内的占位由宿主预留; TSticky 仅顶轨 (底部场景用 TAffix side: bottom); TAffix 底轨需绑 viewport-height。
-    - TAnchor 末个锚点要能高亮, 文档需长于最后目标 + 视口高; 跳转缓动约 200ms, 期间滚轮写入会被缓动覆盖。
-    - TStickyTool 的 popup 仅支持文本气泡, 条目宽由 type 固定 (56/40px), 不可调。
 
 ## 许可证
 

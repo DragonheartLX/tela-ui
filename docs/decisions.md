@@ -1,34 +1,34 @@
 # 已定决策 (勿再翻案)
 
-> 这些取舍已随实现验证; 改代码前读, 不要重新翻案。
+> 已随实现验证的取舍; 改代码前读。机制细节见 `docs/slint-semantics.md`。
 
-- **几何一律落到令牌刻度上 (2026-10-18)** — 间距/圆角/控件高只写令牌; 两类例外: 图标盒内在尺寸(16/20/24px 等)保持字面量, 无对应刻度的 OS 约定值(标题栏键宽 46px、`resize-border` 8px)保持字面量并在行内注释说明。TKbd 交由 TSize 驱动(24/32/40px 高、12/14/16px 字号、8/12/16px 内边距), 窗口圆角取 `radius-large` (9px) 而非 Windows 的 8px。
-- **模态正文靠裁剪封顶, 不引滚动容器 (2026-10-18)** — TDialog 正文按 `窗口高 - 48px - 卡片 chrome` 封顶, TNotification 单卡上限 `(高 - 24px) / 4`, 超出直接裁掉; 布局中的 Text 不会纵向收缩(`slint-semantics.md` 第 16 条), 封顶只能靠 `clip: true` 包装盒, 缺滚动是已知限制。
-- **TProgress 的值动画是开关, 默认关 (2026-10-18)** — `animated: true` 时才给 `p` 挂 `animate`(用 `enabled:` 而非挂载/卸载, 关掉时当帧直达目标值); 默认关是因为逐帧变化的值套动画只会让进度条与百分比滞后于数据。不要改成"target + 命令式镜像属性"的写法: 那种写法挂载时会把非零初值从 0 扫上来(探针实测首帧 0.0, 应为 0.39)。开关与值同帧写不缓动属 Slint 行为, 见 `slint-semantics.md` 第 19 条。
-- **TTabs 的无障碍模型是 tab-list + 每列一个 tab (2026-10-18)** — 根是容器角色, 各列承担 `tab` 角色/标签/禁用态与默认动作, 与 TNavBar/TBreadcrumb 的行级 role 写法一致。
-- **TTable 横向滚动用 ListView 自带轴 (2026-10-20)** — `content-width` 设为列固有宽度, 行宽同值, 表头绑 `content-x` 跟随; 不套第二层横向 ScrollView, 避免横竖两个滚动容器抢滚轮与拖拽 (机制见 `slint-semantics.md` 第 27 条)。
-- **TTable 排序只上报 (2026-10-20)** — 1.18 语言内没有循环语句, 组件无法重排模型; 保持 `sort-changed`, 行重排由宿主完成 (见 `slint-semantics.md` 第 21 条)。
-- **TDatePicker 触发器只读, today 由宿主传入 (2026-10-20)** — Slint 1.18 不向普通组件暴露当前日期与字符串切片, 所以不做手工输入/字符串解析; `TCalendar.today` 与初始显示月份由宿主提供, 组件只负责月历运算与选择。
-- **主题令牌表结构冻结** — 103 个字段在两套预设里重复、以及 151 个顶层转发, 是刻意对齐 TDesign 令牌清单的结果, 不做嵌套/合并重构。
-- **字体走令牌 + 统一 `TText`, 不用 `Window.default-font-family`** — 未设 `font-family` 的 `Text` 只落到宿主窗口默认字体, 再落到渲染器通用族(实测 Arial), 主题字体失效; 库内文本一律经 `TText`(TDesign `body-medium`: 14px/22px), 覆盖字号时给 `line-height` 令牌, 系数由 `TText` 按自身字号换算。
-- **`line-height-headline-s/m/l` 已顶层转发 (2026-10-18)** — THeading 各级行盒直接读它们, 不再是预留令牌。
-- **`font-family-medium` 是预留令牌** — 两套预设定值相同, 暂无消费方; 与 line-height 不同, 它缺的是消费方而非转发。
-- **各浮层皮肤直接引用 `shadow-*` 三行组属有意保留** — 单面组件各自独立, 不属于重复收敛目标。
-- **"TCollapse 换数据后错误面板仍展开"已被否决** — 整份模型替换走 repeater reset() 会清空实例, 真实表现是全部收起(见 `slint-semantics.md` 第 3 条)。
-- **TIconSet 图标不抽公共路径属性 (2026-10-15)** — 每个图标独立, 哪怕 Star/StarFill 逐字节同路径也不去重, 图标数据保持可整段复制替换。
-- **gallery 页的状态失同步与 Timer 常驻属 gallery 代码问题** — 修的时候不要顺手改组件库语义。
-- **cdylib 保留 (2026-10-18)** — `Cargo.toml` 的 `crate-type = ["lib", "cdylib"]` 是移动平台预留, 不因"当前无 C ABI 消费者"删除。
-- **TELA_THEME 精确匹配 (2026-10-18)** — 只认字面量 `light` / `dark`, 不做 trim 也不做小写化; 设了别的值一律报错退出(`src/lib.rs` 的 `theme_from_env`), 不静默跟随系统。
-- **启动失败只在没有控制台的构建里弹窗 (2026-10-18)** — `src/fatal.rs` 的 `MessageBoxW` 只在 Windows 且 `not(debug_assertions)` 时弹原生错误框; dev 只写 stderr, 否则自动化运行会被模态框卡住。panic 走同一通道, 因为 release 是 `panic = "abort"` 加 `windows_subsystem = "windows"`, 什么都不留。
-- **不做令牌漂移守卫 (2026-10-18)** — 两套预设里那 70 个字段重复是刻意对齐 TDesign 令牌清单的结果, 不加运行时断言也不建测试工程; 改 `theme.slint` 时人工比对两套预设。
-- **分类聚合器按交互类型拆分 (2026-10-22)** — 组件数到 57 后, `data-entry` / `data-display` / `feedback` 各自塞了 13–16 个组件, 单类过宽; 拆成 `input` / `select` / `date-time` / `display` / `content` / `notice` / `overlay` 等目录与聚合器, 旧聚合器删除 (破坏性变更), `common.slint` 继续汇总全部导出; gallery 侧栏同步拆成 10 个页面 (另加设置页), 与聚合器一一对应。
-- **TTimePicker 用整列数据 + 行内选中框, 不套 ListView (2026-10-21)** — `ListView` 的 `content-y` 由内部 Flickable 接管, 按选中值定位会被下一次布局清回 0(见 `slint-semantics.md` 第 28 条), 所以时间列直接渲染整列(时 24 / 分秒 60 行), 自己维护偏移量并 `animate` 它: 选中框画在选中行上, 数据带动画滚动时它也一起移动, 点击或滚轮把新值送到中间。无确认按钮, 靠点击外部 / ESC 关闭。代价是没有虚拟化与惯性滚动; 换来真正的数据滚动与跟随数据的选中框。
-- **TTree 用嵌套声明, 不用扁平行模型 (2026-10-23)** — 照 sleek-ui 的 `UMenu` 做成 `TTree` / `TTreeItem` / `TTreeBranch`: 分支用 `@children` 收子节点, 折叠是把子节点放进 `clip` 盒并在 `preferred-height ↔ 0px` 间动画 (收起后实例保留, 焦点不丢)。此前的扁平行模型 (`rows` + `depth`) 要求宿主在回调里重建数组才能收起, 而组件自己既不能写 `rows`(它是 `in`) 也无法把子行藏起来, 落地就是"点了收不起来"。代价是选中值只能放全局 `TTreeLogic`(对应 sleek-ui `UMenuLogic`), 同窗口多树共享一份选中态; 换来点击即收、无需宿主管可见性的结构。深度靠元素嵌套而非组件递归, 不与其冲突。
-- **模式偏好直接用标准库 `Palette.color-scheme`, 不再有自己的枚举 (2026-10-25)** — 删除 `TThemePreference` 与 `TTheme.preference`; 模式存储就是 std-widgets 的 `Palette.color-scheme` (in-out, `ColorScheme`: light/dark/unknown), 读写它让 tela 令牌与标准库组件 (AboutSlint / ScrollView 等) 天然同步, `TTheme.is-dark` 只做派生读。取舍: (a) `unknown` (跟随系统) 下 tela 令牌**默认暗色**, 不探测调色板颜色猜 OS — 用户指定; 标准库组件仍按 OS 解析, 两者在 unknown 且 OS 为亮色时可能不一致 (README 已知限制)。(b) 写入会替换"跟随 OS"绑定 (slint-semantics 第 35 条), 这是 Slint 赋值语义, 纯 .slint 无法恢复绑定, 接受。gallery 侧栏开关、设置页三单选、`TELA_THEME` 环境变量 (Rust 侧 `Palette::get(ui).set_color_scheme`) 全部改写 `Palette.color-scheme`; `MainWindow.slint` 追加 `export { Palette }` 供 Rust 触达。
-
-- **TStickyTool 定案为 TDesign 同构的固定侧边工具栏, 不是吸底操作条 (2026-10-25, 对照 tdesign-vue-next `packages/components/sticky-tool` 源码与 API)** — `placement` 六向 (左/右 × 上/中/下) + `offset` 定位, `shape` 只改连体卡两端 (square/round), `type` 常规 56px / 紧凑 40px, 条目 `popup` 文本气泡按 `trigger` (hover/click) 展示在内容侧; 早前规划文档里"吸底工具栏"的描述是对 TDesign 的误读, 已改。表单提交吸底条的场景由 TAffix `side: bottom` + 宿主自绘 chrome 覆盖, 不另设组件。
-- **滚动缓动一律走组件内 Timer 逐帧写入 (glide), 不用 `animate content-y` (2026-10-25)** — Flickable 按压即移除滚动偏移上的绑定 (slint-semantics 第 36 条), animate 挂上去必死; TScrollBar / TAnchor / TBackTop 各带 16ms×ease-out≈200ms 的 glide, 缓动期内**覆盖**其他写入 (滚轮动量残写在真实窗口曾把"外来写入即中止"版本打断成"只滚一点", 探针的 mock 节奏测不出来), 只有 TScrollBar 的显式滑块拖拽立即接管。外部对 content-y 的直接写入语义 = 瞬时 (无缓动); 要缓动请走 TAnchor.goto / TScrollBar.scroll-to。
-- **TSwipeCell 手势层放在宿主子元素之下 (2026-10-25)** — 覆盖层式 TouchArea 会吞掉内容的全部点击; 放之下则子元素保住自己的事件, 代价是从可点击子元素起手的拖动不滑动单元格 (纯文本永不认领指针, 主流单元格场景不受影响)。拖拽状态机 (begin-drag/drag-to/end-drag) 与吸附动画 (Timer glide 150ms) 均 public/组件内, 探针 38 断言驱动; 左右互斥, 展开态经 changed(side, opened) 上报。操作按钮恒着色: 省略 theme 的条目经 repeater→子属性路径以零值变体到达 (slint-semantics 第 38 条), 按钮内把 default 映射回 primary; 需要中性色操作时改 TSwipeActionButton 语义而不是走 role。底部分隔线 `divider` (默认开) 是根级兄弟节点: 滑动时留在原位并压住操作列底边, 行边界在展开态仍齐平; 几何沿用 TCell (左内缩 `padding-lr-l`, 右到边), 无模型可迭代故连续列表末格由宿主设 false。左侧操作列与分隔线同起点 (`x` 同为 `padding-lr-l`), 展开态色块左缘与线条左端对齐; 左列行程 = 内缩 + 列宽, 无左操作时行程 0, 不解除右滑锁。操作列不画描边 (2026-10-25 视觉评审定案): 1px / 2px 边框都在色块内侧压一圈, 反而仍读成行高不一致; 色块全高铺满, 行边界交给静止的底部分隔线。手势层随内容平移, `mouse-x` 是移动坐标系, `moved` 里补回 offset 增量换成窗口空间位移 (slint-semantics 第 40 条) — 不补时慢拖会来回抽搐。
-- **TPullDownRefresh 组件自持拖拽, 拉动量不借道 content-y; 顶部滚轮向上也触发拉动 (2026-10-25)** — 1.18 Flickable 无 overscroll 信号且越界自动夹回 (slint-semantics 第 37 条), 下拉用独立 `pull` 属性平移 pan 包装组 (header + 视口), content-y 恒在界内; `mouse-drag-pan-enabled: false` 让全幅手势层接管鼠标拖拽。滚轮经手势层的 `scroll-event` 分流: 顶部向上滚 (Slint 里 delta-y > 0 — content-y += delta, 负值向下滚) accept 并喂给同一拉动量 (同 0.5 阻尼, 过阈值当次即触发 — 滚轮没有松手), 有拉动量时向下滚先收回 (收到底 reject 转交列表), 其余 reject 穿透给 Flickable。状态条 header `clip: true` — 不裁剪时 32px 状态行在 0 高 bar 中点对齐, 静止时半行叠在首行上。`content-height` 显式绑到 Flickable (编译器默认馈不出 repeater-only body 的内容高); 状态机 begin-drag/drag-to/end-drag public, `refreshing` 双向 (宿主写 false 收起, `refresh-timeout` 超时兜底并报 timeout), 文案四段可换。取舍: 手势锁定下拉轴后推回不转滚动 (重新按压), 无惯性滚动。
-- **TFooter 定案为纯展示件 (2026-10-25, 对照 tdesign-mobile-vue footer 源码)** — logo (icon+title) / 链接列 / 版权行三段竖排居中, 链接用 TLink (悬停下划线), 不上 URL 只报 `link-clicked(i)` / `logo-clicked()` (Slint 侧无浏览器导航, 宿主自理); 居中实现 = 布局子元素交叉轴默认撑满 + `horizontal-alignment: center` (在布局根子元素上写 `width: parent.width` 会成 binding-loop, 第 31c 条同族)。
-- **页面滚动记忆: 节拍保存 + 适应式重申, 都不挂在切换时刻 (2026-10-25, 真机 UIA 复盘)** — 两条独立战线。**保存**: `changed group-value` 里现读 content-y 不可靠 — if 翻页的塌缩夹持可以先于延迟回调执行, 存下被污染的中间值 (展示页 -1200 在卸载途中被中间高度 1999 的夹持拉到 -1047, 诊断日志实证; mock 探针因塌缩轨迹不经过其深度而漏测); 改为常驻 100ms 节拍定时器把 content-y 存进 page-y[当前页], 切换落定期间 (restore-armed) 挂起, 存值永远早于点击。**恢复**: 固定 3 拍重申窗口不够 — 重页面物化慢于任何定窗 (真机 UIA 客户端在场时内容页回到 0), 且物化期 content-height 非单调 (展示页先涨后缩, 晚到的夹持把恢复值上提后被"两拍稳定"误判成终态); 改为 32ms 拍子, 视口装得下目标值才断言, content-height 任何变化重置稳定计数, 连续 8 拍观测到位才收手, 纠正写入 >8 次 (稳定即退还预算, 防止与真实用户滚轮拉锯) 或 ~1.3s 封顶。真机验证: 导航页滚到底 (-7200) 往返像素级一致。
+- **几何一律落到令牌刻度上 (2026-10-18)** — 间距/圆角/控件高只写令牌; 例外: 图标内在尺寸与 OS 约定值 (标题栏键宽 46px、`resize-border` 8px) 用字面量并注释; TKbd 由 TSize 驱动; 窗口圆角取 `radius-large` (9px)。
+- **模态正文裁剪封顶, 不引滚动容器 (2026-10-18)** — TDialog 按 `窗口高 - 48px - chrome`、TNotification 单卡按 `(高 - 24px) / 4` 封顶; 布局 Text 不会纵向收缩 (语义 16), 只能 `clip: true`。
+- **TProgress 值动画是开关, 默认关 (2026-10-18)** — `animated: true` 才挂 `animate` (用 `enabled:` 关断), 默认关避免值滞后; 不要改成命令式镜像属性 (挂载会把初值从 0 扫上来); 开关与值同帧写不缓动 (语义 19)。
+- **TTabs 无障碍 = tab-list + 每列一个 tab (2026-10-18)** — 根为容器角色, 列承担 tab role/label/disabled/默认动作, 与 TNavBar/TBreadcrumb 一致。
+- **TTable 横向滚动用 ListView 自带轴 (2026-10-20)** — `content-width` 设列固有宽, 行宽同值, 表头绑 `content-x`; 不套第二层横向 ScrollView (语义 27)。
+- **TTable 排序只上报 (2026-10-20)** — 1.18 无循环语句, 组件无法重排模型; 行重排由宿主完成 (语义 21)。
+- **TDatePicker 触发器只读, today 由宿主传入 (2026-10-20)** — 不暴露当前日期与字符串切片, 不做手工输入/解析; 月历运算与选择在组件内。
+- **主题令牌表结构冻结** — 103 字段双预设重复 + 151 顶层转发, 刻意对齐 TDesign 清单, 不做嵌套/合并。
+- **字体走令牌 + 统一 `TText`** — 裸 Text 继承不到主题字体 (语义 13); 库内文本一律 `TText` (14px/22px), 覆盖字号补 `line-height`。
+- **`line-height-headline-s/m/l` 已顶层转发 (2026-10-18)** — THeading 直接消费, 不再是预留令牌。
+- **`font-family-medium` 是预留令牌** — 两套预设相同、暂无消费方; 缺的是消费方而非转发。
+- **浮层皮肤直接引用 `shadow-*` 三行组属有意保留** — 单面组件各自独立, 不属重复收敛目标。
+- **"TCollapse 换数据后错误面板仍展开"已否决** — 整份模型替换走 reset() 清空实例, 实际表现是全部收起 (语义 3)。
+- **TIconSet 图标不抽公共路径 (2026-10-15)** — 每个图标独立, 同路径也不去重, 保持可整段复制替换。
+- **gallery 状态失同步与 Timer 常驻属 gallery 代码问题** — 修时不要顺手改组件库语义。
+- **cdylib 保留 (2026-10-18)** — 移动平台预留, 不因当前无 C ABI 消费者删除。
+- **TELA_THEME 精确匹配 (2026-10-18)** — 只认 `light` / `dark`, 不 trim 不小写化; 其他值报错退出 (`src/lib.rs` 的 `theme_from_env`)。
+- **启动失败只在无控制台构建里弹窗 (2026-10-18)** — `MessageBoxW` 仅 Windows + `not(debug_assertions)`; dev 写 stderr; panic 同通道 (release `panic = "abort"`)。
+- **不做令牌漂移守卫 (2026-10-18)** — 70 字段重复是刻意对齐 TDesign; 不加断言/测试工程, 改 `theme.slint` 时人工比对。
+- **聚合器按交互类型拆分 (2026-10-22)** — 旧 data-entry/data-display/feedback 过宽, 拆成 input/select/date-time/display/content/notice/overlay 等 (破坏性变更); gallery 侧栏一一对应; `common.slint` 仍汇总全部导出。
+- **TTimePicker 整列数据 + 行内选中框, 不套 ListView (2026-10-21)** — ListView 的 `content-y` 归内部 Flickable (语义 28); 整列渲染 + 自维护偏移并 animate, 选中框随数据滚动; 无确认按钮/虚拟化/惯性滚动。
+- **TTree 用嵌套声明, 不用扁平行模型 (2026-10-23)** — `TTree`/`TTreeItem`/`TTreeBranch` + `@children`; 折叠把子节点放进 clip 盒动画, 实例与焦点保留; 代价是选中态只能放全局 `TTreeLogic`, 同窗口多树共享。
+- **模式偏好直接用 `Palette.color-scheme` (2026-10-25)** — 删除 `TThemePreference` / `TTheme.preference`; 读写标准库属性让 tela 与标准库组件同步, `TTheme.is-dark` 只做派生。取舍: `unknown` 下 tela 默认暗色而标准库按 OS 解析, 可能不一致; 写入替换"跟随 OS"绑定 (语义 35)。gallery 开关/设置页/`TELA_THEME` 都走它; `MainWindow.slint` 再导出 `Palette`。
+- **TStickyTool = TDesign 固定侧边工具栏 (2026-10-25)** — placement 六向 + offset, shape 改两端, type 56/40px, popup 文本气泡按 trigger; 不是吸底操作条 (吸底用 TAffix `side: bottom`)。
+- **滚动缓动一律组件内 Timer 逐帧写入 (2026-10-25)** — `animate content-y` 活不过按压 (语义 36); TScrollBar/TAnchor/TBackTop 用 16ms×ease-out≈200ms glide, 缓动期内覆盖外部写入, 仅滑块拖拽立即接管; 直接写 content-y = 瞬时。
+- **TSwipeCell 手势层在宿主子元素之下 (2026-10-25)** — 覆盖层会吞内容点击; 放之下保住子元素事件, 代价是从可点击子元素起手不滑。状态机/吸附动画 public; 操作按钮恒语义色 (default → primary, 语义 38); 分隔线固定在行上, 连续列表末格设 false; 操作列无描边; `mouse-x` 需补 offset 换窗口空间 (语义 40)。
+- **TPullDownRefresh 自持拖拽, 拉动量不借道 content-y (2026-10-25)** — 无 overscroll 且越界自动夹回 (语义 37), 用独立 `pull` 平移包装组; 滚轮经手势层分流: 顶部向上 accept 喂拉动, 向下先收回再转交, 其余穿透; header clip; content-height 显式绑定; 状态机 public, `refreshing` 双向 + 超时兜底; 无惯性滚动。
+- **TFooter 是纯展示件 (2026-10-25)** — logo/链接列/版权三段居中; 链接用 TLink, 只报 `link-clicked(i)` / `logo-clicked()`; 居中靠交叉轴撑满 + `horizontal-alignment: center`, 不写 `width: parent.width` (binding-loop, 语义第 31 条 (c))。
+- **范围外组件不实现 (2026-10-25)** — grid/layout/space (Slint 布局); chart/video/signature (富媒体成本); qrcode/watermark (Rust 生成); Upload (文件对话框 interop, 可先做 DropZone 视觉件); Image 容器 (无加载状态); ColorPicker (低性价比); TTitleBar (TBorderlessWindow); TOverlay (TModalSurface); popup/popover/toast/stepper/menu (已有 TTooltipArea/TMessage/TInputNumber/TSideNav+TNavBar)。
+- **页面滚动记忆: 节拍保存 + 适应式重申 (2026-10-25)** — 保存不能现读 content-y (塌缩夹持早于回调, 会存污染值), 改 100ms 常驻节拍 + 切换期挂起; 恢复用 32ms 适应式重申 (装得下才断言, 高度变化重置计数, 连续 8 拍收手, >8 次或 ~1.3s 封顶); 真机验证 -7200 往返一致。

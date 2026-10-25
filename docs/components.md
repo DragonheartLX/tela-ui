@@ -1,6 +1,7 @@
 # 组件文档
 
-本文档列出 tela-ui 的全部组件, 说明每个组件的继承关系, 参数, 参数类型与回调。
+本文档列出 tela-ui 的全部组件, 说明每个组件的继承关系, 参数, 参数类型与回调,
+并在各节末尾列出已知限制。
 组件按功能分为十类, 每类一个目录与聚合器: `base/` (基础), `input/` (输入),
 `select/` (选择), `date-time/` (日期时间), `display/` (展示), `content/` (内容),
 `notice/` (提示), `overlay/` (浮层), `navigation/` (导航), 另有 `experimental/`
@@ -131,6 +132,8 @@ import { TText, TButton, TLink, TIcon, THeading, TParagraph, TCaption, TDivider,
 回调: `clicked()`。
 
 相关枚举: `TButtonVariant { base, outline, text }`, `TButtonShape { rectangle, square, round }`。
+
+已知限制: 不支持虚线边框 (Slint 边框仅实线)。
 
 ### TLink
 
@@ -327,6 +330,8 @@ TTextArea 参数:
 
 相关枚举: `TInputStatus { default, success, warning, error }`。
 
+已知限制: TTextArea 无字数统计 (`maxLength`)。
+
 ### TInputNumber
 
 数字输入框。左右减/加步进按钮夹住居中的文本框 (TDesign 行内布局); 键入实时
@@ -374,7 +379,7 @@ TTextArea 参数:
 选中建议, 参数为 (下标, value); `accepted(string)` — 无高亮建议时回车, 参数为输入文字。
 
 相关结构: `TAutoCompleteItem { label: string, value: string, disabled: bool }`;
-过滤只匹配 `label`, `disabled` 项可见但不可选、也不参与回车高亮。
+过滤只匹配 `label` 子串且不区分大小写, `disabled` 项可见但不可选、也不参与回车高亮。
 
 已知限制: 不支持上下方向键步进 (1.18 语言内没有循环语句, 组件无法扫描"下一条匹配");
 高亮停在第一条可选匹配或指针悬停项。列表随过滤结果伸缩, 最多 `max-rows` 行。
@@ -816,7 +821,8 @@ import { TCalendar, TDate, TDatePicker, TTimePicker, TTime, TPicker, TPickerColu
 公开函数: `show()`, `close()`, `toggle()`。
 
 已知限制: 触发器只读, 不支持手工输入与字符串解析; `today` 由宿主传入;
-弹层高度约 338px, 靠近窗口底部时请设置 `placement: TPopupPlacement.top-start`。
+暂无键盘导航 (方向键切换日期、回车确认); 弹层高度约 338px, 靠近窗口底部时请设置
+`placement: TPopupPlacement.top-start`。
 
 ### TTimePicker
 
@@ -998,8 +1004,8 @@ import { TTag, TTagVariant, TAvatar, TAvatarSize, TAvatarShape, TAvatarGroup, TA
 
 已知限制: 仅垂直滚动, 内容宽度恒等于视口宽度 (水平滚动场景用 TTable 的
 ListView 接线); 面向非虚拟化内容 — TList / TTable 保留 ListView 行回收并改接
-内部 `TScrollThumb` 叠加条; 贴窗口边缘时请设 `thumb-inset` 为 TBorderlessWindow
-`resize-border` 的宽度 (gallery 用 4px 拉伸带 + 4px 内缩)。
+内部 `TScrollThumb` 叠加条; 贴窗口边缘时原生拉伸热区会抢占命中, 请设 `thumb-inset`
+为 TBorderlessWindow `resize-border` 的宽度 (gallery 用 4px 拉伸带 + 4px 内缩)。
 
 ### TBadge
 
@@ -1558,6 +1564,8 @@ import { TAlert, TNoticeBar, TMessage, TMessageOverlay, TMessageTheme, TMessageP
 `TNotificationData { title, content, theme, stamp }` (stamp 为 show() 单调
 序号, 供 Overlay 区分数据替换)。
 
+已知限制: 单条通知高度上限 `(窗口高 - 24px) / 4`, 超出裁剪 (无滚动容器)。
+
 ### TProgress
 
 进度条。线性或圆环;默认数值直通,`animated: true` 时按 `duration-base` 缓动。
@@ -1620,6 +1628,8 @@ import { TDialog, TDialogService, TDialogServiceOverlay, TDrawer, TDrawerPlaceme
 公开函数: `close()` — 关闭并触发 `closed()`。
 
 插槽: 默认子元素渲染在 content 与按钮行之间, 作自定义主体。
+
+已知限制: 正文 / 插槽超过窗口高度时按上限裁剪 (无滚动容器, 与 TDrawer / TBottomSheet 同策略)。
 
 ### TDialogService (TDialogService + TDialogServiceOverlay)
 
@@ -1799,8 +1809,8 @@ ESC, z-modal 与滑入动画全部复用。结果通过 `result-seq` / `selected
 `max-rows` (`int`, `6`, 超出后列表滚动), `placeholder-text`, `empty-text`。
 
 未包含: 上下方向键在列表内步进 (1.18 的语言内没有循环语句, 服务层无法扫描匹配项 —
-见 README 已知限制), 分组标题, 快捷键内置绑定 (宿主用 `KeyBinding` 放在窗口级
-`FocusScope` 里自行绑定)。
+见 `docs/slint-semantics.md` 第 21 条), 分组标题, 快捷键内置绑定 (宿主用 `KeyBinding`
+放在窗口级 `FocusScope` 里自行绑定)。
 
 ### TPopconfirm
 
@@ -2256,6 +2266,11 @@ in-out, 即 `ColorScheme`)。`light`/`dark` 强制模式, `unknown` 跟随 OS;
 读写它会让 tela 令牌与标准库组件一起切换。`is-dark = color-scheme == dark ||
 color-scheme == unknown` (`unknown` 下 tela 令牌默认暗色)。
 
+已知限制: `unknown` (跟随系统) 下标准库组件按 OS 解析, 而 tela 令牌默认暗色, 亮色
+OS 时两者可能不一致; 写入 `Palette.color-scheme` 会替换其"跟随 OS"绑定 (Slint 赋值
+语义, 见 `docs/slint-semantics.md` 第 35 条), 之后 OS 切换不再传播; `AboutSlint` 的
+logo 读原始 color-scheme, `unknown` 下恒为亮色版。
+
 令牌转发 (均为 `out` 只读快捷属性): 四组语义色阶 `primary/success/warning/error`
 (完整 `TPrimaryColor` 结构) 与 7 态快捷色 (`brand-color`, `brand-color-hover`,
 `brand-color-focus`, `brand-color-active`, `brand-color-disabled`, `brand-color-light`,
@@ -2288,13 +2303,13 @@ color-scheme == unknown` (`unknown` 下 tela 令牌默认暗色)。
 - `TIconPath { command: string, has_fill: bool }` — 单条路径
 - `TIconData { paths: [TIconPath] }` — 完整图标, 即各组件的图标参数类型
 
-内置 44 个字形, 以 `TIconSet.名称` 取用 (按源文件声明顺序):
+内置 46 个字形, 以 `TIconSet.名称` 取用 (按源文件声明顺序):
 
 X, Check, Minus, Plus, Search, ChevronDown, ChevronUp, ChevronLeft, ChevronRight,
 Menu, Info, CircleCheck, CircleX, CircleAlert, TriangleAlert, Eye, Calendar, Clock,
 User, LoaderCircle, Sun, Moon, Bell, House, Lock, Mail, Star, StarFill, Heart, Trash2,
 Pencil, Settings, Download, Upload, RefreshCw, Image, Ellipsis, LayoutDashboard,
-PanelLeftClose, PanelLeftOpen, FlaskConical, Inbox, Square, Copy。
+PanelLeftClose, PanelLeftOpen, FlaskConical, Inbox, Square, Copy, Folder, File。
 
 其中 `Square` / `Copy` 是窗口最大化键的两个字形 (最大化显示 `Square`, 已最大化显示
 `Copy` 表示"向下还原")。

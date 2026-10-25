@@ -1,60 +1,43 @@
 # 自证配方与探针踩坑
 
-> 改动与自证的**规则**在 `AGENTS.md` "改动流程"; 这里只放怎么做的配方、
-> 参考值与踩坑。一次性 Rust 探针写在 `Temp/` 下, 收尾删除。
+> 规则见 `AGENTS.md` 改动流程; 这里只放配方、参考值与踩坑。一次性探针放 `Temp/`, 收尾删除。
 
 ## 自证配方
 
 ```powershell
-# 1) 每个改动文件 0 诊断才算通过
+# 1) 每个改动文件 0 诊断
 slint-viewer -L "tela-ui=<repo>\tela-ui" --check <file.slint> --style fluent
 
-# 2) 全量检查 (仅 5 个非组件数据文件报既有 "No component found": colors / theme /
+# 2) 全量 (仅 5 个数据文件报 "No component found": colors / theme /
 #    base/icon/data / structs/enums / structs/theme)
 Get-ChildItem tela-ui,ui -Recurse -Filter *.slint |
   ForEach-Object { slint-viewer -L "tela-ui=$PWD\tela-ui" --check $_.FullName --style fluent }
 
-# 3) 亮/暗各一张, 交付前必做
+# 3) 亮/暗各一张; 暗色 --load-data dark.json = {"Palette":{"color-scheme":"dark"}},
+#    亮色必须显式 light.json (单帧渲染里 color-scheme 仍是 unknown); JSON 无 BOM
 slint-viewer -L "tela-ui=$PWD\tela-ui" --screenshot out-light.png --size 1200x800 ui\MainWindow.slint
-#    暗色: --load-data dark.json, 内容 {"Palette": {"color-scheme": "dark"}}
-#    亮色参考值需显式 light.json {"Palette": {"color-scheme": "light"}} —
-#    --screenshot 单帧渲染里 Palette.color-scheme 尚为 unknown (OS 检测未落地),
-#    按 unknown→暗色规则默认帧是暗的。
-#    JSON 必须无 BOM, Set-Content 默认带 BOM 会报 "expected value at line 1 column 1"
 
-# 4) gallery 代码样本门禁 — code: 字符串不参与编译, 改动样本后必跑
+# 4) gallery 代码样本门禁 (当前 90 个)
 python scripts\check-code-samples.py
-#    把每个样本包成独立组件逐个 --check, 83 样本 0 诊断才算通过
 ```
 
-- 本机工具: `slint-viewer` / `slint-lsp` / `cargo`。
-- 像素参考值 (2026-10-18 基准, 1200x800 MainWindow): 亮 `#ffffff 56.1%` / `#f3f3f3 20.5%` / `#eeeeee 14.0%` / `#0052d9 1.5%`, 暗 `#242424 56.1%` / `#2c2c2c 20.5%` / `#181818 14.0%` / `#4582e6 1.5%`。要证明新增内容没有副作用, 最强口径是把新内容剥掉的副本渲染, 与 HEAD worktree 逐字节一致。
-- 想看声明是否真生效就查生成代码 `target\debug\build\tela-ui-*\out\MainWindow.rs`, 用 `Select-String` 统计特征串比读文档可靠; 生成代码里枚举变体带 `r#` 前缀, 特征串要写 `AccessibleStringProperty :: r#Label` 这种形态。
+- 工具: `slint-viewer` / `slint-lsp` / `cargo`。
+- 像素基准 (1200x800 MainWindow): 亮 `#ffffff 56.1%` / `#f3f3f3 20.5%` / `#eeeeee 14.0%` / `#0052d9 1.5%`; 暗 `#242424 56.1%` / `#2c2c2c 20.5%` / `#181818 14.0%` / `#4582e6 1.5%`。验证无副作用: 剥掉新内容渲染, 与 HEAD 逐字节一致。
+- 声明是否生效查生成代码 `target\debug\build\tela-ui-*\out\MainWindow.rs`; 枚举变体带 `r#`, 特征串写 `AccessibleStringProperty :: r#Label`。
 
 ## 探针踩坑
 
-1. `mock_elapsed_time` 要 `std::time::Duration`, 不是裸整数。
-2. 指针用 `slint::LogicalPosition { x: f32, y: f32 }`(`platform::` 下没有), 按钮用 `slint::platform::PointerEventButton`。
-3. 用 `i_slint_backend_testing::init_no_event_loop()`, 不是 `init_with_backend` 加 `TestingBackend::default()`。
-4. 组件用 `.window()`(1.18 无 `as_window()`); global 用 `ui.global::<T>()` 加 `invoke_xxx()`, 前提是主 .slint 里 `export { T }` 把它提升为公共 API。
-5. Rust 里的 Slint 枚举变体是 PascalCase, 小写只在 .slint 里用。
-6. `SharedString` 比较先 `.to_string()`, 别用 `"x".into()`(ambiguous)。
-7. 打开模态后先 `mock_elapsed_time` 等动画跑完(本库 `duration-base` = 200ms)再点, 否则点的是动画中途的位置。
-8. 不知道元素在哪就写扫描循环逐点点击打印命中, 一次跑完拿到真实几何。
-9. `Probe::get_singleton()` 只在被主 .slint 的 `export { ... }` 声明为 global 的组件存在; 探针工程里直接 `Probe::new().unwrap()` 拿实例, 用 `p.window()` 派发事件。
-10. `slint::LogicalPosition` 与 `LogicalSize` 在 1.18 是具体类型不是泛型, 直接 `LogicalPosition::new(x, y)` 或 `LogicalPosition { x, y }`。
-11. 探针工程里 `@tela-ui/...` 只有在 build.rs 用 `CompilerConfiguration::with_library_paths(HashMap::from([("tela-ui".into(), repo_root.join("tela-ui"))]))` 注册了同名库路径才生效; 裸 `tela-ui/...` 或 `@tela-ui/...` 未注册时会退化为 crate 根相对路径。
-12. **Slint 1.18 语法限制**: `private function` 无效(用 `function`), callback 体内不能用 `var`, `TextInput.edited` 是 void 类型不能 return accept/reject。
-13. `WindowEvent` 在 `slint::platform::` 下, 不在 crate 根(`use slint::platform::{PointerEventButton, WindowEvent};`)。
-14. 探针 crate 放在仓库树里时, 自己的 `Cargo.toml` 要加一个空的 `[workspace]`, 否则会被根 package 的隐式 workspace 认领而报错。
-15. `i_slint_backend_testing::init_no_event_loop()` 的默认渲染器不支持 `Window::take_snapshot`(报 "WindowAdapter::take_snapshot is not implemented by the platform"); 要截图或按帧量像素得自己装: `i-slint-backend-testing` 开 `renderer-software` feature, 再 `set_platform(Box::new(TestingBackend::new(TestingBackendOptions { mock_time: true, threading: false, renderer_name: Some("software".into()) })))`。`set_platform` 一个进程只能调一次(重复报 `AlreadySet`), 所以先装平台、再按场景反复 `Probe::new()`。
-16. 探针里点元素前先把窗口尺寸定死, 再让布局恰好装下内容: 有多余高度时会被分给可伸缩子元素, 每根条的高度与 y 都变了。命中区差 1px 就漏 —— 实测开关行 120..142 里 130 命中、131 落在缝隙。
-17. 组件建好后先派发一次 `WindowEvent::Resized { size: slint::LogicalSize::new(width, height) }`: testing backend 只上报尺寸不会自动回流, 否则每帧截图约一半像素是全透明(alpha 0), 量出来的包围盒全不可信。
-18. 点击判定把"500ms 内、10px 内"的连续 press 串成一次连击, 且奇数次释放就触发 `double-clicked` —— **拖拽也算一次点击**。拖拽与双击/点击混测时, 每次释放后 `mock_elapsed_time(600ms)` 打断连击链, 否则上一次拖拽会让下一次断言踩进 `double-clicked`。
-19. 量"平移"别用包围盒: 放大态画面必然盖满视口, 包围盒恒等于视口; 也不要用"去趋势亮度峰"的 argmax(带内容相关的偏差)。可用做法是取一行亮度剖面做归一化互相关, 位移精度 ±1px, 递增拖拽序列顺便就是夹紧证明。
-20. 量"列表滚到哪"别用逐行墨迹*计数*做互相关 —— 在 44px 这类行距上会混叠出假位移(实测报出过假的 36px); 改量每行墨迹的*范围*(最右墨迹 x / 最深可见行号)。
-21. 量"缩放"用画面非遮罩包围盒即可, 但要把工具条/芯片所在的行带排除, 并且留意悬停中的图标会变品牌色, 其抗锯齿光晕会被"蓝色系"谓词误判 —— 谓词里加红通道上限或按行带排除。
-22. 一次 `set_platform` 只能建一个平台; 全部场景共用它, 每个 scenario 各自 `Probe::new()`, 场景之间把所有 overlay 关干净(探针里加"栈已空"断言), 否则上一场景的残留状态会污染下一场景。
-23. testing 后端的合成指针事件 (`Window::dispatch_event(PointerPressed/…)`) 只能命中 Window 的**直接**子元素 — 嵌套在子 Rectangle 里的 TouchArea 一律 `Rejected`(实测 even take_snapshot 强制绘制后依旧)。要驱动嵌套组件的交互逻辑, 别走事件派发: 在探针包装组件里加 `public function` 直接调组件的公开函数或直接写它的属性 (同一代码路径), 再用 `mock_elapsed_time` 分段采样断言动画曲线。
-24. `WindowEvent::PointerScrolled` 合成滚轮事件在 testing 后端同样只进 Window 直接子元素 (与第 23 条同族) — 裸可滚 Flickable 都收不到; 滚轮/嵌套路由只能源码分析或真机验证, 探针别为它写断言。
-25. **嵌套 TouchArea 的慢拖只能 OS 鼠标驱动** (第 23 条的现实出口): `Start-Process slint-viewer` 后 `Process.MainWindowHandle` 取到的是 `Winit Thread Event Target` (外层 14x14, 客户区 0x0), 必须 `EnumWindows` 按 pid 取**面积最大且有标题**的窗口。`SetWindowPos` 摆位后 `ClientToScreen(0,0)` 拿客户区原点, `SetCursorPos` 1px/步 + 每步 `mouse_event` LEFTDOWN 保持按下, 每步 `CopyFromScreen` 存一帧, 用探针里高对比色块的左边界量 `offset`。截图含标题栏且受 DPI 缩放任一影响,**只看跨帧相对变化** (本次 24 步实测: 修复前 38→33→40→34 抽搐, 修复后 38→39→41→…→62 单调)。临时脚本放 `Temp/`, 收尾删除。
+1. 时间: `mock_elapsed_time(Duration)`; 动画类先等 `duration-base` (200ms) 再点。
+2. 类型: 指针 `slint::LogicalPosition { x, y }`, 按钮 `slint::platform::PointerEventButton`, `WindowEvent` 也在 `platform::`; Slint 枚举变体 PascalCase; `SharedString` 先 `.to_string()`。
+3. 启动: 用 `i_slint_backend_testing::init_no_event_loop()`; 截图/量像素要 software 渲染器 + `set_platform(Box::new(TestingBackend::new(TestingBackendOptions { mock_time: true, threading: false, renderer_name: Some("software".into()) })))`, 每进程仅一次, 场景间复用平台、各自 `Probe::new()`。
+4. 组件 `.window()`, global `ui.global::<T>()` + `invoke_xxx()`; 前提是主 .slint 用 `export { T }` 提升为公共 API。
+5. 探针 crate 在仓库树里要加空 `[workspace]`; `@tela-ui/...` 需 build.rs 注册同名 library path, 否则退化到 crate 根。
+6. 语法: `private function` 无效 (用 `function`); callback 体内不能用 `var`; `TextInput.edited` 是 void, 不能 return accept/reject。
+7. 点元素前定死窗口尺寸并让布局恰好装下内容; 建好后派发一次 `WindowEvent::Resized`, 否则截图约一半像素全透明。命中区差 1px 就漏。
+8. 不知道元素位置: 写扫描循环逐点点击打印命中。
+9. 合成事件限制: testing 后端的指针/滚轮只命中 Window 直接子元素, 嵌套 TouchArea/Flickable 收不到; 驱动嵌套交互用 public function/直接写属性, 滚轮路由只能源码或真机验证。
+10. 拖拽也算一次点击: 500ms/10px 内连续 press 会串成双击链, 每次释放后 `mock_elapsed_time(600ms)`。
+11. 量平移: 别用包围盒; 取一行亮度剖面做归一化互相关 (±1px)。量列表位置: 别用逐行墨迹计数 (行距会混叠), 用量墨迹范围/最深可见行号。
+12. 量缩放: 非遮罩包围盒, 排除工具条/芯片行带; 悬停图标的品牌色光晕会干扰蓝色谓词。
+13. 场景隔离: 每个 scenario 各自 `Probe::new()`, 场景间关净 overlay 并断言栈空。
+14. 嵌套 TouchArea 慢拖只能 OS 鼠标: `EnumWindows` 按 pid 取面积最大有标题的窗口, `ClientToScreen` 取客户区, 1px/步 `mouse_event` 保持按下, 每步 `CopyFromScreen`; 只看跨帧相对变化 (临时脚本放 `Temp/`)。
