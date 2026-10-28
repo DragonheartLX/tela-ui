@@ -1602,7 +1602,7 @@ import { TAlert, TNoticeBar, TMessage, TMessageOverlay, TMessageTheme, TMessageP
 ## 浮层 overlay
 
 ```slint
-import { TDialog, TDialogService, TDialogServiceOverlay, TDrawer, TDrawerPlacement, TBottomSheet, TActionSheetService, TActionSheetOverlay, TActionSheetItem, TImageViewerService, TImageViewerOverlay, TCommandPaletteService, TCommandPaletteOverlay, TCommandItem, TPopconfirm, TPopover, TTooltipArea, TTooltipOverlay, TTooltipPlacement, TLoadingService, TLoadingServiceOverlay } from "@tela-ui/overlay.slint";
+import { TDialog, TDialogService, TDialogServiceOverlay, TDrawer, TDrawerPlacement, TBottomSheet, TActionSheetService, TActionSheetOverlay, TActionSheetItem, TImageViewerService, TImageViewerOverlay, TCommandPaletteService, TCommandPaletteOverlay, TCommandItem, TPopconfirm, TPopover, TTooltipArea, TTooltipOverlay, TTooltipPlacement, TGuideService, TGuideOverlay, TGuidePlacement, TLoadingService, TLoadingServiceOverlay } from "@tela-ui/overlay.slint";
 ```
 
 ### TDialog
@@ -1905,6 +1905,74 @@ ta := TouchArea {
 | show-arrow | `bool` (in-out) | `true` | 菱形箭头 |
 
 相关枚举: `TTooltipPlacement { top, bottom, left, right }`。
+
+### TGuide (TGuideService + TGuideOverlay)
+
+漫游引导: 高亮遮罩加分步气泡。状态在 `TGuideService` 全局 (只存是否打开、当前序号、
+总步数), 步骤数据在各自的 `TGuideOverlay` 实例里, 按从 0 开始的 `step` 序号认领当前步:
+
+```slint
+// 目标旁放一个, 数据也在这里; 动作只发回调:
+TGuideOverlay {
+    step: 0;
+    title: "第一步";
+    text: "这里是筛选区";
+    target-x: filter.absolute-position.x;
+    target-y: filter.absolute-position.y;
+    target-width: filter.width;
+    target-height: filter.height;
+    next-requested => { TGuideService.next(); }
+    close-requested => { TGuideService.close(); }
+}
+
+// 启动只传步数; current 从 0 自增
+TGuideService.start(1);
+```
+
+一个步骤一个 overlay, 放在目标所在组件内部或外部都行; 遮罩与气泡都限制在
+overlay 自身的盒子里, 所以由你把 overlay 放在哪来决定遮罩盖多大。
+只有 `step == current` 的实例绘制, 其余实例不可见也不拦截指针。
+overlay 只发回调, 改状态是宿主的事。
+遮罩由四块矩形拼成 (Slint 没有裁剪路径), 高亮边缘的圆角由描边矩形表现;
+气泡自动选边 (放得下放下方, 否则上方)。
+
+`TGuideService` 成员:
+
+| 成员 | 类型 | 说明 |
+| --- | --- | --- |
+| open / current / step-count | (out) | 只读状态; `current` 为当前序号 |
+| result-seq | `int` (out) | 每次结束 +1 |
+| completed | `bool` (out) | 仅"完成"按钮结束时为真 |
+| start(count) | 函数 | 传步数并从 0 开始; 0 不打开 |
+| next() | 函数 | 序号自增; 末步等价于完成 |
+| prev() | 函数 | 序号自减; 0 不动 |
+| skip() / close() | 函数 | 结束引导, `completed` 为假 |
+
+`TGuideOverlay` 参数:
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| step | `int` | `0` | 步骤序号, 与 `current` 比对, 整个引导内唯一 |
+| title / text | `string` | `""` | 气泡标题与正文 |
+| target-x / target-y / target-width / target-height | `length` | `0px` | 目标矩形 (窗口坐标), 绑目标元素的 `absolute-position` 与尺寸 |
+| placement | `TGuidePlacement` | `TGuidePlacement.auto` | 气泡方位, `auto` 上下自动选边 |
+| highlight-padding | `length` | `4px` | 高亮挖孔向外扩 |
+| bubble-width | `length` | `300px` | 气泡宽度 |
+| show-arrow / show-skip / show-prev | `bool` | `true` | 箭头 / 多步时跳过 / 非首步上一步 |
+| skip-text / prev-text / next-text / finish-text | `string` | 跳过 / 上一步 / 下一步 / 完成 | 按钮文字 |
+
+回调: `entered()` (轮到自己时触发一次) / `next-requested()` /
+`prev-requested()` / `close-requested()` (跳过与 ESC 都走它)。只读输出:
+`active` (`bool`)。
+
+相关枚举: `TGuidePlacement { auto, top, bottom, left, right }`。
+
+已知限制:
+
+- 遮罩只覆盖 overlay 自身的盒子; 要盖住整页就把 overlay 放到页面级容器, 盖整窗就放到窗口根。
+- 容器有裁剪 (ScrollView/卡片) 时, 遮罩与气泡跟着被裁; 引导期间页面滚动会让高亮与目标错位。
+- 遮罩拦截其盒内的指针事件, 高亮目标本身不可交互 — 引导是模态的。
+- 目标跑到 overlay 盒外时挖孔贴边收起, 气泡贴边距。
 
 ### TLoadingService (TLoadingService + TLoadingServiceOverlay)
 

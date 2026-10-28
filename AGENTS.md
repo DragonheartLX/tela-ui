@@ -16,7 +16,7 @@ README 只做入门: 不放组件统计与已知限制。统计进 `docs/archite
 ## 改动流程
 
 1. 读 `docs/slint-semantics.md` 与 `docs/decisions.md` 相关条目; 已定取舍不翻案。
-2. 改完自证: 每个改动的 `.slint` `--check` 0 诊断; 全量扫描只允许 5 个非组件数据文件报既有 "No component found"; Rust/gallery 改动跑 `cargo build`。
+2. 改完自证: 每个改动的 `.slint` `--check` 0 诊断, 再 `slint-lsp format -i <file>` (仅空白; 语法错误时仍会写回, 故 `--check` 通过后再跑; 4 空格缩进, 不折行; CRLF 工作区格式化后混排属预期, 索引仍为 LF); 全量扫描只允许 5 个非组件数据文件报既有 "No component found"; Rust/gallery 改动跑 `cargo build`。
 3. 亮/暗各渲染一张并对 `docs/harness.md` 参考值; 读不了图就交 PNG 给用户终判, 不声称"看过了"。
 4. 行为/事件改动跑 Rust 探针, 放 `Temp/`; 配方见 `docs/harness.md`。
 5. 同步 `common.slint`、gallery 段落、`docs/components.md` (API 与已知限制)、`docs/architecture.md` 统计、`CHANGELOG.md` (只记总体, 不分类); 清空 `Temp/`。

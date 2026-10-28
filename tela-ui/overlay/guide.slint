@@ -1,0 +1,408 @@
+// Tela UI — TGuide
+//
+// Tour guide: a dimmed mask with a highlight cut-out plus a step bubble.
+// `TGuideService` only holds the tour state (open, current index, step count);
+// the step data lives in the overlays. One `TGuideOverlay` == one step: it
+// binds the service, and only the instance whose zero-based `step` is current
+// draws — the rest stay inert. Place it inside or outside the component that
+// owns the target, so each instance covers exactly its own box.
+//
+// The host owns the state: overlays report intent through callbacks and never
+// write `TGuideService`.
+//   // 目标旁放一个多重实例之一:
+//   TGuideOverlay {
+//       step: 0;
+//       title: "第一步";
+//       text: "这里是筛选区";
+//       target-x: filter.absolute-position.x;
+//       target-y: filter.absolute-position.y;
+//       target-width: filter.width;
+//       target-height: filter.height;
+//       next-requested => { TGuideService.next(); }
+//       prev-requested => { TGuideService.prev(); }
+//       close-requested => { TGuideService.close(); }
+//   }
+//
+//   // 启动: 只传步数, current 从 0 自增
+//   TGuideService.start(1);
+//
+// ESC is forwarded through TPopupStackLayer, the TDialog path.
+
+import { TTheme } from "../theme.slint";
+import { TText } from "../base/typography.slint";
+import { TButton, TButtonVariant } from "../base/button.slint";
+import { TThemeRole, TSize } from "../structs/enums.slint";
+import { TPopupStackLayer } from "../popup-stack.slint";
+
+export enum TGuidePlacement {
+    auto,
+    top,
+    bottom,
+    left,
+    right,
+}
+
+// Tour state: which index is up and how many. No step data here — that lives
+// in the overlays, so a guide can be declared where its target is.
+export global TGuideService {
+    out property <bool> open: false;
+    out property <int> current: 0;
+    out property <int> step-count: 0;
+    // Bumped once per dismissal (finish, skip, ESC).
+    out property <int> result-seq: 0;
+    // True only when the last step was confirmed with the finish button.
+    out property <bool> completed: false;
+
+    public function start(count: int) {
+        self.step-count = max(0, count);
+        self.current = 0;
+        self.completed = false;
+        // An empty tour would only show an inert mask.
+        self.open = self.step-count > 0;
+    }
+
+    public function next() {
+        if (!self.open) {
+            return;
+        }
+        if (self.current < self.step-count - 1) {
+            self.current += 1;
+        } else {
+            self.finish();
+        }
+    }
+
+    public function prev() {
+        if (self.open && self.current > 0) {
+            self.current -= 1;
+        }
+    }
+
+    public function skip() {
+        self.dismiss();
+    }
+
+    public function close() {
+        self.dismiss();
+    }
+
+    function finish() {
+        self.open = false;
+        self.completed = true;
+        self.result-seq += 1;
+    }
+
+    function dismiss() {
+        if (!self.open) {
+            return;
+        }
+        self.open = false;
+        self.completed = false;
+        self.result-seq += 1;
+    }
+}
+
+// One instance per step. It carries the step's texts and target rect; the
+// service only tells it whether it is the current step.
+// It sizes to its parent box; give it explicit geometry inside a Rectangle.
+export component TGuideOverlay inherits Rectangle {
+    // Zero-based step index this overlay serves; unique within the tour.
+    in property <int> step: 0;
+    in property <string> title;
+    in property <string> text;
+    // Window-local target rect: `absolute-position` plus the element size.
+    in property <length> target-x: 0px;
+    in property <length> target-y: 0px;
+    in property <length> target-width: 0px;
+    in property <length> target-height: 0px;
+    // `auto` goes below the target when the bubble fits there, above otherwise.
+    in property <TGuidePlacement> placement: TGuidePlacement.auto;
+
+    // Inflates the cut-out around the target rect.
+    in property <length> highlight-padding: TTheme.spacing-2;
+    in property <length> bubble-width: 300px;
+    in property <bool> show-arrow: true;
+    // Hidden on a single-step guide: there is nothing to skip to.
+    in property <bool> show-skip: true;
+    in property <bool> show-prev: true;
+    in property <string> skip-text: "跳过";
+    in property <string> prev-text: "上一步";
+    in property <string> next-text: "下一步";
+    in property <string> finish-text: "完成";
+
+    // Fired once when this overlay becomes the current step.
+    callback entered();
+    // Intent only: the host moves `TGuideService`.
+    callback next-requested();
+    callback prev-requested();
+    callback close-requested();
+
+    // The current step is this overlay's step.
+    out property <bool> active: TGuideService.open && TGuideService.current == root.step;
+
+    // `entered` fires on the rising edge only, not on every re-evaluation.
+    private property <bool> was-active: false;
+    changed active => {
+        if (root.active && !root.was-active) {
+            root.entered();
+        }
+        root.was-active = root.active;
+    }
+
+    // Window-level placements need a tier above the modal backdrops; inside a
+    // card it just orders against siblings.
+    z: TTheme.z-message;
+
+    // Same geometry probe as TTooltipOverlay: the overlay can sit anywhere, so
+    // window-local target coords are rebased into overlay-local ones.
+    probe := TouchArea {
+        enabled: false;
+    }
+
+    private property <length> gap: 12px;
+    private property <length> edge: TTheme.spacing-4;
+    private property <length> arrow-size: 8px;
+
+    // Cut-out rect, clamped into this overlay's box. A target captured
+    // off-box collapses the hole to the edge instead of inverting it.
+    private property <length> hole-left:
+        max(0px, min(root.width, root.target-x - probe.absolute-position.x - root.highlight-padding));
+    private property <length> hole-top:
+        max(0px, min(root.height, root.target-y - probe.absolute-position.y - root.highlight-padding));
+    private property <length> hole-right:
+        max(0px, min(root.width, root.target-x - probe.absolute-position.x + root.target-width + root.highlight-padding));
+    private property <length> hole-bottom:
+        max(0px, min(root.height, root.target-y - probe.absolute-position.y + root.target-height + root.highlight-padding));
+    private property <length> hole-w: max(0px, root.hole-right - root.hole-left);
+    private property <length> hole-h: max(0px, root.hole-bottom - root.hole-top);
+
+    pure function is-top(bubble-h: length) -> bool {
+        if (root.placement == TGuidePlacement.top) {
+            return true;
+        }
+        if (root.placement != TGuidePlacement.auto) {
+            return false;
+        }
+        // auto: below when it fits; above when only that side has room.
+        return root.height - root.hole-bottom - root.gap < bubble-h
+            && root.hole-top > root.height - root.hole-bottom;
+    }
+
+    pure function bubble-x(bubble-w: length) -> length {
+        if (root.placement == TGuidePlacement.left) {
+            return root.hole-left - bubble-w - root.gap;
+        }
+        if (root.placement == TGuidePlacement.right) {
+            return root.hole-right + root.gap;
+        }
+        return max(root.edge, min(root.width - bubble-w - root.edge, root.hole-left + (root.hole-w - bubble-w) / 2));
+    }
+
+    pure function bubble-y(bubble-h: length) -> length {
+        if (root.placement == TGuidePlacement.left || root.placement == TGuidePlacement.right) {
+            return max(root.edge, min(root.height - bubble-h - root.edge,
+                root.hole-top + (root.hole-h - bubble-h) / 2));
+        }
+        if (root.is-top(bubble-h)) {
+            return max(root.edge, root.hole-top - bubble-h - root.gap);
+        }
+        return max(root.edge, min(root.height - bubble-h - root.edge, root.hole-bottom + root.gap));
+    }
+
+    // Diamond arrow on the bubble edge facing the cut-out, slid along that
+    // edge to stay on the hole centre.
+    pure function arrow-x(bubble-w: length) -> length {
+        if (root.placement == TGuidePlacement.left) {
+            return bubble-w - root.arrow-size / 2;
+        }
+        if (root.placement == TGuidePlacement.right) {
+            return -root.arrow-size / 2;
+        }
+        return max(0px, min(bubble-w - root.arrow-size,
+            root.hole-left + root.hole-w / 2 - root.bubble-x(bubble-w) - root.arrow-size / 2));
+    }
+
+    pure function arrow-y(bubble-h: length) -> length {
+        if (root.placement == TGuidePlacement.left || root.placement == TGuidePlacement.right) {
+            return max(0px, min(bubble-h - root.arrow-size,
+                root.hole-top + root.hole-h / 2 - root.bubble-y(bubble-h) - root.arrow-size / 2));
+        }
+        if (root.is-top(bubble-h)) {
+            return bubble-h - root.arrow-size / 2;
+        }
+        return -root.arrow-size / 2;
+    }
+
+    // Four dim rectangles leave a rectangular hole; Slint has no clip path,
+    // so the rounded ring below carries the rounded look instead.
+    mask := Rectangle {
+        width: root.width;
+        height: root.height;
+        opacity: root.active ? 1 : 0;
+        animate opacity { duration: TTheme.duration-fast; }
+
+        Rectangle {
+            x: 0px;
+            y: 0px;
+            width: root.width;
+            height: root.hole-top;
+            background: TTheme.mask-active;
+        }
+
+        Rectangle {
+            x: 0px;
+            y: root.hole-bottom;
+            width: root.width;
+            height: root.height - root.hole-bottom;
+            background: TTheme.mask-active;
+        }
+
+        Rectangle {
+            x: 0px;
+            y: root.hole-top;
+            width: root.hole-left;
+            height: root.hole-h;
+            background: TTheme.mask-active;
+        }
+
+        Rectangle {
+            x: root.hole-right;
+            y: root.hole-top;
+            width: root.width - root.hole-right;
+            height: root.hole-h;
+            background: TTheme.mask-active;
+        }
+    }
+
+    // Accent outline on the cut-out edge.
+    ring := Rectangle {
+        x: root.hole-left;
+        y: root.hole-top;
+        width: root.hole-w;
+        height: root.hole-h;
+        border-radius: TTheme.radius-medium;
+        border-width: 2px;
+        border-color: TTheme.text-color-brand;
+        background: transparent;
+        opacity: root.active ? 1 : 0;
+        animate opacity { duration: TTheme.duration-fast; }
+    }
+
+    // Swallows every pointer event inside this box while the step is up.
+    // Declared before the bubble so the bubble buttons still win hit-testing.
+    TouchArea {
+        enabled: root.active;
+    }
+
+    bubble := Rectangle {
+        x: root.bubble-x(self.width);
+        y: root.bubble-y(self.height);
+        width: root.bubble-width;
+        height: body.preferred-height;
+        border-radius: TTheme.radius-large;
+        background: TTheme.bg-color-container;
+        drop-shadow-blur: TTheme.shadow-3-blur;
+        drop-shadow-offset-y: TTheme.shadow-3-offset-y;
+        drop-shadow-color: TTheme.shadow-3-color;
+        opacity: root.active ? 1 : 0;
+        animate opacity { duration: TTheme.duration-fast; }
+
+        body := VerticalLayout {
+            padding: TTheme.spacing-4;
+            spacing: TTheme.spacing-3;
+
+            HorizontalLayout {
+                spacing: TTheme.spacing-2;
+
+                TText {
+                    text: root.title;
+                    overflow: elide;
+                    font-size: TTheme.font-size-title-s;
+                    line-height: TTheme.line-height-title;
+                    font-weight: TTheme.font-weight-medium;
+                    vertical-alignment: center;
+                    horizontal-stretch: 1;
+                }
+
+                if TGuideService.step-count > 1: TText {
+                    text: (root.step + 1) + "/" + TGuideService.step-count;
+                    font-size: TTheme.font-size-s;
+                    line-height: TTheme.line-height-s;
+                    color: TTheme.text-color-secondary;
+                    horizontal-alignment: right;
+                    vertical-alignment: center;
+                }
+            }
+
+            TText {
+                text: root.text;
+                wrap: word-wrap;
+                color: TTheme.text-color-secondary;
+                // Step changes read out without moving focus.
+                accessible-live-region: AccessibleLiveness.polite;
+            }
+
+            HorizontalLayout {
+                spacing: TTheme.spacing-2;
+
+                // Absorbs the leftover row space so the buttons stay
+                // right-packed.
+                Rectangle { }
+
+                if root.show-skip && TGuideService.step-count > 1: TButton {
+                    variant: TButtonVariant.text;
+                    size: TSize.small;
+                    text: root.skip-text;
+                    disabled: !root.active;
+                    clicked => {
+                        root.close-requested();
+                    }
+                }
+
+                if root.show-prev && root.step > 0: TButton {
+                    variant: TButtonVariant.outline;
+                    size: TSize.small;
+                    text: root.prev-text;
+                    disabled: !root.active;
+                    clicked => {
+                        root.prev-requested();
+                    }
+                }
+
+                TButton {
+                    theme: TThemeRole.primary;
+                    size: TSize.small;
+                    text: root.step == TGuideService.step-count - 1 ? root.finish-text : root.next-text;
+                    disabled: !root.active;
+                    clicked => {
+                        root.next-requested();
+                    }
+                }
+            }
+        }
+
+        if root.show-arrow: Rectangle {
+            width: root.arrow-size;
+            height: root.arrow-size;
+            x: root.arrow-x(parent.width);
+            y: root.arrow-y(parent.height);
+            background: TTheme.bg-color-container;
+            transform-rotation: 45deg;
+            transform-origin: { x: self.width / 2, y: self.height / 2 };
+        }
+
+        // A group box, not a dialog: the mask already isolates the step and
+        // the label names it for assistive tech.
+        accessible-role: AccessibleRole.groupbox;
+        accessible-label: root.title;
+    }
+
+    // ESC goes through the shared stack, so a guide over a dialog closes the
+    // guide first. Only the current step's overlay registers.
+    TPopupStackLayer {
+        active: root.active;
+        close-requested => {
+            root.close-requested();
+        }
+    }
+}

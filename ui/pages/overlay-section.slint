@@ -20,6 +20,8 @@ import {
     TActionSheetItem,
     TTooltipArea,
     TTooltipPlacement,
+    TGuideService,
+    TGuideOverlay,
 } from "@tela-ui/overlay.slint";
 import { GallerySection } from "../gallery-section.slint";
 
@@ -52,6 +54,12 @@ export component OverlaySection inherits VerticalLayout {
         TDrawerPlacement.top,
         TDrawerPlacement.bottom,
     ];
+
+    // Guide outcome → toast, the same result-seq listening.
+    private property <int> guide-result: TGuideService.result-seq;
+    changed guide-result => {
+        TMessage.info(TGuideService.completed ? "引导: 已完成" : "引导: 已跳过");
+    }
 
     // Service dialog outcome → toast, demonstrating result-seq listening.
     private property <int> svc-dialog-result: TDialogService.result-seq;
@@ -449,6 +457,152 @@ export component OverlaySection inherits VerticalLayout {
                 vertical-alignment: center;
                 wrap: word-wrap;
                 horizontal-stretch: 1;
+            }
+        }
+    }
+
+    // ======================== TGuide ======================
+    GallerySection {
+        title: "漫游引导 TGuide";
+        code: "import { TGuideService, TGuideOverlay } from \"@tela-ui/overlay.slint\";\nimport { TButton } from \"@tela-ui/base.slint\";\n\n// 目标旁放一个, 步骤数据保存在这里; 动作只发回调:\nTGuideOverlay {\n    step: 0;\n    title: \"保存\";\n    text: \"保存当前配置\";\n    target-x: save.absolute-position.x;\n    target-y: save.absolute-position.y;\n    target-width: save.width;\n    target-height: save.height;\n    next-requested => { TGuideService.next(); }\n    close-requested => { TGuideService.close(); }\n}\n\n// 启动只传步数:\nsave := TButton {\n    text: \"开始引导\";\n    clicked => { TGuideService.start(1); }\n}";
+
+        HorizontalLayout {
+            spacing: 24px;
+
+            // The mask only covers this box: overlays decide how far the dim
+            // reaches (here the demo card, in an app maybe the whole page).
+            Rectangle {
+                width: 540px;
+                height: 300px;
+                background: TTheme.bg-color-secondarycontainer;
+                border-radius: TTheme.radius-medium;
+
+                guide-a := Rectangle {
+                    x: 24px;
+                    y: 24px;
+                    width: 140px;
+                    height: 48px;
+                    background: TTheme.bg-color-container;
+                    border-radius: TTheme.radius-default;
+
+                    TText {
+                        width: parent.width;
+                        height: parent.height;
+                        text: "目标 A";
+                        color: TTheme.text-color-secondary;
+                        horizontal-alignment: center;
+                        vertical-alignment: center;
+                    }
+                }
+
+                guide-b := Rectangle {
+                    x: 200px;
+                    y: 24px;
+                    width: 140px;
+                    height: 48px;
+                    background: TTheme.bg-color-container;
+                    border-radius: TTheme.radius-default;
+
+                    TText {
+                        width: parent.width;
+                        height: parent.height;
+                        text: "目标 B";
+                        color: TTheme.text-color-secondary;
+                        horizontal-alignment: center;
+                        vertical-alignment: center;
+                    }
+                }
+
+                guide-c := Rectangle {
+                    x: 376px;
+                    y: 24px;
+                    width: 140px;
+                    height: 48px;
+                    background: TTheme.bg-color-container;
+                    border-radius: TTheme.radius-default;
+
+                    TText {
+                        width: parent.width;
+                        height: parent.height;
+                        text: "目标 C";
+                        color: TTheme.text-color-secondary;
+                        horizontal-alignment: center;
+                        vertical-alignment: center;
+                    }
+                }
+
+                // One overlay per step: it owns the step's texts and target
+                // rect, and only draws when the service's current index is its
+                // `step`. Every action goes back to the host, the only writer
+                // of the service.
+                TGuideOverlay {
+                    step: 0;
+                    title: "第一步: 目标 A";
+                    text: "高亮遮罩挖出目标区域, 气泡自动选在有空间的一侧。";
+                    target-x: guide-a.absolute-position.x;
+                    target-y: guide-a.absolute-position.y;
+                    target-width: guide-a.width;
+                    target-height: guide-a.height;
+                    x: 0px;
+                    y: 0px;
+                    width: parent.width;
+                    height: parent.height;
+                    next-requested => { TGuideService.next(); }
+                    prev-requested => { TGuideService.prev(); }
+                    close-requested => { TGuideService.close(); }
+                }
+
+                TGuideOverlay {
+                    step: 1;
+                    title: "第二步: 目标 B";
+                    text: "轮到自己时对应序号的 overlay 才绘制, 其余实例保持惰性。";
+                    target-x: guide-b.absolute-position.x;
+                    target-y: guide-b.absolute-position.y;
+                    target-width: guide-b.width;
+                    target-height: guide-b.height;
+                    x: 0px;
+                    y: 0px;
+                    width: parent.width;
+                    height: parent.height;
+                    next-requested => { TGuideService.next(); }
+                    prev-requested => { TGuideService.prev(); }
+                    close-requested => { TGuideService.close(); }
+                }
+
+                TGuideOverlay {
+                    step: 2;
+                    title: "第三步: 目标 C";
+                    text: "按钮只发回调, 由宿主推进 global; 跳过或 ESC 结束。";
+                    target-x: guide-c.absolute-position.x;
+                    target-y: guide-c.absolute-position.y;
+                    target-width: guide-c.width;
+                    target-height: guide-c.height;
+                    x: 0px;
+                    y: 0px;
+                    width: parent.width;
+                    height: parent.height;
+                    next-requested => { TGuideService.next(); }
+                    prev-requested => { TGuideService.prev(); }
+                    close-requested => { TGuideService.close(); }
+                }
+            }
+
+            VerticalLayout {
+                spacing: 16px;
+
+                TButton {
+                    theme: TThemeRole.primary;
+                    text: "开始引导";
+                    clicked => {
+                        TGuideService.start(3);
+                    }
+                }
+
+                TCaption {
+                    width: 280px;
+                    text: "状态在 TGuideService (只存当前序号与步数), 步骤数据在各自的 TGuideOverlay; 用 step 序号认领当前步, 动作只触发回调。遮罩覆盖 overlay 自身盒子。";
+                    wrap: word-wrap;
+                }
             }
         }
     }

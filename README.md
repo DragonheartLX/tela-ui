@@ -82,7 +82,7 @@ TSwitch {
 }
 ```
 
-组件按交互类型聚合导出: `base` / `input` / `select` / `date-time` / `display` / `content` / `notice` / `overlay` / `navigation` / `experimental`; 另有服务型浮层 (对话框 / 加载 / 消息 / 通知 / 图片预览 / 命令面板 / 动作面板 / 提示) 与主题、图标、浮层栈三个全局对象。`@tela-ui/common.slint` 保留为全量兼容出口。完整参数说明与各组件已知限制见 [docs/components.md](docs/components.md); 组件统计见 [docs/architecture.md](docs/architecture.md)。
+组件按交互类型聚合导出: `base` / `input` / `select` / `date-time` / `display` / `content` / `notice` / `overlay` / `navigation` / `experimental`; 另有服务型浮层 (对话框 / 加载 / 消息 / 通知 / 图片预览 / 命令面板 / 动作面板 / 提示 / 引导) 与主题、图标、浮层栈三个全局对象。`@tela-ui/common.slint` 保留为全量兼容出口。完整参数说明与各组件已知限制见 [docs/components.md](docs/components.md); 组件统计见 [docs/architecture.md](docs/architecture.md)。
 
 ## 致谢与说明
 
