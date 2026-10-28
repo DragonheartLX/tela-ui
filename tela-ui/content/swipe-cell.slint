@@ -356,7 +356,7 @@ export component TSwipeCell inherits Rectangle {
                     // the offset feeds on itself and a slow drag oscillates
                     // (slint-semantics #40).
                     root.drag-to(self.mouse-x - self.pressed-x
-                            + root.offset - root.press-offset,
+                        + root.offset - root.press-offset,
                         self.mouse-y - self.pressed-y);
                 }
             }

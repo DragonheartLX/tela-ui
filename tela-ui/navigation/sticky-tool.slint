@@ -130,11 +130,11 @@ export component TStickyTool inherits Rectangle {
     // The bubble actually shown: click popups win over hover popups.
     private property <int> bubble-index:
         root.popup-open >= 0 && root.popup-open < root.items.length
-            && root.items[root.popup-open].trigger == TStickyToolTrigger.click
+        && root.items[root.popup-open].trigger == TStickyToolTrigger.click
         ? root.popup-open
         : root.hover-index >= 0 && root.hover-index < root.items.length
-            && root.items[root.hover-index].trigger == TStickyToolTrigger.hover
-            && root.items[root.hover-index].popup != ""
+        && root.items[root.hover-index].trigger == TStickyToolTrigger.hover
+        && root.items[root.hover-index].popup != ""
         ? root.hover-index : -1;
     private property <bool> on-right:
         root.placement == TStickyToolPlacement.right-top

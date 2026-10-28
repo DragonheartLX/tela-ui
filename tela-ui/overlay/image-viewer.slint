@@ -208,7 +208,10 @@ export component TImageViewerOverlay inherits TModalSurface {
     // compound.
     private property <length> start-pan-x: 0;
     private property <length> start-pan-y: 0;
-    animate drag-x { duration: TTheme.duration-base; enabled: !root.dragging; }
+    animate drag-x {
+        duration: TTheme.duration-base;
+        enabled: !root.dragging;
+    }
 
     // Box of the current image at the current zoom. The slots recompute their
     // own fit; these copies drive the pan clamp and the click hit test.

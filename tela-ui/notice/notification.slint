@@ -191,6 +191,7 @@ export component TNotificationOverlay inherits Rectangle {
                             icon-color: close-ta.has-hover ? TTheme.text-color-secondary : TTheme.text-color-placeholder;
                             animate icon-color { duration: TTheme.duration-fast; }
                         }
+
                         close-ta := TouchArea {
                             mouse-cursor: MouseCursor.pointer;
                             clicked => {

@@ -38,7 +38,10 @@ export component TCarousel inherits Rectangle {
     // glued to the pointer.
     private property <length> drag-x: 0;
     private property <bool> dragging: false;
-    animate drag-x { duration: TTheme.duration-slow; enabled: !root.dragging; }
+    animate drag-x {
+        duration: TTheme.duration-slow;
+        enabled: !root.dragging;
+    }
 
     clip: true;
 

@@ -94,8 +94,8 @@ export component TList inherits Rectangle {
                     title-text := TText {
                         y: (root.row-height
                             - (it.description != ""
-                                ? TTheme.line-height-m + TTheme.spacing-1 + TTheme.line-height-s
-                                : TTheme.line-height-m)) / 2;
+                            ? TTheme.line-height-m + TTheme.spacing-1 + TTheme.line-height-s
+                            : TTheme.line-height-m)) / 2;
                         width: parent.width;
                         height: TTheme.line-height-m;
                         text: it.text;

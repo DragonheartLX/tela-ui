@@ -187,8 +187,7 @@ component SplitterPaneBase inherits Rectangle {
                 icon: TIconSet.ChevronLeft;
                 size: 10px;
                 icon-color: root.disabled ? TTheme.text-color-disabled : TTheme.text-color-secondary;
-                transform-rotation:
-                    root.vertical ? (root.collapsed ? -90deg : 90deg)
+                transform-rotation: root.vertical ? (root.collapsed ? -90deg : 90deg)
                     : (root.collapsed ? 180deg : 0deg);
                 transform-origin: { x: self.width / 2, y: self.height / 2 };
                 animate transform-rotation { duration: TTheme.duration-fast; }

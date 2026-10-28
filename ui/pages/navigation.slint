@@ -3,10 +3,52 @@
 // TAffix / TAnchor / TStickyTool), 一个组件一张卡. The app's own top navigation bar is
 // the live TNavBar; this section covers the rest.
 
-import { TTheme,  TThemeRole,  TSize, TPopupPlacement } from "@tela-ui/theme.slint";
-import { TText, TIconSet, TCaption, TButton, TButtonVariant, TParagraph } from "@tela-ui/base.slint";
+import {
+    TTheme,
+    TThemeRole,
+    TSize,
+    TPopupPlacement,
+} from "@tela-ui/theme.slint";
+import {
+    TText,
+    TIconSet,
+    TCaption,
+    TButton,
+    TButtonVariant,
+    TParagraph,
+} from "@tela-ui/base.slint";
 import { TMessage } from "@tela-ui/notice.slint";
-import { TTabs, TPagination, TNavBar, TNavItem, TSideNav, TSideNavItem, TSideNavMode, TSideNavTogglePosition, TBreadcrumb, TCrumbItem, TSteps, TDropdownMenu, TDropdownMenuItem, TContextMenu, TBackTop, TTabBar, TTabBarItem, TIndexes, TFab, TFabItem, TAffix, TAffixSide, TAnchor, TAnchorItem, TStickyTool, TStickyToolPlacement, TStickyToolShape, TStickyToolType, TStickyToolTrigger } from "@tela-ui/navigation.slint";
+import {
+    TTabs,
+    TPagination,
+    TNavBar,
+    TNavItem,
+    TSideNav,
+    TSideNavItem,
+    TSideNavMode,
+    TSideNavTogglePosition,
+    TBreadcrumb,
+    TCrumbItem,
+    TSteps,
+    TDropdownMenu,
+    TDropdownMenuItem,
+    TContextMenu,
+    TBackTop,
+    TTabBar,
+    TTabBarItem,
+    TIndexes,
+    TFab,
+    TFabItem,
+    TAffix,
+    TAffixSide,
+    TAnchor,
+    TAnchorItem,
+    TStickyTool,
+    TStickyToolPlacement,
+    TStickyToolShape,
+    TStickyToolType,
+    TStickyToolTrigger,
+} from "@tela-ui/navigation.slint";
 import { GallerySection } from "../gallery-section.slint";
 import { TScrollBar } from "@tela-ui/scroll-bar.slint";
 
@@ -14,7 +56,34 @@ export component NavigationSection inherits VerticalLayout {
     in-out property <int> idx: -1;
     // TTabBar demo feedback as plain text.
     in-out property <string> tab-status: "尚未切换";
-    in-out property <[string]> idx-letters: ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"];
+    in-out property <[string]> idx-letters: [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+        "G",
+        "H",
+        "I",
+        "J",
+        "K",
+        "L",
+        "M",
+        "N",
+        "O",
+        "P",
+        "Q",
+        "R",
+        "S",
+        "T",
+        "U",
+        "V",
+        "W",
+        "X",
+        "Y",
+        "Z"
+    ];
 
     spacing: 28px;
 
@@ -81,10 +150,18 @@ export component NavigationSection inherits VerticalLayout {
                     padding: TTheme.margin-l;
                     spacing: 4px;
 
-                    if root.tab-index == 0: TParagraph { text: "首页内容：这里根据 current-index 切换显示不同的面板。"; }
-                    if root.tab-index == 1: TParagraph { text: "组件内容：TTabs 组件的下方通过 if 表达式渲染当前页。"; }
-                    if root.tab-index == 2: TParagraph { text: "文档内容：下划线位置随选中项平滑移动。"; }
-                    if root.tab-index == 3: TParagraph { text: "关于内容：Tela UI — TDesign-inspired Slint components."; }
+                    if root.tab-index == 0: TParagraph {
+                        text: "首页内容：这里根据 current-index 切换显示不同的面板。";
+                    }
+                    if root.tab-index == 1: TParagraph {
+                        text: "组件内容：TTabs 组件的下方通过 if 表达式渲染当前页。";
+                    }
+                    if root.tab-index == 2: TParagraph {
+                        text: "文档内容：下划线位置随选中项平滑移动。";
+                    }
+                    if root.tab-index == 3: TParagraph {
+                        text: "关于内容：Tela UI — TDesign-inspired Slint components.";
+                    }
                 }
             }
         }
@@ -104,7 +181,10 @@ export component NavigationSection inherits VerticalLayout {
                 current <=> root.page;
             }
 
-            TCaption { text: "当前第 \{root.page} 页"; vertical-alignment: center; }
+            TCaption {
+                text: "当前第 \{root.page} 页";
+                vertical-alignment: center;
+            }
         }
     }
 
@@ -122,10 +202,16 @@ export component NavigationSection inherits VerticalLayout {
                 items: root.gallery-nav-items;
                 current-value <=> root.gallery-nav-value;
 
-                TButton { size: TSize.small; theme: TThemeRole.primary; text: "操作"; }
+                TButton {
+                    size: TSize.small;
+                    theme: TThemeRole.primary;
+                    text: "操作";
+                }
             }
 
-            TCaption { text: "右侧操作区由 TNavBar 的子元素提供,点击菜单项切换高亮；本 gallery 页顶部的分组导航也是这个组件。"; }
+            TCaption {
+                text: "右侧操作区由 TNavBar 的子元素提供,点击菜单项切换高亮；本 gallery 页顶部的分组导航也是这个组件。";
+            }
         }
     }
 
@@ -186,7 +272,9 @@ export component NavigationSection inherits VerticalLayout {
                 Rectangle { }
             }
 
-            TParagraph { text: "左侧为可收起的图标+文本导航 (TSideNavMode.icon-text), 头部按钮切换收起, 收起后按钮自动居中, 宽度在 232px 与 64px 间平滑过渡; 中间为纯图标导航 (TSideNavMode.icon); 右侧为收起按钮置于底部的变体 (TSideNavTogglePosition.bottom)。三者共享 current-value, 选中项联动高亮; 提示为 disabled 状态。"; }
+            TParagraph {
+                text: "左侧为可收起的图标+文本导航 (TSideNavMode.icon-text), 头部按钮切换收起, 收起后按钮自动居中, 宽度在 232px 与 64px 间平滑过渡; 中间为纯图标导航 (TSideNavMode.icon); 右侧为收起按钮置于底部的变体 (TSideNavTogglePosition.bottom)。三者共享 current-value, 选中项联动高亮; 提示为 disabled 状态。";
+            }
         }
     }
 
@@ -245,7 +333,10 @@ export component NavigationSection inherits VerticalLayout {
                 Rectangle { }
             }
 
-            TCaption { text: "按钮触发需设 auto-open: false 并在 clicked 中调用 toggle(); 静态内容由内部 TouchArea 自动开合。支持图标, 禁用, 危险项与分隔线; 点击外部或选中后关闭。"; wrap: word-wrap; }
+            TCaption {
+                text: "按钮触发需设 auto-open: false 并在 clicked 中调用 toggle(); 静态内容由内部 TouchArea 自动开合。支持图标, 禁用, 危险项与分隔线; 点击外部或选中后关闭。";
+                wrap: word-wrap;
+            }
         }
     }
 
@@ -323,7 +414,9 @@ export component NavigationSection inherits VerticalLayout {
                     padding: TTheme.padding-lr-l;
                     spacing: TTheme.spacing-3;
 
-                    for i in 24: TParagraph { text: "滚动内容第 \{i + 1} 行,滚动超过阈值后右下角出现回到顶部按钮。"; }
+                    for i in 24: TParagraph {
+                        text: "滚动内容第 \{i + 1} 行,滚动超过阈值后右下角出现回到顶部按钮。";
+                    }
                 }
             }
 
@@ -383,9 +476,15 @@ export component NavigationSection inherits VerticalLayout {
                 }
             }
 
-            TCaption { text: "状态: \{root.tab-status}"; wrap: word-wrap; }
+            TCaption {
+                text: "状态: \{root.tab-status}";
+                wrap: word-wrap;
+            }
 
-            TCaption { text: "标签等宽拉伸, 选中项品牌色; 角标复用 TBadge (badge 计数 / badge-dot 红点); 顶部分隔线内建; 图示为手机宽度, 实际随容器拉伸。"; wrap: word-wrap; }
+            TCaption {
+                text: "标签等宽拉伸, 选中项品牌色; 角标复用 TBadge (badge 计数 / badge-dot 红点); 顶部分隔线内建; 图示为手机宽度, 实际随容器拉伸。";
+                wrap: word-wrap;
+            }
         }
     }
 
@@ -575,7 +674,10 @@ export component NavigationSection inherits VerticalLayout {
                 }
             }
 
-            TCaption { text: "与 TSticky 的区分: 无容器范围, 钉住后一直保持到宿主关闭; side 选顶轨/底轨, offset 是离轨距离, 底钉还需 viewport-height (未绑定时退化为随文档滚动)。pinned / changed(bool) 上报钉住态。"; wrap: word-wrap; }
+            TCaption {
+                text: "与 TSticky 的区分: 无容器范围, 钉住后一直保持到宿主关闭; side 选顶轨/底轨, offset 是离轨距离, 底钉还需 viewport-height (未绑定时退化为随文档滚动)。pinned / changed(bool) 上报钉住态。";
+                wrap: word-wrap;
+            }
         }
     }
 
@@ -710,7 +812,12 @@ export component NavigationSection inherits VerticalLayout {
                     items: [
                         { icon: TIconSet.Bell, label: "通知", popup: "消息中心" },
                         { icon: TIconSet.Plus, label: "添加", popup: "新建任务" },
-                        { icon: TIconSet.Ellipsis, label: "更多", popup: "更多操作", trigger: TStickyToolTrigger.click },
+                        {
+                            icon: TIconSet.Ellipsis,
+                            label: "更多",
+                            popup: "更多操作",
+                            trigger: TStickyToolTrigger.click
+                        },
                     ];
 
                     clicked(i) => {
@@ -733,8 +840,10 @@ export component NavigationSection inherits VerticalLayout {
                 }
             }
 
-            TCaption { text: "TDesign StickyTool 同构: placement 六向 (左右 × 上中下), shape 方/圆, type 常规 56px (图标+文案) / 紧凑 40px (纯图标); popup 为文本气泡, 悬浮或点击 (trigger) 展示在内容侧, 偏移由 offset-x / offset-y 调整。回调 clicked(i) / hovered(i)。"; wrap: word-wrap; }
+            TCaption {
+                text: "TDesign StickyTool 同构: placement 六向 (左右 × 上中下), shape 方/圆, type 常规 56px (图标+文案) / 紧凑 40px (纯图标); popup 为文本气泡, 悬浮或点击 (trigger) 展示在内容侧, 偏移由 offset-x / offset-y 调整。回调 clicked(i) / hovered(i)。";
+                wrap: word-wrap;
+            }
         }
     }
-
 }

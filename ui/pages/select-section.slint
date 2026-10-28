@@ -3,7 +3,21 @@
 
 import { TSize } from "@tela-ui/theme.slint";
 import { TCaption } from "@tela-ui/base.slint";
-import { TSelect, TSelectItem, TCheckBox, TRadioGroup, TRadioItem, TSwitch, TSegmented, TSelectInput, TTreeSelect, TCascader, TCascaderItem, TCascaderBranch, TCascaderLogic } from "@tela-ui/select.slint";
+import {
+    TSelect,
+    TSelectItem,
+    TCheckBox,
+    TRadioGroup,
+    TRadioItem,
+    TSwitch,
+    TSegmented,
+    TSelectInput,
+    TTreeSelect,
+    TCascader,
+    TCascaderItem,
+    TCascaderBranch,
+    TCascaderLogic,
+} from "@tela-ui/select.slint";
 import { TTreeItem, TTreeBranch } from "@tela-ui/content.slint";
 import { GallerySection } from "../gallery-section.slint";
 
@@ -49,7 +63,11 @@ export component SelectSection inherits VerticalLayout {
                 current-value <=> root.city-value;
             }
 
-            TCaption { text: "选中: \{root.city-value}"; vertical-alignment: center; }
+            TCaption {
+                text: "选中: \{root.city-value}";
+                vertical-alignment: center;
+            }
+
             Rectangle { }
         }
     }
@@ -62,12 +80,33 @@ export component SelectSection inherits VerticalLayout {
         HorizontalLayout {
             spacing: 24px;
 
-            TCheckBox { text: "全选"; indeterminate: root.check-a != root.check-b; checked: root.check-a && root.check-b;
-                changed(c) => { root.check-a = c; root.check-b = c; } }
-            TCheckBox { text: "选项 A"; checked <=> root.check-a; }
-            TCheckBox { text: "选项 B"; checked <=> root.check-b; }
-            TCheckBox { text: "禁用"; disabled: true; }
-            TCheckBox { text: "选中禁用"; checked: true; disabled: true; }
+            TCheckBox {
+                text: "全选";
+                indeterminate: root.check-a != root.check-b;
+                checked: root.check-a && root.check-b;
+                changed(c) => { root.check-a = c; root.check-b = c; }
+            }
+
+            TCheckBox {
+                text: "选项 A";
+                checked <=> root.check-a;
+            }
+
+            TCheckBox {
+                text: "选项 B";
+                checked <=> root.check-b;
+            }
+
+            TCheckBox {
+                text: "禁用";
+                disabled: true;
+            }
+
+            TCheckBox {
+                text: "选中禁用";
+                checked: true;
+                disabled: true;
+            }
             // Absorbs the leftover row space: with only fixed-width
             // children the layout spreads the slack between the items
             // and shoves the row against the card edge.
@@ -94,12 +133,34 @@ export component SelectSection inherits VerticalLayout {
         HorizontalLayout {
             spacing: 24px;
 
-            TSwitch { checked <=> root.switch-on; }
-            TSwitch { checked: false; }
-            TSwitch { checked: true; disabled: true; }
-            TSwitch { checked: false; disabled: true; }
-            TSwitch { size: TSize.small; checked: true; }
-            TSwitch { size: TSize.large; checked: false; }
+            TSwitch {
+                checked <=> root.switch-on;
+            }
+
+            TSwitch {
+                checked: false;
+            }
+
+            TSwitch {
+                checked: true;
+                disabled: true;
+            }
+
+            TSwitch {
+                checked: false;
+                disabled: true;
+            }
+
+            TSwitch {
+                size: TSize.small;
+                checked: true;
+            }
+
+            TSwitch {
+                size: TSize.large;
+                checked: false;
+            }
+
             Rectangle { }
         }
     }
@@ -121,7 +182,9 @@ export component SelectSection inherits VerticalLayout {
                 }
             }
 
-            TCaption { text: "当前选中下标: \{root.seg-index}"; }
+            TCaption {
+                text: "当前选中下标: \{root.seg-index}";
+            }
         }
     }
 
@@ -154,7 +217,10 @@ export component SelectSection inherits VerticalLayout {
                 Rectangle { }
             }
 
-            TCaption { text: "聚焦即列出全部, 键入按标签子串过滤 (不区分大小写); 选中项带 ✓, 回车或点击选中; 再次键入继续过滤, 不清空已选。"; wrap: word-wrap; }
+            TCaption {
+                text: "聚焦即列出全部, 键入按标签子串过滤 (不区分大小写); 选中项带 ✓, 回车或点击选中; 再次键入继续过滤, 不清空已选。";
+                wrap: word-wrap;
+            }
         }
     }
 
@@ -174,24 +240,49 @@ export component SelectSection inherits VerticalLayout {
                     root.tree-select-value = v;
                 }
 
-                TTreeItem { label: "概览"; value: "overview"; }
-                TTreeItem { label: "统计"; value: "stats"; }
+                TTreeItem {
+                    label: "概览";
+                    value: "overview";
+                }
+
+                TTreeItem {
+                    label: "统计";
+                    value: "stats";
+                }
 
                 TTreeBranch {
                     label: "文件";
                     opened: true;
-                    TTreeItem { label: "文件 1.txt"; value: "file-1"; }
-                    TTreeItem { label: "文件 2.txt"; value: "file-2"; }
+                    TTreeItem {
+                        label: "文件 1.txt";
+                        value: "file-1";
+                    }
+
+                    TTreeItem {
+                        label: "文件 2.txt";
+                        value: "file-2";
+                    }
                 }
 
                 TTreeBranch {
                     label: "设置";
-                    TTreeItem { label: "外观"; value: "appearance"; }
-                    TTreeItem { label: "禁用项"; value: "disabled-node"; enabled: false; }
+                    TTreeItem {
+                        label: "外观";
+                        value: "appearance";
+                    }
+
+                    TTreeItem {
+                        label: "禁用项";
+                        value: "disabled-node";
+                        enabled: false;
+                    }
                 }
             }
 
-            TCaption { text: "选中值: \{root.tree-select-value} — 树节点嵌套声明, 经 @children 进入下拉; 选中值经 TTreeLogic 全局共享, 点叶子选中并回填触发器。"; wrap: word-wrap; }
+            TCaption {
+                text: "选中值: \{root.tree-select-value} — 树节点嵌套声明, 经 @children 进入下拉; 选中值经 TTreeLogic 全局共享, 点叶子选中并回填触发器。";
+                wrap: word-wrap;
+            }
         }
     }
 
@@ -217,24 +308,44 @@ export component SelectSection inherits VerticalLayout {
 
                     TCascaderBranch {
                         label: "杭州市";
-                        TCascaderItem { label: "西湖区"; value: "xihu"; }
-                        TCascaderItem { label: "余杭区"; value: "yuhang"; }
+                        TCascaderItem {
+                            label: "西湖区";
+                            value: "xihu";
+                        }
+
+                        TCascaderItem {
+                            label: "余杭区";
+                            value: "yuhang";
+                        }
                     }
 
                     TCascaderBranch {
                         label: "宁波市";
-                        TCascaderItem { label: "海曙区"; value: "haishu"; }
+                        TCascaderItem {
+                            label: "海曙区";
+                            value: "haishu";
+                        }
                     }
                 }
 
                 TCascaderBranch {
                     label: "江苏省";
-                    TCascaderItem { label: "南京市"; value: "nanjing"; }
-                    TCascaderItem { label: "苏州市"; value: "suzhou"; }
+                    TCascaderItem {
+                        label: "南京市";
+                        value: "nanjing";
+                    }
+
+                    TCascaderItem {
+                        label: "苏州市";
+                        value: "suzhou";
+                    }
                 }
             }
 
-            TCaption { text: "选中值: \{root.cascader-value} — 单列逐级展开 (点分支行折叠/展开), 点叶子选中并关闭面板; 触发器回显叶子 label, 完整路径回显暂不支持 (见已知限制)。"; wrap: word-wrap; }
+            TCaption {
+                text: "选中值: \{root.cascader-value} — 单列逐级展开 (点分支行折叠/展开), 点叶子选中并关闭面板; 触发器回显叶子 label, 完整路径回显暂不支持 (见已知限制)。";
+                wrap: word-wrap;
+            }
         }
     }
 }

@@ -4,7 +4,22 @@
 
 import { TTheme, TThemeRole, TSize } from "@tela-ui/theme.slint";
 import { TText, TIcon, TIconSet, TButton, TCaption } from "@tela-ui/base.slint";
-import { TTag, TTagVariant, TBadge, TAvatar, TAvatarSize, TAvatarShape, TAvatarGroup, TAvatarGroupItem, TEmpty, TTimeline, TDescriptions, TStatistic, TComment, TCountDown } from "@tela-ui/display.slint";
+import {
+    TTag,
+    TTagVariant,
+    TBadge,
+    TAvatar,
+    TAvatarSize,
+    TAvatarShape,
+    TAvatarGroup,
+    TAvatarGroupItem,
+    TEmpty,
+    TTimeline,
+    TDescriptions,
+    TStatistic,
+    TComment,
+    TCountDown,
+} from "@tela-ui/display.slint";
 import { TMessage } from "@tela-ui/notice.slint";
 import { TScrollBar } from "@tela-ui/display.slint";
 import { TParagraph } from "@tela-ui/base.slint";
@@ -23,16 +38,59 @@ export component DisplaySection inherits VerticalLayout {
 
         HorizontalLayout {
             spacing: 8px;
-            TTag { text: "默认"; }
-            TTag { theme: TThemeRole.primary; text: "主要"; }
-            TTag { theme: TThemeRole.success; text: "成功"; }
-            TTag { theme: TThemeRole.warning; text: "警告"; }
-            TTag { theme: TThemeRole.error; text: "危险"; }
-            TTag { theme: TThemeRole.primary; variant: TTagVariant.dark; text: "深色"; }
-            TTag { theme: TThemeRole.primary; variant: TTagVariant.outline; text: "描边"; }
-            TTag { theme: TThemeRole.primary; text: "可关闭"; closable: true; }
-            TTag { theme: TThemeRole.primary; size: TSize.small; text: "小"; }
-            TTag { theme: TThemeRole.primary; size: TSize.large; text: "大"; }
+            TTag {
+                text: "默认";
+            }
+
+            TTag {
+                theme: TThemeRole.primary;
+                text: "主要";
+            }
+
+            TTag {
+                theme: TThemeRole.success;
+                text: "成功";
+            }
+
+            TTag {
+                theme: TThemeRole.warning;
+                text: "警告";
+            }
+
+            TTag {
+                theme: TThemeRole.error;
+                text: "危险";
+            }
+
+            TTag {
+                theme: TThemeRole.primary;
+                variant: TTagVariant.dark;
+                text: "深色";
+            }
+
+            TTag {
+                theme: TThemeRole.primary;
+                variant: TTagVariant.outline;
+                text: "描边";
+            }
+
+            TTag {
+                theme: TThemeRole.primary;
+                text: "可关闭";
+                closable: true;
+            }
+
+            TTag {
+                theme: TThemeRole.primary;
+                size: TSize.small;
+                text: "小";
+            }
+
+            TTag {
+                theme: TThemeRole.primary;
+                size: TSize.large;
+                text: "大";
+            }
             // Absorbs the leftover row space.
             Rectangle { }
         }
@@ -48,15 +106,29 @@ export component DisplaySection inherits VerticalLayout {
 
             TBadge {
                 count: 6;
-                TIcon { icon: TIconSet.Bell; size: 24px; icon-color: TTheme.text-color-primary; }
+                TIcon {
+                    icon: TIconSet.Bell;
+                    size: 24px;
+                    icon-color: TTheme.text-color-primary;
+                }
             }
+
             TBadge {
                 count: 128;
-                TIcon { icon: TIconSet.Mail; size: 24px; icon-color: TTheme.text-color-primary; }
+                TIcon {
+                    icon: TIconSet.Mail;
+                    size: 24px;
+                    icon-color: TTheme.text-color-primary;
+                }
             }
+
             TBadge {
                 dot: true;
-                TIcon { icon: TIconSet.Settings; size: 24px; icon-color: TTheme.text-color-primary; }
+                TIcon {
+                    icon: TIconSet.Settings;
+                    size: 24px;
+                    icon-color: TTheme.text-color-primary;
+                }
             }
 
             // Absorbs the leftover row space.
@@ -72,10 +144,25 @@ export component DisplaySection inherits VerticalLayout {
         HorizontalLayout {
             spacing: 24px;
 
-            TAvatar { text: "T"; }
-            TAvatar { size: TAvatarSize.small; text: "TD"; }
-            TAvatar { size: TAvatarSize.large; text: "龙"; }
-            TAvatar { size: TAvatarSize.extra-large; shape: TAvatarShape.square; text: ""; }
+            TAvatar {
+                text: "T";
+            }
+
+            TAvatar {
+                size: TAvatarSize.small;
+                text: "TD";
+            }
+
+            TAvatar {
+                size: TAvatarSize.large;
+                text: "龙";
+            }
+
+            TAvatar {
+                size: TAvatarSize.extra-large;
+                shape: TAvatarShape.square;
+                text: "";
+            }
 
             // Absorbs the leftover row space.
             Rectangle { }
@@ -131,7 +218,10 @@ export component DisplaySection inherits VerticalLayout {
                 Rectangle { }
             }
 
-            TCaption { text: "成员按声明顺序叠放 (后者在上), 重叠量固定 spacing-4; max-count 截断并渲染 +N 尾像。"; wrap: word-wrap; }
+            TCaption {
+                text: "成员按声明顺序叠放 (后者在上), 重叠量固定 spacing-4; max-count 截断并渲染 +N 尾像。";
+                wrap: word-wrap;
+            }
         }
     }
 
@@ -183,9 +273,21 @@ export component DisplaySection inherits VerticalLayout {
 
         TTimeline {
             items: [
-                { label: "创建订单", content: "用户提交了订单,等待支付。", theme: TThemeRole.primary },
-                { label: "支付完成", content: "微信支付 ¥199.00,交易号 202610070001。", theme: TThemeRole.success },
-                { label: "商品出库", content: "包裹已从杭州仓发出,预计明日送达。", theme: TThemeRole.default },
+                {
+                    label: "创建订单",
+                    content: "用户提交了订单,等待支付。",
+                    theme: TThemeRole.primary
+                },
+                {
+                    label: "支付完成",
+                    content: "微信支付 ¥199.00,交易号 202610070001。",
+                    theme: TThemeRole.success
+                },
+                {
+                    label: "商品出库",
+                    content: "包裹已从杭州仓发出,预计明日送达。",
+                    theme: TThemeRole.default
+                },
                 { label: "确认收货", content: "", theme: TThemeRole.default },
             ];
         }
@@ -229,9 +331,26 @@ export component DisplaySection inherits VerticalLayout {
         HorizontalLayout {
             spacing: 48px;
 
-            TStatistic { title: "总销售额"; value: "¥ 286,860"; horizontal-stretch: 0; }
-            TStatistic { title: "下载量"; value: "12,930"; suffix: "次"; theme: TThemeRole.success; horizontal-stretch: 0; }
-            TStatistic { title: "在线人数"; loading: true; horizontal-stretch: 0; }
+            TStatistic {
+                title: "总销售额";
+                value: "¥ 286,860";
+                horizontal-stretch: 0;
+            }
+
+            TStatistic {
+                title: "下载量";
+                value: "12,930";
+                suffix: "次";
+                theme: TThemeRole.success;
+                horizontal-stretch: 0;
+            }
+
+            TStatistic {
+                title: "在线人数";
+                loading: true;
+                horizontal-stretch: 0;
+            }
+
             Rectangle { }
         }
     }
@@ -252,7 +371,9 @@ export component DisplaySection inherits VerticalLayout {
                 padding: TTheme.padding-lr-l;
                 spacing: TTheme.spacing-3;
 
-                for i in 16: TParagraph { text: "滚动内容第 \{i + 1} 行 — 滑块可拖拽、可点击定位。"; }
+                for i in 16: TParagraph {
+                    text: "滚动内容第 \{i + 1} 行 — 滑块可拖拽、可点击定位。";
+                }
             }
         }
     }
@@ -295,7 +416,10 @@ export component DisplaySection inherits VerticalLayout {
                 content: "纯展示组件, 回复列表由宿主自行嵌套。";
             }
 
-            TCaption { text: "状态: \{root.comment-status}"; wrap: word-wrap; }
+            TCaption {
+                text: "状态: \{root.comment-status}";
+                wrap: word-wrap;
+            }
         }
     }
 

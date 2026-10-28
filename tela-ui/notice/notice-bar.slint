@@ -56,8 +56,8 @@ export component TNoticeBar inherits Rectangle {
     private property <length> line-h: TTheme.line-height-m;
     private property <length> text-x:
         root.icon.paths.length > 0
-            ? TTheme.padding-lr-m + 16px + TTheme.spacing-3
-            : TTheme.padding-lr-m;
+        ? TTheme.padding-lr-m + 16px + TTheme.spacing-3
+        : TTheme.padding-lr-m;
 
     if root.icon.paths.length > 0: TIcon {
         x: TTheme.padding-lr-m;

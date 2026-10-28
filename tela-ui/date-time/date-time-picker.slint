@@ -150,14 +150,14 @@ export component TDateTimePicker inherits Rectangle {
     private property <int> col-count: 5;
     private property <length> panel-w:
         2 * root.pad + root.col-count * TTheme.spacing-14
-            + (root.col-count - 1) * TTheme.spacing-2;
+        + (root.col-count - 1) * TTheme.spacing-2;
     private property <length> panel-h:
         2 * root.pad + root.visible-rows * root.item-h;
 
     // Wheel index helpers. date.day == 0 means unset (-1 in wheel terms).
     private property <int> year-idx:
         value.date.year >= root.start-year && value.date.year <= root.end-year
-            ? value.date.year - root.start-year : -1;
+        ? value.date.year - root.start-year : -1;
     private property <int> month-idx: value.date.month >= 1 ? value.date.month - 1 : -1;
     private property <int> day-idx: value.date.day >= 1 ? value.date.day - 1 : -1;
 
@@ -166,7 +166,7 @@ export component TDateTimePicker inherits Rectangle {
     private property <int> dim: root.leap(value.date.year) && value.date.month == 2 ? 29
         : value.date.month == 2 ? 28
         : value.date.month == 4 || value.date.month == 6
-            || value.date.month == 9 || value.date.month == 11 ? 30
+        || value.date.month == 9 || value.date.month == 11 ? 30
         : value.date.month >= 1 ? 31 : 31;
 
     pure function leap(y: int) -> bool {
@@ -179,9 +179,9 @@ export component TDateTimePicker inherits Rectangle {
 
     private property <string> display-text:
         root.value.date.year > 0
-            ? "\{root.value.date.year}-\{root.pad2(root.value.date.month)}-\{root.pad2(root.value.date.day)}"
-                + (root.value.hour >= 0 ? " \{root.pad2(root.value.hour)}:\{root.pad2(root.value.minute)}" : "")
-            : "";
+        ? "\{root.value.date.year}-\{root.pad2(root.value.date.month)}-\{root.pad2(root.value.date.day)}"
+        + (root.value.hour >= 0 ? " \{root.pad2(root.value.hour)}:\{root.pad2(root.value.minute)}" : "")
+        : "";
 
     function set-value(d: TDate, hour: int, minute: int) {
         root.value = { date: d, hour: hour, minute: minute };
@@ -192,7 +192,11 @@ export component TDateTimePicker inherits Rectangle {
         // Keep day clamped to the new month length; unset stays unset.
         let day = root.day-idx >= 0 ? min(root.day-idx + 1, root.dimOf(root.start-year + i, root.value.date.month)) : 0;
         root.set-value(
-            { year: root.start-year + i, month: root.value.date.month >= 1 ? root.value.date.month : 1, day: day },
+            {
+            year: root.start-year + i,
+            month: root.value.date.month >= 1 ? root.value.date.month : 1,
+            day: day
+        },
             root.value.hour >= 0 ? root.value.hour : 0,
             root.value.minute >= 0 ? root.value.minute : 0,
         );
@@ -201,7 +205,11 @@ export component TDateTimePicker inherits Rectangle {
     function pick-month(i: int) {
         let day = root.day-idx >= 0 ? min(root.day-idx + 1, root.dimOf(root.value.date.year, i + 1)) : 0;
         root.set-value(
-            { year: root.value.date.year >= root.start-year ? root.value.date.year : root.start-year, month: i + 1, day: day },
+            {
+            year: root.value.date.year >= root.start-year ? root.value.date.year : root.start-year,
+            month: i + 1,
+            day: day
+        },
             root.value.hour >= 0 ? root.value.hour : 0,
             root.value.minute >= 0 ? root.value.minute : 0,
         );
@@ -210,10 +218,10 @@ export component TDateTimePicker inherits Rectangle {
     function pick-day(i: int) {
         root.set-value(
             {
-                year: root.value.date.year > 0 ? root.value.date.year : root.start-year,
-                month: root.value.date.month >= 1 ? root.value.date.month : 1,
-                day: i + 1,
-            },
+            year: root.value.date.year > 0 ? root.value.date.year : root.start-year,
+            month: root.value.date.month >= 1 ? root.value.date.month : 1,
+            day: i + 1,
+        },
             root.value.hour >= 0 ? root.value.hour : 0,
             root.value.minute >= 0 ? root.value.minute : 0,
         );

@@ -70,6 +70,7 @@ export component TAlert inherits Rectangle {
                 icon-color: close-ta.has-hover ? TTheme.theme-color(root.theme) : TTheme.text-color-secondary;
                 animate icon-color { duration: TTheme.duration-fast; }
             }
+
             close-ta := TouchArea {
                 mouse-cursor: MouseCursor.pointer;
                 clicked => {

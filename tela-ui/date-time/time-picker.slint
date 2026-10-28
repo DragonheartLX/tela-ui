@@ -140,7 +140,7 @@ export component TTimePicker inherits Rectangle {
     private property <int> col-count: root.show-seconds ? 3 : 2;
     private property <length> panel-w:
         2 * root.pad + root.col-count * TTheme.spacing-14
-            + (root.col-count - 1) * TTheme.spacing-2;
+        + (root.col-count - 1) * TTheme.spacing-2;
     // Columns plus padding; no footer.
     private property <length> panel-h:
         2 * root.pad + root.visible-rows * root.item-h;
@@ -153,9 +153,9 @@ export component TTimePicker inherits Rectangle {
 
     private property <string> display-text:
         root.value.hour >= 0
-            ? "\{root.pad2(root.value.hour)}:\{root.pad2(root.value.minute)}"
-                + (root.show-seconds ? ":\{root.pad2(root.value.second)}" : "")
-            : "";
+        ? "\{root.pad2(root.value.hour)}:\{root.pad2(root.value.minute)}"
+        + (root.show-seconds ? ":\{root.pad2(root.value.second)}" : "")
+        : "";
 
     function pick-hour(h: int) {
         if (root.value.hour != h) {

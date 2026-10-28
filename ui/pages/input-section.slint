@@ -5,7 +5,23 @@
 import { TThemeRole, TSize } from "@tela-ui/theme.slint";
 import { TIconSet, TCaption } from "@tela-ui/base.slint";
 import { TMessage } from "@tela-ui/notice.slint";
-import { TInput, TTextArea, TInputNumber, TAutoComplete, TAutoCompleteItem, TSearch, TInputAdornment, TForm, TFormItem, TSlider, TRate, TTagInput, TRangeInput, TOtpInput, TMention } from "@tela-ui/input.slint";
+import {
+    TInput,
+    TTextArea,
+    TInputNumber,
+    TAutoComplete,
+    TAutoCompleteItem,
+    TSearch,
+    TInputAdornment,
+    TForm,
+    TFormItem,
+    TSlider,
+    TRate,
+    TTagInput,
+    TRangeInput,
+    TOtpInput,
+    TMention,
+} from "@tela-ui/input.slint";
 import { GallerySection } from "../gallery-section.slint";
 
 export component InputSection inherits VerticalLayout {
@@ -62,6 +78,7 @@ export component InputSection inherits VerticalLayout {
                     input-type: password;
                     clearable: false;
                 }
+
                 TInput {
                     width: 210px;
                     placeholder-text: "验证码";
@@ -71,8 +88,19 @@ export component InputSection inherits VerticalLayout {
                         TMessage.info("验证码已发送");
                     }
                 }
-                TInput { width: 170px; placeholder-text: "禁用状态"; disabled: true; }
-                TInput { width: 170px; text: "只读状态"; read-only: true; }
+
+                TInput {
+                    width: 170px;
+                    placeholder-text: "禁用状态";
+                    disabled: true;
+                }
+
+                TInput {
+                    width: 170px;
+                    text: "只读状态";
+                    read-only: true;
+                }
+
                 Rectangle { }
             }
         }
@@ -104,9 +132,27 @@ export component InputSection inherits VerticalLayout {
                 max: 10;
                 value <=> root.num-value;
             }
-            TInputNumber { width: 160px; value: 3.5; min: 0; max: 10; step: 0.5; editable: false; }
-            TInputNumber { width: 160px; value: 2; disabled: true; }
-            TCaption { text: "当前值: \{root.num-value}"; vertical-alignment: center; }
+
+            TInputNumber {
+                width: 160px;
+                value: 3.5;
+                min: 0;
+                max: 10;
+                step: 0.5;
+                editable: false;
+            }
+
+            TInputNumber {
+                width: 160px;
+                value: 2;
+                disabled: true;
+            }
+
+            TCaption {
+                text: "当前值: \{root.num-value}";
+                vertical-alignment: center;
+            }
+
             Rectangle { }
         }
     }
@@ -288,10 +334,26 @@ export component InputSection inherits VerticalLayout {
         HorizontalLayout {
             spacing: 24px;
 
-            TRate { value <=> root.rate-value; }
-            TRate { value: 2; read-only: true; }
-            TRate { size: TSize.small; theme: TThemeRole.primary; value: 4; }
-            TRate { value: 3; disabled: true; }
+            TRate {
+                value <=> root.rate-value;
+            }
+
+            TRate {
+                value: 2;
+                read-only: true;
+            }
+
+            TRate {
+                size: TSize.small;
+                theme: TThemeRole.primary;
+                value: 4;
+            }
+
+            TRate {
+                value: 3;
+                disabled: true;
+            }
+
             Rectangle { }
         }
     }
@@ -329,7 +391,10 @@ export component InputSection inherits VerticalLayout {
                 Rectangle { }
             }
 
-            TCaption { text: "回车添加, 空文本退格删除末位; 点标签 x 删除 (索引与标签一起上报, 模型由宿主删除); 标签不换行, 重复校验在宿主侧做。"; wrap: word-wrap; }
+            TCaption {
+                text: "回车添加, 空文本退格删除末位; 点标签 x 删除 (索引与标签一起上报, 模型由宿主删除); 标签不换行, 重复校验在宿主侧做。";
+                wrap: word-wrap;
+            }
         }
     }
 
@@ -366,7 +431,10 @@ export component InputSection inherits VerticalLayout {
                 Rectangle { }
             }
 
-            TCaption { text: "两侧数值区间 (当前 \{round(root.range-min)} ~ \{round(root.range-max)}); 一侧变更会拖动另一侧保持有序, 空缓冲视为未输入不触发 changed, 失焦按存值重排文本。"; wrap: word-wrap; }
+            TCaption {
+                text: "两侧数值区间 (当前 \{round(root.range-min)} ~ \{round(root.range-max)}); 一侧变更会拖动另一侧保持有序, 空缓冲视为未输入不触发 changed, 失焦按存值重排文本。";
+                wrap: word-wrap;
+            }
         }
     }
 
@@ -394,7 +462,10 @@ export component InputSection inherits VerticalLayout {
                 Rectangle { }
             }
 
-            TCaption { text: "输完一段自动跳下一格, 空段退格回上一格; 全部填满触发 completed。每段缓冲全文上报 changed(i, text), 溢出/粘贴分发由宿主改写 values。"; wrap: word-wrap; }
+            TCaption {
+                text: "输完一段自动跳下一格, 空段退格回上一格; 全部填满触发 completed。每段缓冲全文上报 changed(i, text), 溢出/粘贴分发由宿主改写 values。";
+                wrap: word-wrap;
+            }
         }
     }
 
@@ -430,7 +501,10 @@ export component InputSection inherits VerticalLayout {
                 }
             }
 
-            TCaption { text: "输入 @ 触发建议 (演示为示意): 触发解析、建议填充 (suggestions) 与选中文本拼接都在宿主侧; 面板锚输入框而非光标 (TextInput 不暴露光标几何)。"; wrap: word-wrap; }
+            TCaption {
+                text: "输入 @ 触发建议 (演示为示意): 触发解析、建议填充 (suggestions) 与选中文本拼接都在宿主侧; 面板锚输入框而非光标 (TextInput 不暴露光标几何)。";
+                wrap: word-wrap;
+            }
         }
     }
 }

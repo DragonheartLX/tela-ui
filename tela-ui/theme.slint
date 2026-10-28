@@ -17,11 +17,11 @@
 
 import { Palette } from "std-widgets.slint";
 import { TPrimaryColor, TAppThemeConfig } from "structs/theme.slint";
-import { TThemeRole,  TSize } from "structs/enums.slint";
+import { TThemeRole, TSize } from "structs/enums.slint";
 
 // Shared semantic enums ride along with the tokens, so one import covers
 // both: import { TTheme,  TThemeRole,  TSize } from "@tela-ui/theme.slint";
-export { TThemeRole,  TSize,  TPopupPlacement } from "structs/enums.slint";
+export { TThemeRole, TSize, TPopupPlacement } from "structs/enums.slint";
 import { TLightColors, TDarkColors } from "colors.slint";
 
 export global TTheme {
@@ -41,12 +41,10 @@ export global TTheme {
         animation-duration: 200ms,
         duration-fast: 150ms,
         duration-slow: 300ms,
-
         primary: TLightColors.brand,
         success: TLightColors.success,
         warning: TLightColors.warning,
         error: TLightColors.error,
-
         bg-page: #eeeeee,
         bg-container: #ffffff,
         bg-container-hover: #f3f3f3,
@@ -62,7 +60,6 @@ export global TTheme {
         bg-secondarycomponent-active: #a6a6a6,
         bg-component-disabled: #eeeeee,
         bg-specialcomponent: #ffffff,
-
         text-primary: rgba(0, 0, 0, 0.9),
         text-secondary: rgba(0, 0, 0, 0.6),
         text-placeholder: rgba(0, 0, 0, 0.4),
@@ -71,13 +68,10 @@ export global TTheme {
         text-brand: #0052d9,
         text-link: #003cab,
         text-watermark: rgba(0, 0, 0, 0.1),
-
         border-level-1: #e8e8e8,
         border-level-2: #dddddd,
-
         mask-active: rgba(0, 0, 0, 0.6),
         mask-disabled: rgba(255, 255, 255, 0.6),
-
         shadow-1-color: rgba(0, 0, 0, 0.08),
         shadow-1-blur: 10px,
         shadow-1-offset-y: 2px,
@@ -87,14 +81,12 @@ export global TTheme {
         shadow-3-color: rgba(0, 0, 0, 0.12),
         shadow-3-blur: 24px,
         shadow-3-offset-y: 8px,
-
         radius-small: 2px,
         radius-default: 3px,
         radius-medium: 6px,
         radius-large: 9px,
         radius-extra-large: 12px,
         radius-round: 999px,
-
         spacing-1: 2px,
         spacing-2: 4px,
         spacing-3: 6px,
@@ -111,24 +103,20 @@ export global TTheme {
         spacing-14: 56px,
         spacing-15: 64px,
         spacing-16: 72px,
-
         padding-lr-xs: 4px,
         padding-lr-s: 8px,
         padding-lr-m: 12px,
         padding-lr-l: 16px,
         padding-lr-xl: 24px,
-
         margin-xs: 4px,
         margin-s: 8px,
         margin-m: 12px,
         margin-l: 16px,
         margin-xl: 20px,
         margin-xxl: 24px,
-
         height-s: 24px,
         height-m: 32px,
         height-l: 40px,
-
         font-family: "Microsoft YaHei",
         font-family-medium: "Microsoft YaHei",
         font-weight-regular: 400,
@@ -159,12 +147,10 @@ export global TTheme {
         animation-duration: 200ms,
         duration-fast: 150ms,
         duration-slow: 300ms,
-
         primary: TDarkColors.brand,
         success: TDarkColors.success,
         warning: TDarkColors.warning,
         error: TDarkColors.error,
-
         bg-page: #181818,
         bg-container: #242424,
         bg-container-hover: #2c2c2c,
@@ -180,7 +166,6 @@ export global TTheme {
         bg-secondarycomponent-active: #777777,
         bg-component-disabled: #2c2c2c,
         bg-specialcomponent: transparent,
-
         text-primary: rgba(255, 255, 255, 0.9),
         text-secondary: rgba(255, 255, 255, 0.55),
         text-placeholder: rgba(255, 255, 255, 0.35),
@@ -189,13 +174,10 @@ export global TTheme {
         text-brand: #4582e6,
         text-link: #4582e6,
         text-watermark: rgba(255, 255, 255, 0.1),
-
         border-level-1: #393939,
         border-level-2: #5e5e5e,
-
         mask-active: rgba(0, 0, 0, 0.4),
         mask-disabled: rgba(0, 0, 0, 0.6),
-
         shadow-1-color: rgba(0, 0, 0, 0.3),
         shadow-1-blur: 10px,
         shadow-1-offset-y: 2px,
@@ -205,14 +187,12 @@ export global TTheme {
         shadow-3-color: rgba(0, 0, 0, 0.5),
         shadow-3-blur: 24px,
         shadow-3-offset-y: 8px,
-
         radius-small: 2px,
         radius-default: 3px,
         radius-medium: 6px,
         radius-large: 9px,
         radius-extra-large: 12px,
         radius-round: 999px,
-
         spacing-1: 2px,
         spacing-2: 4px,
         spacing-3: 6px,
@@ -229,24 +209,20 @@ export global TTheme {
         spacing-14: 56px,
         spacing-15: 64px,
         spacing-16: 72px,
-
         padding-lr-xs: 4px,
         padding-lr-s: 8px,
         padding-lr-m: 12px,
         padding-lr-l: 16px,
         padding-lr-xl: 24px,
-
         margin-xs: 4px,
         margin-s: 8px,
         margin-m: 12px,
         margin-l: 16px,
         margin-xl: 20px,
         margin-xxl: 24px,
-
         height-s: 24px,
         height-m: 32px,
         height-l: 40px,
-
         font-family: "Microsoft YaHei",
         font-family-medium: "Microsoft YaHei",
         font-weight-regular: 400,
@@ -468,9 +444,9 @@ export global TTheme {
     // Callers that must keep the default theme gray check for TThemeRole.default first.
     public pure function theme-scheme(t: TThemeRole) -> TPrimaryColor {
         t == TThemeRole.success ? root.theme.success
-        : t == TThemeRole.warning ? root.theme.warning
-        : t == TThemeRole.error ? root.theme.error
-        : root.theme.primary;
+            : t == TThemeRole.warning ? root.theme.warning
+            : t == TThemeRole.error ? root.theme.error
+            : root.theme.primary;
     }
 
     public pure function theme-color(t: TThemeRole) -> color {
@@ -500,26 +476,26 @@ export global TTheme {
     // Control metrics by `TSize`, shared by TButton / TSelect / TLink / ...
     public pure function size-height(s: TSize) -> length {
         s == TSize.small ? root.theme.height-s
-        : s == TSize.large ? root.theme.height-l
-        : root.theme.height-m;
+            : s == TSize.large ? root.theme.height-l
+            : root.theme.height-m;
     }
 
     public pure function size-font(s: TSize) -> length {
         s == TSize.small ? root.theme.font-size-s
-        : s == TSize.large ? root.theme.font-size-l
-        : root.theme.font-size-m;
+            : s == TSize.large ? root.theme.font-size-l
+            : root.theme.font-size-m;
     }
 
     // TDesign line box paired with `size-font`; pass it to TText.line-height.
     public pure function size-line-height(s: TSize) -> length {
         s == TSize.small ? root.theme.line-height-s
-        : s == TSize.large ? root.theme.line-height-l
-        : root.theme.line-height-m;
+            : s == TSize.large ? root.theme.line-height-l
+            : root.theme.line-height-m;
     }
 
     public pure function size-padding(s: TSize) -> length {
         s == TSize.small ? root.theme.padding-lr-s
-        : s == TSize.large ? root.theme.padding-lr-l
-        : root.theme.padding-lr-m;
+            : s == TSize.large ? root.theme.padding-lr-l
+            : root.theme.padding-lr-m;
     }
 }

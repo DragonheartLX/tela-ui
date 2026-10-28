@@ -85,7 +85,7 @@ export component TCalendar inherits Rectangle {
     pure function before(a: TDate, b: TDate) -> bool {
         return a.year < b.year
             || (a.year == b.year && (a.month < b.month
-                || (a.month == b.month && a.day < b.day)));
+            || (a.month == b.month && a.day < b.day)));
     }
 
     pure function pad2(n: int) -> string {
@@ -121,7 +121,7 @@ export component TCalendar inherits Rectangle {
         }
         return root.range
             ? (root.valid-date(root.range-start) && root.same-date(d, root.range-start))
-                || (root.valid-date(root.range-end) && root.same-date(d, root.range-end))
+            || (root.valid-date(root.range-end) && root.same-date(d, root.range-end))
             : root.valid-date(root.value) && root.same-date(d, root.value);
     }
 

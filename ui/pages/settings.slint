@@ -32,6 +32,7 @@ export component SettingsSection inherits VerticalLayout {
                         Palette.color-scheme = ColorScheme.light;
                     }
                 }
+
                 TRadio {
                     text: "深色";
                     selected: Palette.color-scheme == ColorScheme.dark;
@@ -39,6 +40,7 @@ export component SettingsSection inherits VerticalLayout {
                         Palette.color-scheme = ColorScheme.dark;
                     }
                 }
+
                 TRadio {
                     text: "跟随系统";
                     selected: Palette.color-scheme == ColorScheme.unknown;
@@ -48,7 +50,9 @@ export component SettingsSection inherits VerticalLayout {
                 }
             }
 
-            TCaption { text: "选择即时写入 Palette.color-scheme; 跟随系统时实际模式由操作系统的深浅色设置决定, 侧边栏底部的按钮仍是亮暗快捷切换。"; }
+            TCaption {
+                text: "选择即时写入 Palette.color-scheme; 跟随系统时实际模式由操作系统的深浅色设置决定, 侧边栏底部的按钮仍是亮暗快捷切换。";
+            }
         }
     }
 
@@ -58,7 +62,9 @@ export component SettingsSection inherits VerticalLayout {
         VerticalLayout {
             spacing: 8px;
 
-            TParagraph { text: "Tela UI — TDesign 风格的 Slint 组件库。所有 token 都在 TTheme 单例上, 此页的修改即时作用于整个演示应用。"; }
+            TParagraph {
+                text: "Tela UI — TDesign 风格的 Slint 组件库。所有 token 都在 TTheme 单例上, 此页的修改即时作用于整个演示应用。";
+            }
         }
     }
 

@@ -44,7 +44,10 @@ export component TBottomSheet inherits TModalSurface {
         drop-shadow-color: TTheme.shadow-3-color;
         // The cap clips an over-tall body instead of pushing the panel off.
         clip: true;
-        animate y { duration: TTheme.duration-base; easing: ease-out; }
+        animate y {
+            duration: TTheme.duration-base;
+            easing: ease-out;
+        }
 
         // Absorbs clicks on the panel body so they cannot reach the backdrop.
         // Declared before the layout: traversal is front-to-back and starts at
@@ -95,6 +98,7 @@ export component TBottomSheet inherits TModalSurface {
                         icon-color: close-ta.has-hover ? TTheme.text-color-primary : TTheme.text-color-secondary;
                         animate icon-color { duration: TTheme.duration-fast; }
                     }
+
                     close-ta := TouchArea {
                         mouse-cursor: MouseCursor.pointer;
                         clicked => {

@@ -92,7 +92,10 @@ component TNavRow inherits Rectangle {
         icon: root.icon;
         size: 20px;
         icon-color: TTheme.text-color-secondary;
-        animate x { duration: TTheme.duration-base; easing: ease-out; }
+        animate x {
+            duration: TTheme.duration-base;
+            easing: ease-out;
+        }
         animate icon-color { duration: TTheme.duration-fast; }
 
         states [
@@ -119,8 +122,7 @@ component TNavRow inherits Rectangle {
         animate color { duration: TTheme.duration-fast; }
 
         states [
-            hovered when row-ta.has-hover && !root.disabled: {
-            }
+            hovered when row-ta.has-hover && !root.disabled: {}
             active when root.value != "" && root.value == root.current-value && !root.disabled: {
                 color: TTheme.brand-color;
             }
@@ -172,7 +174,10 @@ export component TSideNav inherits Rectangle {
     private property <bool> footer-chevron: root.collapsible && root.toggle-position == TSideNavTogglePosition.bottom;
 
     width: self.show-text ? 232px : 64px;
-    animate width { duration: TTheme.duration-base; easing: ease-out; }
+    animate width {
+        duration: TTheme.duration-base;
+        easing: ease-out;
+    }
     background: TTheme.bg-color-container;
 
     VerticalLayout {
@@ -236,7 +241,10 @@ export component TSideNav inherits Rectangle {
                     size: 16px;
                     // The 180° flip doubles as the collapsed-direction cue.
                     transform-rotation: root.show-text ? 0deg : 180deg;
-                    animate transform-rotation { duration: TTheme.duration-base; easing: ease-out; }
+                    animate transform-rotation {
+                        duration: TTheme.duration-base;
+                        easing: ease-out;
+                    }
                     icon-color: toggle-ta.has-hover ? TTheme.brand-color : TTheme.text-color-secondary;
                     animate icon-color { duration: TTheme.duration-fast; }
                 }
@@ -275,7 +283,9 @@ export component TSideNav inherits Rectangle {
             }
         }
 
-        Rectangle { vertical-stretch: 1; }
+        Rectangle {
+            vertical-stretch: 1;
+        }
 
         // Footer entries ---------------------------------------------------
         // Pinned to the bottom edge above the collapse toggle.

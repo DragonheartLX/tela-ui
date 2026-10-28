@@ -4,7 +4,7 @@
 // width; segments split it equally. Wrap it in a width-constrained container
 // when fewer/shorter options are wanted.
 
-import { TTheme,  TSize } from "../theme.slint";
+import { TTheme, TSize } from "../theme.slint";
 import { TText } from "../base/typography.slint";
 
 export component TSegmented inherits Rectangle {
@@ -75,8 +75,7 @@ export component TSegmented inherits Rectangle {
                 animate color { duration: TTheme.duration-fast; }
 
                 states [
-                    hovered when ta.has-hover && !root.disabled && i != root.current-index: {
-                    }
+                    hovered when ta.has-hover && !root.disabled && i != root.current-index: {}
                     disabled when root.disabled: {
                         color: TTheme.text-color-disabled;
                     }

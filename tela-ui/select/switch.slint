@@ -72,7 +72,10 @@ export component TSwitch inherits Rectangle {
         drop-shadow-blur: TTheme.shadow-1-blur;
         drop-shadow-offset-y: TTheme.shadow-1-offset-y;
         drop-shadow-color: TTheme.shadow-1-color;
-        animate x { duration: TTheme.duration-fast; easing: ease-out; }
+        animate x {
+            duration: TTheme.duration-fast;
+            easing: ease-out;
+        }
     }
 
     accessible-role: AccessibleRole.checkbox;

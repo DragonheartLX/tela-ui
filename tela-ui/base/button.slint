@@ -13,7 +13,7 @@ import { TText } from "typography.slint";
 import { TIcon } from "icon/icon.slint";
 import { TLoadingSpinner } from "loading.slint";
 import { TIconData } from "icon/data.slint";
-import { TThemeRole,  TSize } from "../structs/enums.slint";
+import { TThemeRole, TSize } from "../structs/enums.slint";
 export enum TButtonVariant {
     base,
     outline,
@@ -93,7 +93,6 @@ export component TButton inherits Rectangle {
             content-color: variant == TButtonVariant.base ? root.on-fill : root.text-hover;
             border-brush: variant == TButtonVariant.outline ? root.border-hover : transparent;
         }
-
         pressed when touch.pressed: {
             bg: variant == TButtonVariant.base ? root.fill-active
                 : variant == TButtonVariant.outline ? transparent
@@ -101,7 +100,6 @@ export component TButton inherits Rectangle {
             content-color: variant == TButtonVariant.base ? root.on-fill : root.text-pressed;
             border-brush: variant == TButtonVariant.outline ? root.border-pressed : transparent;
         }
-
         disabled when root.disabled: {
             bg: variant == TButtonVariant.base ? root.fill-disabled : transparent;
             content-color: variant == TButtonVariant.base ? root.on-fill-disabled : root.text-disabled;

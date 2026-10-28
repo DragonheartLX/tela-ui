@@ -2,7 +2,16 @@
 // TDateTimePicker), 一个组件一张卡.
 
 import { TCaption } from "@tela-ui/base.slint";
-import { TCalendar, TDate, TDatePicker, TTimePicker, TTime, TPicker, TDateTimePicker, TDateTime } from "@tela-ui/date-time.slint";
+import {
+    TCalendar,
+    TDate,
+    TDatePicker,
+    TTimePicker,
+    TTime,
+    TPicker,
+    TDateTimePicker,
+    TDateTime,
+} from "@tela-ui/date-time.slint";
 import { GallerySection } from "../gallery-section.slint";
 
 export component DateTimeSection inherits VerticalLayout {
@@ -54,7 +63,10 @@ export component DateTimeSection inherits VerticalLayout {
                 Rectangle { }
             }
 
-            TCaption { text: "左右箭头切换月份; 单选点击即回调, 区间选第二次点击完成。灰色日期属于相邻月份, 同样可选。"; wrap: word-wrap; }
+            TCaption {
+                text: "左右箭头切换月份; 单选点击即回调, 区间选第二次点击完成。灰色日期属于相邻月份, 同样可选。";
+                wrap: word-wrap;
+            }
         }
     }
 
@@ -86,7 +98,10 @@ export component DateTimeSection inherits VerticalLayout {
                 Rectangle { }
             }
 
-            TCaption { text: "触发器只读; 点击展开日历, 单选即关, 区间选完结束关。"; wrap: word-wrap; }
+            TCaption {
+                text: "触发器只读; 点击展开日历, 单选即关, 区间选完结束关。";
+                wrap: word-wrap;
+            }
         }
     }
 
@@ -115,7 +130,10 @@ export component DateTimeSection inherits VerticalLayout {
                 Rectangle { }
             }
 
-            TCaption { text: "触发器只读; 整列数据带动画滚动, 选中框随选中行移动; 点击行或滚轮逐格改值, 无确认按钮。"; wrap: word-wrap; }
+            TCaption {
+                text: "触发器只读; 整列数据带动画滚动, 选中框随选中行移动; 点击行或滚轮逐格改值, 无确认按钮。";
+                wrap: word-wrap;
+            }
         }
     }
 
@@ -142,7 +160,10 @@ export component DateTimeSection inherits VerticalLayout {
                 Rectangle { }
             }
 
-            TCaption { text: "每列独立取值, 点行或滚轮逐格滚动; 选中下标存于 value 数组, 请初始化成与列数等长 (短模型只有恰好填到末位的拾取能追加, 中间留空的列写不进); 无触发器与确认按钮, 联动列由宿主在 changed 里重建 options。"; wrap: word-wrap; }
+            TCaption {
+                text: "每列独立取值, 点行或滚轮逐格滚动; 选中下标存于 value 数组, 请初始化成与列数等长 (短模型只有恰好填到末位的拾取能追加, 中间留空的列写不进); 无触发器与确认按钮, 联动列由宿主在 changed 里重建 options。";
+                wrap: word-wrap;
+            }
         }
     }
 
@@ -175,7 +196,10 @@ export component DateTimeSection inherits VerticalLayout {
                 Rectangle { }
             }
 
-            TCaption { text: "年/月/日/时/分五列滚轮; 日列随年月自动收放 (闰月长度用 TCalendar 同款运算); hour < 0 表示未选时间, 拾取任一列会把其余列补成有效零值。"; wrap: word-wrap; }
+            TCaption {
+                text: "年/月/日/时/分五列滚轮; 日列随年月自动收放 (闰月长度用 TCalendar 同款运算); hour < 0 表示未选时间, 拾取任一列会把其余列补成有效零值。";
+                wrap: word-wrap;
+            }
         }
     }
 }

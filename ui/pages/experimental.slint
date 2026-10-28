@@ -14,17 +14,35 @@ export component ExperimentalSection inherits VerticalLayout {
         HorizontalLayout {
             spacing: 16px;
 
-            TSkeleton { width: 48px; height: 48px; circle: true; }
+            TSkeleton {
+                width: 48px;
+                height: 48px;
+                circle: true;
+            }
 
             VerticalLayout {
                 spacing: 8px;
 
-                TSkeleton { height: 14px; width: 260px; }
-                TSkeleton { height: 14px; width: 220px; }
-                TSkeleton { height: 14px; width: 180px; }
+                TSkeleton {
+                    height: 14px;
+                    width: 260px;
+                }
+
+                TSkeleton {
+                    height: 14px;
+                    width: 220px;
+                }
+
+                TSkeleton {
+                    height: 14px;
+                    width: 180px;
+                }
             }
 
-            TSkeleton { width: 120px; height: 80px; }
+            TSkeleton {
+                width: 120px;
+                height: 80px;
+            }
         }
     }
 
@@ -33,6 +51,8 @@ export component ExperimentalSection inherits VerticalLayout {
         title: "无边框窗口 TBorderlessWindow";
         code: "import { TBorderlessWindow } from \"@tela-ui/base.slint\";\n\nexport component MainWindow inherits TBorderlessWindow {\n    title: \"我的应用\";\n    header-height: 40px;\n\n    VerticalLayout {\n        // 窗口内容\n    }\n}";
 
-        TParagraph { text: "以 Window 为根的无边框应用窗口: no-frame 去掉系统装饰, 自绘标题栏含拖拽热区与最小化/最大化/关闭按钮, 关闭钮悬停为红色。最小化/最大化/关闭与拖拽全部纯 .slint 实现 (minimized/maximized 内建属性 + hide() + 内建 WindowMoveArea 拖拽热区)。把 TBorderlessWindow 当作应用窗口的根使用 (替代 Window), 子元素即窗口内容。"; }
+        TParagraph {
+            text: "以 Window 为根的无边框应用窗口: no-frame 去掉系统装饰, 自绘标题栏含拖拽热区与最小化/最大化/关闭按钮, 关闭钮悬停为红色。最小化/最大化/关闭与拖拽全部纯 .slint 实现 (minimized/maximized 内建属性 + hide() + 内建 WindowMoveArea 拖拽热区)。把 TBorderlessWindow 当作应用窗口的根使用 (替代 Window), 子元素即窗口内容。";
+        }
     }
 }

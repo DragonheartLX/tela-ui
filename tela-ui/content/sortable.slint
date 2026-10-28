@@ -92,7 +92,10 @@ export component TSortable inherits Rectangle {
         y: root.row-y(i);
         // 让位动画只挂在被拖行之外 (enabled 关断时当帧直达), 且挂在 y 上
         // 而非镜像属性 — 行 y 只依赖 row-y(), resize 不经此路径。
-        animate y { duration: TTheme.duration-fast; enabled: i != root.dragging; }
+        animate y {
+            duration: TTheme.duration-fast;
+            enabled: i != root.dragging;
+        }
         width: parent.width;
         height: root.row-height;
         background: TTheme.bg-color-container;

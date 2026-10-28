@@ -2,10 +2,26 @@
 // TProgress / TResult), 一个组件一张卡.
 
 import { TTheme, TThemeRole } from "@tela-ui/theme.slint";
-import { TText, TButton, TButtonVariant, TCaption, TIconSet } from "@tela-ui/base.slint";
+import {
+    TText,
+    TButton,
+    TButtonVariant,
+    TCaption,
+    TIconSet,
+} from "@tela-ui/base.slint";
 import { TSelect, TSelectItem, TSwitch } from "@tela-ui/select.slint";
 import { TSlider } from "@tela-ui/input.slint";
-import { TAlert, TNoticeBar, TMessage, TMessagePlacement, TNotification, TResult, TResultStatus, TProgress, TProgressVariant } from "@tela-ui/notice.slint";
+import {
+    TAlert,
+    TNoticeBar,
+    TMessage,
+    TMessagePlacement,
+    TNotification,
+    TResult,
+    TResultStatus,
+    TProgress,
+    TProgressVariant,
+} from "@tela-ui/notice.slint";
 import { GallerySection } from "../gallery-section.slint";
 
 export component NoticeSection inherits VerticalLayout {
@@ -54,10 +70,33 @@ export component NoticeSection inherits VerticalLayout {
         VerticalLayout {
             spacing: 12px;
 
-            TAlert { theme: TThemeRole.default; title: "信息提示"; description: "这是一条普通的信息提示,用于展示需要用户关注的内容。"; closable: true; }
-            TAlert { theme: TThemeRole.success; title: "操作成功"; description: "表单已成功提交。"; closable: true; }
-            TAlert { theme: TThemeRole.warning; title: "警告提示"; description: "磁盘剩余空间不足 10%,请及时清理。"; closable: true; }
-            TAlert { theme: TThemeRole.error; title: "错误提示"; description: "网络连接失败,请检查网络后重试。"; closable: true; }
+            TAlert {
+                theme: TThemeRole.default;
+                title: "信息提示";
+                description: "这是一条普通的信息提示,用于展示需要用户关注的内容。";
+                closable: true;
+            }
+
+            TAlert {
+                theme: TThemeRole.success;
+                title: "操作成功";
+                description: "表单已成功提交。";
+                closable: true;
+            }
+
+            TAlert {
+                theme: TThemeRole.warning;
+                title: "警告提示";
+                description: "磁盘剩余空间不足 10%,请及时清理。";
+                closable: true;
+            }
+
+            TAlert {
+                theme: TThemeRole.error;
+                title: "错误提示";
+                description: "网络连接失败,请检查网络后重试。";
+                closable: true;
+            }
         }
     }
 
@@ -95,10 +134,29 @@ export component NoticeSection inherits VerticalLayout {
             HorizontalLayout {
                 spacing: 12px;
 
-                TButton { text: "信息"; clicked => { TMessage.info("这是一条信息消息"); } }
-                TButton { theme: TThemeRole.success; text: "成功"; clicked => { TMessage.success("保存成功"); } }
-                TButton { theme: TThemeRole.warning; text: "警告"; clicked => { TMessage.warning("请注意潜在风险"); } }
-                TButton { theme: TThemeRole.error; text: "错误"; clicked => { TMessage.error("操作失败,请重试"); } }
+                TButton {
+                    text: "信息";
+                    clicked => { TMessage.info("这是一条信息消息"); }
+                }
+
+                TButton {
+                    theme: TThemeRole.success;
+                    text: "成功";
+                    clicked => { TMessage.success("保存成功"); }
+                }
+
+                TButton {
+                    theme: TThemeRole.warning;
+                    text: "警告";
+                    clicked => { TMessage.warning("请注意潜在风险"); }
+                }
+
+                TButton {
+                    theme: TThemeRole.error;
+                    text: "错误";
+                    clicked => { TMessage.error("操作失败,请重试"); }
+                }
+
                 Rectangle { }
             }
         }
@@ -115,16 +173,37 @@ export component NoticeSection inherits VerticalLayout {
             HorizontalLayout {
                 spacing: 12px;
 
-                TButton { text: "信息通知"; clicked => { TNotification.info("提示", "这是一条信息通知,右上角堆叠展示"); } }
-                TButton { theme: TThemeRole.success; text: "成功通知"; clicked => { TNotification.success("操作成功", "数据已保存"); } }
-                TButton { theme: TThemeRole.warning; text: "警告通知"; clicked => { TNotification.warning("空间不足", "磁盘剩余空间不足 10%,请及时清理,或考虑升级更大容量的磁盘以获得更好的使用体验。"); } }
-                TButton { theme: TThemeRole.error; text: "错误通知"; clicked => { TNotification.error("操作失败", "网络连接失败,请重试"); } }
+                TButton {
+                    text: "信息通知";
+                    clicked => { TNotification.info("提示", "这是一条信息通知,右上角堆叠展示"); }
+                }
+
+                TButton {
+                    theme: TThemeRole.success;
+                    text: "成功通知";
+                    clicked => { TNotification.success("操作成功", "数据已保存"); }
+                }
+
+                TButton {
+                    theme: TThemeRole.warning;
+                    text: "警告通知";
+                    clicked => { TNotification.warning("空间不足", "磁盘剩余空间不足 10%,请及时清理,或考虑升级更大容量的磁盘以获得更好的使用体验。"); }
+                }
+
+                TButton {
+                    theme: TThemeRole.error;
+                    text: "错误通知";
+                    clicked => { TNotification.error("操作失败", "网络连接失败,请重试"); }
+                }
 
                 // Absorbs the leftover row space.
                 Rectangle { }
             }
 
-            TCaption { text: "通知显示在窗口右上角, 多条自动堆叠 (最多 4 条, 满员时挤掉最旧一条), 4.5 秒后自动消失, 也可点击关闭。窗口根部需要一个 TNotificationOverlay。"; wrap: word-wrap; }
+            TCaption {
+                text: "通知显示在窗口右上角, 多条自动堆叠 (最多 4 条, 满员时挤掉最旧一条), 4.5 秒后自动消失, 也可点击关闭。窗口根部需要一个 TNotificationOverlay。";
+                wrap: word-wrap;
+            }
         }
     }
 
@@ -139,18 +218,59 @@ export component NoticeSection inherits VerticalLayout {
             HorizontalLayout {
                 spacing: 32px;
 
-                TProgress { value: root.progress-value; theme: TThemeRole.primary; horizontal-stretch: 1; animated: root.progress-animated; }
-                TProgress { value: 66; theme: TThemeRole.success; horizontal-stretch: 1; }
-                TProgress { value: 30; theme: TThemeRole.warning; horizontal-stretch: 1; }
-                TProgress { value: 90; theme: TThemeRole.error; horizontal-stretch: 1; show-label: false; }
+                TProgress {
+                    value: root.progress-value;
+                    theme: TThemeRole.primary;
+                    horizontal-stretch: 1;
+                    animated: root.progress-animated;
+                }
+
+                TProgress {
+                    value: 66;
+                    theme: TThemeRole.success;
+                    horizontal-stretch: 1;
+                }
+
+                TProgress {
+                    value: 30;
+                    theme: TThemeRole.warning;
+                    horizontal-stretch: 1;
+                }
+
+                TProgress {
+                    value: 90;
+                    theme: TThemeRole.error;
+                    horizontal-stretch: 1;
+                    show-label: false;
+                }
             }
 
             HorizontalLayout {
                 spacing: 32px;
-                TProgress { variant: TProgressVariant.circle; value: root.progress-value; theme: TThemeRole.primary; animated: root.progress-animated; }
-                TProgress { variant: TProgressVariant.circle; value: 66; theme: TThemeRole.success; }
-                TProgress { variant: TProgressVariant.circle; value: 30; theme: TThemeRole.warning; }
-                TProgress { variant: TProgressVariant.circle; value: 100; theme: TThemeRole.error; }
+                TProgress {
+                    variant: TProgressVariant.circle;
+                    value: root.progress-value;
+                    theme: TThemeRole.primary;
+                    animated: root.progress-animated;
+                }
+
+                TProgress {
+                    variant: TProgressVariant.circle;
+                    value: 66;
+                    theme: TThemeRole.success;
+                }
+
+                TProgress {
+                    variant: TProgressVariant.circle;
+                    value: 30;
+                    theme: TThemeRole.warning;
+                }
+
+                TProgress {
+                    variant: TProgressVariant.circle;
+                    value: 100;
+                    theme: TThemeRole.error;
+                }
                 // Absorbs the leftover row space.
                 Rectangle { }
             }
@@ -191,8 +311,14 @@ export component NoticeSection inherits VerticalLayout {
                     title: "提交成功";
                     description: "表单已提交,审核结果将以消息通知。";
 
-                    TButton { text: "继续填写"; }
-                    TButton { theme: TThemeRole.primary; text: "查看详情"; }
+                    TButton {
+                        text: "继续填写";
+                    }
+
+                    TButton {
+                        theme: TThemeRole.primary;
+                        text: "查看详情";
+                    }
                 }
             }
 
@@ -205,8 +331,15 @@ export component NoticeSection inherits VerticalLayout {
                     title: "提交失败";
                     description: "网络连接失败,请检查网络后重试。";
 
-                    TButton { variant: TButtonVariant.outline; text: "返回修改"; }
-                    TButton { theme: TThemeRole.error; text: "重新提交"; }
+                    TButton {
+                        variant: TButtonVariant.outline;
+                        text: "返回修改";
+                    }
+
+                    TButton {
+                        theme: TThemeRole.error;
+                        text: "重新提交";
+                    }
                 }
             }
 
@@ -249,10 +382,15 @@ export component NoticeSection inherits VerticalLayout {
                 icon: TIconSet.CircleCheck;
             }
 
-            TCaption { text: "状态: \{root.notice-status}"; wrap: word-wrap; }
+            TCaption {
+                text: "状态: \{root.notice-status}";
+                wrap: word-wrap;
+            }
 
-            TCaption { text: "单行 elide 展示, 无跑马灯; 多条内容为整条轮播 (changed 只在真切换时触发); 关闭走 visible (TAlert 同款), 宿主重新置 open 即可恢复。"; wrap: word-wrap; }
+            TCaption {
+                text: "单行 elide 展示, 无跑马灯; 多条内容为整条轮播 (changed 只在真切换时触发); 关闭走 visible (TAlert 同款), 宿主重新置 open 即可恢复。";
+                wrap: word-wrap;
+            }
         }
     }
-
 }

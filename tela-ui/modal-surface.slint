@@ -25,7 +25,10 @@ export component TModalSurface inherits Rectangle {
     opacity: root.open ? 1 : 0;
     background: TTheme.mask-active;
     z: TTheme.z-modal;
-    animate opacity { duration: TTheme.duration-base; easing: ease-out; }
+    animate opacity {
+        duration: TTheme.duration-base;
+        easing: ease-out;
+    }
 
     public function close() {
         open = false;

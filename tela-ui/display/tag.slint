@@ -14,7 +14,7 @@ import { TTheme } from "../theme.slint";
 import { TText } from "../base/typography.slint";
 import { TIcon } from "../base/icon/icon.slint";
 import { TIconSet, TIconData } from "../base/icon/data.slint";
-import { TThemeRole,  TSize } from "../structs/enums.slint";
+import { TThemeRole, TSize } from "../structs/enums.slint";
 export enum TTagVariant {
     dark,
     light,
@@ -136,6 +136,7 @@ export component TTag inherits Rectangle {
                 icon-color: close-ta.has-hover ? root.content-color : TTheme.text-color-secondary;
                 animate icon-color { duration: TTheme.duration-fast; }
             }
+
             close-ta := TouchArea {
                 enabled: !root.disabled;
                 mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;

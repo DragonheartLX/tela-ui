@@ -6,10 +6,41 @@
 
 import { TTheme } from "@tela-ui/theme.slint";
 import { Palette } from "std-widgets.slint";
-import { TBorderlessWindow, TIconSet, TParagraph, TButton, TButtonVariant } from "@tela-ui/base.slint";
-import { TTooltipOverlay, TDialog, TDialogService, TDialogServiceOverlay, TDrawer, TDrawerPlacement, TBottomSheet, TActionSheetOverlay, TActionSheetService, TImageViewerOverlay, TImageViewerService, TCommandPaletteOverlay, TCommandPaletteService, TLoadingService, TLoadingServiceOverlay } from "@tela-ui/overlay.slint";
-import { TMessageOverlay, TMessage, TNotificationOverlay } from "@tela-ui/notice.slint";
-import { TSideNav, TSideNavItem, TSideNavTogglePosition, TBackTop } from "@tela-ui/navigation.slint";
+import {
+    TBorderlessWindow,
+    TIconSet,
+    TParagraph,
+    TButton,
+    TButtonVariant,
+} from "@tela-ui/base.slint";
+import {
+    TTooltipOverlay,
+    TDialog,
+    TDialogService,
+    TDialogServiceOverlay,
+    TDrawer,
+    TDrawerPlacement,
+    TBottomSheet,
+    TActionSheetOverlay,
+    TActionSheetService,
+    TImageViewerOverlay,
+    TImageViewerService,
+    TCommandPaletteOverlay,
+    TCommandPaletteService,
+    TLoadingService,
+    TLoadingServiceOverlay,
+} from "@tela-ui/overlay.slint";
+import {
+    TMessageOverlay,
+    TMessage,
+    TNotificationOverlay,
+} from "@tela-ui/notice.slint";
+import {
+    TSideNav,
+    TSideNavItem,
+    TSideNavTogglePosition,
+    TBackTop,
+} from "@tela-ui/navigation.slint";
 import { TScrollBar } from "@tela-ui/scroll-bar.slint";
 
 import { BasicsSection } from "pages/basics.slint";
@@ -29,8 +60,8 @@ export component MainWindow inherits TBorderlessWindow {
     // OS-level window icon (taskbar etc.): the exported LayoutDashboard logo.
     icon: @image-url("assets/logo.svg");
     logo: TIconSet.LayoutDashboard;
-    preferred-width: 1200px;
-    preferred-height: 800px;
+    preferred-width: 1280px;
+    preferred-height: 720px;
     // Below this the page content overflows and the ScrollView grows a
     // horizontal scrollbar.
     min-width: 960px;
@@ -67,16 +98,16 @@ export component MainWindow inherits TBorderlessWindow {
 
     pure function page-index(name: string) -> int {
         name == "input" ? 1
-        : name == "select" ? 2
-        : name == "date-time" ? 3
-        : name == "display" ? 4
-        : name == "content" ? 5
-        : name == "notice" ? 6
-        : name == "overlay" ? 7
-        : name == "navigation" ? 8
-        : name == "experimental" ? 9
-        : name == "settings" ? 10
-        : 0;
+            : name == "select" ? 2
+            : name == "date-time" ? 3
+            : name == "display" ? 4
+            : name == "content" ? 5
+            : name == "notice" ? 6
+            : name == "overlay" ? 7
+            : name == "navigation" ? 8
+            : name == "experimental" ? 9
+            : name == "settings" ? 10
+            : 0;
     }
 
     // Per-page scroll memory: a 100ms cadence timer snapshots the live
@@ -151,6 +182,7 @@ export component MainWindow inherits TBorderlessWindow {
             }
         }
     }
+
     private property <bool> restore-armed: false;
     private property <length> restore-target: 0px;
     private property <length> restore-height: 0px;
@@ -203,13 +235,27 @@ export component MainWindow inherits TBorderlessWindow {
                         padding-bottom: 32px;
                         spacing: 28px;
 
-                        if root.group-value == "basics": BasicsSection { vertical-stretch: 0; }
-                        if root.group-value == "input": InputSection { vertical-stretch: 0; }
-                        if root.group-value == "select": SelectSection { vertical-stretch: 0; }
-                        if root.group-value == "date-time": DateTimeSection { vertical-stretch: 0; }
-                        if root.group-value == "display": DisplaySection { vertical-stretch: 0; }
-                        if root.group-value == "content": ContentSection { vertical-stretch: 0; }
-                        if root.group-value == "notice": NoticeSection { vertical-stretch: 0; }
+                        if root.group-value == "basics": BasicsSection {
+                            vertical-stretch: 0;
+                        }
+                        if root.group-value == "input": InputSection {
+                            vertical-stretch: 0;
+                        }
+                        if root.group-value == "select": SelectSection {
+                            vertical-stretch: 0;
+                        }
+                        if root.group-value == "date-time": DateTimeSection {
+                            vertical-stretch: 0;
+                        }
+                        if root.group-value == "display": DisplaySection {
+                            vertical-stretch: 0;
+                        }
+                        if root.group-value == "content": ContentSection {
+                            vertical-stretch: 0;
+                        }
+                        if root.group-value == "notice": NoticeSection {
+                            vertical-stretch: 0;
+                        }
                         if root.group-value == "overlay": OverlaySection {
                             vertical-stretch: 0;
                             dialog-open <=> root.dialog-open;
@@ -217,13 +263,21 @@ export component MainWindow inherits TBorderlessWindow {
                             sheet-open <=> root.sheet-open;
                             drawer-placement <=> root.drawer-placement;
                         }
-                        if root.group-value == "navigation": NavigationSection { vertical-stretch: 0; }
-                        if root.group-value == "experimental": ExperimentalSection { vertical-stretch: 0; }
-                        if root.group-value == "settings": SettingsSection { vertical-stretch: 0; }
+                        if root.group-value == "navigation": NavigationSection {
+                            vertical-stretch: 0;
+                        }
+                        if root.group-value == "experimental": ExperimentalSection {
+                            vertical-stretch: 0;
+                        }
+                        if root.group-value == "settings": SettingsSection {
+                            vertical-stretch: 0;
+                        }
 
                         // Spacer: keep sections at their natural height when the
                         // viewport is taller than the content.
-                        Rectangle { vertical-stretch: 1; }
+                        Rectangle {
+                            vertical-stretch: 1;
+                        }
                     }
                 }
 
@@ -251,7 +305,10 @@ export component MainWindow inherits TBorderlessWindow {
         placement <=> root.drawer-placement;
         title: "抽屉标题";
 
-        TParagraph { text: "这是 Tela UI 的抽屉组件,从窗口边缘滑出,适合放置表单、详情等较大面积的临时内容。"; }
+        TParagraph {
+            text: "这是 Tela UI 的抽屉组件,从窗口边缘滑出,适合放置表单、详情等较大面积的临时内容。";
+        }
+
         TButton {
             variant: TButtonVariant.outline;
             text: "关闭抽屉";
@@ -263,7 +320,10 @@ export component MainWindow inherits TBorderlessWindow {
         open <=> root.sheet-open;
         title: "底部弹层标题";
 
-        TParagraph { text: "TBottomSheet 从窗口底边滑出,高度随内容,由 TModalSurface 提供遮罩、ESC 与点击遮罩关闭。"; }
+        TParagraph {
+            text: "TBottomSheet 从窗口底边滑出,高度随内容,由 TModalSurface 提供遮罩、ESC 与点击遮罩关闭。";
+        }
+
         TButton {
             variant: TButtonVariant.outline;
             text: "关闭弹层";
@@ -294,5 +354,12 @@ export component MainWindow inherits TBorderlessWindow {
 // TLoadingService rides along so Rust can show/hide the fullscreen loading.
 // The P5 services ride along too: every global-driven overlay is drivable
 // from Rust only when the global is exported from the main .slint.
-export { TTheme, TLoadingService, TDialogService, TActionSheetService, TImageViewerService, TCommandPaletteService }
+export {
+    TTheme,
+    TLoadingService,
+    TDialogService,
+    TActionSheetService,
+    TImageViewerService,
+    TCommandPaletteService,
+}
 export { Palette } from "std-widgets.slint";

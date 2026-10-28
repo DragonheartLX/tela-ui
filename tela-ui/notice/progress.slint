@@ -5,7 +5,7 @@
 
 import { TTheme } from "../theme.slint";
 import { TText } from "../base/typography.slint";
-import { TThemeRole,  TSize } from "../structs/enums.slint";
+import { TThemeRole, TSize } from "../structs/enums.slint";
 
 export enum TProgressVariant {
     line,
@@ -27,7 +27,10 @@ export component TProgress inherits Rectangle {
     private property <float> p: max(0, min(100, value)) / 100;
     // `enabled:` rather than a mount/unmount switch, so the default snaps the
     // current frame to the target value instead of running a 200ms animation.
-    animate p { enabled: root.animated; duration: TTheme.duration-base; }
+    animate p {
+        enabled: root.animated;
+        duration: TTheme.duration-base;
+    }
     private property <length> th:
         size == TSize.small ? 4px
         : size == TSize.large ? 10px
@@ -91,9 +94,28 @@ export component TProgress inherits Rectangle {
             stroke: TTheme.bg-color-component;
             stroke-width: sw * 1px;
 
-            MoveTo { x: 12; y: 12 - parent.r; }
-            ArcTo { x: 12; y: 12 + parent.r; radius-x: parent.r; radius-y: parent.r; sweep: true; large-arc: false; }
-            ArcTo { x: 12; y: 12 - parent.r; radius-x: parent.r; radius-y: parent.r; sweep: true; large-arc: false; }
+            MoveTo {
+                x: 12;
+                y: 12 - parent.r;
+            }
+
+            ArcTo {
+                x: 12;
+                y: 12 + parent.r;
+                radius-x: parent.r;
+                radius-y: parent.r;
+                sweep: true;
+                large-arc: false;
+            }
+
+            ArcTo {
+                x: 12;
+                y: 12 - parent.r;
+                radius-x: parent.r;
+                radius-y: parent.r;
+                sweep: true;
+                large-arc: false;
+            }
         }
 
         // Value arc: starts at 12 o'clock, sweeps clockwise.
@@ -115,10 +137,12 @@ export component TProgress inherits Rectangle {
                 x: 12 - parent.r * sin(-0.0001 * 360deg);
                 y: 12 - parent.r * cos(0.0001 * 360deg);
             }
+
             LineTo {
                 x: 12 - parent.r * sin(-0.0002 * 360deg);
                 y: 12 - parent.r * cos(0.0002 * 360deg);
             }
+
             ArcTo {
                 x: 12 - parent.r * sin(-parent.sweep * 360deg);
                 y: 12 - parent.r * cos(parent.sweep * 360deg);

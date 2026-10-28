@@ -52,14 +52,14 @@ export component TAffix inherits Rectangle {
         root.side == TAffixSide.bottom && root.viewport-height > 0px;
     private property <bool> is-pinned:
         root.enabled && (root.on-bottom
-            ? root.y-follow >= root.viewport-height - root.offset - root.height
-            : root.y-follow <= root.offset);
+        ? root.y-follow >= root.viewport-height - root.offset - root.height
+        : root.y-follow <= root.offset);
 
     x: 0;
     y: !root.enabled ? root.y-follow
         : root.on-bottom
-            ? Math.min(root.viewport-height - root.offset - root.height, root.y-follow)
-            : Math.max(root.offset, root.y-follow);
+        ? Math.min(root.viewport-height - root.offset - root.height, root.y-follow)
+        : Math.max(root.offset, root.y-follow);
 
     changed is-pinned => { root.changed(root.is-pinned); }
 

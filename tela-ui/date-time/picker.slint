@@ -123,7 +123,7 @@ export component TPicker inherits Rectangle {
     private property <int> col-count: root.columns.length;
     private property <length> panel-w:
         2 * root.pad + root.col-count * TTheme.spacing-14
-            + max(0, root.col-count - 1) * TTheme.spacing-2;
+        + max(0, root.col-count - 1) * TTheme.spacing-2;
     private property <length> panel-h:
         2 * root.pad + root.visible-rows * root.item-height;
 

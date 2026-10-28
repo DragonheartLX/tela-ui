@@ -109,7 +109,7 @@ export global TCommandPaletteService {
     public pure function hit(command: TCommandItem) -> bool {
         return self.keyword == ""
             || command.label.to-lowercase().replace-all(self.keyword.to-lowercase(), "")
-                != command.label.to-lowercase();
+            != command.label.to-lowercase();
     }
 }
 
@@ -365,7 +365,7 @@ export component TCommandPaletteOverlay inherits TModalSurface {
                             }
                         }
                     }
-            }
+                }
             }
 
             // `active-index` names the first match, so a negative one is

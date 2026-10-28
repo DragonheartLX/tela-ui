@@ -53,11 +53,11 @@ export component TDatePicker inherits Rectangle {
 
     private property <string> display-text:
         root.range
-            ? (root.range-start.year > 0
-                ? root.date-label(root.range-start)
-                    + (root.range-end.year > 0 ? " ~ " + root.date-label(root.range-end) : " ~")
-                : "")
-            : (root.value.year > 0 ? root.date-label(root.value) : "");
+        ? (root.range-start.year > 0
+        ? root.date-label(root.range-start)
+        + (root.range-end.year > 0 ? " ~ " + root.date-label(root.range-end) : " ~")
+        : "")
+        : (root.value.year > 0 ? root.date-label(root.value) : "");
 
     function sync-view() {
         if (root.range && root.range-start.year > 0) {

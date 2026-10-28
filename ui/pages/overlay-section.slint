@@ -7,7 +7,20 @@ import { TTheme, TThemeRole, TPopupPlacement } from "@tela-ui/theme.slint";
 import { TText, TButton, TButtonVariant, TCaption } from "@tela-ui/base.slint";
 import { TSelect, TSelectItem } from "@tela-ui/select.slint";
 import { TMessage } from "@tela-ui/notice.slint";
-import { TDrawerPlacement, TPopconfirm, TPopover, TDialogService, TLoadingService, TImageViewerService, TCommandPaletteService, TCommandItem, TActionSheetService, TActionSheetItem, TTooltipArea, TTooltipPlacement } from "@tela-ui/overlay.slint";
+import {
+    TDrawerPlacement,
+    TPopconfirm,
+    TPopover,
+    TDialogService,
+    TLoadingService,
+    TImageViewerService,
+    TCommandPaletteService,
+    TCommandItem,
+    TActionSheetService,
+    TActionSheetItem,
+    TTooltipArea,
+    TTooltipPlacement,
+} from "@tela-ui/overlay.slint";
 import { GallerySection } from "../gallery-section.slint";
 
 export component OverlaySection inherits VerticalLayout {
@@ -106,8 +119,19 @@ export component OverlaySection inherits VerticalLayout {
         HorizontalLayout {
             spacing: 12px;
 
-            TButton { variant: TButtonVariant.outline; theme: TThemeRole.primary; text: "打开对话框"; clicked => { root.dialog-open = true; } }
-            TCaption { text: "对话框本体挂载在窗口根部 (MainWindow), 点击遮罩或按钮关闭。"; vertical-alignment: center; wrap: word-wrap; horizontal-stretch: 1; }
+            TButton {
+                variant: TButtonVariant.outline;
+                theme: TThemeRole.primary;
+                text: "打开对话框";
+                clicked => { root.dialog-open = true; }
+            }
+
+            TCaption {
+                text: "对话框本体挂载在窗口根部 (MainWindow), 点击遮罩或按钮关闭。";
+                vertical-alignment: center;
+                wrap: word-wrap;
+                horizontal-stretch: 1;
+            }
         }
     }
 
@@ -119,9 +143,25 @@ export component OverlaySection inherits VerticalLayout {
         HorizontalLayout {
             spacing: 12px;
 
-            TButton { variant: TButtonVariant.outline; theme: TThemeRole.primary; text: "服务式 confirm"; clicked => { TDialogService.confirm("服务式确认框", "深层组件代码或 Rust 皆可免接线直接调用, 结果经 result-seq 广播。"); } }
-            TButton { variant: TButtonVariant.outline; text: "服务式 alert"; clicked => { TDialogService.alert("服务式警示框", "alert() 只有确认按钮, 适合纯告知场景。"); } }
-            TCaption { text: "ESC / 遮罩 / 按钮三条关闭路径都算一次结果, 右上角 toast 展示结果。"; vertical-alignment: center; wrap: word-wrap; horizontal-stretch: 1; }
+            TButton {
+                variant: TButtonVariant.outline;
+                theme: TThemeRole.primary;
+                text: "服务式 confirm";
+                clicked => { TDialogService.confirm("服务式确认框", "深层组件代码或 Rust 皆可免接线直接调用, 结果经 result-seq 广播。"); }
+            }
+
+            TButton {
+                variant: TButtonVariant.outline;
+                text: "服务式 alert";
+                clicked => { TDialogService.alert("服务式警示框", "alert() 只有确认按钮, 适合纯告知场景。"); }
+            }
+
+            TCaption {
+                text: "ESC / 遮罩 / 按钮三条关闭路径都算一次结果, 右上角 toast 展示结果。";
+                vertical-alignment: center;
+                wrap: word-wrap;
+                horizontal-stretch: 1;
+            }
         }
     }
 
@@ -133,8 +173,19 @@ export component OverlaySection inherits VerticalLayout {
         HorizontalLayout {
             spacing: 12px;
 
-            TButton { variant: TButtonVariant.outline; theme: TThemeRole.primary; text: "全屏加载 2 秒"; clicked => { TLoadingService.show("拼命加载中…"); load-timer.start(); } }
-            TCaption { text: "全屏遮罩阻断指针输入; 是状态而非浮层, ESC 不关闭。"; vertical-alignment: center; wrap: word-wrap; horizontal-stretch: 1; }
+            TButton {
+                variant: TButtonVariant.outline;
+                theme: TThemeRole.primary;
+                text: "全屏加载 2 秒";
+                clicked => { TLoadingService.show("拼命加载中…"); load-timer.start(); }
+            }
+
+            TCaption {
+                text: "全屏遮罩阻断指针输入; 是状态而非浮层, ESC 不关闭。";
+                vertical-alignment: center;
+                wrap: word-wrap;
+                horizontal-stretch: 1;
+            }
         }
     }
 
@@ -155,8 +206,19 @@ export component OverlaySection inherits VerticalLayout {
                 }
             }
 
-            TButton { variant: TButtonVariant.outline; theme: TThemeRole.primary; text: "打开抽屉"; clicked => { root.drawer-open = true; } }
-            TCaption { text: "抽屉本体挂载在窗口根部, 从指定边缘滑出。"; vertical-alignment: center; wrap: word-wrap; horizontal-stretch: 1; }
+            TButton {
+                variant: TButtonVariant.outline;
+                theme: TThemeRole.primary;
+                text: "打开抽屉";
+                clicked => { root.drawer-open = true; }
+            }
+
+            TCaption {
+                text: "抽屉本体挂载在窗口根部, 从指定边缘滑出。";
+                vertical-alignment: center;
+                wrap: word-wrap;
+                horizontal-stretch: 1;
+            }
         }
     }
 
@@ -168,9 +230,25 @@ export component OverlaySection inherits VerticalLayout {
         HorizontalLayout {
             spacing: 12px;
 
-            TButton { variant: TButtonVariant.outline; theme: TThemeRole.primary; text: "预览第 1 张"; clicked => { TImageViewerService.open(root.viewer-images, 0); } }
-            TButton { variant: TButtonVariant.outline; text: "预览第 3 张"; clicked => { TImageViewerService.open(root.viewer-images, 2); } }
-            TCaption { text: "全屏遮罩上按原图比例适配显示; 图片上左右拖拽切换 (首尾有阻力), 滚轮/双击缩放并可拖拽平移, 底部缩略图条直达任意一张; 点图片框以外的视口区域 / 关闭钮 / ESC 关闭, 索引变化经 change-seq 上报。"; vertical-alignment: center; wrap: word-wrap; horizontal-stretch: 1; }
+            TButton {
+                variant: TButtonVariant.outline;
+                theme: TThemeRole.primary;
+                text: "预览第 1 张";
+                clicked => { TImageViewerService.open(root.viewer-images, 0); }
+            }
+
+            TButton {
+                variant: TButtonVariant.outline;
+                text: "预览第 3 张";
+                clicked => { TImageViewerService.open(root.viewer-images, 2); }
+            }
+
+            TCaption {
+                text: "全屏遮罩上按原图比例适配显示; 图片上左右拖拽切换 (首尾有阻力), 滚轮/双击缩放并可拖拽平移, 底部缩略图条直达任意一张; 点图片框以外的视口区域 / 关闭钮 / ESC 关闭, 索引变化经 change-seq 上报。";
+                vertical-alignment: center;
+                wrap: word-wrap;
+                horizontal-stretch: 1;
+            }
         }
     }
 
@@ -182,8 +260,19 @@ export component OverlaySection inherits VerticalLayout {
         HorizontalLayout {
             spacing: 12px;
 
-            TButton { variant: TButtonVariant.outline; theme: TThemeRole.primary; text: "打开命令面板"; clicked => { TCommandPaletteService.open(); } }
-            TCaption { text: "输入即过滤 (子串匹配, 不区分大小写), 回车执行高亮的第一条, 点击列表项直接执行, ESC / 点遮罩关闭; 快捷键由宿主绑定 (KeyBinding 放窗口级 FocusScope 里)。"; vertical-alignment: center; wrap: word-wrap; horizontal-stretch: 1; }
+            TButton {
+                variant: TButtonVariant.outline;
+                theme: TThemeRole.primary;
+                text: "打开命令面板";
+                clicked => { TCommandPaletteService.open(); }
+            }
+
+            TCaption {
+                text: "输入即过滤 (子串匹配, 不区分大小写), 回车执行高亮的第一条, 点击列表项直接执行, ESC / 点遮罩关闭; 快捷键由宿主绑定 (KeyBinding 放窗口级 FocusScope 里)。";
+                vertical-alignment: center;
+                wrap: word-wrap;
+                horizontal-stretch: 1;
+            }
         }
     }
 
@@ -195,9 +284,25 @@ export component OverlaySection inherits VerticalLayout {
         HorizontalLayout {
             spacing: 12px;
 
-            TButton { variant: TButtonVariant.outline; theme: TThemeRole.primary; text: "打开底部弹层"; clicked => { root.sheet-open = true; } }
-            TButton { variant: TButtonVariant.outline; text: "打开动作面板"; clicked => { TActionSheetService.show("选择操作", "该操作不可撤销,请谨慎选择", root.sheet-actions); } }
-            TCaption { text: "两者都由 TModalSurface 提供遮罩 / ESC / z-modal; 动作面板的结果经 result-seq + selected-index 上报, -1 表示取消。"; vertical-alignment: center; wrap: word-wrap; horizontal-stretch: 1; }
+            TButton {
+                variant: TButtonVariant.outline;
+                theme: TThemeRole.primary;
+                text: "打开底部弹层";
+                clicked => { root.sheet-open = true; }
+            }
+
+            TButton {
+                variant: TButtonVariant.outline;
+                text: "打开动作面板";
+                clicked => { TActionSheetService.show("选择操作", "该操作不可撤销,请谨慎选择", root.sheet-actions); }
+            }
+
+            TCaption {
+                text: "两者都由 TModalSurface 提供遮罩 / ESC / z-modal; 动作面板的结果经 result-seq + selected-index 上报, -1 表示取消。";
+                vertical-alignment: center;
+                wrap: word-wrap;
+                horizontal-stretch: 1;
+            }
         }
     }
 
@@ -339,7 +444,12 @@ export component OverlaySection inherits VerticalLayout {
                 }
             }
 
-            TCaption { text: "渲染在窗口级 (TTooltipOverlay), 不受卡片或滚动容器裁剪; 亮暗均为深色气泡。"; vertical-alignment: center; wrap: word-wrap; horizontal-stretch: 1; }
+            TCaption {
+                text: "渲染在窗口级 (TTooltipOverlay), 不受卡片或滚动容器裁剪; 亮暗均为深色气泡。";
+                vertical-alignment: center;
+                wrap: word-wrap;
+                horizontal-stretch: 1;
+            }
         }
     }
 
