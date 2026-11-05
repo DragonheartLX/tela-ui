@@ -125,6 +125,7 @@ import { TText, TButton, TLink, TIcon, THeading, TParagraph, TCaption, TDivider,
 | size | `TSize` | `TSize.medium` | 高度 24/32/40px |
 | shape | `TButtonShape` | `TButtonShape.rectangle` | `rectangle` / `square` 图标按钮 (宽=高) / `round` 胶囊 |
 | text | `string` | `""` | 按钮文字, 空串不渲染文本 |
+| name | `string` | `""` | 读屏名; 图标按钮 (text 为空) 没有可派生的标签, 用它补 |
 | icon | `TIconData` | 空 | 前置图标, loading 时被转圈替代 |
 | loading | `bool` | `false` | 显示旋转指示并禁用点击 |
 | disabled | `bool` | `false` | 禁用态 |
@@ -229,7 +230,7 @@ TText { font-size: TTheme.size-font(size); line-height: TTheme.size-line-height(
 | --- | --- | --- | --- | --- |
 | TLoading | text | `string` | `""` | 空串时只显示转圈 |
 | TLoading | theme | `TThemeRole` | `TThemeRole.primary` | 圈的颜色 |
-| TLoading | size | `length` (in-out) | `24px` | 圈直径 |
+| TLoading | size | `length` (in) | `24px` | 圈直径 |
 | TLoadingSpinner | spinner-color | `brush` | `TTheme.brand-color` | 圈的颜色 |
 | TLoadingSpinner | size | `length` (in) | `16px` | 圈直径 |
 | TLoadingSpinner | stroke-width | `float` (in) | `2.0` | 24 网格单位线宽 |
@@ -551,7 +552,8 @@ TInputNumber 的缓冲语义 (空缓冲 = 未输入, 不触发 changed; 失焦�
 公开函数: `focus-segment(index)` — 编程聚焦某段 (下标夹紧)。
 
 已知限制: 段内不限制字符数; 宿主整体改写 `values` 后, 已填段计数要到下一次
-编辑才重算。
+编辑才重算; `length` 是挂载期属性, 挂载后再改会污染已填段计数 (for 重建的
+init 会重复累加)。
 
 ### TMention
 
@@ -1050,7 +1052,7 @@ ListView 接线); 面向非虚拟化内容 — TList / TTable 保留 ListView �
 | --- | --- | --- | --- |
 | icon | `TIconData` | `TIconSet.Inbox` | 占位图标 |
 | description | `string` | `"暂无数据"` | 为空字符串时隐藏 |
-| icon-size | `length` (in-out) | `48px` | 图标边长 |
+| icon-size | `length` (in) | `48px` | 图标边长 |
 
 插槽: 默认子元素为描述下方的操作区, 在一行内居中排布, 通常放按钮。
 
@@ -1550,7 +1552,6 @@ import { TAlert, TNoticeBar, TMessage, TMessageOverlay, TMessageTheme, TMessageP
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | items | `[TNotificationData]` (in-out) | `[]` | 变长队列, 下标 0 最旧; 用 Slint 1.18 的 array push/remove 维护, 最多 4 条 |
-| seq | `int` (out) | `0` | 每次 show 自增, 并作为 stamp 写进新条目 |
 | placement | `TNotificationPlacement` (in-out) | `TNotificationPlacement.top-right` | 贴靠的窗口角落 |
 
 `TNotification` 函数: `info(string, string)`, `success(…)`, `warning(…)`,
@@ -1561,8 +1562,7 @@ import { TAlert, TNoticeBar, TMessage, TMessageOverlay, TMessageTheme, TMessageP
 
 相关枚举/结构: `TNotificationTheme { info, success, warning, error }`,
 `TNotificationPlacement { top-left, top-right, bottom-left, bottom-right }`,
-`TNotificationData { title, content, theme, stamp }` (stamp 为 show() 单调
-序号, 供 Overlay 区分数据替换)。
+`TNotificationData { title, content, theme }`。
 
 已知限制: 单条通知高度上限 `(窗口高 - 24px) / 4`, 超出裁剪 (无滚动容器)。
 
@@ -2103,7 +2103,7 @@ import { TTabs, TPagination, TNavBar, TSideNav, TBreadcrumb, TSteps, TDropdownMe
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | items | `[string]` | `[]` | 步骤名 |
-| current | `int` | `0` | 当前步骤下标, 之前的步骤计为已完成 |
+| current | `int` | `0` | 当前步骤下标, 之前的步骤计为已完成; 视觉按下标夹紧 (`-1` 全待办, 超尾全完成) |
 
 ### TDropdownMenu
 
@@ -2196,7 +2196,7 @@ badge-dot: bool = false }` (badge 为 0 且非 dot 时角标隐藏)。
 | 参数 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | letters | `[string]` | `[]` | 字母 (任意短标签), 自上而下 |
-| current | `int` (in-out) | `-1` | 当前下标 |
+| current | `int` (in-out) | `-1` | 当前下标; 视觉与气泡读夹紧值, 越界写入不崩气泡 |
 
 回调: `changed(int)` — 下标真变化时。公开函数 `pick(y: length)` 与
 TouchArea 同路径 (y 为相对条顶的指针位置)。
@@ -2462,7 +2462,7 @@ PanelLeftClose, PanelLeftOpen, FlaskConical, Inbox, Square, Copy, Folder, File�
 | TActionSheetItem | TActionSheetService | label, theme, disabled |
 | TCommandItem | TCommandPaletteService | label, shortcut |
 | TMessageTheme / TMessagePlacement | Message | info, success, warning, error / 六向贴靠 |
-| TNotificationTheme / TNotificationPlacement / TNotificationData | Notification | info, success, warning, error / 四角贴靠 / title, content, theme, stamp |
+| TNotificationTheme / TNotificationPlacement / TNotificationData | Notification | info, success, warning, error / 四角贴靠 / title, content, theme |
 | TTooltipPlacement | Tooltip | top, bottom, left, right |
 | TDropdownMenuItem | TDropdownMenu | label, value, icon, disabled, danger, divider |
 | TPopupPlacement | TDropdownMenu, TPopconfirm (经 @tela-ui/theme.slint 再导出) | bottom-start, bottom-end, top-start, top-end |

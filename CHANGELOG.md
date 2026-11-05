@@ -4,5 +4,17 @@
 
 ## [Unreleased]
 
+### Breaking Changes
+- Removed `TNotificationData.stamp`, `TNotification.seq`, and the `MainWindow` `page-scroll-y` out property
+
 ### Added
-- 漫游引导: `TGuideService` + 每步一个 `TGuideOverlay` (高亮遮罩 + 自动选边气泡, 状态在全局, 动作走回调)。
+- Accessibility support: accessible roles, labels, enabled state, and default actions across input, select, context-menu, tag, and navigation components
+
+### Changed
+- Renamed the library crate from `tela_lib` to `tela_ui` and moved bootstrap, panic reporting, and `TELA_THEME` handling into the binary target
+- `TLoading.size` and `TEmpty.icon-size` are now input properties
+- `TSelect` popup item height now derives from `TTheme.height-m`
+
+### Fixed
+- `TInput` placeholder indent now tracks the prefix icon size
+- Re-picking the already selected `TSelect` option no longer fires `selected` again
