@@ -96,8 +96,13 @@ export component TTag inherits Rectangle {
     touch := TouchArea {
         enabled: root.clickable && !root.disabled;
         mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;
+        accessible-role: AccessibleRole.button;
+        accessible-label: root.text;
+        accessible-enabled: root.clickable && !root.disabled;
         clicked => {
-            root.clicked();
+            if (root.clickable && !root.disabled) {
+                root.clicked();
+            }
         }
     }
 
@@ -140,9 +145,14 @@ export component TTag inherits Rectangle {
             close-ta := TouchArea {
                 enabled: !root.disabled;
                 mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;
+                accessible-role: AccessibleRole.button;
+                accessible-label: "关闭";
+                accessible-enabled: !root.disabled;
                 clicked => {
                     // Fire only: the host drops the tag from its model.
-                    root.closed();
+                    if (!root.disabled) {
+                        root.closed();
+                    }
                 }
             }
         }

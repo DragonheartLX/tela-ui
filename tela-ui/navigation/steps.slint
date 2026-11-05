@@ -11,8 +11,12 @@ import { TIconSet } from "../base/icon/data.slint";
 
 export component TSteps inherits Rectangle {
     in property <[string]> items;
-    // Index of the current step; earlier steps count as done.
+    // Index of the current step; earlier steps count as done. Visuals read
+    // the clamped view so a host write past the end cannot mark every step
+    // done; `-1` renders everything pending, matching TIndexes.
     in property <int> current: 0;
+    private property <int> safe-current:
+        Math.max(-1, Math.min(root.current, root.items.length - 1));
 
     height: TTheme.height-l;
 
@@ -30,10 +34,10 @@ export component TSteps inherits Rectangle {
                 width: 24px;
                 height: 24px;
                 border-radius: self.width / 2;
-                background: i <= root.current ? TTheme.brand-color : TTheme.bg-color-component;
+                background: i <= root.safe-current ? TTheme.brand-color : TTheme.bg-color-component;
                 animate background { duration: TTheme.duration-base; }
 
-                if i < root.current: TIcon {
+                if i < root.safe-current: TIcon {
                     x: (parent.width - self.width) / 2;
                     y: (parent.height - self.height) / 2;
                     icon: TIconSet.Check;
@@ -41,14 +45,14 @@ export component TSteps inherits Rectangle {
                     icon-color: TTheme.text-color-anti;
                 }
 
-                if i >= root.current: TText {
+                if i >= root.safe-current: TText {
                     width: 100%;
                     height: 100%;
                     text: "\{i + 1}";
                     font-size: TTheme.font-size-s;
                     line-height: TTheme.line-height-s;
                     font-weight: TTheme.font-weight-medium;
-                    color: i == root.current ? TTheme.text-color-anti : TTheme.text-color-secondary;
+                    color: i == root.safe-current ? TTheme.text-color-anti : TTheme.text-color-secondary;
                     horizontal-alignment: center;
                     vertical-alignment: center;
                 }
@@ -59,7 +63,7 @@ export component TSteps inherits Rectangle {
                 y: 0;
                 height: parent.height;
                 text: step;
-                color: i <= root.current ? TTheme.text-color-primary : TTheme.text-color-secondary;
+                color: i <= root.safe-current ? TTheme.text-color-primary : TTheme.text-color-secondary;
                 vertical-alignment: center;
                 overflow: elide;
             }
@@ -70,7 +74,7 @@ export component TSteps inherits Rectangle {
                 y: (parent.height - self.height) / 2;
                 width: max(0px, parent.width - self.x);
                 height: 1px;
-                background: i < root.current ? TTheme.brand-color : TTheme.component-stroke;
+                background: i < root.safe-current ? TTheme.brand-color : TTheme.component-stroke;
                 visible: i < root.items.length - 1;
                 animate background { duration: TTheme.duration-base; }
             }

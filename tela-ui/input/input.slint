@@ -129,7 +129,7 @@ export component TInput inherits TInputFrame {
         // The chip runs to the row's right edge (= the border's inner side),
         // so the row keeps its right padding only while no chip is shown.
         padding-right: root.suffix-chip-on ? 0px : root.pad;
-        spacing: TTheme.spacing-2;
+        spacing: root.spacing-left;
 
         if root.prefix-icon.paths.length > 0: TIcon {
             y: (parent.height - self.height) / 2;
@@ -183,6 +183,8 @@ export component TInput inherits TInputFrame {
 
             clear-ta := TouchArea {
                 mouse-cursor: MouseCursor.pointer;
+                accessible-role: AccessibleRole.button;
+                accessible-label: "清空";
                 clicked => {
                     root.text = "";
                     root.cleared();
@@ -259,7 +261,8 @@ export component TInput inherits TInputFrame {
 
     // Placeholder (above the background, hidden once text is entered)
     placeholder := TText {
-        x: (root.prefix-icon.paths.length > 0 ? pad + 16px + spacing-left : pad)
+        // Indent past the prefix icon (fs + 2px wide) plus the row spacing.
+        x: (root.prefix-icon.paths.length > 0 ? pad + root.fs + 2px + spacing-left : pad)
             + parent.border-width;
         y: 0;
         height: parent.height;

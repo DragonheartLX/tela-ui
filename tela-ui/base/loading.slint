@@ -1,7 +1,8 @@
 // Tela UI — TLoading
 //
 // Spinning arc loader (indeterminate). Used by TButton and as a standalone
-// indicator. Sizes: 16px default; use 24px/32px for standalone spinners.
+// indicator. TLoadingSpinner is 16px; TLoading defaults to 24px — use
+// 24px/32px for standalone spinners.
 
 import { TTheme } from "../theme.slint";
 import { TText } from "typography.slint";
@@ -64,7 +65,7 @@ export component TLoadingSpinner inherits TStrokedShape {
 export component TLoading inherits HorizontalLayout {
     in property <string> text;
     in property <TThemeRole> theme: TThemeRole.primary;
-    in-out property <length> size: 24px;
+    in property <length> size: 24px;
 
     spacing: TTheme.spacing-2;
 

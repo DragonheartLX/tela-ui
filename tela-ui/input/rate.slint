@@ -61,12 +61,13 @@ export component TRate inherits Rectangle {
         enabled: !root.disabled && !root.read-only;
         mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;
         clicked => {
-            if (hover-idx == root.value && root.allow-clear) {
-                root.value = 0;
-            } else {
-                root.value = hover-idx;
+            // Same-value click only resets when clearing is allowed; a
+            // no-op click (same score, no clear) must not fire `changed`.
+            let next = (hover-idx == root.value && root.allow-clear) ? 0 : hover-idx;
+            if (next != root.value) {
+                root.value = next;
+                root.changed(next);
             }
-            root.changed(root.value);
         }
     }
 

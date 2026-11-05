@@ -32,7 +32,7 @@ export component TPopupSurface inherits Rectangle {
     in property <length> anchor-height;
     in property <TPopupPlacement> placement: TPopupPlacement.bottom-start;
     // Distance between the trigger edge and the popup.
-    in property <length> gap: 6px;
+    in property <length> gap: TTheme.spacing-3;
 
     // < 0 means content-driven: max(popup-min-width, content preferred width).
     in property <length> popup-min-width: 140px;

@@ -31,6 +31,8 @@ export component TAlert inherits Rectangle {
         spacing: TTheme.margin-s;
 
         TIcon {
+            // 3px: optical alignment with the title line box when the
+            // two-line body pushes the icon to the top (no token on that step).
             y: root.description == "" ? (parent.height - self.height) / 2 : 3px;
             icon: root.theme == TThemeRole.success ? TIconSet.CircleCheck
                 : root.theme == TThemeRole.warning ? TIconSet.CircleAlert
@@ -73,6 +75,8 @@ export component TAlert inherits Rectangle {
 
             close-ta := TouchArea {
                 mouse-cursor: MouseCursor.pointer;
+                accessible-role: AccessibleRole.button;
+                accessible-label: "关闭";
                 clicked => {
                     root.open = false;
                     root.closed();

@@ -66,11 +66,18 @@ export component TInputNumber inherits TInputFrame {
     accessible-value-minimum: root.min;
     accessible-value-maximum: root.max;
     accessible-value-step: root.step;
+    accessible-enabled: !root.disabled;
+    // `clicked()` bypasses the TouchArea's `enabled` gate, so the actions
+    // carry their own disabled / boundary guards.
     accessible-action-decrement => {
-        btn-minus.clicked();
+        if (!root.disabled && !root.at-min) {
+            btn-minus.clicked();
+        }
     }
     accessible-action-increment => {
-        btn-plus.clicked();
+        if (!root.disabled && !root.at-max) {
+            btn-plus.clicked();
+        }
     }
     accessible-action-default => {
         root.focus-request();
@@ -166,14 +173,20 @@ export component TInputNumber inherits TInputFrame {
 
             key-pressed(event) => {
                 if event.text == Key.UpArrow {
-                    root.value = root.clamp-v(root.value + root.step);
+                    let next = root.clamp-v(root.value + root.step);
+                    if (next != root.value) {
+                        root.value = next;
+                        root.changed(root.value);
+                    }
                     self.text = root.format(root.value);
-                    root.changed(root.value);
                     return accept;
                 } else if event.text == Key.DownArrow {
-                    root.value = root.clamp-v(root.value - root.step);
+                    let next = root.clamp-v(root.value - root.step);
+                    if (next != root.value) {
+                        root.value = next;
+                        root.changed(root.value);
+                    }
                     self.text = root.format(root.value);
-                    root.changed(root.value);
                     return accept;
                 }
                 reject

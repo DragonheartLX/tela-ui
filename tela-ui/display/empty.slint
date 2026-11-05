@@ -11,7 +11,7 @@ import { TIconData, TIconSet } from "../base/icon/data.slint";
 export component TEmpty inherits Rectangle {
     in property <TIconData> icon: TIconSet.Inbox;
     in property <string> description: "暂无数据";
-    in-out property <length> icon-size: 48px;
+    in property <length> icon-size: 48px;
 
     // Vertical metrics: glyph → gap → description → gap → actions.
     private property <length> gap: TTheme.spacing-4;

@@ -32,11 +32,6 @@ export struct TNotificationData {
     title: string,
     content: string,
     theme: TNotificationTheme,
-    // Monotonic id of the `show()` call that produced this notification.
-    // The overlay's per-item auto-dismiss timer restarts when the item data
-    // changes, so a reused card never inherits the previous message's
-    // countdown phase. Hosts that push directly leave it at 0.
-    stamp: int = 0,
 }
 
 export global TNotification {
@@ -47,20 +42,16 @@ export global TNotification {
     // push/remove map to RepeaterTracker row_added/row_removed, which
     // splice the instance list instead of resetting it; surviving
     // instances are marked dirty and rebuilt, so each card's Timer
-    // restarts from a fresh phase — exactly the behavior the old
-    // stamp-restart dance was emulating by hand.
+    // restarts from a fresh phase.
     in-out property <[TNotificationData]> items: [];
     in-out property <TNotificationPlacement> placement: TNotificationPlacement.top-right;
-    // Bumped once per `show()` and stamped into the queued item.
-    out property <int> seq: 0;
     // Capacity is 1.18-visible to the overlay; keep it a plain constant.
     public function show(title: string, content: string, th: TNotificationTheme) {
-        seq += 1;
         // Full queue: the oldest (index 0) drops off the visible stack.
         if (items.length >= 4) {
             items.remove(0);
         }
-        items.push({ title: title, content: content, theme: th, stamp: seq });
+        items.push({ title: title, content: content, theme: th });
     }
 
     public function info(title: string, content: string) {
@@ -164,6 +155,8 @@ export component TNotificationOverlay inherits Rectangle {
                         TText {
                             // Wraps to the fixed 228px column.
                             // The card height follows the wrapped line count.
+                            // Content is not a live region: the title already
+                            // announces the card; the body follows on focus.
                             text: it.content;
                             font-size: TTheme.font-size-s;
                             line-height: TTheme.line-height-s;
@@ -205,9 +198,7 @@ export component TNotificationOverlay inherits Rectangle {
             // Per-item auto-dismiss. `row_added`/`row_removed` splice the
             // repeater's instance list; surviving instances are marked dirty
             // and rebuilt, which restarts this timer from a fresh phase
-            // whenever the queue shifts underneath it. That is the exact
-            // semantic the old stamp-restart logic hand-coded for the
-            // fixed-slot design.
+            // whenever the queue shifts underneath it.
             Timer {
                 interval: 4.5s;
                 triggered => {

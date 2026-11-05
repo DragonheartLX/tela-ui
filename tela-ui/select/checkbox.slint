@@ -17,10 +17,13 @@ export component TCheckBox inherits Rectangle {
 
     private property <bool> on: checked || indeterminate;
 
-    // Pointer click and the assistive-tech default action share one path.
+    // Pointer click and the assistive-tech default action share one path;
+    // the disabled guard lives here so both callers are covered.
     function toggle() {
-        root.checked = !root.checked;
-        root.changed(root.checked);
+        if (!root.disabled) {
+            root.checked = !root.checked;
+            root.changed(root.checked);
+        }
     }
 
     // Rest state; overridden by the `states` below.
@@ -100,6 +103,7 @@ export component TCheckBox inherits Rectangle {
     accessible-role: AccessibleRole.checkbox;
     accessible-label: text;
     accessible-checked: checked;
+    accessible-enabled: !root.disabled;
     accessible-action-default => {
         root.toggle();
     }

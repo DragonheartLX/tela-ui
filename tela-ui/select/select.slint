@@ -36,7 +36,7 @@ export component TSelect inherits Rectangle {
     private property <length> h: TTheme.size-height(size);
     private property <length> fs: TTheme.size-font(size);
     private property <length> line: TTheme.size-line-height(size);
-    private property <length> item-h: 32px;
+    private property <length> item-h: TTheme.height-m;
 
     private property <string> display-label:
         current-index >= 0 && current-index < items.length ? items[current-index].label : "";
@@ -62,6 +62,12 @@ export component TSelect inherits Rectangle {
     touch := TouchArea {
         enabled: !root.disabled;
         mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;
+        accessible-role: AccessibleRole.button;
+        accessible-label: root.has-selection ? root.display-label : root.placeholder-text;
+        accessible-enabled: !root.disabled;
+        accessible-action-default => {
+            surface.show();
+        }
         clicked => {
             surface.show();
         }
@@ -94,7 +100,6 @@ export component TSelect inherits Rectangle {
 
             // Later states win over earlier ones.
             states [
-                selected when root.has-selection: {}
                 disabled when root.disabled: {
                     color: TTheme.text-color-disabled;
                 }
@@ -178,17 +183,26 @@ export component TSelect inherits Rectangle {
                     item-ta := TouchArea {
                         enabled: !it.disabled;
                         mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;
+                        accessible-role: AccessibleRole.list-item;
+                        accessible-label: it.label;
+                        accessible-enabled: !it.disabled;
+                        accessible-action-default => {
+                            self.select();
+                        }
                         clicked => {
-                            root.current-index = i;
-                            root.selected(i, it.value);
+                            self.select();
+                        }
+
+                        function select() {
+                            if (root.current-index != i) {
+                                root.current-index = i;
+                                root.selected(i, it.value);
+                            }
                             surface.close();
                         }
                     }
                 }
             }
         }
-
-        accessible-role: AccessibleRole.button;
-        accessible-label: display-label;
     }
 }

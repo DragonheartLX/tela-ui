@@ -83,6 +83,8 @@ export component TTabBar inherits Rectangle {
             tab-touch := TouchArea {
                 accessible-role: AccessibleRole.tab;
                 accessible-label: it.text;
+                // The current tab's click is a guarded no-op, like TTabs.
+                accessible-enabled: i != root.safe-current;
 
                 clicked => {
                     if (i != root.current) {

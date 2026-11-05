@@ -425,10 +425,10 @@ export global TTheme {
     out property <duration> duration-slow: root.theme.duration-slow;
 
     // Z 序 (窗口级兄弟元素层叠, 主题无关):
-    //   z-popup  锚定浮层 (TTooltipOverlay 级)
+    //   z-popup  锚定浮层 (自绘浮层的宿主可用, 库内组件经 PopupWindow 原生置顶)
     //   z-modal  模态面 (TDialog / TDrawer 的遮罩与面板)
-    //   z-message 顶层瞬时反馈 (TMessage / TNotification)
-    //   TTooltipOverlay 也取 z-message: 触发器常活在模态面板里, 气泡必须压过遮罩。
+    //   z-message 顶层瞬时反馈 (TMessage / TNotification / TTooltipOverlay / TGuide)
+    //   TTooltipOverlay 取 z-message: 触发器常活在模态面板里, 气泡必须压过遮罩。
     // 仅对"直接挂在窗口根下的兄弟 overlay"生效。
     // PopupWindow 族的 dropdown/popconfirm/select 由运行时原生置顶, 不参与该层叠。
     out property <float> z-popup: 100;

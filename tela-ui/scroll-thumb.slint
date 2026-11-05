@@ -38,14 +38,16 @@ export component TScrollThumb inherits Rectangle {
     visible: max-scroll > 1px;
     clip: true;
 
+    // Draggable span per screen pixel of track travel (0 when unscrollable).
+    pure function ratio() -> float {
+        return max-scroll > 0px
+            ? max-scroll / Math.max(1px, track-l - thumb-l) : 0;
+    }
+
     // Offset that centers the thumb's middle under a pointer position.
     pure function pointer-target(mouse: length) -> length {
-        let along = horizontal ? root.width : root.height;
-        let mouse-along = mouse;
-        let target = mouse-along - TTheme.spacing-1 - thumb-l / 2;
-        let ratio = max-scroll > 0px
-            ? max-scroll / Math.max(1px, track-l - thumb-l) : 0;
-        return -Math.max(0px, Math.min(max-scroll, target * ratio));
+        let target = mouse - TTheme.spacing-1 - thumb-l / 2;
+        return -Math.max(0px, Math.min(max-scroll, target * root.ratio()));
     }
 
     thumb := Rectangle {
@@ -63,6 +65,9 @@ export component TScrollThumb inherits Rectangle {
     }
 
     ta := TouchArea {
+        accessible-role: AccessibleRole.slider;
+        accessible-label: "滚动条";
+
         // Drag baseline, captured on press.
         private property <length> pressed-offset;
         private property <length> pressed-mouse;
@@ -90,9 +95,7 @@ export component TScrollThumb inherits Rectangle {
                 }
                 if (root.dragging) {
                     let delta2 = mouse - self.pressed-mouse;
-                    let ratio = max-scroll > 0px
-                        ? max-scroll / Math.max(1px, track-l - thumb-l) : 0;
-                    content-offset = -Math.max(0px, Math.min(max-scroll, pressed-offset + delta2 * ratio));
+                    content-offset = -Math.max(0px, Math.min(max-scroll, pressed-offset + delta2 * root.ratio()));
                 }
             }
         }

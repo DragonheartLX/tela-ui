@@ -122,7 +122,6 @@ component TNavRow inherits Rectangle {
         animate color { duration: TTheme.duration-fast; }
 
         states [
-            hovered when row-ta.has-hover && !root.disabled: {}
             active when root.value != "" && root.value == root.current-value && !root.disabled: {
                 color: TTheme.brand-color;
             }

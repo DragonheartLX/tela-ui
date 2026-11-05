@@ -17,7 +17,9 @@ import { TTheme } from "../theme.slint";
 import { TSize } from "../structs/enums.slint";
 
 export component TOtpInput inherits Rectangle {
-    // Segment count; model writes rebuild the segments.
+    // Segment count; model writes rebuild the segments. Mount-time only:
+    // changing it later rebuilds every segment and their `init`s re-add to
+    // `filled-count` without a reset point, polluting the count.
     in property <int> length: 4;
     in property <bool> masked: false;
     in property <bool> disabled: false;
@@ -161,4 +163,5 @@ export component TOtpInput inherits Rectangle {
     }
 
     accessible-role: AccessibleRole.groupbox;
+    accessible-label: "验证码输入";
 }

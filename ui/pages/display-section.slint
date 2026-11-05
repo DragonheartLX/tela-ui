@@ -3,7 +3,13 @@
 // TCountDown), 一个组件一张卡.
 
 import { TTheme, TThemeRole, TSize } from "@tela-ui/theme.slint";
-import { TText, TIcon, TIconSet, TButton, TCaption } from "@tela-ui/base.slint";
+import {
+    TIcon,
+    TIconSet,
+    TButton,
+    TCaption,
+    TParagraph,
+} from "@tela-ui/base.slint";
 import {
     TTag,
     TTagVariant,
@@ -12,17 +18,15 @@ import {
     TAvatarSize,
     TAvatarShape,
     TAvatarGroup,
-    TAvatarGroupItem,
     TEmpty,
     TTimeline,
     TDescriptions,
     TStatistic,
+    TScrollBar,
     TComment,
     TCountDown,
 } from "@tela-ui/display.slint";
 import { TMessage } from "@tela-ui/notice.slint";
-import { TScrollBar } from "@tela-ui/display.slint";
-import { TParagraph } from "@tela-ui/base.slint";
 import { GallerySection } from "../gallery-section.slint";
 
 export component DisplaySection inherits VerticalLayout {

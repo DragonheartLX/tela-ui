@@ -159,6 +159,15 @@ export component TDropdownMenu inherits Rectangle {
                     row-ta := TouchArea {
                         enabled: !it.disabled && !it.divider;
                         mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;
+                        accessible-role: AccessibleRole.button;
+                        accessible-label: it.label;
+                        accessible-enabled: !it.disabled && !it.divider;
+                        accessible-action-default => {
+                            if (self.enabled) {
+                                root.selected(i, it.value);
+                                surface.close();
+                            }
+                        }
                         clicked => {
                             root.selected(i, it.value);
                             surface.close();
@@ -169,5 +178,7 @@ export component TDropdownMenu inherits Rectangle {
         }
     }
 
+    // Trigger-side role; the label comes from the trigger content itself,
+    // so no redundant announcement here.
     accessible-role: AccessibleRole.button;
 }

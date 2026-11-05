@@ -77,42 +77,45 @@ export component TProgress inherits Rectangle {
         }
     }
 
-    if variant == TProgressVariant.circle: Rectangle {
+    if variant == TProgressVariant.circle: circle := Rectangle {
         width: root.d;
         height: root.d;
 
+        // Ring metrics in the 24-unit viewbox: stroke width and the
+        // radius that keeps the stroke inside the box. Shared by the
+        // track ring and the value arc below.
+        private property <float> sw: root.th / root.d * 24;
+        private property <float> r: 12 - sw / 2;
+
         // Track ring: full circle drawn as two half arcs.
         Path {
-            private property <float> sw: root.th / root.d * 24;
-            private property <float> r: 12 - sw / 2;
-
             viewbox-width: 24;
             viewbox-height: 24;
             width: 100%;
             height: 100%;
 
             stroke: TTheme.bg-color-component;
-            stroke-width: sw * 1px;
+            stroke-width: circle.sw * 1px;
 
             MoveTo {
                 x: 12;
-                y: 12 - parent.r;
+                y: 12 - circle.r;
             }
 
             ArcTo {
                 x: 12;
-                y: 12 + parent.r;
-                radius-x: parent.r;
-                radius-y: parent.r;
+                y: 12 + circle.r;
+                radius-x: circle.r;
+                radius-y: circle.r;
                 sweep: true;
                 large-arc: false;
             }
 
             ArcTo {
                 x: 12;
-                y: 12 - parent.r;
-                radius-x: parent.r;
-                radius-y: parent.r;
+                y: 12 - circle.r;
+                radius-x: circle.r;
+                radius-y: circle.r;
                 sweep: true;
                 large-arc: false;
             }
@@ -120,8 +123,6 @@ export component TProgress inherits Rectangle {
 
         // Value arc: starts at 12 o'clock, sweeps clockwise.
         if root.p > 0.001: Path {
-            private property <float> sw: root.th / root.d * 24;
-            private property <float> r: 12 - sw / 2;
             private property <float> sweep: min(0.9999, root.p);
 
             viewbox-width: 24;
@@ -130,24 +131,24 @@ export component TProgress inherits Rectangle {
             height: 100%;
 
             stroke: root.bar-color;
-            stroke-width: sw * 1px;
+            stroke-width: circle.sw * 1px;
             stroke-line-cap: round;
 
             MoveTo {
-                x: 12 - parent.r * sin(-0.0001 * 360deg);
-                y: 12 - parent.r * cos(0.0001 * 360deg);
+                x: 12 - circle.r * sin(-0.0001 * 360deg);
+                y: 12 - circle.r * cos(0.0001 * 360deg);
             }
 
             LineTo {
-                x: 12 - parent.r * sin(-0.0002 * 360deg);
-                y: 12 - parent.r * cos(0.0002 * 360deg);
+                x: 12 - circle.r * sin(-0.0002 * 360deg);
+                y: 12 - circle.r * cos(0.0002 * 360deg);
             }
 
             ArcTo {
-                x: 12 - parent.r * sin(-parent.sweep * 360deg);
-                y: 12 - parent.r * cos(parent.sweep * 360deg);
-                radius-x: parent.r;
-                radius-y: parent.r;
+                x: 12 - circle.r * sin(-parent.sweep * 360deg);
+                y: 12 - circle.r * cos(parent.sweep * 360deg);
+                radius-x: circle.r;
+                radius-y: circle.r;
                 sweep: parent.sweep > 0;
                 large-arc: parent.sweep > 0.5;
             }

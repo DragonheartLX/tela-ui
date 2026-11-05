@@ -85,7 +85,12 @@ export component TRadio inherits Rectangle {
     accessible-role: AccessibleRole.radio-button;
     accessible-label: text;
     accessible-checked: selected;
-    accessible-action-default => { root.clicked(); }
+    accessible-enabled: !root.disabled;
+    accessible-action-default => {
+        if (!root.disabled) {
+            root.clicked();
+        }
+    }
 }
 
 export component TRadioGroup inherits HorizontalLayout {
@@ -97,15 +102,15 @@ export component TRadioGroup inherits HorizontalLayout {
 
     spacing: TTheme.margin-l;
 
-    // Absorber: keeps radios left-packed when the group stretches wider
-    // than its content (else the layout spreads the slack as extra gaps).
     for it[i] in items: TRadio {
         text: it.text;
         selected: it.value == root.value;
         disabled: root.disabled;
         clicked => {
-            root.value = it.value;
-            root.changed(it.value);
+            if (root.value != it.value) {
+                root.value = it.value;
+                root.changed(it.value);
+            }
         }
     }
 

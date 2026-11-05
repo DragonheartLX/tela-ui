@@ -88,14 +88,18 @@ export component TScrollBar inherits Rectangle {
         root.gliding = true;
     }
 
+    // Draggable span per screen pixel of track travel (0 when unscrollable).
+    pure function ratio() -> float {
+        return max-scroll > 0px
+            ? max-scroll / Math.max(1px, track-l - thumb-l) : 0;
+    }
+
     // Offset that centers the thumb's middle under a pointer position —
     // used for track presses; presses on the thumb keep their grab offset
     // instead (see the strip's moved handler).
     pure function pointer-target(mouse: length) -> length {
         let target = mouse - TTheme.spacing-1 - thumb-l / 2;
-        let ratio = max-scroll > 0px
-            ? max-scroll / Math.max(1px, track-l - thumb-l) : 0;
-        return -Math.max(0px, Math.min(max-scroll, target * ratio));
+        return -Math.max(0px, Math.min(max-scroll, target * root.ratio()));
     }
 
     // Whether a strip coordinate is on the thumb itself.
@@ -126,6 +130,9 @@ export component TScrollBar inherits Rectangle {
         width: 6px;
         height: parent.height;
         enabled: root.enabled;
+        accessible-role: AccessibleRole.slider;
+        accessible-label: "滚动条";
+        accessible-enabled: root.enabled;
 
         // Drag baseline and press target, captured on press.
         private property <length> pressed-offset;
@@ -160,9 +167,7 @@ export component TScrollBar inherits Rectangle {
                 }
                 if (root.dragging) {
                     let delta2 = self.mouse-y - self.pressed-mouse;
-                    let ratio = max-scroll > 0px
-                        ? max-scroll / Math.max(1px, track-l - thumb-l) : 0;
-                    root.content-y = -Math.max(0px, Math.min(max-scroll, pressed-offset + delta2 * ratio));
+                    root.content-y = -Math.max(0px, Math.min(max-scroll, pressed-offset + delta2 * root.ratio()));
                 }
             }
         }

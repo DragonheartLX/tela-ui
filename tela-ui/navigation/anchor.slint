@@ -95,7 +95,7 @@ export component TAnchor inherits Rectangle {
         label: it.label;
         active: root.passed(i) && (i == root.items.length - 1 || !root.passed(i + 1));
 
-        accessible-role: AccessibleRole.text;
+        accessible-role: AccessibleRole.button;
         accessible-label: it.label;
         accessible-action-default => { root.goto(i); }
 

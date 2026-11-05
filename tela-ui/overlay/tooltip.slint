@@ -9,7 +9,7 @@
 //   TTooltipArea {
 //       width: 120px; height: 32px;
 //       text: "提示"; placement: TTooltipPlacement.top;
-//       Text { text: "目标"; }
+//       TText { text: "目标"; }
 //   }
 // Interactive triggers (TButton) wire the global themselves:
 //   ta := TouchArea { changed has-hover => {
@@ -78,7 +78,7 @@ export component TTooltipOverlay inherits Rectangle {
     // Dark mode uses the elevated secondary-container surface, not an inversion.
     private property <color> bubble-bg: TTheme.is-dark ? TTheme.bg-color-secondarycontainer : TTheme.text-color-primary;
     private property <color> bubble-fg: TTheme.is-dark ? TTheme.text-color-primary : TTheme.bg-color-container;
-    private property <length> gap: 8px;
+    private property <length> gap: TTheme.spacing-4;
     // Hover latch: the bubble appears after `delay`, hides instantly.
     private property <bool> has-waited: false;
     private property <bool> hovering: TTooltip.hovering;

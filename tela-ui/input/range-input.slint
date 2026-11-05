@@ -131,17 +131,23 @@ export component TRangeInput inherits TInputFrame {
 
             key-pressed(event) => {
                 if event.text == Key.UpArrow {
-                    root.min-value = root.clamp-v(root.min-value + root.step);
-                    if (root.max-value < root.min-value) {
-                        root.max-value = root.min-value;
+                    let next = root.clamp-v(root.min-value + root.step);
+                    if (next != root.min-value) {
+                        root.min-value = next;
+                        if (root.max-value < root.min-value) {
+                            root.max-value = root.min-value;
+                        }
+                        root.changed(root.min-value, root.max-value);
                     }
                     self.text = root.format(root.min-value);
-                    root.changed(root.min-value, root.max-value);
                     return accept;
                 } else if event.text == Key.DownArrow {
-                    root.min-value = root.clamp-v(root.min-value - root.step);
+                    let next = root.clamp-v(root.min-value - root.step);
+                    if (next != root.min-value) {
+                        root.min-value = next;
+                        root.changed(root.min-value, root.max-value);
+                    }
                     self.text = root.format(root.min-value);
-                    root.changed(root.min-value, root.max-value);
                     return accept;
                 }
                 reject
@@ -204,17 +210,23 @@ export component TRangeInput inherits TInputFrame {
 
             key-pressed(event) => {
                 if event.text == Key.UpArrow {
-                    root.max-value = root.clamp-v(root.max-value + root.step);
-                    self.text = root.format(root.max-value);
-                    root.changed(root.min-value, root.max-value);
-                    return accept;
-                } else if event.text == Key.DownArrow {
-                    root.max-value = root.clamp-v(root.max-value - root.step);
-                    if (root.min-value > root.max-value) {
-                        root.min-value = root.max-value;
+                    let next = root.clamp-v(root.max-value + root.step);
+                    if (next != root.max-value) {
+                        root.max-value = next;
+                        root.changed(root.min-value, root.max-value);
                     }
                     self.text = root.format(root.max-value);
-                    root.changed(root.min-value, root.max-value);
+                    return accept;
+                } else if event.text == Key.DownArrow {
+                    let next = root.clamp-v(root.max-value - root.step);
+                    if (next != root.max-value) {
+                        root.max-value = next;
+                        if (root.min-value > root.max-value) {
+                            root.min-value = root.max-value;
+                        }
+                        root.changed(root.min-value, root.max-value);
+                    }
+                    self.text = root.format(root.max-value);
                     return accept;
                 }
                 reject

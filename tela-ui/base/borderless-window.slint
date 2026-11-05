@@ -28,7 +28,7 @@ import { TIconData, TIconSet } from "icon/data.slint";
 // One title-bar control.
 // It has a full-height hit target and a hover highlight.
 // Danger mode is the close-style red hover with a white glyph.
-// TCaption glyphs are normalized to Windows' 10px optical box.
+// Title-bar glyphs are normalized to Windows' 10px optical box.
 // Lucide Minus draws 14/24 and X 12/24 of the icon size.
 // Call sites pass per-glyph sizes with an absolute ~1.1px stroke.
 // That matches the maximize square's 1px border.
@@ -148,6 +148,7 @@ export component TBorderlessWindow inherits Window {
                         color: TTheme.text-color-secondary;
                         vertical-alignment: center;
                         horizontal-stretch: 1;
+                        overflow: elide;
                         visible: root.header-title-visible;
                     }
 

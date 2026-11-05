@@ -75,7 +75,6 @@ export component TSegmented inherits Rectangle {
                 animate color { duration: TTheme.duration-fast; }
 
                 states [
-                    hovered when ta.has-hover && !root.disabled && i != root.current-index: {}
                     disabled when root.disabled: {
                         color: TTheme.text-color-disabled;
                     }

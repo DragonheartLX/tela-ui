@@ -18,7 +18,6 @@ import {
     TSplitterPanePrimaryVertical,
     TTableAlign,
     TList,
-    TListItem,
     TCell,
     TCellGroup,
     TSortable,
@@ -519,7 +518,7 @@ export component ContentSection inherits VerticalLayout {
         code: "import { TSwipeCell, TSwipeSide } from \"@tela-ui/content.slint\";\nimport { TThemeRole, TTheme } from \"@tela-ui/theme.slint\";\nimport { TText } from \"@tela-ui/base.slint\";\nimport { TMessage } from \"@tela-ui/notice.slint\";\n\nTSwipeCell {\n    height: 56px; // 行高由宿主钉住\n    // 底部分隔线默认开, 固定在行上不随内容滑动; 连续列表末行设 divider: false\n    right-actions: [\n        { text: \"编辑\", theme: TThemeRole.primary },\n        { text: \"删除\", theme: TThemeRole.error },\n    ];\n\n    // 内容自备背景与排版 (手势层在内容之下, 不挡子元素自己的点击)\n    Rectangle {\n        background: TTheme.bg-color-container;\n\n        TText {\n            x: TTheme.padding-lr-l;\n            width: parent.width - 2 * TTheme.padding-lr-l;\n            height: parent.height;\n            text: \"左滑查看操作\";\n            vertical-alignment: center;\n        }\n    }\n\n    action-clicked(side, i) => {\n        TMessage.info(side == TSwipeSide.left ? \"左侧操作 \\{i}\" : \"右侧操作 \\{i}\");\n    }\n}";
 
         VerticalLayout {
-            spacing: 0;
+            spacing: 0px;
 
             TSwipeCell {
                 height: 56px;

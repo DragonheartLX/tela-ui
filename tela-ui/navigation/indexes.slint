@@ -19,6 +19,10 @@ export component TIndexes inherits Rectangle {
 
     // True between pointer-down and pointer-up: drives the echo bubble.
     private property <bool> active: false;
+    // Visuals read the clamped index; a host write past the end highlights
+    // nothing instead of crashing the bubble lookup.
+    private property <int> safe-current:
+        Math.max(-1, Math.min(root.current, root.letters.length - 1));
 
     // 32px touch width on the token scale.
     width: TTheme.spacing-10;
@@ -32,16 +36,16 @@ export component TIndexes inherits Rectangle {
         text: it;
         horizontal-alignment: center;
         vertical-alignment: center;
-        font-weight: i == root.current ? TTheme.font-weight-medium : TTheme.font-weight-regular;
-        color: i == root.current ? TTheme.brand-color : TTheme.text-color-secondary;
+        font-weight: i == root.safe-current ? TTheme.font-weight-medium : TTheme.font-weight-regular;
+        color: i == root.safe-current ? TTheme.brand-color : TTheme.text-color-secondary;
         animate color { duration: TTheme.duration-fast; }
     }
 
     // Echo bubble while pressing/dragging (overflows to the left on
     // purpose — the bar hugs the container edge).
-    if root.active && root.current >= 0 && root.letters.length > 0: Rectangle {
+    if root.active && root.safe-current >= 0: Rectangle {
         x: -self.width - TTheme.spacing-2;
-        y: root.current * TTheme.line-height-s + (TTheme.line-height-s - self.height) / 2;
+        y: root.safe-current * TTheme.line-height-s + (TTheme.line-height-s - self.height) / 2;
         width: TTheme.spacing-9;
         height: TTheme.spacing-9;
         border-radius: TTheme.radius-medium;
@@ -55,7 +59,7 @@ export component TIndexes inherits Rectangle {
         TText {
             width: parent.width;
             height: parent.height;
-            text: root.letters[root.current];
+            text: root.letters[root.safe-current];
             font-weight: TTheme.font-weight-semibold;
             color: TTheme.brand-color;
             horizontal-alignment: center;

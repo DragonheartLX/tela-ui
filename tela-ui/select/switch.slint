@@ -23,10 +23,13 @@ export component TSwitch inherits Rectangle {
     private property <length> thumb: h - 6px;
     private property <length> inset: 3px;
 
-    // Pointer click and the assistive-tech default action share one path.
+    // Pointer click and the assistive-tech default action share one path;
+    // the disabled guard lives here so both callers are covered.
     function toggle() {
-        root.checked = !root.checked;
-        root.changed(root.checked);
+        if (!root.disabled) {
+            root.checked = !root.checked;
+            root.changed(root.checked);
+        }
     }
 
     width: w;
@@ -79,7 +82,10 @@ export component TSwitch inherits Rectangle {
     }
 
     accessible-role: AccessibleRole.checkbox;
+    // No text property to derive a label from; hosts should wrap the switch
+    // in a labelled control when the state alone is not self-explanatory.
     accessible-checked: checked;
+    accessible-enabled: !root.disabled;
     accessible-action-default => {
         root.toggle();
     }

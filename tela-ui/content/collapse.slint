@@ -46,6 +46,8 @@ export component TCollapse inherits VerticalLayout {
         // only ever received a slice of the free space, so clicks on the
         // label and chevron did nothing.
         header := Rectangle {
+            // 44px is TDesign's collapse header height — intrinsic control
+            // metric, deliberately literal (no height token lands on it).
             height: 44px;
 
             HorizontalLayout {

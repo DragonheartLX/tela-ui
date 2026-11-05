@@ -47,6 +47,11 @@ export component TPopconfirm inherits Rectangle {
     // `auto-open: false`, which removes the area entirely.
     if root.auto-open: TouchArea {
         mouse-cursor: MouseCursor.pointer;
+        accessible-role: AccessibleRole.button;
+        accessible-label: root.text;
+        accessible-action-default => {
+            root.toggle();
+        }
         clicked => {
             root.toggle();
         }
@@ -100,5 +105,6 @@ export component TPopconfirm inherits Rectangle {
         }
     }
 
-    accessible-role: AccessibleRole.button;
+    // No root role: with `auto-open` the trigger area above speaks; with
+    // `auto-open: false` the consumer's own trigger control does.
 }

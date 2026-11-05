@@ -16,6 +16,8 @@ export component TSlider inherits Rectangle {
     callback changed(float);
     callback released(float);
 
+    // TDesign slider metrics: 6px track, 16px round handle — intrinsic
+    // control sizes, deliberately literal (no token lands on either step).
     private property <length> track-h: 6px;
     private property <length> handle-d: 16px;
     private property <float> t: (value - minimum) / max(0.0001, maximum - minimum);

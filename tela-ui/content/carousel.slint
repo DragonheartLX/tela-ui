@@ -83,7 +83,8 @@ export component TCarousel inherits Rectangle {
                 // Switch only when the drag passed the threshold (and actually
                 // moved: at zero width the comparison would be vacuously
                 // true); otherwise glide back to the slide the drag started
-                // from.
+                // from. 80px is the documented spec floor (TDesign 走马灯),
+                // capped by half the slide width.
                 let step = root.drag-x != 0px
                     && Math.abs(root.drag-x) >= Math.min(80px, root.width / 2)
                     ? (root.drag-x < 0 ? 1 : -1) : 0;
@@ -101,7 +102,7 @@ export component TCarousel inherits Rectangle {
     // Dots indicator, centered at the bottom edge.
     HorizontalLayout {
         x: (parent.width - self.preferred-width) / 2;
-        y: parent.height - self.preferred-height - 12px;
+        y: parent.height - self.preferred-height - TTheme.spacing-5;
         height: self.preferred-height;
         spacing: TTheme.spacing-3;
 
@@ -128,7 +129,10 @@ export component TCarousel inherits Rectangle {
             TouchArea {
                 mouse-cursor: MouseCursor.pointer;
                 clicked => {
-                    if (i != root.current) {
+                    // Same guard as the accessible action: `current` may hold
+                    // an out-of-range value, so compare against the clamped
+                    // view (`safe-current`), not the raw write-back slot.
+                    if (i != root.safe-current) {
                         root.current = i;
                         root.changed(i);
                     }

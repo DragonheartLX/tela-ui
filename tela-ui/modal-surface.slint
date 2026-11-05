@@ -47,6 +47,8 @@ export component TModalSurface inherits Rectangle {
 
     TouchArea {
         enabled: root.open && root.close-on-overlay;
+        // Pure gesture backdrop: closes the modal, no role announced.
+        accessible-role: AccessibleRole.none;
         clicked => {
             root.close();
         }

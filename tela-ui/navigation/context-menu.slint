@@ -17,7 +17,6 @@
 import { TTheme } from "../theme.slint";
 import { TText } from "../base/typography.slint";
 import { TIcon } from "../base/icon/icon.slint";
-import { TIconData } from "../base/icon/data.slint";
 import { TPopupSurface } from "../popup-surface.slint";
 import { TDropdownMenuItem } from "dropdown-menu.slint";
 import { TScrollBar } from "../scroll-bar.slint";
@@ -31,6 +30,8 @@ export component TContextMenu inherits Rectangle {
     in property <int> max-visible-items: 8;
     // Fixed popup width; the popup is clipped at the window edge.
     in property <length> popup-width: 180px;
+    // Panel width actually applied: at least 140px, wider on demand.
+    private property <length> pw: max(root.popup-width, 140px);
 
     callback selected(int, string);
 
@@ -84,8 +85,10 @@ export component TContextMenu inherits Rectangle {
         popup-x: root.menu-x;
         popup-y: root.menu-y;
         gap: 0px;
-        popup-width: max(root.popup-width, 140px);
-        popup-max-width: max(root.popup-width, 140px);
+        // popup-width and popup-max-width are the same bound: the panel is
+        // at least 140px, wider when the content prefers it.
+        popup-width: root.pw;
+        popup-max-width: root.pw;
         // Reported row heights, capped at `max-visible-items` full rows plus
         // the list layout's 2 × 4px padding.
         popup-height: min(root.rows-h, root.max-visible-items * root.item-height) + 8px;
@@ -154,6 +157,15 @@ export component TContextMenu inherits Rectangle {
                     row-ta := TouchArea {
                         enabled: !it.disabled && !it.divider;
                         mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;
+                        accessible-role: AccessibleRole.button;
+                        accessible-label: it.label;
+                        accessible-enabled: !it.disabled && !it.divider;
+                        accessible-action-default => {
+                            if (self.enabled) {
+                                root.selected(i, it.value);
+                                surface.close();
+                            }
+                        }
                         clicked => {
                             root.selected(i, it.value);
                             surface.close();

@@ -88,9 +88,6 @@ export component MainWindow inherits TBorderlessWindow {
         { label: "实验性", value: "experimental", icon: TIconSet.FlaskConical },
     ];
     in-out property <string> group-value: "basics";
-    // Current page scroll offset, exposed read-only for hosts and probes
-    // (element ids are not part of the compiled API).
-    out property <length> page-scroll-y: page-scroll.content-y;
     // Per-page scroll memory: switching pages stores the outgoing offset and
     // restores the incoming one, so every page keeps its own position.
     // Index order matches group-items plus settings (11 entries).

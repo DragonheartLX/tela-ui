@@ -163,11 +163,7 @@ export component TDateTimePicker inherits Rectangle {
 
     private property <int> year-count: max(0, root.end-year - root.start-year + 1);
     // The day wheel follows the displayed month length (TCalendar math).
-    private property <int> dim: root.leap(value.date.year) && value.date.month == 2 ? 29
-        : value.date.month == 2 ? 28
-        : value.date.month == 4 || value.date.month == 6
-        || value.date.month == 9 || value.date.month == 11 ? 30
-        : value.date.month >= 1 ? 31 : 31;
+    private property <int> dim: root.dimOf(value.date.year, value.date.month);
 
     pure function leap(y: int) -> bool {
         return Math.mod(y, 4) == 0 && (Math.mod(y, 100) != 0 || Math.mod(y, 400) == 0);

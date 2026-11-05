@@ -35,10 +35,8 @@ import {
     TContextMenu,
     TBackTop,
     TTabBar,
-    TTabBarItem,
     TIndexes,
     TFab,
-    TFabItem,
     TAffix,
     TAffixSide,
     TAnchor,
@@ -684,7 +682,7 @@ export component NavigationSection inherits VerticalLayout {
     // ========================= TAnchor =========================
     GallerySection {
         title: "锚点导航 TAnchor";
-        code: "import { TAnchor, TAnchorItem } from \"@tela-ui/navigation.slint\";\nimport { TScrollBar } from \"@tela-ui/display.slint\";\nimport { TText } from \"@tela-ui/base.slint\";\nimport { TTheme } from \"@tela-ui/theme.slint\";\n\nproperty <int> current: -1;\nproperty <[string]> names: [\"概览\", \"安装\", \"快速上手\", \"常见问题\"];\n\nRectangle {\n    height: 260px;\n    clip: true;\n\n    HorizontalLayout {\n        sv := TScrollBar {\n            content-height: 800px; // 4 节 × 200px\n\n            VerticalLayout {\n                for s in 4: Rectangle {\n                    height: 200px;\n                    background: TTheme.bg-color-secondarycontainer;\n\n                    TText {\n                        x: 16px;\n                        y: 16px;\n                        text: \"0\\{s + 1} \\{names[s]}\"; // 品牌色序号 + 节名\n                        font-size: TTheme.font-size-l;\n                        font-weight: TTheme.font-weight-semibold;\n                        color: TTheme.brand-color;\n                    }\n                }\n            }\n        }\n\n        TAnchor {\n            width: 108px;\n            items: [\n                { label: \"概览\", target-y: 0px },\n                { label: \"安装\", target-y: 200px },\n                { label: \"快速上手\", target-y: 400px },\n                { label: \"常见问题\", target-y: 600px },\n            ];\n            max-scroll: sv.content-height - sv.height; // 末节防过滚\n            content-y <=> sv.content-y;\n\n            changed(i) => { root.current = i; } // -1 表示在首个锚点之上\n        }\n    }\n}";
+        code: "import { TAnchor, TAnchorItem } from \"@tela-ui/navigation.slint\";\nimport { TScrollBar } from \"@tela-ui/display.slint\";\nimport { TText } from \"@tela-ui/base.slint\";\nimport { TTheme } from \"@tela-ui/theme.slint\";\n\nproperty <int> current: -1;\nproperty <[string]> names: [\"概览\", \"安装\", \"快速上手\", \"常见问题\"];\n\nRectangle {\n    height: 260px;\n    clip: true;\n\n    HorizontalLayout {\n        sv := TScrollBar {\n            content-height: 800px; // 4 节 × 200px\n\n            VerticalLayout {\n                for s in 4: Rectangle {\n                    height: 200px;\n                    background: TTheme.bg-color-secondarycontainer;\n\n                    TText {\n                        x: 16px;\n                        y: 16px;\n                        text: \"0\\{s + 1} \\{names[s]}\"; // 品牌色序号 + 节名\n                        font-size: TTheme.font-size-l;\n                        line-height: TTheme.line-height-l;\n                        font-weight: TTheme.font-weight-semibold;\n                        color: TTheme.brand-color;\n                    }\n                }\n            }\n        }\n\n        TAnchor {\n            width: 108px;\n            items: [\n                { label: \"概览\", target-y: 0px },\n                { label: \"安装\", target-y: 200px },\n                { label: \"快速上手\", target-y: 400px },\n                { label: \"常见问题\", target-y: 600px },\n            ];\n            max-scroll: sv.content-height - sv.height; // 末节防过滚\n            content-y <=> sv.content-y;\n\n            changed(i) => { root.current = i; } // -1 表示在首个锚点之上\n        }\n    }\n}";
 
         VerticalLayout {
             spacing: 16px;
@@ -720,6 +718,7 @@ export component NavigationSection inherits VerticalLayout {
                                         y: TTheme.padding-lr-l;
                                         text: "0\{s + 1}";
                                         font-size: TTheme.font-size-l;
+                                        line-height: TTheme.line-height-l;
                                         font-weight: TTheme.font-weight-semibold;
                                         color: TTheme.brand-color;
                                     }
@@ -729,6 +728,7 @@ export component NavigationSection inherits VerticalLayout {
                                         y: TTheme.padding-lr-l;
                                         text: root.anchor-items[s].label;
                                         font-size: TTheme.font-size-l;
+                                        line-height: TTheme.line-height-l;
                                         font-weight: TTheme.font-weight-semibold;
                                     }
 

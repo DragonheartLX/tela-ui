@@ -24,7 +24,9 @@ export component TNavBar inherits Rectangle {
 
     callback changed(string);
 
-    height: 56px;
+    // 56px = height-l + spacing-6, the token idiom TTabBar uses for the
+    // same TDesign bar height.
+    height: TTheme.height-l + TTheme.spacing-6;
     background: TTheme.bg-color-container;
 
     HorizontalLayout {

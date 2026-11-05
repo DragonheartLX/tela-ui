@@ -35,6 +35,8 @@ export component TButton inherits Rectangle {
     in property <TIconData> icon;
     in property <bool> loading;
     in property <bool> disabled;
+    // Screen-reader name; icon-only buttons have no `text` to derive one from.
+    in property <string> name: "";
 
     callback clicked();
 
@@ -145,7 +147,7 @@ export component TButton inherits Rectangle {
     }
 
     accessible-role: AccessibleRole.button;
-    accessible-label: text;
+    accessible-label: root.name != "" ? root.name : root.text;
     accessible-enabled: !root.disabled && !root.loading;
     accessible-action-default => {
         if (!root.disabled && !root.loading) { root.clicked(); }

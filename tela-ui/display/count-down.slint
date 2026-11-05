@@ -27,7 +27,7 @@ export component TCountDown inherits Rectangle {
     private property <int> minutes: Math.mod(Math.floor(self.total-ms / 60000), 60);
     private property <int> seconds: Math.mod(Math.floor(self.total-ms / 1000), 60);
 
-    public pure function pad2(n: int) -> string {
+    pure function pad2(n: int) -> string {
         return n < 10 ? "0\{n}" : "\{n}";
     }
 

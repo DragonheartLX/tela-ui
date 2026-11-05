@@ -120,6 +120,7 @@ export component TDatePicker inherits Rectangle {
         mouse-cursor: root.disabled ? MouseCursor.default : MouseCursor.pointer;
         accessible-role: AccessibleRole.button;
         accessible-label: root.display-text != "" ? root.display-text : root.placeholder-text;
+        accessible-enabled: !root.disabled;
 
         clicked => {
             surface.toggle();
@@ -130,7 +131,7 @@ export component TDatePicker inherits Rectangle {
         anchor-width: root.width;
         anchor-height: root.height;
         placement: root.placement;
-        gap: 6px;
+        gap: TTheme.spacing-3;
         popup-width: root.cal-width + 2px;
         popup-height: root.cal-height + 2px;
         popup-max-width: root.cal-width + 2px;

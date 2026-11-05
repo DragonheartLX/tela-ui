@@ -30,7 +30,6 @@ import { TIconSet } from "../base/icon/data.slint";
 import { TDivider } from "../base/divider.slint";
 import { TModalSurface } from "../modal-surface.slint";
 import { TPopupStack } from "../popup-stack.slint";
-import { TScrollBar } from "../scroll-bar.slint";
 import { ScrollView } from "std-widgets.slint";
 
 export struct TCommandItem {
@@ -353,6 +352,9 @@ export component TCommandPaletteOverlay inherits TModalSurface {
                                 row-ta := TouchArea {
                                     enabled: root.open && TCommandPaletteService.hit(it);
                                     mouse-cursor: MouseCursor.pointer;
+                                    accessible-role: AccessibleRole.button;
+                                    accessible-label: it.label;
+                                    accessible-enabled: root.open && TCommandPaletteService.hit(it);
                                     clicked => {
                                         TCommandPaletteService.run(i);
                                     }
@@ -378,6 +380,8 @@ export component TCommandPaletteOverlay inherits TModalSurface {
                     color: TTheme.text-color-placeholder;
                     horizontal-alignment: center;
                     vertical-alignment: center;
+                    // Floating-layer status: announced as the filter changes.
+                    accessible-live-region: AccessibleLiveness.polite;
                 }
             }
         }

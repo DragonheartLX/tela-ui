@@ -113,10 +113,13 @@ export component TSelectInput inherits Rectangle {
             || root.items[index].disabled || !root.hit(root.items[index]) {
             return false;
         }
-        root.current-index = index;
+        // Re-picking the selection restores the label but does not re-fire.
+        if (index != root.current-index) {
+            root.current-index = index;
+            root.selected(index, root.items[index].value);
+        }
         root.text = root.items[index].label;
         trigger.move-caret-to-end();
-        root.selected(index, root.items[index].value);
         surface.close();
         return true;
     }
@@ -291,6 +294,8 @@ export component TSelectInput inherits Rectangle {
                         horizontal-alignment: center;
                         vertical-alignment: center;
                         overflow: elide;
+                        // Floating-layer status: announced as the filter changes.
+                        accessible-live-region: AccessibleLiveness.polite;
                     }
                 }
             }

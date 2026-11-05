@@ -47,7 +47,7 @@ export component TLink inherits Rectangle {
     ]
 
     height: content.preferred-height;
-    width: max(content.preferred-width, underline-line.width);
+    width: content.preferred-width;
 
     touch := TouchArea {
         enabled: !root.disabled;
