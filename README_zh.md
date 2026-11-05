@@ -10,18 +10,13 @@ TDesign 风格的 [Slint](https://slint.dev) 第三方组件库
 
 ## 快速开始
 
-在 `build.rs` 中注册组件库路径, 之后即可用 `@tela-ui/` 前缀导入组件:
+在 `build.rs` 中注册组件库路径, 之后即可用 `@tela-ui/` 前缀导入组件。`tela_ui::import_paths()` 会解析 `tela-ui` crate 内置 `.slint` 源文件的绝对路径, 所以 git clone 与 crates.io 安装都能用:
 
 ```rust
-use std::{collections::HashMap, path::PathBuf};
-
 fn main() {
-    let library_paths = HashMap::from([(
-        "tela-ui".to_string(),
-        PathBuf::from("path/to/tela-ui"), // 本项目的 tela-ui/ 文件夹
-    )]);
     let config = slint_build::CompilerConfiguration::new()
-        .with_library_paths(library_paths);
+        .with_library_paths(tela_ui::import_paths())
+        .with_style("fluent".into());
     slint_build::compile_with_config("ui/MainWindow.slint", config).unwrap();
 }
 ```
@@ -68,10 +63,10 @@ TTheme.dark.bg-page = #101010;
 整体替换用 `TTheme.dark = { ... }`; 省略字段必须补齐, 请基于 `@tela-ui/colors.slint` 的 `TLightColors` / `TDarkColors` 派生以保留色阶, 完整字段见 `structs/theme.slint`。
 
 ```rust
-// 从 Rust 侧操作 (Palette/TTheme 由 ui/MainWindow.slint 再导出;
-// ColorScheme 走生成代码同款 re-export 路径)
-use tela_lib::Palette;
-use slint::private_unstable_api::re_exports::ColorScheme;
+// Rust 侧操作: 模式偏好由 std-widgets 的 `Palette` 全局承载。在你自己的 .slint 里
+// 再导出它 (`export { Palette } from "std-widgets.slint";`), 再用
+// `slint::include_modules!()` 引入作用域。
+use slint::language::ColorScheme;
 Palette::get(&ui).set_color_scheme(ColorScheme::Dark);
 ```
 

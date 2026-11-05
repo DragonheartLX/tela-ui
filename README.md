@@ -10,18 +10,13 @@ An unofficial third-party [Slint](https://slint.dev) component library in the st
 
 ## Quick Start
 
-Register the library path in `build.rs`, then import components with the `@tela-ui/` prefix:
+Register the library path in `build.rs`, then import components with the `@tela-ui/` prefix. `tela_ui::import_paths()` resolves the absolute path of the `.slint` files shipped inside the `tela-ui` crate, so it works both for a git clone and for a crates.io install:
 
 ```rust
-use std::{collections::HashMap, path::PathBuf};
-
 fn main() {
-    let library_paths = HashMap::from([(
-        "tela-ui".to_string(),
-        PathBuf::from("path/to/tela-ui"), // the tela-ui/ folder of this project
-    )]);
     let config = slint_build::CompilerConfiguration::new()
-        .with_library_paths(library_paths);
+        .with_library_paths(tela_ui::import_paths())
+        .with_style("fluent".into());
     slint_build::compile_with_config("ui/MainWindow.slint", config).unwrap();
 }
 ```
@@ -69,10 +64,10 @@ TTheme.dark.bg-page = #101010;
 To replace a theme wholesale, use `TTheme.dark = { ... }`; every omitted field must be filled in. Derive from `TLightColors` / `TDarkColors` in `@tela-ui/colors.slint` to keep the color ramps intact; the full field list is in `structs/theme.slint`.
 
 ```rust
-// From the Rust side (Palette/TTheme are re-exported by ui/MainWindow.slint;
-// ColorScheme is re-exported along the same path as the generated code)
-use tela_lib::Palette;
-use slint::private_unstable_api::re_exports::ColorScheme;
+// From the Rust side: the std-widgets `Palette` global carries the mode
+// preference. Export it from your own .slint (`export { Palette } from
+// "std-widgets.slint";`) and pull it into scope with `slint::include_modules!()`.
+use slint::language::ColorScheme;
 Palette::get(&ui).set_color_scheme(ColorScheme::Dark);
 ```
 

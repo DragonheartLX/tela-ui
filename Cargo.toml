@@ -3,6 +3,11 @@ name = "tela-ui"
 version = "0.1.0"
 edition = "2024"
 license = "Apache-2.0"
+description = "TDesign-style third-party component library for Slint"
+repository = "https://github.com/DragonheartLX/tela-ui"
+readme = "README.md"
+keywords = ["slint", "gui", "ui", "tdesign", "widgets"]
+categories = ["gui"]
 
 [lib]
 crate-type = ["lib", "cdylib"]

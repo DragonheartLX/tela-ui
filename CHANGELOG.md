@@ -4,6 +4,8 @@
 
 ## [Unreleased]
 
+- crate 发布准备: 补全 `[package]` 元数据 (description / repository / readme / keywords / categories); `tela_ui::import_paths()` 从 gallery `ui/` 改指库源码 `tela-ui/` 并统一注册名, 供 consumers 在自己的 `build.rs` 里注册 (crates.io 安装与 git clone 均可用)。
+
 ## [0.1.0] - 2026-11-05
 
 首个版本: 面向 Slint 1.18.1 的 TDesign 风格组件库。
