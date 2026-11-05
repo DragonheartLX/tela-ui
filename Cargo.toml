@@ -7,7 +7,7 @@ license = "Apache-2.0"
 [lib]
 crate-type = ["lib", "cdylib"]
 path = "src/lib.rs"
-name = "tela_lib"
+name = "tela_ui"
 
 [[bin]]
 path = "src/main.rs"
