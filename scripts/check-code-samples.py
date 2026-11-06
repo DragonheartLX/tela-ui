@@ -83,7 +83,7 @@ def main():
             with open(path, "w", encoding="utf-8", newline="\n") as f:
                 f.write(wrap(text))
             r = subprocess.run(
-                ["slint-viewer", "-L", f"tela-ui={REPO}\\tela-ui", "--check",
+                ["slint-viewer", "-L", f"tela-ui={os.path.join(REPO, 'tela-ui')}", "--check",
                  path, "--style", "fluent"],
                 capture_output=True, text=True,
             )
