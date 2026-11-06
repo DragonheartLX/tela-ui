@@ -32,3 +32,4 @@
 - **TFooter 是纯展示件 (2026-10-25)** — logo/链接列/版权三段居中; 链接用 TLink, 只报 `link-clicked(i)` / `logo-clicked()`; 居中靠交叉轴撑满 + `horizontal-alignment: center`, 不写 `width: parent.width` (binding-loop, 语义第 31 条 (c))。
 - **范围外组件不实现 (2026-10-25)** — grid/layout/space (Slint 布局); chart/video/signature (富媒体成本); qrcode/watermark (Rust 生成); Upload (文件对话框 interop, 可先做 DropZone 视觉件); Image 容器 (无加载状态); ColorPicker (低性价比); TTitleBar (TBorderlessWindow); TOverlay (TModalSurface); popup/popover/toast/stepper/menu (已有 TTooltipArea/TMessage/TInputNumber/TSideNav+TNavBar)。
 - **页面滚动记忆: 节拍保存 + 适应式重申 (2026-10-25)** — 保存不能现读 content-y (塌缩夹持早于回调, 会存污染值), 改 100ms 常驻节拍 + 切换期挂起; 恢复用 32ms 适应式重申 (装得下才断言, 高度变化重置计数, 连续 8 拍收手, >8 次或 ~1.3s 封顶); 真机验证 -7200 往返一致。
+- **渲染器不给 skia DX12: 依赖改 femtovg (2026-11-06)** — skia 在 Windows 默认 DX12 (wgpu) 交换链建不出 premultiplied alpha, 透明 (圆角) 窗口外圈合成成黑色 (上游 slint#13572 / #4120 未修); slint 依赖用 `renderer-femtovg` (OpenGL 表面) 替代 `renderer-skia`, 全平台同一条特性线, 无 target-specific 分叉
