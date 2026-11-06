@@ -4,7 +4,11 @@
 
 ## [Unreleased]
 
+### Added
+- 新增展示组件 `THeatmap` (瓦片网格热力图, 行主序五档着色, 悬停标签气泡与图例), 随 `@tela-ui/display` 聚合导出; 细节见 `docs/components.md`。
 
+### Fixed
+- 修复 gallery Windows 构建窗口圆角外黑底: slint 依赖弃 `renderer-skia` 改 `renderer-femtovg` (skia 的 DX12 wgpu 表面建不出 premultiplied alpha, 上游 slint#13572 / #4120), 全平台一致; 上游修复后可换回 skia。
 ## [0.1.0] - 2026-11-05
 
 首个版本: 面向 Slint 1.18.1 的 TDesign 风格组件库。

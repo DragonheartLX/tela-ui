@@ -1,6 +1,6 @@
 // Gallery section: 展示 (TTag / TBadge / TAvatar / TAvatarGroup / TEmpty /
 // TTimeline / TDescriptions / TStatistic / TScrollBar / TComment /
-// TCountDown), 一个组件一张卡.
+// TCountDown / THeatmap), 一个组件一张卡.
 
 import { TTheme, TThemeRole, TSize } from "@tela-ui/theme.slint";
 import {
@@ -25,6 +25,7 @@ import {
     TScrollBar,
     TComment,
     TCountDown,
+    THeatmap,
 } from "@tela-ui/display.slint";
 import { TMessage } from "@tela-ui/notice.slint";
 import { GallerySection } from "../gallery-section.slint";
@@ -34,6 +35,9 @@ export component DisplaySection inherits VerticalLayout {
 
     // TComment demo feedback as plain text.
     in-out property <string> comment-status: "暂无操作";
+
+    // THeatmap demo feedback (clicked cell index) as plain text.
+    in-out property <string> heat-status: "尚未点击格子";
 
     // ========================= TTag =========================
     GallerySection {
@@ -422,6 +426,75 @@ export component DisplaySection inherits VerticalLayout {
 
             TCaption {
                 text: "状态: \{root.comment-status}";
+                wrap: word-wrap;
+            }
+        }
+    }
+
+    // ======================= THeatmap ======================
+    GallerySection {
+        title: "热力图 THeatmap";
+        code: "import { THeatmap } from \"@tela-ui/display.slint\";\nimport { TThemeRole } from \"@tela-ui/theme.slint\";\n\nproperty <string> status: \"\";\n\nTHeatmap {\n    columns: 7;\n    show-legend: true;\n    cells: [\n        { }, { label: \"周一: 2 个提交\", level: 2 },\n        { label: \"周二: 4 个提交\", level: 4 },\n    ];\n\n    clicked(i) => { root.status = \"点击第 \\{i} 格\"; }\n}\n\n// 每格五档: 0 空格, 1..4 沿色阶渐深;\n// theme: TThemeRole.default 为中性灰档。";
+
+        VerticalLayout {
+            spacing: 16px;
+
+            HorizontalLayout {
+                spacing: 48px;
+
+                THeatmap {
+                    columns: 7;
+                    show-legend: true;
+                    cells: [
+                        { },
+                        { label: "周一: 1 个提交", level: 1 },
+                        { label: "周二: 3 个提交", level: 3 },
+                        { },
+                        { label: "周四: 1 个提交", level: 1 },
+                        { label: "周五: 4 个提交", level: 4 },
+                        { label: "周六: 2 个提交", level: 2 },
+                        { label: "周日: 2 个提交", level: 2 },
+                        { label: "周一: 3 个提交", level: 3 },
+                        { },
+                        { label: "周三: 4 个提交", level: 4 },
+                        { label: "周四: 2 个提交", level: 2 },
+                        { label: "周五: 1 个提交", level: 1 },
+                        { },
+                        { label: "周日: 3 个提交", level: 3 },
+                        { label: "周一: 4 个提交", level: 4 },
+                        { label: "周二: 2 个提交", level: 2 },
+                        { label: "周三: 1 个提交", level: 1 },
+                        { label: "周四: 0 个提交" },
+                        { label: "周五: 3 个提交", level: 3 },
+                        { label: "周六: 4 个提交", level: 4 },
+                    ];
+
+                    clicked(i) => {
+                        root.heat-status = "点击第 \{i} 格";
+                    }
+                }
+
+                THeatmap {
+                    columns: 4;
+                    theme: TThemeRole.error;
+                    cells: [
+                        { label: "第 1 格", level: 2 },
+                        { label: "第 2 格", level: 3 },
+                        { label: "第 3 格", level: 1 },
+                        { label: "第 4 格", level: 4 },
+                        { label: "第 5 格" },
+                        { label: "第 6 格", level: 2 },
+                        { label: "第 7 格", level: 3 },
+                        { label: "第 8 格", level: 1 },
+                    ];
+                }
+
+                // Absorbs the leftover row space.
+                Rectangle { }
+            }
+
+            TCaption {
+                text: "\{root.heat-status}; 图例与格数可配, 标签悬停出气泡。";
                 wrap: word-wrap;
             }
         }

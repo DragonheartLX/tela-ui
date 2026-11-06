@@ -260,6 +260,10 @@ TText { font-size: TTheme.size-font(size); line-height: TTheme.size-line-height(
 最大化键按 `maximized` 在 `TIconSet.Square` 与 `TIconSet.Copy` 之间换字形), TIcon 与
 内建 `WindowMoveArea` (拖拽热区)。
 
+已知限制: 圆角外透出桌面的前提是窗口表面有 alpha; 依赖默认走 `renderer-femtovg`
+(OpenGL 表面) 规避 skia 在 Windows 的 DX12 (wgpu) 表面问题 (建不出 premultiplied
+alpha, 圆角外黑底, 上游 slint#13572 / #4120); 坚持用 skia 的宿主须给 Windows 目标, 上游修复前取舍见 `docs/decisions.md`。
+
 ---
 
 ### TKbd
@@ -917,7 +921,7 @@ import { TCalendar, TDate, TDatePicker, TTimePicker, TTime, TPicker, TPickerColu
 ## 展示 display
 
 ```slint
-import { TTag, TTagVariant, TAvatar, TAvatarSize, TAvatarShape, TAvatarGroup, TAvatarGroupItem, TBadge, TCard, TEmpty, TDescriptions, TDescriptionItem, TTimeline, TTimelineItem, TStatistic, TScrollBar, TComment, TCountDown } from "@tela-ui/display.slint";
+import { TTag, TTagVariant, TAvatar, TAvatarSize, TAvatarShape, TAvatarGroup, TAvatarGroupItem, TBadge, TCard, TEmpty, TDescriptions, TDescriptionItem, TTimeline, TTimelineItem, TStatistic, TScrollBar, TComment, TCountDown, THeatmap, THeatmapCell } from "@tela-ui/display.slint";
 ```
 
 ### TTag
@@ -1138,6 +1142,32 @@ ListView 接线); 面向非虚拟化内容 — TList / TTable 保留 ListView �
 
 回调: `changed(duration)` — 每秒一次, 携带新剩余时长; `finished()` — 归零时
 恰好一次。展示样式固定 (title-l 半粗), 宽高随文本。
+
+### THeatmap
+
+瓦片网格热力图 (GitHub contributions 风格, 数据驱动): 扁平 `cells` 模型按
+`columns` 分行 (行主序, 末行可不足列数), 每格五档 — `level: 0` 中性空格,
+`1..4` 沿 `theme` 色阶渐深 (`TThemeRole.default` 渲染中性灰档, 档位取
+text-* 令牌); `level` 读取时夹紧到 [0, 4]。格子无选中态, 交互只上报;
+`label` 非空时悬停出 TTooltip 气泡并作为无障碍标签。`show-legend` 在网格
+下方加 "少 □□□□□ 多" 图例 (标签可换字)。
+
+继承: `Rectangle` (内容尺寸: 网格 + 可选图例行)。
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| cells | `[THeatmapCell]` | 空 | 行主序格子模型 |
+| columns | `int` | `7` | 每行列数, < 1 时夹到 1 |
+| theme | `TThemeRole` | `TThemeRole.success` | 档位色阶家族 (default → 中性灰) |
+| cell-size | `length` | `TTheme.spacing-6` (16px) | 单格边长; 格距固定 spacing-2 |
+| show-legend | `bool` | `false` | 是否渲染图例行 |
+| legend-min-label / legend-max-label | `string` | `少 / 多` | 图例两端文案, 为空隐藏该端 |
+
+回调: `clicked(int)` — 行主序格下标 (无下标的格也会上报)。
+
+已知限制: 格子不能是富媒体 (只渲染五档纯色); 文本浮层要求窗口根部放
+`TTooltipOverlay`; 无内置月份/星期轴 — 周历形态 (42 格 + 轴标) 由宿主自行
+组合; data 为空时组件零高度。
 
 ## 内容 content
 
@@ -2472,6 +2502,7 @@ PanelLeftClose, PanelLeftOpen, FlaskConical, Inbox, Square, Copy, Folder, File�
 | TCollapseItem | TCollapse | label, content, disabled |
 | TCarouselSlide | TCarousel | image |
 | TDate | TCalendar, TDatePicker | year, month, day (全 0 = 未选) |
+| THeatmapCell | THeatmap | label string = "", level int = 0 (0 空格, 1..4 档) |
 | TTime | TTimePicker | hour, minute, second (hour < 0 = 未选) |
 | TAutoCompleteItem | TAutoComplete | label, value, disabled |
 | TTableColumn / TTableRow / TTableAlign / TTableSortDirection | TTable | title, width, min-width, align, sortable / cells / left, center, right / none, ascending, descending |

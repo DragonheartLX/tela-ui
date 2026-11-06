@@ -1,0 +1,178 @@
+// Tela UI — THeatmap
+//
+// Tile-grid heat map (GitHub contributions style, model-driven): a flat,
+// row-major `cells` model is split into `columns` columns (the last row may
+// be shorter). Each cell renders one of five levels: 0 = neutral empty tile,
+// 1..4 = shades of the `theme` color ramp (`TThemeRole.default` shades a
+// neutral gray scale); levels are clamped into [0, 4] on read.
+// Cells are static — there is no selection state — so interaction is
+// report-only: `clicked(index)` (row-major) and the label tooltip via the
+// window-level TTooltip overlay.
+
+import { TTheme, TThemeRole } from "../theme.slint";
+import { TText } from "../base/typography.slint";
+import { TTooltip, TTooltipPlacement } from "../overlay/tooltip.slint";
+
+export struct THeatmapCell {
+    // Tooltip / accessibility text; empty = no tooltip, blank label.
+    label: string = "",
+    // 0 = empty tile, 1..4 = ramp shades (values outside render 0 or 4).
+    level: int = 0,
+}
+
+// Static colored tile: shared by heat cells (interactive) and the legend.
+component TileShape inherits Rectangle {
+    in property <color> fill;
+
+    background: root.fill;
+    border-radius: TTheme.radius-small;
+}
+
+// Interactive heat cell: button reads the label, hover latches the tooltip.
+component HeatTile inherits TileShape {
+    in property <string> label;
+    callback clicked();
+
+    touch := TouchArea {
+        accessible-role: AccessibleRole.button;
+        accessible-label: root.label;
+        mouse-cursor: MouseCursor.pointer;
+        clicked => {
+            root.clicked();
+        }
+        changed has-hover => {
+            if (root.label != "") {
+                TTooltip.show(root.label, TTooltipPlacement.top,
+                    self.has-hover, self.absolute-position, self.width, self.height);
+            }
+        }
+    }
+}
+
+export component THeatmap inherits Rectangle {
+    // Row-major model, split into `columns` per row.
+    in property <[THeatmapCell]> cells;
+    // Cells per row; < 1 clamps to 1.
+    in property <int> columns: 7;
+    // Color family for levels 1..4; `default` renders a gray scale.
+    in property <TThemeRole> theme: TThemeRole.success;
+    in property <length> cell-size: TTheme.spacing-6;
+    // Legend row (labels flank a 0..4 tile strip).
+    in property <bool> show-legend: false;
+    in property <string> legend-min-label: "少";
+    in property <string> legend-max-label: "多";
+
+    // Row-major cell index.
+    callback clicked(int);
+
+    private property <length> gap: TTheme.spacing-2;
+    private property <int> grid-cols: root.columns >= 1 ? root.columns : 1;
+    private property <int> grid-rows:
+        root.cells.length > 0 ? Math.ceil(root.cells.length / root.grid-cols) : 0;
+    private property <length> grid-width:
+        root.grid-cols * root.cell-size + (root.grid-cols - 1) * root.gap;
+    private property <length> grid-height:
+        root.grid-rows * root.cell-size + Math.max(root.grid-rows - 1, 0) * root.gap;
+    private property <bool> has-legend:
+        root.show-legend && (root.legend-min-label != "" || root.legend-max-label != "");
+    private property <length> legend-height:
+        Math.max(root.cell-size, TTheme.line-height-s);
+
+    pure function row-of(i: int) -> int {
+        return Math.floor(i / root.grid-cols);
+    }
+
+    pure function col-of(i: int) -> int {
+        return Math.mod(i, root.grid-cols);
+    }
+
+    pure function ramp-level(l: int) -> int {
+        return l < 0 ? 0 : l > 4 ? 4 : l;
+    }
+
+    // Level 0 = empty tile; levels 1..4 walk the ramp light → dark in light
+    // mode (the dark presets invert `color-1..10`, so the same indices keep
+    // the same contrast order); `TThemeRole.default` shades neutrals.
+    pure function level-color(l: int) -> color {
+        let k = root.ramp-level(l);
+        if (k == 0) {
+            return TTheme.bg-color-secondarycontainer;
+        }
+        if (root.theme == TThemeRole.default) {
+            return k == 1 ? TTheme.text-color-disabled : k == 2 ? TTheme.text-color-placeholder
+                : k == 3 ? TTheme.text-color-secondary : TTheme.text-color-primary;
+        }
+        let ramp = TTheme.theme-scheme(root.theme);
+        return k == 1 ? ramp.color-2 : k == 2 ? ramp.color-4
+            : k == 3 ? ramp.color-6 : ramp.color-8;
+    }
+
+    width: root.grid-width;
+    height: root.grid-height + (root.has-legend ? TTheme.spacing-2 + root.legend-height : 0px);
+
+    for cell[i] in root.cells: HeatTile {
+        x: root.col-of(i) * (root.cell-size + root.gap);
+        y: root.row-of(i) * (root.cell-size + root.gap);
+        width: root.cell-size;
+        height: root.cell-size;
+        fill: root.level-color(cell.level);
+        label: cell.label;
+        clicked => {
+            root.clicked(i);
+        }
+    }
+
+    if root.has-legend: HorizontalLayout {
+        x: 0px;
+        y: root.grid-height + TTheme.spacing-2;
+        width: self.preferred-width;
+        height: root.legend-height;
+        spacing: root.gap;
+
+        if root.legend-min-label != "": TText {
+            text: root.legend-min-label;
+            font-size: TTheme.font-size-s;
+            line-height: TTheme.line-height-s;
+            color: TTheme.text-color-secondary;
+            vertical-alignment: center;
+        }
+
+        TileShape {
+            width: root.cell-size;
+            height: root.cell-size;
+            fill: root.level-color(0);
+        }
+
+        TileShape {
+            width: root.cell-size;
+            height: root.cell-size;
+            fill: root.level-color(1);
+        }
+
+        TileShape {
+            width: root.cell-size;
+            height: root.cell-size;
+            fill: root.level-color(2);
+        }
+
+        TileShape {
+            width: root.cell-size;
+            height: root.cell-size;
+            fill: root.level-color(3);
+        }
+
+        TileShape {
+            width: root.cell-size;
+            height: root.cell-size;
+            fill: root.level-color(4);
+        }
+
+        if root.legend-max-label != "": TText {
+            text: root.legend-max-label;
+            font-size: TTheme.font-size-s;
+            line-height: TTheme.line-height-s;
+            color: TTheme.text-color-secondary;
+            vertical-alignment: center;
+        }
+    }
+}
