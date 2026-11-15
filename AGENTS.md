@@ -10,8 +10,7 @@ README 只做入门: 不放组件统计与已知限制。统计进 `docs/archite
 
 ## 仓库速览
 
-- `tela-ui/` 组件库, `@tela-ui/...`; 分类聚合, `common.slint` 仅兼容。
-- `ui/` + `src/` gallery (bin `tela`), Slint 1.18.1 / edition 2024 / `fluent`。
+- Cargo workspace: 根包 `tela-ui` 为库 (无 slint 依赖, `import_paths()` 出口), `gallery/` 成员为展示二进制 (bin `tela`, slint 依赖在此)。
 
 ## 改动流程
 

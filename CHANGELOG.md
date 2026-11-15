@@ -2,6 +2,11 @@
 
 本文件只记录版本级总体变更; 逐组件细节、机制与取舍见 `docs/components.md`、`docs/slint-semantics.md` 与 `docs/decisions.md`。
 
+## [0.1.2] - 2026-11-15
+
+### Changed
+- 仓库改为 Cargo workspace: 根包 `tela-ui` 为纯库 (去掉 slint 依赖, 仅 `import_paths()` 出口), 展示二进制独立为 `gallery/` 成员 (bin `tela`, slint / slint-build 依赖移到此处); 发布包改为只含 Rust 出口与 `tela-ui/` Slint 源。
+
 ## [0.1.1] - 2026-11-06
 
 ### Added

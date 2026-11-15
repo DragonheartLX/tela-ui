@@ -1,0 +1,19 @@
+[package]
+name = "tela"
+edition = "2024"
+publish = false
+
+[dependencies]
+slint = { version = "1.18.1", default-features = false, features = [
+  "accessibility",
+  "compat-1-18",
+  "backend-winit",
+  "renderer-femtovg",
+  "renderer-software",
+  "std",
+] }
+
+[build-dependencies]
+slint-build = "1.18.1"
+# Build script only: resolves the bundled `.slint` import paths.
+tela-ui = { path = ".." }

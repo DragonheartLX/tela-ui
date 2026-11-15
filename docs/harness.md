@@ -15,7 +15,7 @@ Get-ChildItem tela-ui,ui -Recurse -Filter *.slint |
 
 # 3) 亮/暗各一张; 暗色 --load-data dark.json = {"Palette":{"color-scheme":"dark"}},
 #    亮色必须显式 light.json (单帧渲染里 color-scheme 仍是 unknown); JSON 无 BOM
-slint-viewer -L "tela-ui=$PWD\tela-ui" --screenshot out-light.png --size 1200x800 ui\MainWindow.slint
+slint-viewer -L "tela-ui=$PWD\tela-ui" --screenshot out-light.png --size 1200x800 gallery\ui\MainWindow.slint
 
 # 4) gallery 代码样本门禁 (当前 90 个)
 python scripts\check-code-samples.py
@@ -23,7 +23,7 @@ python scripts\check-code-samples.py
 
 - 工具: `slint-viewer` / `slint-lsp` / `cargo`。
 - 像素基准 (1200x800 MainWindow): 亮 `#ffffff 56.1%` / `#f3f3f3 20.5%` / `#eeeeee 14.0%` / `#0052d9 1.5%`; 暗 `#242424 56.1%` / `#2c2c2c 20.5%` / `#181818 14.0%` / `#4582e6 1.5%`。验证无副作用: 剥掉新内容渲染, 与 HEAD 逐字节一致。
-- 声明是否生效查生成代码 `target\debug\build\tela-ui-*\out\MainWindow.rs`; 枚举变体带 `r#`, 特征串写 `AccessibleStringProperty :: r#Label`。
+- 声明是否生效查生成代码 `target\debug\build\tela-*\out\MainWindow.rs`; 枚举变体带 `r#`, 特征串写 `AccessibleStringProperty :: r#Label`。
 
 ## 探针踩坑
 

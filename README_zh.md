@@ -44,9 +44,9 @@ export component MainWindow inherits Window {
 运行 gallery (组件陈列应用):
 
 ```sh
-cargo run                     # 跟随系统深浅色
-TELA_THEME=dark cargo run     # POSIX: 强制暗色 (只认 light / dark, 其它值启动即报错退出)
-$env:TELA_THEME="dark"; cargo run   # PowerShell 写法
+cargo run --package tela          # 跟随系统深浅色
+TELA_THEME=dark cargo run --package tela     # POSIX: 强制暗色 (只认 light / dark, 其它值启动即报错退出)
+$env:TELA_THEME="dark"; cargo run --package tela   # PowerShell 写法
 ```
 
 ## 主题

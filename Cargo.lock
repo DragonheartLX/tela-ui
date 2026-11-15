@@ -4173,12 +4173,17 @@ dependencies = [
 ]
 
 [[package]]
-name = "tela-ui"
-version = "0.1.1"
+name = "tela"
+version = "0.0.0"
 dependencies = [
  "slint",
  "slint-build",
+ "tela-ui",
 ]
+
+[[package]]
+name = "tela-ui"
+version = "0.1.2"
 
 [[package]]
 name = "tempfile"

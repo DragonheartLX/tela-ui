@@ -1,4 +1,4 @@
-![tela-ui](https://socialify.dev/DragonheartLX/tela-ui/image?description=1&font=JetBrains+Mono&logo=https%3A%2F%2Fraw.githubusercontent.com%2FDragonheartLX%2Ftela-ui%2Frefs%2Fheads%2Fmain%2Fui%2Fassets%2Flogo.svg&name=1&pattern=Plus&stargazers=1&theme=Auto)
+![tela-ui](https://socialify.dev/DragonheartLX/tela-ui/image?description=1&font=JetBrains+Mono&logo=https%3A%2F%2Fraw.githubusercontent.com%2FDragonheartLX%2Ftela-ui%2Frefs%2Fheads%2Fmain%2Fgallery%2Fui%2Fassets%2Flogo.svg&name=1&pattern=Plus&stargazers=1&theme=Auto)
 
 English | [简体中文](README_zh.md)
 
@@ -45,9 +45,9 @@ export component MainWindow inherits Window {
 Run the gallery (component showcase app):
 
 ```sh
-cargo run                     # follow the system light/dark scheme
-TELA_THEME=dark cargo run     # POSIX: force dark mode (only light / dark accepted; any other value exits with an error at startup)
-$env:TELA_THEME="dark"; cargo run   # PowerShell equivalent
+cargo run --package tela          # follow the system light/dark scheme
+TELA_THEME=dark cargo run --package tela     # POSIX: force dark mode (only light / dark accepted; any other value exits with an error at startup)
+$env:TELA_THEME="dark"; cargo run --package tela   # PowerShell equivalent
 ```
 
 ## Theming

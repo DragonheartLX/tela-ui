@@ -4,9 +4,10 @@
 
 ## 结构
 
-- `tela-ui/` — 组件库本体, `build.rs` 注册 `@tela-ui/...`; 分类目录 + 顶层同名聚合器, `common.slint` 仅兼容出口。
+- Cargo workspace: 根包 `tela-ui` 为库 (仅 `import_paths()` Rust 出口 + `tela-ui/` Slint 源, 无 slint 依赖), 成员 `gallery/` 为展示二进制 (slint + slint-build + 库路径依赖)。
+- `tela-ui/` — 组件库本体, `@tela-ui/...`; 分类目录 + 顶层同名聚合器, `common.slint` 仅兼容出口。
 - `tela-ui/structs/` — 共享枚举与主题结构; `colors.slint` 为亮/暗色板。
-- `ui/` + `src/` — gallery (bin `tela`); `MainWindow.slint` 用 `if` 懒挂 11 页 (10 分类 + 设置)。设置页 `AboutSlint` 是标准库组件, 版本行默认黑字, 暗色下对比度低。
+- `gallery/ui/` + `gallery/src/` — gallery (bin `tela`); `MainWindow.slint` 用 `if` 懒挂 11 页 (10 分类 + 设置)。设置页 `AboutSlint` 是标准库组件, 版本行默认黑字, 暗色下对比度低。
 - 构建: Slint 1.18.1 / edition 2024 / `fluent` / accessibility + winit + femtovg/software。
 
 ## 统计 (2026-11-06)
