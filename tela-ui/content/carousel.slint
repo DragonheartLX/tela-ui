@@ -48,8 +48,6 @@ export component TCarousel inherits Rectangle {
     track := Rectangle {
         x: -root.slide-pos * parent.width + root.drag-x;
         y: 0;
-        width: parent.width;
-        height: parent.height;
         for it[i] in root.items: Image {
             x: i * root.width;
             y: 0;

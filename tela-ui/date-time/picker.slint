@@ -86,8 +86,6 @@ component TPickerWheel inherits Rectangle {
             }
 
             row-touch := TouchArea {
-                width: parent.width;
-                height: parent.height;
                 mouse-cursor: MouseCursor.pointer;
                 accessible-role: AccessibleRole.button;
                 accessible-label: opt;
@@ -129,7 +127,6 @@ export component TPicker inherits Rectangle {
 
     width: root.panel-w;
     height: root.panel-h;
-    background: transparent;
     clip: true;
 
     public function set-value(col: int, idx: int) {

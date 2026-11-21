@@ -8,7 +8,7 @@
 - `tela-ui/` — 组件库本体, `@tela-ui/...`; 分类目录 + 顶层同名聚合器, `common.slint` 仅兼容出口。
 - `tela-ui/structs/` — 共享枚举与主题结构; `colors.slint` 为亮/暗色板。
 - `gallery/ui/` + `gallery/src/` — gallery (bin `tela`); `MainWindow.slint` 用 `if` 懒挂 11 页 (10 分类 + 设置)。设置页 `AboutSlint` 是标准库组件, 版本行默认黑字, 暗色下对比度低。
-- 构建: Slint 1.18.1 / edition 2024 / `fluent` / accessibility + winit + femtovg/software。
+- 构建: Slint 1.19.0 (Slint 语言 edition 1.19) / Rust edition 2024 / `fluent` / accessibility + winit + femtovg/software; gallery 与 tela-ui 库各带 `slint-project.json` (edition 1.19; gallery 另有 main / library-paths), `build.rs` 的 `CompilerConfiguration` 优先。
 
 ## 统计 (2026-11-06)
 

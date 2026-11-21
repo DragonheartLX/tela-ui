@@ -72,7 +72,6 @@ export component DisplaySection inherits VerticalLayout {
 
             TTag {
                 theme: TThemeRole.primary;
-                variant: TTagVariant.dark;
                 text: "深色";
             }
 
@@ -169,7 +168,6 @@ export component DisplaySection inherits VerticalLayout {
             TAvatar {
                 size: TAvatarSize.extra-large;
                 shape: TAvatarShape.square;
-                text: "";
             }
 
             // Absorbs the leftover row space.
@@ -228,7 +226,6 @@ export component DisplaySection inherits VerticalLayout {
 
             TCaption {
                 text: "成员按声明顺序叠放 (后者在上), 重叠量固定 spacing-4; max-count 截断并渲染 +N 尾像。";
-                wrap: word-wrap;
             }
         }
     }
@@ -373,7 +370,6 @@ export component DisplaySection inherits VerticalLayout {
             border-radius: TTheme.radius-medium;
             border-width: 1px;
             border-color: TTheme.component-stroke;
-            clip: true;
 
             VerticalLayout {
                 padding: TTheme.padding-lr-l;
@@ -426,7 +422,6 @@ export component DisplaySection inherits VerticalLayout {
 
             TCaption {
                 text: "状态: \{root.comment-status}";
-                wrap: word-wrap;
             }
         }
     }
@@ -443,7 +438,6 @@ export component DisplaySection inherits VerticalLayout {
                 spacing: 48px;
 
                 THeatmap {
-                    columns: 7;
                     show-legend: true;
                     cells: [
                         { },
@@ -495,7 +489,6 @@ export component DisplaySection inherits VerticalLayout {
 
             TCaption {
                 text: "\{root.heat-status}; 图例与格数可配, 标签悬停出气泡。";
-                wrap: word-wrap;
             }
         }
     }

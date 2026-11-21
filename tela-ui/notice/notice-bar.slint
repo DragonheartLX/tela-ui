@@ -63,7 +63,6 @@ export component TNoticeBar inherits Rectangle {
         x: TTheme.padding-lr-m;
         y: (parent.height - self.height) / 2;
         icon: root.icon;
-        size: 16px;
         icon-color: TTheme.theme-color(root.theme);
     }
 
@@ -79,8 +78,6 @@ export component TNoticeBar inherits Rectangle {
         Rectangle {
             y: -root.roll-pos * root.line-h;
             x: 0;
-            width: parent.width;
-            height: parent.height;
 
             for it[i] in root.contents: TText {
                 x: 0;

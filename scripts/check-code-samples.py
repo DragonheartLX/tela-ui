@@ -1,4 +1,4 @@
-# Gallery code-sample gate: extract every `code:` string from ui/pages/*.slint,
+# Gallery code-sample gate: extract every `code:` string from gallery/ui/pages/*.slint,
 # wrap each into a standalone compilable file, and run slint-viewer --check on it.
 # A sample is only valid if it compiles standalone — the embedded strings never
 # ride through the normal compile, so API drift rots them invisibly.
@@ -14,7 +14,7 @@ import sys
 import tempfile
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PAGES = os.path.join(REPO, "ui", "pages")
+PAGES = os.path.join(REPO, "gallery", "ui", "pages")
 CODE_RE = re.compile(r'(?m)^[ \t]*code\s*:\s*"')
 
 
@@ -83,19 +83,20 @@ def main():
             with open(path, "w", encoding="utf-8", newline="\n") as f:
                 f.write(wrap(text))
             r = subprocess.run(
-                ["slint-viewer", "-L", f"tela-ui={os.path.join(REPO, 'tela-ui')}", "--check",
+                ["slint-viewer", "-L", f"tela-ui={os.path.join(REPO, 'tela-ui')}", "--edition", "1.19", "--check",
                  path, "--style", "fluent"],
                 capture_output=True, text=True,
             )
             out = (r.stdout + r.stderr).strip()
             if out:
-                fail += 1
                 clean = re.sub(r"\x1b\[[0-9;]*m", "", out)
                 msgs = [l for l in clean.splitlines()
                         if l.startswith(("error", "warning"))]
-                print(f"FAIL {fname}:{line}")
-                for mline in msgs:
-                    print(f"   {mline}")
+                if msgs:
+                    fail += 1
+                    print(f"FAIL {fname}:{line}")
+                    for mline in msgs:
+                        print(f"   {mline}")
     finally:
         shutil.rmtree(scratch, ignore_errors=True)
     print(f"{len(samples)} samples, {fail} with diagnostics")

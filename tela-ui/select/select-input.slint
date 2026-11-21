@@ -128,6 +128,7 @@ export component TSelectInput inherits Rectangle {
     min-width: 160px;
 
     trigger := TInput {
+        accessible-role: none;
         x: 0;
         y: 0;
         width: parent.width;
@@ -198,7 +199,6 @@ export component TSelectInput inherits Rectangle {
                 padding: root.pad;
                     // Gaps are baked into the rows; layout spacing would also
                     // apply between collapsed zero-height rows.
-                    spacing: 0px;
 
                 for it[i] in root.items: Rectangle {
                     height: root.hit(it) ? root.row-h : 0px;
@@ -304,4 +304,5 @@ export component TSelectInput inherits Rectangle {
 
     accessible-role: AccessibleRole.text-input;
     accessible-label: root.has-selection ? root.current-value : root.placeholder-text;
+    accessible-value: root.text;
 }

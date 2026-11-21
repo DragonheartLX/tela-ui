@@ -333,7 +333,6 @@ export component NavigationSection inherits VerticalLayout {
 
             TCaption {
                 text: "按钮触发需设 auto-open: false 并在 clicked 中调用 toggle(); 静态内容由内部 TouchArea 自动开合。支持图标, 禁用, 危险项与分隔线; 点击外部或选中后关闭。";
-                wrap: word-wrap;
             }
         }
     }
@@ -370,7 +369,6 @@ export component NavigationSection inherits VerticalLayout {
 
             TCaption {
                 text: "在鼠标位置弹出, 菜单样式与 TDropdownMenu 一致 (图标 / 禁用 / 危险项 / 分隔线); 点击外部、ESC 或选中后关闭。触发区会吞掉左键, 交互式触发内容需设 auto-area: false 并自行调 open-at()。弹层在窗口边缘会被裁剪。";
-                wrap: word-wrap;
             }
         }
     }
@@ -465,7 +463,6 @@ export component NavigationSection inherits VerticalLayout {
                             { text: "消息", icon: TIconSet.Bell, badge: 6 },
                             { text: "我的", icon: TIconSet.User, badge-dot: true },
                         ];
-                        current: 0;
 
                         changed(i) => {
                             root.tab-status = "已切到第 \{i + 1} 个标签";
@@ -476,12 +473,10 @@ export component NavigationSection inherits VerticalLayout {
 
             TCaption {
                 text: "状态: \{root.tab-status}";
-                wrap: word-wrap;
             }
 
             TCaption {
                 text: "标签等宽拉伸, 选中项品牌色; 角标复用 TBadge (badge 计数 / badge-dot 红点); 顶部分隔线内建; 图示为手机宽度, 实际随容器拉伸。";
-                wrap: word-wrap;
             }
         }
     }
@@ -674,7 +669,6 @@ export component NavigationSection inherits VerticalLayout {
 
             TCaption {
                 text: "与 TSticky 的区分: 无容器范围, 钉住后一直保持到宿主关闭; side 选顶轨/底轨, offset 是离轨距离, 底钉还需 viewport-height (未绑定时退化为随文档滚动)。pinned / changed(bool) 上报钉住态。";
-                wrap: word-wrap;
             }
         }
     }
@@ -782,7 +776,6 @@ export component NavigationSection inherits VerticalLayout {
 
             TCaption {
                 text: "当前锚点: \{root.anchor-current >= 0 ? root.anchor-items[root.anchor-current].label : "—"}; 每行自己算 active (本节已过线且下一节未过线), 1.18 无循环语句; 点击或 goto(i) 缓动滚到 target-y - offset-top, 夹在 [0, max-scroll], 用户滚动可中断缓动。";
-                wrap: word-wrap;
             }
         }
     }
@@ -842,7 +835,6 @@ export component NavigationSection inherits VerticalLayout {
 
             TCaption {
                 text: "TDesign StickyTool 同构: placement 六向 (左右 × 上中下), shape 方/圆, type 常规 56px (图标+文案) / 紧凑 40px (纯图标); popup 为文本气泡, 悬浮或点击 (trigger) 展示在内容侧, 偏移由 offset-x / offset-y 调整。回调 clicked(i) / hovered(i)。";
-                wrap: word-wrap;
             }
         }
     }

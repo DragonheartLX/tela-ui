@@ -68,6 +68,7 @@ export component TMention inherits Rectangle {
     min-width: 160px;
 
     trigger := TInput {
+        accessible-role: none;
         x: 0;
         y: 0;
         width: parent.width;
@@ -104,7 +105,6 @@ export component TMention inherits Rectangle {
 
             VerticalLayout {
                 padding: root.pad;
-                spacing: 0px;
 
                 for it[i] in root.suggestions: Rectangle {
                     height: root.row-h;
@@ -190,4 +190,5 @@ export component TMention inherits Rectangle {
 
     accessible-role: AccessibleRole.text-input;
     accessible-label: root.placeholder-text;
+    accessible-value: root.text;
 }

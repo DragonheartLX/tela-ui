@@ -143,7 +143,6 @@ export component TMessageOverlay inherits Rectangle {
                     : TMessage.theme == TMessageTheme.warning ? TIconSet.CircleAlert
                     : TMessage.theme == TMessageTheme.error ? TIconSet.CircleX
                     : TIconSet.Info;
-                size: 16px;
                 icon-color: TMessage.theme == TMessageTheme.success ? TTheme.success-color
                     : TMessage.theme == TMessageTheme.warning ? TTheme.warning-color
                     : TMessage.theme == TMessageTheme.error ? TTheme.error-color

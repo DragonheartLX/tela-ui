@@ -2,6 +2,18 @@
 
 本文件只记录版本级总体变更; 逐组件细节、机制与取舍见 `docs/components.md`、`docs/slint-semantics.md` 与 `docs/decisions.md`。
 
+## [0.1.3] - 2026-11-21
+
+### Changed
+- 升级 Slint 1.18.1 → 1.19.0 (gallery 的 slint / slint-build 依赖): 保留官方要求的兼容 feature `compat-1-18`; gallery 构建启用 Slint 语言 edition 1.19 (1.19 的行为修复为 opt-in; 经渲染逐像素对比, tela-ui 组件行为与 1.18 一致, 见 `docs/slint-semantics.md` 头注)。
+- gallery 新增 `slint-project.json` (Slint 项目文件: 语言 edition 1.19 / main `ui/MainWindow.slint` / library-paths `tela-ui`), 供工具链 (LSP / live-preview / slint-viewer) 识别 edition 与库路径; `build.rs` 的 `CompilerConfiguration` 仍优先, 二者一致无冲突。
+- tela-ui 库新增 `slint-project.json` (Slint 库项目文件: 语言 edition 1.19, 无 `main`——库由消费者目录式挂载; 项目文件供工具链/LSP 编辑库源码时识别 edition; 经构建与渲染验证 gallery 编译与渲染不变)。
+
+### Fixed
+- 无障碍: 输入类组件 (TInput / TTextArea / TMention / TSelectInput) 内部 TextInput/TInput 设 `accessible-role: none` 并在组件根补 `accessible-value`, 消除 Slint 1.19 新增的"嵌套 text-input 重复暴露"诊断, 读屏不再重复朗读输入框 (对齐官方 LineEdit 模式)。
+- 适配 Slint 1.19 新增诊断: 清理全部"属性设为默认值"冗余绑定 (编译器保证行为不变), 并移除 TImageViewer 布局内冗余 y。
+- 修复 gallery 代码样本门禁脚本 (`scripts/check-code-samples.py`): 路径改为 workspace 结构 (`gallery/ui/pages`), `slint-viewer` 调用加 `--edition 1.19`, 且仅以 error/warning 判失败 (Slint 1.19 新增 info 级"绑定到默认值"建议不再误判样本)。
+
 ## [0.1.2] - 2026-11-15
 
 ### Changed

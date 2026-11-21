@@ -2,6 +2,7 @@
 
 > 每条都对着锁定版本源码或本仓库生成产物核对过, 不是猜测。
 > 引用时写 `docs/slint-semantics.md` 第 N 条。
+> Slint 1.19 (gallery 已用语言 edition 1.19) 行为与 1.18 一致: tela-ui 组件经渲染逐像素验证无差异, 本文件条目仍适用。1.19 的 edition 门控行为修复 (if/for 元素计尺寸、states 属性默认值) 不改变 tela-ui 实际组件。
 
 1. **Rectangle 不消费指针事件** — `input_event` 返回 `EventIgnored`, 遍历 FrontToBack 继续; 模态卡片自身无 TouchArea 时点正文会落到遮罩, 面板内放空白 `TouchArea {}` 吸收。
 

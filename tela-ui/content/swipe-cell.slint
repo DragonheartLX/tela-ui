@@ -327,8 +327,6 @@ export component TSwipeCell inherits Rectangle {
     content := Rectangle {
         x: root.offset;
         y: 0;
-        width: parent.width;
-        height: parent.height;
 
         // Gesture layer BELOW the host children: the children keep their
         // own pointer events; the swipe works wherever they do not claim
@@ -336,8 +334,6 @@ export component TSwipeCell inherits Rectangle {
         swipe := TouchArea {
             x: 0;
             y: 0;
-            width: parent.width;
-            height: parent.height;
             enabled: !root.disabled;
 
             pointer-event(ev) => {

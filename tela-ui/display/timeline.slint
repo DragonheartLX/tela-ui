@@ -16,7 +16,6 @@ export struct TTimelineItem {
 export component TTimeline inherits VerticalLayout {
     in property <[TTimelineItem]> items;
 
-    spacing: 0px;
 
     for it[i] in root.items: HorizontalLayout {
         // Rail: dot on top, connector line filling the rest of the row.

@@ -288,8 +288,6 @@ export component TImageViewerOverlay inherits TModalSurface {
         Rectangle {
             x: -root.slide-pos * parent.width + root.drag-x;
             y: 0;
-            width: parent.width;
-            height: parent.height;
 
             for u[j] in TImageViewerService.urls: Rectangle {
                 x: j * root.width;
@@ -477,7 +475,6 @@ export component TImageViewerOverlay inherits TModalSurface {
             }
 
             TText {
-                y: (parent.height - self.height) / 2;
                 width: root.zoom-pct-w;
                 text: root.zoom-text;
                 font-size: TTheme.font-size-s;

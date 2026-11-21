@@ -83,7 +83,6 @@ export component TFormItem inherits VerticalLayout {
     // Help / error line, indented to the control column when the label
     // column is fixed-width.
     if root.error-text != "" || root.help-text != "": HorizontalLayout {
-        spacing: 0px;
 
         if root.label != "" && root.label-width > 0px: Rectangle {
             width: root.label-width + TTheme.spacing-3;

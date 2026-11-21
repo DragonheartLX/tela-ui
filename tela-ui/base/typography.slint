@@ -50,7 +50,6 @@ export component THeading inherits TText {
         : level == 3 ? TTheme.line-height-headline-s
         : TTheme.line-height-title;
 
-    text: "";
     wrap: word-wrap;
     font-size: level-size;
     line-height: level-line;
@@ -61,13 +60,11 @@ export component THeading inherits TText {
 export component TParagraph inherits TText {
     in property <bool> secondary: false;
 
-    text: "";
     wrap: word-wrap;
     color: secondary ? TTheme.text-color-secondary : TTheme.text-color-primary;
 }
 
 export component TCaption inherits TText {
-    text: "";
     wrap: word-wrap;
     font-size: TTheme.font-size-s;
     line-height: TTheme.line-height-s;

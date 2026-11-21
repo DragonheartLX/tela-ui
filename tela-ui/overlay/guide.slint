@@ -236,8 +236,6 @@ export component TGuideOverlay inherits Rectangle {
     // Four dim rectangles leave a rectangular hole; Slint has no clip path,
     // so the rounded ring below carries the rounded look instead.
     mask := Rectangle {
-        width: root.width;
-        height: root.height;
         opacity: root.active ? 1 : 0;
         animate opacity { duration: TTheme.duration-fast; }
 
@@ -283,7 +281,6 @@ export component TGuideOverlay inherits Rectangle {
         border-radius: TTheme.radius-medium;
         border-width: 2px;
         border-color: TTheme.text-color-brand;
-        background: transparent;
         opacity: root.active ? 1 : 0;
         animate opacity { duration: TTheme.duration-fast; }
     }

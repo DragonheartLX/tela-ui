@@ -137,7 +137,6 @@ export component SelectSection inherits VerticalLayout {
             }
 
             TSwitch {
-                checked: false;
             }
 
             TSwitch {
@@ -146,7 +145,6 @@ export component SelectSection inherits VerticalLayout {
             }
 
             TSwitch {
-                checked: false;
                 disabled: true;
             }
 
@@ -157,7 +155,6 @@ export component SelectSection inherits VerticalLayout {
 
             TSwitch {
                 size: TSize.large;
-                checked: false;
             }
 
             Rectangle { }
@@ -218,7 +215,6 @@ export component SelectSection inherits VerticalLayout {
 
             TCaption {
                 text: "聚焦即列出全部, 键入按标签子串过滤 (不区分大小写); 选中项带 ✓, 回车或点击选中; 再次键入继续过滤, 不清空已选。";
-                wrap: word-wrap;
             }
         }
     }
@@ -280,7 +276,6 @@ export component SelectSection inherits VerticalLayout {
 
             TCaption {
                 text: "选中值: \{root.tree-select-value} — 树节点嵌套声明, 经 @children 进入下拉; 选中值经 TTreeLogic 全局共享, 点叶子选中并回填触发器。";
-                wrap: word-wrap;
             }
         }
     }
@@ -343,7 +338,6 @@ export component SelectSection inherits VerticalLayout {
 
             TCaption {
                 text: "选中值: \{root.cascader-value} — 单列逐级展开 (点分支行折叠/展开), 点叶子选中并关闭面板; 触发器回显叶子 label, 完整路径回显暂不支持 (见已知限制)。";
-                wrap: word-wrap;
             }
         }
     }

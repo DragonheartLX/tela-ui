@@ -137,7 +137,6 @@ export component OverlaySection inherits VerticalLayout {
             TCaption {
                 text: "对话框本体挂载在窗口根部 (MainWindow), 点击遮罩或按钮关闭。";
                 vertical-alignment: center;
-                wrap: word-wrap;
                 horizontal-stretch: 1;
             }
         }
@@ -167,7 +166,6 @@ export component OverlaySection inherits VerticalLayout {
             TCaption {
                 text: "ESC / 遮罩 / 按钮三条关闭路径都算一次结果, 右上角 toast 展示结果。";
                 vertical-alignment: center;
-                wrap: word-wrap;
                 horizontal-stretch: 1;
             }
         }
@@ -191,7 +189,6 @@ export component OverlaySection inherits VerticalLayout {
             TCaption {
                 text: "全屏遮罩阻断指针输入; 是状态而非浮层, ESC 不关闭。";
                 vertical-alignment: center;
-                wrap: word-wrap;
                 horizontal-stretch: 1;
             }
         }
@@ -224,7 +221,6 @@ export component OverlaySection inherits VerticalLayout {
             TCaption {
                 text: "抽屉本体挂载在窗口根部, 从指定边缘滑出。";
                 vertical-alignment: center;
-                wrap: word-wrap;
                 horizontal-stretch: 1;
             }
         }
@@ -254,7 +250,6 @@ export component OverlaySection inherits VerticalLayout {
             TCaption {
                 text: "全屏遮罩上按原图比例适配显示; 图片上左右拖拽切换 (首尾有阻力), 滚轮/双击缩放并可拖拽平移, 底部缩略图条直达任意一张; 点图片框以外的视口区域 / 关闭钮 / ESC 关闭, 索引变化经 change-seq 上报。";
                 vertical-alignment: center;
-                wrap: word-wrap;
                 horizontal-stretch: 1;
             }
         }
@@ -278,7 +273,6 @@ export component OverlaySection inherits VerticalLayout {
             TCaption {
                 text: "输入即过滤 (子串匹配, 不区分大小写), 回车执行高亮的第一条, 点击列表项直接执行, ESC / 点遮罩关闭; 快捷键由宿主绑定 (KeyBinding 放窗口级 FocusScope 里)。";
                 vertical-alignment: center;
-                wrap: word-wrap;
                 horizontal-stretch: 1;
             }
         }
@@ -308,7 +302,6 @@ export component OverlaySection inherits VerticalLayout {
             TCaption {
                 text: "两者都由 TModalSurface 提供遮罩 / ESC / z-modal; 动作面板的结果经 result-seq + selected-index 上报, -1 表示取消。";
                 vertical-alignment: center;
-                wrap: word-wrap;
                 horizontal-stretch: 1;
             }
         }
@@ -387,7 +380,6 @@ export component OverlaySection inherits VerticalLayout {
             TPopover {
                 title: "字段说明";
                 text: "该字段用于集群对内服务的访问域名,保存后需要重启实例才能生效。";
-                placement: TPopupPlacement.bottom-start;
 
                 Rectangle {
                     width: 120px;
@@ -424,7 +416,6 @@ export component OverlaySection inherits VerticalLayout {
                 background: TTheme.bg-color-secondarycontainer;
                 border-radius: TTheme.radius-default;
                 text: "我是 Tooltip, 鼠标移开即消失, 250ms 延迟出现";
-                placement: TTooltipPlacement.top;
 
                 TText {
                     text: "上方提示";
@@ -455,7 +446,6 @@ export component OverlaySection inherits VerticalLayout {
             TCaption {
                 text: "渲染在窗口级 (TTooltipOverlay), 不受卡片或滚动容器裁剪; 亮暗均为深色气泡。";
                 vertical-alignment: center;
-                wrap: word-wrap;
                 horizontal-stretch: 1;
             }
         }
@@ -536,7 +526,6 @@ export component OverlaySection inherits VerticalLayout {
                 // `step`. Every action goes back to the host, the only writer
                 // of the service.
                 TGuideOverlay {
-                    step: 0;
                     title: "第一步: 目标 A";
                     text: "高亮遮罩挖出目标区域, 气泡自动选在有空间的一侧。";
                     target-x: guide-a.absolute-position.x;
@@ -601,7 +590,6 @@ export component OverlaySection inherits VerticalLayout {
                 TCaption {
                     width: 280px;
                     text: "状态在 TGuideService (只存当前序号与步数), 步骤数据在各自的 TGuideOverlay; 用 step 序号认领当前步, 动作只触发回调。遮罩覆盖 overlay 自身盒子。";
-                    wrap: word-wrap;
                 }
             }
         }

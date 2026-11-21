@@ -97,7 +97,6 @@ export component TCell inherits Rectangle {
         if root.arrow: TIcon {
             y: (parent.height - self.height) / 2;
             icon: TIconSet.ChevronRight;
-            size: 16px;
             icon-color: root.disabled ? TTheme.text-color-disabled : TTheme.text-color-placeholder;
         }
     }
@@ -107,8 +106,6 @@ export component TCell inherits Rectangle {
     row-touch := TouchArea {
         x: 0;
         y: 0;
-        width: parent.width;
-        height: parent.height;
         enabled: !root.disabled;
         mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;
         accessible-role: AccessibleRole.button;

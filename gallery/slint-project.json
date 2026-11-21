@@ -1,0 +1,7 @@
+{
+    "edition": "1.19",
+    "main": "ui/MainWindow.slint",
+    "library-paths": {
+        "tela-ui": "../tela-ui"
+    }
+}

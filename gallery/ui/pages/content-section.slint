@@ -118,7 +118,6 @@ export component ContentSection inherits VerticalLayout {
 
             TCaption {
                 text: "点击可排序列切换升序 / 降序 / 取消, 行重排由宿主在 sort-changed 里完成; 列宽超出时拖动底部滚动条或横向滚轮, 表头同步。";
-                wrap: word-wrap;
             }
         }
     }
@@ -131,7 +130,6 @@ export component ContentSection inherits VerticalLayout {
         TCarousel {
             height: 240px;
             autoplay: true;
-            interval: 3s;
             items: [
                 { image: @image-url("../assets/slide-1.svg") },
                 { image: @image-url("../assets/slide-2.svg") },
@@ -209,7 +207,6 @@ export component ContentSection inherits VerticalLayout {
 
         TCaption {
             text: "节点嵌套声明, 深度不限 (分支用 @children 承载子节点); 点分支行折叠/展开, 折叠靠裁剪高度并带动画; 点叶子节点选中, 选中值经 TTreeLogic 全局共享 (一个窗口只维护一份选中态); disabled 节点不响应点击且不高亮。";
-            wrap: word-wrap;
         }
     }
 
@@ -256,7 +253,6 @@ export component ContentSection inherits VerticalLayout {
 
             TCaption {
                 text: "行虚拟化由 ListView 提供 (只实例化可见行); selectable 时点行高亮并回调 changed, row-clicked 每次点击都报; 行高默认 48px 可覆盖。";
-                wrap: word-wrap;
             }
         }
     }
@@ -321,7 +317,6 @@ export component ContentSection inherits VerticalLayout {
 
                     TSplitterPanePrimaryVertical {
                         size: 96px;
-                        min-size: 48px;
                         collapsible: true;
 
                         Rectangle {
@@ -357,7 +352,6 @@ export component ContentSection inherits VerticalLayout {
 
             TCaption {
                 text: "第一栏宽度随拖拽变化 (当前 \{root.pane-size}, 下限 min-size), 圆形按钮折叠/展开, 尺寸由组件自己维护, 一个窗口可放多个分栏; 第二栏无下限, 可被拖到 0。";
-                wrap: word-wrap;
             }
         }
     }
@@ -413,7 +407,6 @@ export component ContentSection inherits VerticalLayout {
 
             TCaption {
                 text: "行高随说明文字自适应, 分隔线由每行自绘 — 组内末行设 divider: false; 点击只上报 clicked, 状态由宿主维护。";
-                wrap: word-wrap;
             }
         }
     }
@@ -441,7 +434,6 @@ export component ContentSection inherits VerticalLayout {
 
             TCaption {
                 text: "按住任意行拖动, 其余行实时让位预览插入位置, 松手上报 reorder(from, to) — 1.18 语言内没有循环语句, 行序由宿主重建模型完成; 拖拽中列表不滚动。";
-                wrap: word-wrap;
             }
         }
     }
@@ -507,7 +499,6 @@ export component ContentSection inherits VerticalLayout {
 
             TCaption {
                 text: "CSS position:sticky 语义: natural-y 是标题在文档里的位置, 滚动越过 offset-top 后钉在视口顶, bounds-bottom (文档坐标) 越过后释放; 组件是滚动容器的覆盖层兄弟, 文档里的 40px 由宿主自己预留。pinned / changed(bool) 上报吸附态。";
-                wrap: word-wrap;
             }
         }
     }
@@ -518,7 +509,6 @@ export component ContentSection inherits VerticalLayout {
         code: "import { TSwipeCell, TSwipeSide } from \"@tela-ui/content.slint\";\nimport { TThemeRole, TTheme } from \"@tela-ui/theme.slint\";\nimport { TText } from \"@tela-ui/base.slint\";\nimport { TMessage } from \"@tela-ui/notice.slint\";\n\nTSwipeCell {\n    height: 56px; // 行高由宿主钉住\n    // 底部分隔线默认开, 固定在行上不随内容滑动; 连续列表末行设 divider: false\n    right-actions: [\n        { text: \"编辑\", theme: TThemeRole.primary },\n        { text: \"删除\", theme: TThemeRole.error },\n    ];\n\n    // 内容自备背景与排版 (手势层在内容之下, 不挡子元素自己的点击)\n    Rectangle {\n        background: TTheme.bg-color-container;\n\n        TText {\n            x: TTheme.padding-lr-l;\n            width: parent.width - 2 * TTheme.padding-lr-l;\n            height: parent.height;\n            text: \"左滑查看操作\";\n            vertical-alignment: center;\n        }\n    }\n\n    action-clicked(side, i) => {\n        TMessage.info(side == TSwipeSide.left ? \"左侧操作 \\{i}\" : \"右侧操作 \\{i}\");\n    }\n}";
 
         VerticalLayout {
-            spacing: 0px;
 
             TSwipeCell {
                 height: 56px;
@@ -593,7 +583,6 @@ export component ContentSection inherits VerticalLayout {
 
             TCaption {
                 text: "拖动锁定横轴 (纵向手势不触发滑动); 松手时越过操作列一半宽度吸附展开, 否则弹回; 展开态点内容即收起; 点操作按钮先收起再回调 action-clicked(侧, 下标)。左右互斥, left-opened / right-opened 可双向绑定由宿主控制, 吸附结果经 changed(侧, 开合) 上报。底部分隔线 divider 默认开, 固定在行上不随内容滑动 (压住操作列底边, 行高读起来一致), 左侧操作列与线条同起点; 组内末行设 false。";
-                wrap: word-wrap;
             }
         }
     }
@@ -666,7 +655,6 @@ export component ContentSection inherits VerticalLayout {
 
             TCaption {
                 text: "顶部按住下拉或滚轮向上滚, 箭头随拉动量翻转, 过阈值 (loading-bar-height) 松手触发 refresh 并锁定加载条 (滚轮没有松手, 越过阈值当次即触发); 宿主写 refreshing: false 收起并短暂显示完成语, 超时 refresh-timeout 自动收起并报 timeout; 向上拖或滚轮向下先把拉动量收回去, 收到底转为滚动列表。拉动量带 0.5 阻尼, 上限 max-bar-height。";
-                wrap: word-wrap;
             }
         }
     }
@@ -703,7 +691,6 @@ export component ContentSection inherits VerticalLayout {
 
             TCaption {
                 text: "logo (图标 + 标题, 可只给其一) / links / text 三段都可省略, 竖排居中; 链接用 TLink 渲染 (悬停下划线), 点击上报 link-clicked(下标), logo 点击上报 logo-clicked(); 跳转由宿主处理。";
-                wrap: word-wrap;
             }
         }
     }

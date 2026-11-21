@@ -33,14 +33,12 @@ import { TIconSet } from "../base/icon/data.slint";
 
 // Horizontal split: panes side by side.
 export component TSplitter inherits HorizontalLayout {
-    spacing: 0px;
 
     @children
 }
 
 // Vertical split: panes stacked.
 export component TSplitterVertical inherits VerticalLayout {
-    spacing: 0px;
 
     @children
 }
@@ -212,7 +210,6 @@ component SplitterPaneBase inherits Rectangle {
 
 // Primary (first) pane of a horizontal TSplitter: width is draggable.
 export component TSplitterPanePrimary inherits SplitterPaneBase {
-    vertical: false;
     preferred-width: root.vis-size;
     min-width: 0px;
     horizontal-stretch: 0;

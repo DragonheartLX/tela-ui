@@ -6,16 +6,16 @@
 
 ```powershell
 # 1) 每个改动文件 0 诊断
-slint-viewer -L "tela-ui=<repo>\tela-ui" --check <file.slint> --style fluent
+slint-viewer -L "tela-ui=<repo>\tela-ui" --edition 1.19 --check <file.slint> --style fluent
 
 # 2) 全量 (仅 5 个数据文件报 "No component found": colors / theme /
 #    base/icon/data / structs/enums / structs/theme)
 Get-ChildItem tela-ui,ui -Recurse -Filter *.slint |
-  ForEach-Object { slint-viewer -L "tela-ui=$PWD\tela-ui" --check $_.FullName --style fluent }
+  ForEach-Object { slint-viewer -L "tela-ui=$PWD\tela-ui" --edition 1.19 --check $_.FullName --style fluent }
 
 # 3) 亮/暗各一张; 暗色 --load-data dark.json = {"Palette":{"color-scheme":"dark"}},
 #    亮色必须显式 light.json (单帧渲染里 color-scheme 仍是 unknown); JSON 无 BOM
-slint-viewer -L "tela-ui=$PWD\tela-ui" --screenshot out-light.png --size 1200x800 gallery\ui\MainWindow.slint
+slint-viewer -L "tela-ui=$PWD\tela-ui" --edition 1.19 --screenshot out-light.png --size 1200x800 gallery\ui\MainWindow.slint
 
 # 4) gallery 代码样本门禁 (当前 90 个)
 python scripts\check-code-samples.py

@@ -182,13 +182,10 @@ export component TCommandPaletteOverlay inherits TModalSurface {
         // get theirs.
         TouchArea {
             enabled: root.open;
-            width: parent.width;
-            height: parent.height;
         }
 
         content := VerticalLayout {
             padding: TTheme.spacing-2;
-            spacing: 0px;
 
             // ---- search row; x/y placement mirrors TInput's frame ----
             Rectangle {
@@ -198,7 +195,6 @@ export component TCommandPaletteOverlay inherits TModalSurface {
                     x: TTheme.padding-lr-m;
                     y: (parent.height - self.height) / 2;
                     icon: TIconSet.Search;
-                    size: 16px;
                     icon-color: TTheme.text-color-placeholder;
                 }
 
@@ -207,8 +203,6 @@ export component TCommandPaletteOverlay inherits TModalSurface {
                 FocusScope {
                     x: 0;
                     y: 0;
-                    width: parent.width;
-                    height: parent.height;
                     // The field focuses itself; the scope only relays keys.
                     focus-on-click: false;
 
@@ -230,7 +224,6 @@ export component TCommandPaletteOverlay inherits TModalSurface {
                         y: 0;
                         width: parent.width - self.x - TTheme.padding-lr-m;
                         height: parent.height;
-                        single-line: true;
                         vertical-alignment: center;
                         font-size: TTheme.font-size-m;
                         font-family: TTheme.font-family;
@@ -285,7 +278,6 @@ export component TCommandPaletteOverlay inherits TModalSurface {
                         // Gap is baked into each row so a collapsed row leaves no
                         // spacing behind: layout spacing is applied per child even
                         // when the child is zero sized.
-                        spacing: 0px;
 
                         for it[i] in TCommandPaletteService.commands: Rectangle {
                             // Outer box: fixed height + baked gap.

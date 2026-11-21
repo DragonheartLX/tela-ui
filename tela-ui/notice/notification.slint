@@ -97,7 +97,6 @@ export component TNotificationOverlay inherits Rectangle {
         x: root.to-left ? 24px : parent.width - self.width - 24px;
         y: root.to-bottom ? parent.height - self.preferred-height - 12px : 12px;
         // Slot spacing is baked into each wrapper's height.
-        spacing: 0px;
 
         for it[i] in TNotification.items: Rectangle {
             private property <length> card-h: row.preferred-height + TTheme.padding-lr-m * 2;

@@ -97,8 +97,6 @@ component TTimeColumn inherits Rectangle {
             }
 
             row-touch := TouchArea {
-                width: parent.width;
-                height: parent.height;
                 mouse-cursor: MouseCursor.pointer;
                 accessible-role: AccessibleRole.button;
                 accessible-label: "\{root.label} \{root.pad2(i)}";
@@ -254,7 +252,6 @@ export component TTimePicker inherits Rectangle {
 
                 TTimeColumn {
                     label: "时";
-                    count: 24;
                     item-height: root.item-h;
                     value: root.value.hour;
                     picked(h) => { root.pick-hour(h); }

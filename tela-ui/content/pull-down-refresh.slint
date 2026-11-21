@@ -219,8 +219,6 @@ export component TPullDownRefresh inherits Rectangle {
     pan := Rectangle {
         x: 0;
         y: root.pull;
-        width: parent.width;
-        height: parent.height;
 
         header := Rectangle {
             x: 0;
@@ -241,14 +239,12 @@ export component TPullDownRefresh inherits Rectangle {
 
                 if root.refreshing: TLoadingSpinner {
                     y: (parent.height - self.height) / 2;
-                    size: 16px;
                     spinner-color: TTheme.brand-color;
                 }
 
                 if !root.refreshing: TIcon {
                     y: (parent.height - self.height) / 2;
                     icon: TIconSet.ChevronDown;
-                    size: 16px;
                     icon-color: TTheme.text-color-secondary;
                     // Flips to "release" as the pull crosses the threshold.
                     transform-rotation: 180deg * Math.min(1.0, root.pull / root.loading-bar-height);
@@ -283,7 +279,6 @@ export component TPullDownRefresh inherits Rectangle {
 
             body := VerticalLayout {
                 width: parent.width;
-                spacing: 0px;
 
                 @children
             }
@@ -295,8 +290,6 @@ export component TPullDownRefresh inherits Rectangle {
     gesture := TouchArea {
         x: 0;
         y: 0;
-        width: parent.width;
-        height: parent.height;
         enabled: !root.disabled && !root.refreshing;
 
         pointer-event(ev) => {

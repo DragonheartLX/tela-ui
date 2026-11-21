@@ -191,7 +191,6 @@ export component TCalendar inherits Rectangle {
             TButton {
                 variant: TButtonVariant.text;
                 shape: TButtonShape.square;
-                size: TSize.medium;
                 icon: TIconSet.ChevronLeft;
                 disabled: !root.can-prev;
                 accessible-label: "上个月";
@@ -214,7 +213,6 @@ export component TCalendar inherits Rectangle {
             TButton {
                 variant: TButtonVariant.text;
                 shape: TButtonShape.square;
-                size: TSize.medium;
                 icon: TIconSet.ChevronRight;
                 accessible-label: "下个月";
                 clicked => {
@@ -260,7 +258,6 @@ export component TCalendar inherits Rectangle {
         y: root.pad + root.header-height + root.weekday-height + root.floor-div(i, 7) * root.cell-size;
         width: root.cell-size;
         height: root.cell-size;
-        background: transparent;
 
         // Range band behind the day circle. Middle cells are plain squares so
         // neighbours join seamlessly; the range ends are rounded with 50%
@@ -269,16 +266,12 @@ export component TCalendar inherits Rectangle {
         if cell.middle && !cell.start-day && !cell.end-day: Rectangle {
             x: 0;
             y: 0;
-            width: parent.width;
-            height: parent.height;
             background: TTheme.brand-color-light;
         }
 
         if cell.middle && cell.start-day && cell.end-day: Rectangle {
             x: 0;
             y: 0;
-            width: parent.width;
-            height: parent.height;
             border-radius: TTheme.radius-round;
             background: TTheme.brand-color-light;
         }

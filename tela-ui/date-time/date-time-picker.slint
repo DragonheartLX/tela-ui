@@ -102,8 +102,6 @@ component TNumericWheel inherits Rectangle {
             }
 
             row-touch := TouchArea {
-                width: parent.width;
-                height: parent.height;
                 mouse-cursor: MouseCursor.pointer;
                 accessible-role: AccessibleRole.button;
                 accessible-label: root.label != "" ? "\{root.label} \{root.label-for(i)}" : root.label-for(i);
@@ -338,7 +336,6 @@ export component TDateTimePicker inherits Rectangle {
                 TNumericWheel {
                     label: "时";
                     count: 24;
-                    base: 0;
                     pad-width: 2;
                     item-height: root.item-h;
                     value: root.value.hour;
@@ -348,7 +345,6 @@ export component TDateTimePicker inherits Rectangle {
                 TNumericWheel {
                     label: "分";
                     count: 60;
-                    base: 0;
                     pad-width: 2;
                     item-height: root.item-h;
                     value: root.value.minute;

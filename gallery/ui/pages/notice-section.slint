@@ -71,7 +71,6 @@ export component NoticeSection inherits VerticalLayout {
             spacing: 12px;
 
             TAlert {
-                theme: TThemeRole.default;
                 title: "信息提示";
                 description: "这是一条普通的信息提示,用于展示需要用户关注的内容。";
                 closable: true;
@@ -202,7 +201,6 @@ export component NoticeSection inherits VerticalLayout {
 
             TCaption {
                 text: "通知显示在窗口右上角, 多条自动堆叠 (最多 4 条, 满员时挤掉最旧一条), 4.5 秒后自动消失, 也可点击关闭。窗口根部需要一个 TNotificationOverlay。";
-                wrap: word-wrap;
             }
         }
     }
@@ -220,7 +218,6 @@ export component NoticeSection inherits VerticalLayout {
 
                 TProgress {
                     value: root.progress-value;
-                    theme: TThemeRole.primary;
                     horizontal-stretch: 1;
                     animated: root.progress-animated;
                 }
@@ -250,7 +247,6 @@ export component NoticeSection inherits VerticalLayout {
                 TProgress {
                     variant: TProgressVariant.circle;
                     value: root.progress-value;
-                    theme: TThemeRole.primary;
                     animated: root.progress-animated;
                 }
 
@@ -384,12 +380,10 @@ export component NoticeSection inherits VerticalLayout {
 
             TCaption {
                 text: "状态: \{root.notice-status}";
-                wrap: word-wrap;
             }
 
             TCaption {
                 text: "单行 elide 展示, 无跑马灯; 多条内容为整条轮播 (changed 只在真切换时触发); 关闭走 visible (TAlert 同款), 宿主重新置 open 即可恢复。";
-                wrap: word-wrap;
             }
         }
     }

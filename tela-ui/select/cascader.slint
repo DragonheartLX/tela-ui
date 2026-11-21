@@ -64,7 +64,6 @@ component CascaderRow inherits Rectangle {
             y: (parent.height - self.height) / 2;
             width: 16px;
             icon: TIconSet.ChevronRight;
-            size: 16px;
             icon-color: !root.enabled ? TTheme.text-color-disabled
                 : root.selected ? TTheme.brand-color
                 : TTheme.text-color-secondary;
@@ -76,7 +75,6 @@ component CascaderRow inherits Rectangle {
         if !root.branch && root.icon.paths.length > 0: TIcon {
             y: (parent.height - self.height) / 2;
             icon: root.icon;
-            size: 16px;
             icon-color: !root.enabled ? TTheme.text-color-disabled
                 : root.selected ? TTheme.brand-color
                 : TTheme.text-color-secondary;
@@ -143,7 +141,6 @@ export component TCascaderBranch inherits VerticalLayout {
 
     callback opened-changed(bool);
 
-    spacing: 0px;
 
     // The fold animates only this branch's own open/close toggle: while
     // open, the height tracks content changes instantly, so a nested fold's
@@ -172,7 +169,6 @@ export component TCascaderBranch inherits VerticalLayout {
 
         body := VerticalLayout {
             padding-left: TTheme.padding-lr-l;
-            spacing: 0px;
 
             @children
         }
@@ -300,7 +296,6 @@ export component TCascader inherits Rectangle {
 
             VerticalLayout {
                 padding: 4px;
-                spacing: 0px;
 
                 @children
             }

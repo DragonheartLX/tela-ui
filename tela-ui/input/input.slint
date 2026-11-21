@@ -148,8 +148,8 @@ export component TInput inherits TInputFrame {
         }
 
         ti := TextInput {
+            accessible-role: none;
             vertical-alignment: center;
-            single-line: true;
             input-type: root.input-type;
             color: root.disabled ? TTheme.text-color-disabled : TTheme.text-color-primary;
             font-size: root.fs;
@@ -277,6 +277,7 @@ export component TInput inherits TInputFrame {
 
     accessible-role: AccessibleRole.text-input;
     accessible-label: placeholder-text;
+    accessible-value: text;
 }
 
 export component TTextArea inherits TInputFrame {
@@ -296,6 +297,7 @@ export component TTextArea inherits TInputFrame {
     focus-request => { ti.focus(); }
 
     ti := TextInput {
+        accessible-role: none;
         x: TTheme.spacing-3;
         y: TTheme.spacing-3;
         width: parent.width - self.x * 2;
@@ -324,4 +326,5 @@ export component TTextArea inherits TInputFrame {
 
     accessible-role: AccessibleRole.text-input;
     accessible-label: placeholder-text;
+    accessible-value: text;
 }

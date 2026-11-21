@@ -76,7 +76,6 @@ export component InputSection inherits VerticalLayout {
                     width: 170px;
                     placeholder-text: "密码";
                     input-type: password;
-                    clearable: false;
                 }
 
                 TInput {
@@ -128,7 +127,6 @@ export component InputSection inherits VerticalLayout {
 
             TInputNumber {
                 width: 160px;
-                min: 0;
                 max: 10;
                 value <=> root.num-value;
             }
@@ -136,7 +134,6 @@ export component InputSection inherits VerticalLayout {
             TInputNumber {
                 width: 160px;
                 value: 3.5;
-                min: 0;
                 max: 10;
                 step: 0.5;
                 editable: false;
@@ -194,7 +191,6 @@ export component InputSection inherits VerticalLayout {
                 text: root.auto-value == ""
                     ? "输入即过滤 (标签子串匹配, 不区分大小写); 高亮首条匹配, 回车或点击选中; 输入框为空时列出全部。"
                     : "已选:" + root.auto-value;
-                wrap: word-wrap;
             }
         }
     }
@@ -231,7 +227,6 @@ export component InputSection inherits VerticalLayout {
 
             TCaption {
                 text: root.search-result + " 悬停输入框显示右缘 x 图标, 点击即清空 (取消); 回车触发搜索。";
-                wrap: word-wrap;
             }
         }
     }
@@ -267,7 +262,6 @@ export component InputSection inherits VerticalLayout {
 
             TCaption {
                 text: "附着段与输入框共用一套状态边框 (悬停/聚焦/禁用); 框内前后缀文字与可点击后缀按钮直接用 TInput 的 prefix-text / suffix-text / suffix-clickable。";
-                wrap: word-wrap;
             }
         }
     }
@@ -393,7 +387,6 @@ export component InputSection inherits VerticalLayout {
 
             TCaption {
                 text: "回车添加, 空文本退格删除末位; 点标签 x 删除 (索引与标签一起上报, 模型由宿主删除); 标签不换行, 重复校验在宿主侧做。";
-                wrap: word-wrap;
             }
         }
     }
@@ -413,16 +406,12 @@ export component InputSection inherits VerticalLayout {
                     width: 240px;
                     placeholder-min-text: "最低价";
                     placeholder-max-text: "最高价";
-                    min: 0;
-                    max: 100;
                     min-value <=> root.range-min;
                     max-value <=> root.range-max;
                 }
 
                 TRangeInput {
                     width: 240px;
-                    min: 0;
-                    max: 100;
                     disabled: true;
                     min-value: 20;
                     max-value: 60;
@@ -433,7 +422,6 @@ export component InputSection inherits VerticalLayout {
 
             TCaption {
                 text: "两侧数值区间 (当前 \{round(root.range-min)} ~ \{round(root.range-max)}); 一侧变更会拖动另一侧保持有序, 空缓冲视为未输入不触发 changed, 失焦按存值重排文本。";
-                wrap: word-wrap;
             }
         }
     }
@@ -455,7 +443,6 @@ export component InputSection inherits VerticalLayout {
                 }
 
                 TOtpInput {
-                    length: 4;
                     masked: true;
                 }
 
@@ -464,7 +451,6 @@ export component InputSection inherits VerticalLayout {
 
             TCaption {
                 text: "输完一段自动跳下一格, 空段退格回上一格; 全部填满触发 completed。每段缓冲全文上报 changed(i, text), 溢出/粘贴分发由宿主改写 values。";
-                wrap: word-wrap;
             }
         }
     }
@@ -503,7 +489,6 @@ export component InputSection inherits VerticalLayout {
 
             TCaption {
                 text: "输入 @ 触发建议 (演示为示意): 触发解析、建议填充 (suggestions) 与选中文本拼接都在宿主侧; 面板锚输入框而非光标 (TextInput 不暴露光标几何)。";
-                wrap: word-wrap;
             }
         }
     }

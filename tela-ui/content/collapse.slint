@@ -26,7 +26,6 @@ export component TCollapse inherits VerticalLayout {
     // `accordion` is false, so `current-index` never moves there.
     callback changed(int);
 
-    spacing: 0px;
 
     for it[i] in root.items: panel := VerticalLayout {
         private property <bool> local-open: false;
@@ -74,7 +73,6 @@ export component TCollapse inherits VerticalLayout {
                     width: 16px;
                     y: (parent.height - self.height) / 2;
                     icon: TIconSet.ChevronDown;
-                    size: 16px;
                     icon-color: it.disabled ? TTheme.text-color-disabled : TTheme.text-color-secondary;
                     transform-rotation: open ? 180deg : 0deg;
                     transform-origin: { x: self.width / 2, y: self.height / 2 };
@@ -92,8 +90,6 @@ export component TCollapse inherits VerticalLayout {
             }
 
             TouchArea {
-                width: 100%;
-                height: 100%;
                 enabled: !it.disabled;
                 mouse-cursor: self.enabled ? MouseCursor.pointer : MouseCursor.default;
                 clicked => {

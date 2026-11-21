@@ -14,7 +14,8 @@ fn main() {
 
     let config = slint_build::CompilerConfiguration::new()
         .with_library_paths(library_paths)
-        .with_style("fluent".into());
+        .with_style("fluent".into())
+        .with_edition((1, 19));
 
     slint_build::compile_with_config("ui/MainWindow.slint", config).unwrap();
 }
